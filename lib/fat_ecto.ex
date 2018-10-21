@@ -1,0 +1,2 @@
+defmodule FatEcto do
+end
