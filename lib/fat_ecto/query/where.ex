@@ -63,7 +63,7 @@ defmodule FatEcto.FatQuery.FatWhere do
 
                     %{"$lt" => value} ->
                       if opts[:binding] == :last do
-                        if FatEcto.FatQuery.FatHelper.is_fat_ecto_field?(value) do
+                        if FatEcto.FatHelper.is_fat_ecto_field?(value) do
                           value = String.replace(value, "$", "", global: false)
 
                           dynamic(
@@ -78,7 +78,7 @@ defmodule FatEcto.FatQuery.FatWhere do
                           )
                         end
                       else
-                        if FatEcto.FatQuery.FatHelper.is_fat_ecto_field?(value) do
+                        if FatEcto.FatHelper.is_fat_ecto_field?(value) do
                           value = String.replace(value, "$", "", global: false)
 
                           dynamic(
@@ -96,7 +96,7 @@ defmodule FatEcto.FatQuery.FatWhere do
 
                     %{"$lte" => value} ->
                       if opts[:binding] == :last do
-                        if FatEcto.FatQuery.FatHelper.is_fat_ecto_field?(value) do
+                        if FatEcto.FatHelper.is_fat_ecto_field?(value) do
                           value = String.replace(value, "$", "", global: false)
 
                           dynamic(
@@ -111,7 +111,7 @@ defmodule FatEcto.FatQuery.FatWhere do
                           )
                         end
                       else
-                        if FatEcto.FatQuery.FatHelper.is_fat_ecto_field?(value) do
+                        if FatEcto.FatHelper.is_fat_ecto_field?(value) do
                           value = String.replace(value, "$", "", global: false)
 
                           dynamic(
@@ -129,7 +129,7 @@ defmodule FatEcto.FatQuery.FatWhere do
 
                     %{"$gt" => value} ->
                       if opts[:binding] == :last do
-                        if FatEcto.FatQuery.FatHelper.is_fat_ecto_field?(value) do
+                        if FatEcto.FatHelper.is_fat_ecto_field?(value) do
                           value = String.replace(value, "$", "", global: false)
 
                           dynamic(
@@ -144,7 +144,7 @@ defmodule FatEcto.FatQuery.FatWhere do
                           )
                         end
                       else
-                        if FatEcto.FatQuery.FatHelper.is_fat_ecto_field?(value) do
+                        if FatEcto.FatHelper.is_fat_ecto_field?(value) do
                           value = String.replace(value, "$", "", global: false)
 
                           dynamic(
@@ -162,7 +162,7 @@ defmodule FatEcto.FatQuery.FatWhere do
 
                     %{"$gte" => value} ->
                       if opts[:binding] == :last do
-                        if FatEcto.FatQuery.FatHelper.is_fat_ecto_field?(value) do
+                        if FatEcto.FatHelper.is_fat_ecto_field?(value) do
                           value = String.replace(value, "$", "", global: false)
 
                           dynamic(
@@ -177,7 +177,7 @@ defmodule FatEcto.FatQuery.FatWhere do
                           )
                         end
                       else
-                        if FatEcto.FatQuery.FatHelper.is_fat_ecto_field?(value) do
+                        if FatEcto.FatHelper.is_fat_ecto_field?(value) do
                           value = String.replace(value, "$", "", global: false)
 
                           dynamic(
@@ -264,7 +264,7 @@ defmodule FatEcto.FatQuery.FatWhere do
 
             "$lt" ->
               if opts[:binding] == :last do
-                if FatEcto.FatQuery.FatHelper.is_fat_ecto_field?(value) do
+                if FatEcto.FatHelper.is_fat_ecto_field?(value) do
                   value = String.replace(value, "$", "", global: false)
 
                   from(
@@ -277,7 +277,7 @@ defmodule FatEcto.FatQuery.FatWhere do
                   from([..., c] in queryable, where: field(c, ^String.to_existing_atom(k)) < ^value)
                 end
               else
-                if FatEcto.FatQuery.FatHelper.is_fat_ecto_field?(value) do
+                if FatEcto.FatHelper.is_fat_ecto_field?(value) do
                   value = String.replace(value, "$", "", global: false)
 
                   from(
@@ -293,7 +293,7 @@ defmodule FatEcto.FatQuery.FatWhere do
 
             "$lte" ->
               if opts[:binding] == :last do
-                if FatEcto.FatQuery.FatHelper.is_fat_ecto_field?(value) do
+                if FatEcto.FatHelper.is_fat_ecto_field?(value) do
                   value = String.replace(value, "$", "", global: false)
 
                   from(
@@ -306,7 +306,7 @@ defmodule FatEcto.FatQuery.FatWhere do
                   from([..., c] in queryable, where: field(c, ^String.to_existing_atom(k)) <= ^value)
                 end
               else
-                if FatEcto.FatQuery.FatHelper.is_fat_ecto_field?(value) do
+                if FatEcto.FatHelper.is_fat_ecto_field?(value) do
                   value = String.replace(value, "$", "", global: false)
 
                   from(
@@ -322,7 +322,7 @@ defmodule FatEcto.FatQuery.FatWhere do
 
             "$gt" ->
               if opts[:binding] == :last do
-                if FatEcto.FatQuery.FatHelper.is_fat_ecto_field?(value) do
+                if FatEcto.FatHelper.is_fat_ecto_field?(value) do
                   value = String.replace(value, "$", "", global: false)
 
                   from(
@@ -335,7 +335,7 @@ defmodule FatEcto.FatQuery.FatWhere do
                   from([..., c] in queryable, where: field(c, ^String.to_existing_atom(k)) > ^value)
                 end
               else
-                if FatEcto.FatQuery.FatHelper.is_fat_ecto_field?(value) do
+                if FatEcto.FatHelper.is_fat_ecto_field?(value) do
                   value = String.replace(value, "$", "", global: false)
 
                   from(
@@ -351,7 +351,7 @@ defmodule FatEcto.FatQuery.FatWhere do
 
             "$gte" ->
               if opts[:binding] == :last do
-                if FatEcto.FatQuery.FatHelper.is_fat_ecto_field?(value) do
+                if FatEcto.FatHelper.is_fat_ecto_field?(value) do
                   value = String.replace(value, "$", "", global: false)
 
                   from(
@@ -364,7 +364,7 @@ defmodule FatEcto.FatQuery.FatWhere do
                   from([..., c] in queryable, where: field(c, ^String.to_existing_atom(k)) >= ^value)
                 end
               else
-                if FatEcto.FatQuery.FatHelper.is_fat_ecto_field?(value) do
+                if FatEcto.FatHelper.is_fat_ecto_field?(value) do
                   value = String.replace(value, "$", "", global: false)
 
                   from(

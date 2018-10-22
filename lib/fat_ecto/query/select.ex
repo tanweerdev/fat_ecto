@@ -42,7 +42,7 @@ defmodule FatEcto.FatQuery.FatSelect do
 
                 # Call the method in query helper module
                 field =
-                  FatEcto.FatQuery.FatHelper.associations(
+                  FatEcto.FatHelper.associations(
                     model,
                     relation_name,
                     fields,
@@ -83,7 +83,7 @@ defmodule FatEcto.FatQuery.FatSelect do
                     relation_name = String.to_existing_atom(key)
                     assoc_fields = value
 
-                    FatEcto.FatQuery.FatHelper.associations(
+                    FatEcto.FatHelper.associations(
                       model,
                       relation_name,
                       fields,
