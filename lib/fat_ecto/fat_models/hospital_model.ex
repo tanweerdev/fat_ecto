@@ -13,7 +13,7 @@ defmodule FatEcto.FatHospital do
     field(:total_staff, :integer)
     field(:rating, :integer)
 
-    has_many(:rooms, FAT.Room)
+    has_many(:rooms, FatEcto.FatRoom )
 
     many_to_many(:doctors, FatEcto.FatDoctor, join_through: FatEcto.FatHospitalDoctor)
   end
