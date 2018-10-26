@@ -3,11 +3,11 @@ defmodule FatEcto.FatRoom do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @fields [:beds, :patients, :incharge, :nurses, :level]
+  @fields [:beds, :capacity, :incharge, :nurses, :level]
 
   schema "fat_rooms" do
     field(:beds, :integer)
-    field(:patients, :integer)
+    field(:capacity, :integer)
     field(:incharge, :string)
     field(:nurses, :integer)
     field(:level, :integer)

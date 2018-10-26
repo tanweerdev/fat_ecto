@@ -6,10 +6,10 @@ defmodule Query.JoinTest do
   test "returns the query with right join and selected fields" do
     opts = %{
       "$right_join" => %{
-        "rooms" => %{
+        "fat_rooms" => %{
           "$on_field" => "id",
           "$on_join_table_field" => "hospital_id",
-          "$select" => ["beds", "patients", "level"],
+          "$select" => ["beds", "capacity", "level"],
           "$where" => %{"incharge" => "John"}
         }
       }
@@ -18,10 +18,10 @@ defmodule Query.JoinTest do
     expected =
       from(
         h in FatEcto.FatHospital,
-        right_join: r in "rooms",
+        right_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
-        where: r.incharge == ^"John"
-        # select: merge(h, map(r, [:beds, :patients, :level]))
+        where: r.incharge == ^"John",
+        select: merge(h, %{^:fat_rooms => map(r, [:beds, :capacity, :level])})
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -32,10 +32,10 @@ defmodule Query.JoinTest do
   test "returns the query with left join and selected fields" do
     opts = %{
       "$right_join" => %{
-        "rooms" => %{
+        "fat_rooms" => %{
           "$on_field" => "id",
           "$on_join_table_field" => "hospital_id",
-          "$select" => ["beds", "patients", "level"],
+          "$select" => ["beds", "capacity", "level"],
           "$where" => %{"incharge" => "John"}
         }
       },
@@ -46,10 +46,10 @@ defmodule Query.JoinTest do
       from(
         h in FatEcto.FatHospital,
         where: h.rating == ^3,
-        right_join: r in "rooms",
+        right_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
-        where: r.incharge == ^"John"
-        # select: merge(h, map(r, [:beds, :patients, :level]))
+        where: r.incharge == ^"John",
+        select: merge(h, %{^:fat_rooms => map(r, [:beds, :capacity, :level])})
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -60,7 +60,7 @@ defmodule Query.JoinTest do
     opts = %{
       "$select" => %{"$fields" => ["name", "designation", "experience_years"]},
       "$full_join" => %{
-        "patients" => %{
+        "fat_patients" => %{
           "$on_field" => "id",
           "$on_join_table_field" => "doctor_id",
           "$select" => ["name", "prescription", "symptoms"]
@@ -71,13 +71,12 @@ defmodule Query.JoinTest do
     expected =
       from(
         d in FatEcto.FatDoctor,
-        full_join: p in "patients",
-        on: d.id == p.doctor_id
-        # select:
-        #   merge(
-        #     map(d, [:name, :designation, :experience_years]),
-        #     map(p, [:name, :prescription, :symptoms])
-        #   )
+        full_join: p in "fat_patients",
+        on: d.id == p.doctor_id,
+        select:
+          merge(map(d, [:name, :designation, :experience_years]), %{
+            ^:fat_patients => map(p, [:name, :prescription, :symptoms])
+          })
       )
 
     result = Query.build(FatEcto.FatDoctor, opts)
@@ -87,10 +86,10 @@ defmodule Query.JoinTest do
   test "returns the query with inner join and selected fields" do
     opts = %{
       "$inner_join" => %{
-        "rooms" => %{
+        "fat_rooms" => %{
           "$on_field" => "id",
           "$on_join_table_field" => "hospital_id",
-          "$select" => ["beds", "patients", "level"],
+          "$select" => ["beds", "capacity", "level"],
           "$where" => %{"incharge" => "John"}
         }
       },
@@ -101,10 +100,10 @@ defmodule Query.JoinTest do
       from(
         h in FatEcto.FatHospital,
         where: h.rating == ^3,
-        inner_join: r in "rooms",
+        inner_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
-        where: r.incharge == ^"John"
-        # select: merge(h, map(r, [:beds, :patients, :level]))
+        where: r.incharge == ^"John",
+        select: merge(h, %{^:fat_rooms => map(r, [:beds, :capacity, :level])})
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -114,10 +113,10 @@ defmodule Query.JoinTest do
   test "returns the query with inner join and selected fields and inner where" do
     opts = %{
       "$inner_join" => %{
-        "rooms" => %{
+        "fat_rooms" => %{
           "$on_field" => "id",
           "$on_join_table_field" => "hospital_id",
-          "$select" => ["beds", "patients", "level"],
+          "$select" => ["beds", "capacity", "level"],
           "$where" => %{"incharge" => "John"}
         }
       },
@@ -128,10 +127,10 @@ defmodule Query.JoinTest do
       from(
         h in FatEcto.FatHospital,
         where: h.rating == ^3,
-        inner_join: r in "rooms",
+        inner_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
-        where: r.incharge == ^"John"
-        # select: merge(h, map(r, [:beds, :patients, :level]))
+        where: r.incharge == ^"John",
+        select: merge(h, %{^:fat_rooms => map(r, [:beds, :capacity, :level])})
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -141,10 +140,10 @@ defmodule Query.JoinTest do
   test "returns the query with inner join and selected fields and outer where" do
     opts = %{
       "$right_join" => %{
-        "rooms" => %{
+        "fat_rooms" => %{
           "$on_field" => "id",
           "$on_join_table_field" => "hospital_id",
-          "$select" => ["beds", "patients", "level"],
+          "$select" => ["beds", "capacity", "level"],
           "$where" => %{"incharge" => "John"}
         }
       },
@@ -155,11 +154,10 @@ defmodule Query.JoinTest do
       from(
         h in FatEcto.FatHospital,
         where: h.rating == ^3,
-        right_join: r in "rooms",
+        right_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
         where: r.incharge == ^"John",
-        # select: merge(h, map(r, [:beds, :patients, :level]))
-        select: merge(h, %{^:rooms => map(r, [:beds, :patients, :level])})
+        select: merge(h, %{^:fat_rooms => map(r, [:beds, :capacity, :level])})
       )
 
     result = Query.build(FatEcto.FatHospital, opts)

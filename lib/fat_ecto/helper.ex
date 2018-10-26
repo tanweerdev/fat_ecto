@@ -3,8 +3,8 @@ defmodule FatEcto.FatHelper do
 
   require Ecto.Query
   @min_limit 0
-  @max_limit Application.get_env(:fat_ecto, :repo)[:max_limit]
-  @default_limit Application.get_env(:fat_ecto, :repo)[:default_limit]
+  @max_limit Application.get_env(:fat_ecto, :repo)[:max_limit] || 100
+  @default_limit Application.get_env(:fat_ecto, :repo)[:default_limit] || 10
 
   @min_skip 0
   @default_skip 0
@@ -103,6 +103,9 @@ defmodule FatEcto.FatHelper do
       } ->
         fields ++
           [owner_key] ++ [{relation_name, Enum.map(assoc_fields, &String.to_existing_atom/1)}]
+
+      nil ->
+        fields
     end
   end
 

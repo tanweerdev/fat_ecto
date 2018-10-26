@@ -19,14 +19,14 @@ defmodule Query.SelectTest do
     opts = %{
       "$select" => %{
         "$fields" => ["name", "location", "rating"],
-        "rooms" => ["beds", "patients"]
+        "fat_rooms" => ["beds", "capacity"]
       }
     }
 
     expected =
       from(
         h in FatEcto.FatHospital,
-        select: map(h, [:name, :location, :rating, :id, {:rooms, [:beds, :patients]}])
+        select: map(h, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])
       )
 
     result = build(FatEcto.FatHospital, opts)
@@ -37,7 +37,7 @@ defmodule Query.SelectTest do
     opts = %{
       "$select" => %{
         "$fields" => ["name", "location", "rating"],
-        "rooms" => ["beds", "patients"]
+        "fat_rooms" => ["beds", "capacity"]
       },
       "$order" => %{"id" => "$desc"}
     }
@@ -46,7 +46,7 @@ defmodule Query.SelectTest do
       from(
         h in FatEcto.FatHospital,
         order_by: [desc: h.id],
-        select: map(h, [:name, :location, :rating, :id, {:rooms, [:beds, :patients]}])
+        select: map(h, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])
       )
 
     result = build(FatEcto.FatHospital, opts)
@@ -57,7 +57,7 @@ defmodule Query.SelectTest do
     opts = %{
       "$select" => %{
         "$fields" => ["name", "location", "rating"],
-        "rooms" => ["beds", "patients"]
+        "fat_rooms" => ["beds", "capacity"]
       },
       "$order" => %{"id" => "$desc"},
       "$where" => %{"rating" => 4}
@@ -68,7 +68,7 @@ defmodule Query.SelectTest do
         h in FatEcto.FatHospital,
         where: h.rating == ^4,
         order_by: [desc: h.id],
-        select: map(h, [:name, :location, :rating, :id, {:rooms, [:beds, :patients]}])
+        select: map(h, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])
       )
 
     result = build(FatEcto.FatHospital, opts)
@@ -79,13 +79,13 @@ defmodule Query.SelectTest do
     opts = %{
       "$select" => %{
         "$fields" => ["name", "location", "rating"],
-        "rooms" => ["beds", "patients"]
+        "fat_rooms" => ["beds", "capacity"]
       },
       "$order" => %{"id" => "$desc"},
       "$where" => %{"rating" => 4},
       "$include" => %{
-        "doctors" => %{
-          "$include" => ["patients"],
+        "fat_doctors" => %{
+          "$include" => ["fat_patients"],
           "$where" => %{"name" => "ham"},
           "$order" => %{"id" => "$desc"}
         }
@@ -94,22 +94,22 @@ defmodule Query.SelectTest do
 
     query =
       from(d in FatEcto.FatDoctor,
-        left_join: p in assoc(d, :patients),
+        left_join: p in assoc(d, :fat_patients),
         where: d.name == ^"ham",
         order_by: [desc: d.id],
         limit: ^10,
         offset: ^0,
-        preload: [:patients]
+        preload: [:fat_patients]
       )
 
     expected =
       from(
         h in FatEcto.FatHospital,
-        join: d in assoc(h, :doctors),
+        join: d in assoc(h, :fat_doctors),
         where: h.rating == ^4,
         order_by: [desc: h.id],
-        select: map(h, [:name, :location, :rating, :id, {:rooms, [:beds, :patients]}]),
-        preload: [doctors: ^query]
+        select: map(h, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]),
+        preload: [fat_doctors: ^query]
       )
 
     result = build(FatEcto.FatHospital, opts)

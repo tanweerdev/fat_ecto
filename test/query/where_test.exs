@@ -96,20 +96,20 @@ defmodule Query.WhereTest do
 
   test "returns the query where field gt another field" do
     opts = %{
-      "$where" => %{"beds" => %{"$gt" => "$patients"}}
+      "$where" => %{"beds" => %{"$gt" => "$capacity"}}
     }
 
-    expected = from(r in FatEcto.FatRoom, where: r.beds > r.patients)
+    expected = from(r in FatEcto.FatRoom, where: r.beds > r.capacity)
     result = build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
   test "returns the query where field gte" do
     opts = %{
-      "$where" => %{"patients" => %{"$gte" => 3}}
+      "$where" => %{"capacity" => %{"$gte" => 3}}
     }
 
-    expected = from(r in FatEcto.FatRoom, where: r.patients >= ^3)
+    expected = from(r in FatEcto.FatRoom, where: r.capacity >= ^3)
     result = build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
