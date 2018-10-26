@@ -15,14 +15,14 @@ defmodule FatEcto.FatPatient do
   ]
 
   schema "fat_patients" do
-    field(:name, :string, virtual: true)
-    field(:location, :string, virtual: true)
-    field(:phone, :string, virtual: true)
-    field(:address, :string, virtual: true)
-    field(:prescription, :string, virtual: true)
-    field(:symtoms, :string, virtual: true)
-    field(:date_of_birth, :string, virtual: true)
-    field(:appointments_count, :integer, virtual: true)
+    field(:name, :string)
+    field(:location, :string)
+    field(:phone, :string)
+    field(:address, :string)
+    field(:prescription, :string)
+    field(:symtoms, :string)
+    field(:date_of_birth, :string)
+    field(:appointments_count, :integer)
     many_to_many(:fat_doctors, FatEcto.FatDoctor, join_through: FatEcto.FatDoctorPatient)
   end
 
