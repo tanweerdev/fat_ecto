@@ -12,7 +12,7 @@ defmodule FatEcto.FatRoom do
     field(:nurses, :integer)
     field(:level, :integer)
 
-    belongs_to(:hospital, FatEcto.FatHospital)
+    belongs_to(:fat_hospital, FatEcto.FatHospital)
   end
 
   def changeset(data) when is_map(data) do

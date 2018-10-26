@@ -23,7 +23,7 @@ defmodule FatEcto.FatPatient do
     field(:symtoms, :string, virtual: true)
     field(:date_of_birth, :string, virtual: true)
     field(:appointments_count, :integer, virtual: true)
-    many_to_many(:doctors, FatEcto.FatDoctor, join_through: FatEcto.FatDoctorPatient)
+    many_to_many(:fat_doctors, FatEcto.FatDoctor, join_through: FatEcto.FatDoctorPatient)
   end
 
   def changeset(data) when is_map(data) do

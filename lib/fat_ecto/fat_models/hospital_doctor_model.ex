@@ -3,7 +3,7 @@ defmodule FatEcto.FatHospitalDoctor do
   use Ecto.Schema
 
   schema "fat_hospitals_doctors" do
-    belongs_to(:doctor, FatEcto.FatDoctor)
-    belongs_to(:hospital, FatEcto.FatHospital)
+    belongs_to(:fat_doctor, FatEcto.FatDoctor)
+    belongs_to(:fat_hospital, FatEcto.FatHospital)
   end
 end

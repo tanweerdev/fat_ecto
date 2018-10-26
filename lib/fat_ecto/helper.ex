@@ -1,8 +1,6 @@
 defmodule FatEcto.FatHelper do
   @moduledoc false
 
-  # TODO: read http://michal.muskala.eu/2017/07/30/configuring-elixir-libraries.html#recommendations-for-library-authors
-  # TODO: read http://michal.muskala.eu/2017/02/10/error-handling-in-elixir-libraries.html
   require Ecto.Query
   @min_limit 0
   @max_limit Application.get_env(:fat_ecto, :repo)[:max_limit]
@@ -108,6 +106,7 @@ defmodule FatEcto.FatHelper do
     end
   end
 
+  # whats this method for
   defp replacement_for(key, tuple) do
     map = Enum.into(tuple, %{})
 
@@ -120,6 +119,7 @@ defmodule FatEcto.FatHelper do
     end
   end
 
+  # whats this method for
   # TODO: Add docs and examples for ex_doc
   def replace_keys(map, tuple) do
     for {k, v} <- map, into: %{}, do: {replacement_for(k, tuple), v}

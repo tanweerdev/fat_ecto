@@ -13,7 +13,7 @@ defmodule FatEcto.FatQuery.FatInclude do
             Enum.reduce(include, queryable, fn {key, value}, queryable ->
               relation_name = String.to_existing_atom(key)
 
-              # TODO: move the following to some helper module
+              # TODO: move the following to helper module
               %{
                 owner: _owner,
                 owner_key: _owner_key,

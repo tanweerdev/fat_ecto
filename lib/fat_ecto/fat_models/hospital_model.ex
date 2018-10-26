@@ -13,9 +13,9 @@ defmodule FatEcto.FatHospital do
     field(:total_staff, :integer)
     field(:rating, :integer)
 
-    has_many(:rooms, FatEcto.FatRoom )
+    has_many(:fat_rooms, FatEcto.FatRoom)
 
-    many_to_many(:doctors, FatEcto.FatDoctor, join_through: FatEcto.FatHospitalDoctor)
+    many_to_many(:fat_doctors, FatEcto.FatDoctor, join_through: FatEcto.FatHospitalDoctor)
   end
 
   def changeset(data) when is_map(data) do

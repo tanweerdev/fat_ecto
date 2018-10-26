@@ -13,8 +13,8 @@ defmodule FatEcto.FatDoctor do
     field(:email, :string)
     field(:experience_years, :integer)
     field(:rating, :integer)
-    many_to_many(:hospitals, FatEcto.FatHospital, join_through: FatEcto.FatHospitalDoctor)
-    many_to_many(:patients, FatEcto.FatPatient, join_through: FatEcto.FatDoctorPatient)
+    many_to_many(:fat_hospitals, FatEcto.FatHospital, join_through: FatEcto.FatHospitalDoctor)
+    many_to_many(:fat_patients, FatEcto.FatPatient, join_through: FatEcto.FatDoctorPatient)
   end
 
   def changeset(data) when is_map(data) do

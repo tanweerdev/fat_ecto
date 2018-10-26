@@ -61,7 +61,7 @@ defmodule FatEcto.FatQuery.FatSelect do
                 # TODO: remove this Qserv.BaseRepo but dont break the functionality
                 result = Qserv.BaseRepo.all(query)
                 # Replace orignal_keys with custom keys
-                Enum.map(result, fn m -> FatEcto.FatQuery.FatHelper.replace_keys(m, tuple) end)
+                Enum.map(result, fn m -> FatEcto.FatHelper.replace_keys(m, tuple) end)
               else
                 # TODO: Add docs and examples of ex_doc for this case here
                 # if map only contain fields(list of maps)
@@ -69,7 +69,7 @@ defmodule FatEcto.FatQuery.FatSelect do
 
                 # TODO: remove this Qserv.BaseRepo but dont break the functionality
                 result = Qserv.BaseRepo.all(query)
-                Enum.map(result, fn m -> FatEcto.FatQuery.FatHelper.replace_keys(m, tuple) end)
+                Enum.map(result, fn m -> FatEcto.FatHelper.replace_keys(m, tuple) end)
               end
             else
               # TODO: Add docs and examples of ex_doc for this case here

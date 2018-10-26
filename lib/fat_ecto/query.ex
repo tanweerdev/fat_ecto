@@ -62,10 +62,11 @@ defmodule FatEcto.FatQuery do
   ## Options
 
     - `$find`- To fetch all the results from database.
-    - `include`- Include the assoc_model and also define the limit and join type.
-    - `select`- select the fields from queryable and the assoc_model as well.
-    - `skip`- Skip records.
-    - `where`- Added the where attribute in the query .
+    - `$include`- Include the assoc_model and also define the limit and join type.
+    - `$select`- select the fields from queryable and the assoc_model as well.
+    - `$skip`- Skip records.
+    - `$limit`- limit the number of records returned records.
+    - `$where`- Added the where attribute in the query .
 
 
 
