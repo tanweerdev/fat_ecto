@@ -13,12 +13,12 @@ defmodule FatEcto.FatQuery.FatInclude do
             Enum.reduce(include, queryable, fn {key, value}, queryable ->
               relation_name = String.to_existing_atom(key)
 
-              # TODO: move the following to helper module
               %{owner: _o, owner_key: _ok, related: related_model, related_key: _rk} =
                 FatEcto.FatHelper.model_related_owner(model, relation_name)
 
               include_kwery =
                 related_model
+                |> FatEcto.FatQuery.build_select(value["$select"], related_model)
                 |> FatEcto.FatQuery.build_where(value["$where"], binding: :last)
                 |> FatEcto.FatQuery.build_order_by(value["$order"])
                 |> FatEcto.FatQuery.build_include(value["$include"], related_model)
@@ -44,18 +44,19 @@ defmodule FatEcto.FatQuery.FatInclude do
           include when is_list(include) ->
             # TODO: implement logic for the
             Enum.reduce(include, queryable, fn model, queryable ->
-              case model do
-                m when is_map(m) ->
-                  # TODO:
-                  queryable
+              # case model do
+              # TODO: include: [{hospital: {$fields: [], $where: {}}}, {rooms: {$fields: [], $where: {}}}]
+              #   m when is_map(m) ->
+              #     queryable
 
-                m when is_binary(m) ->
-                  from(
-                    q in queryable,
-                    left_join: a in assoc(q, ^String.to_existing_atom(m)),
-                    preload: [^String.to_existing_atom(m)]
-                  )
-              end
+              #   m when is_binary(m) ->
+              from(
+                q in queryable,
+                left_join: a in assoc(q, ^String.to_existing_atom(model)),
+                preload: [^String.to_existing_atom(model)]
+              )
+
+              # end
             end)
         end
       end

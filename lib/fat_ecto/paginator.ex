@@ -7,7 +7,7 @@ defmodule FatEcto.FatPaginator do
       # TODO: @repo.all and @repo.one nil warning
       @repo unquote(options)[:repo]
       # TODO: Add docs and examples for ex_doc
-      def new(query, params) do
+      def paginate(query, params) do
         {skip, params} = FatEcto.FatHelper.get_skip_value(params)
         {limit, _params} = FatEcto.FatHelper.get_limit_value(params)
 

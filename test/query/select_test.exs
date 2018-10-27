@@ -53,6 +53,21 @@ defmodule Query.SelectTest do
     assert inspect(result) == inspect(expected)
   end
 
+  test "returns the select query with related fields inside direct array" do
+    opts = %{
+      "$select" => ["name", "location", "rating"]
+    }
+
+    expected =
+      from(
+        h in FatEcto.FatHospital,
+        select: map(h, [:name, :location, :rating])
+      )
+
+    result = build(FatEcto.FatHospital, opts)
+    assert inspect(result) == inspect(expected)
+  end
+
   test "returns the select query with related fields with order by/where " do
     opts = %{
       "$select" => %{

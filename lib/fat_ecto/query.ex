@@ -113,7 +113,7 @@ defmodule FatEcto.FatQuery do
         {:ok, @repo.one(Ecto.Query.limit(queryable, 1))}
 
       "$all" ->
-        {:ok, new(queryable, skip: opts["$skip"], limit: opts["$limit"])}
+        {:ok, paginate(queryable, skip: opts["$skip"], limit: opts["$limit"])}
 
       nil ->
         {:error, "Method not found"}
