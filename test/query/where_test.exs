@@ -26,7 +26,7 @@ defmodule Query.WhereTest do
 
   test "returns the query where field notlike" do
     opts = %{
-      "$where" => %{"email" => %{"$notlike" => "%john@ %"}}
+      "$where" => %{"email" => %{"$not_like" => "%john@ %"}}
     }
 
     expected = from(d in FatEcto.FatDoctor, where: not like(d.email, ^"%john@ %"))
@@ -36,7 +36,7 @@ defmodule Query.WhereTest do
 
   test "returns the query where field notilike" do
     opts = %{
-      "$where" => %{"address" => %{"$notilike" => "%street2 %"}}
+      "$where" => %{"address" => %{"$not_ilike" => "%street2 %"}}
     }
 
     expected = from(d in FatEcto.FatDoctor, where: not ilike(d.address, ^"%street2 %"))
@@ -136,7 +136,7 @@ defmodule Query.WhereTest do
 
   test "returns the query where field notbetween" do
     opts = %{
-      "$where" => %{"appointments_count" => %{"$notbetween" => [10, 20]}}
+      "$where" => %{"appointments_count" => %{"$not_between" => [10, 20]}}
     }
 
     expected =
@@ -158,7 +158,7 @@ defmodule Query.WhereTest do
 
   test "returns the query where field notin" do
     opts = %{
-      "$where" => %{"appointments_count" => %{"$notin" => [20, 50]}}
+      "$where" => %{"appointments_count" => %{"$not_in" => [20, 50]}}
     }
 
     expected = from(p in FatEcto.FatPatient, where: p.appointments_count not in ^[20, 50])

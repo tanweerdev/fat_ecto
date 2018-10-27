@@ -109,7 +109,6 @@ defmodule FatEcto.FatHelper do
     end
   end
 
-  # whats this method for
   defp replacement_for(key, tuple) do
     map = Enum.into(tuple, %{})
 
@@ -122,7 +121,6 @@ defmodule FatEcto.FatHelper do
     end
   end
 
-  # whats this method for
   # TODO: Add docs and examples for ex_doc
   def replace_keys(map, tuple) do
     for {k, v} <- map, into: %{}, do: {replacement_for(k, tuple), v}
@@ -142,5 +140,48 @@ defmodule FatEcto.FatHelper do
     queryable_f_exists = Enum.map(queryable_fields, &String.to_atom/1) -- queryable_schema_fields
     model_f_exists = Enum.map(model_fields, &String.to_atom/1) -- model_schema_fields
     queryable_f_exists ++ model_f_exists
+  end
+
+  def model_related_owner(model, relation_name) do
+    case model.__schema__(:association, relation_name) do
+      %Ecto.Association.Has{
+        owner: owner,
+        owner_key: owner_key,
+        related: related,
+        related_key: related_key
+      } ->
+        %{
+          owner: owner,
+          owner_key: owner_key,
+          related: related,
+          related_key: related_key
+        }
+
+      %Ecto.Association.BelongsTo{
+        owner: owner,
+        owner_key: owner_key,
+        related: related,
+        related_key: related_key
+      } ->
+        %{
+          owner: owner,
+          owner_key: owner_key,
+          related: related,
+          related_key: related_key
+        }
+
+      %Ecto.Association.ManyToMany{
+        owner: owner,
+        owner_key: owner_key,
+        related: related
+        # related_key: related_key
+      } ->
+        %{
+          owner: owner,
+          owner_key: owner_key,
+          related: related,
+          related_key: nil
+        }
+    end
   end
 end

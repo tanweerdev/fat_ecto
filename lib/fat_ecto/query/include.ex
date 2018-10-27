@@ -14,52 +14,8 @@ defmodule FatEcto.FatQuery.FatInclude do
               relation_name = String.to_existing_atom(key)
 
               # TODO: move the following to helper module
-              %{
-                owner: _owner,
-                owner_key: _owner_key,
-                related: related_model,
-                related_key: _related_key
-              } =
-                case model.__schema__(:association, relation_name) do
-                  %Ecto.Association.Has{
-                    owner: owner,
-                    owner_key: owner_key,
-                    related: related,
-                    related_key: related_key
-                  } ->
-                    %{
-                      owner: owner,
-                      owner_key: owner_key,
-                      related: related,
-                      related_key: related_key
-                    }
-
-                  %Ecto.Association.BelongsTo{
-                    owner: owner,
-                    owner_key: owner_key,
-                    related: related,
-                    related_key: related_key
-                  } ->
-                    %{
-                      owner: owner,
-                      owner_key: owner_key,
-                      related: related,
-                      related_key: related_key
-                    }
-
-                  %Ecto.Association.ManyToMany{
-                    owner: owner,
-                    owner_key: owner_key,
-                    related: related
-                    # related_key: related_key
-                  } ->
-                    %{
-                      owner: owner,
-                      owner_key: owner_key,
-                      related: related,
-                      related_key: nil
-                    }
-                end
+              %{owner: _o, owner_key: _ok, related: related_model, related_key: _rk} =
+                FatEcto.FatHelper.model_related_owner(model, relation_name)
 
               include_kwery =
                 related_model

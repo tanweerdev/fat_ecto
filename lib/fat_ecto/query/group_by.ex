@@ -7,8 +7,21 @@ defmodule FatEcto.FatQuery.FatGroupBy do
         if opts_group_by == nil do
           queryable
         else
-          queryable
-          # TODO: build group by
+          case opts_group_by do
+            opts_group_by when is_list(opts_group_by) ->
+              Enum.reduce(opts_group_by, queryable, fn group_by_field, queryable ->
+                from(
+                  q in queryable,
+                  group_by: field(q, ^String.to_existing_atom(group_by_field))
+                )
+              end)
+
+            opts_group_by when is_binary(opts_group_by) ->
+              from(
+                q in queryable,
+                group_by: field(q, ^String.to_existing_atom(opts_group_by))
+              )
+          end
         end
       end
     end

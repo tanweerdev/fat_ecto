@@ -240,7 +240,7 @@ defmodule FatEcto.FatQuery.FatWhere do
                 from(q in queryable, where: ilike(field(q, ^String.to_existing_atom(k)), ^value))
               end
 
-            "$notlike" ->
+            "$not_like" ->
               if opts[:binding] == :last do
                 from([..., c] in queryable,
                   where: not like(field(c, ^String.to_existing_atom(k)), ^value)
@@ -249,7 +249,7 @@ defmodule FatEcto.FatQuery.FatWhere do
                 from(q in queryable, where: not like(field(q, ^String.to_existing_atom(k)), ^value))
               end
 
-            "$notilike" ->
+            "$not_ilike" ->
               if opts[:binding] == :last do
                 from(
                   [..., c] in queryable,
@@ -395,7 +395,7 @@ defmodule FatEcto.FatQuery.FatWhere do
                 )
               end
 
-            "$notbetween" ->
+            "$not_between" ->
               if opts[:binding] == :last do
                 from(
                   [..., c] in queryable,
@@ -419,7 +419,7 @@ defmodule FatEcto.FatQuery.FatWhere do
                 from(q in queryable, where: field(q, ^String.to_existing_atom(k)) in ^value)
               end
 
-            "$notin" ->
+            "$not_in" ->
               if opts[:binding] == :last do
                 from([..., c] in queryable,
                   where: field(c, ^String.to_existing_atom(k)) not in ^value
