@@ -1,29 +1,30 @@
 defmodule FatEcto.FatQuery.FatDynamics do
   import Ecto.Query
+  alias FatEcto.FatHelper
   # TODO: Add docs and examples for ex_doc
   def is_nil_dynamic(key, dynamics, opts \\ []) do
     if opts[:binding] == :last do
       if opts[:dynamic_type] == :and do
         dynamic(
           [..., c],
-          is_nil(field(c, ^String.to_existing_atom(key))) and ^dynamics
+          is_nil(field(c, ^FatHelper.string_to_existing_atom(key))) and ^dynamics
         )
       else
         dynamic(
           [..., c],
-          is_nil(field(c, ^String.to_existing_atom(key))) or ^dynamics
+          is_nil(field(c, ^FatHelper.string_to_existing_atom(key))) or ^dynamics
         )
       end
     else
       if opts[:dynamic_type] == :and do
         dynamic(
           [c],
-          is_nil(field(c, ^String.to_existing_atom(key))) and ^dynamics
+          is_nil(field(c, ^FatHelper.string_to_existing_atom(key))) and ^dynamics
         )
       else
         dynamic(
           [c],
-          is_nil(field(c, ^String.to_existing_atom(key))) or ^dynamics
+          is_nil(field(c, ^FatHelper.string_to_existing_atom(key))) or ^dynamics
         )
       end
     end
@@ -34,24 +35,24 @@ defmodule FatEcto.FatQuery.FatDynamics do
       if opts[:dynamic_type] == :and do
         dynamic(
           [..., c],
-          not is_nil(field(c, ^String.to_existing_atom(key))) and ^dynamics
+          not is_nil(field(c, ^FatHelper.string_to_existing_atom(key))) and ^dynamics
         )
       else
         dynamic(
           [..., c],
-          not is_nil(field(c, ^String.to_existing_atom(key))) or ^dynamics
+          not is_nil(field(c, ^FatHelper.string_to_existing_atom(key))) or ^dynamics
         )
       end
     else
       if opts[:dynamic_type] == :and do
         dynamic(
           [c],
-          not is_nil(field(c, ^String.to_existing_atom(key))) and ^dynamics
+          not is_nil(field(c, ^FatHelper.string_to_existing_atom(key))) and ^dynamics
         )
       else
         dynamic(
           [c],
-          not is_nil(field(c, ^String.to_existing_atom(key))) or ^dynamics
+          not is_nil(field(c, ^FatHelper.string_to_existing_atom(key))) or ^dynamics
         )
       end
     end
@@ -59,62 +60,62 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
   def gt_dynamic(key, value, dynamics, opts \\ []) do
     if opts[:binding] == :last do
-      if FatEcto.FatHelper.is_fat_ecto_field?(value) do
+      if FatHelper.is_fat_ecto_field?(value) do
         value = String.replace(value, "$", "", global: false)
 
         if opts[:dynamic_type] == :and do
           dynamic(
             [..., c],
-            field(c, ^String.to_existing_atom(key)) > field(c, ^String.to_existing_atom(value)) and
-              ^dynamics
+            field(c, ^FatHelper.string_to_existing_atom(key)) >
+              field(c, ^FatHelper.string_to_existing_atom(value)) and ^dynamics
           )
         else
           dynamic(
             [..., c],
-            field(c, ^String.to_existing_atom(key)) > field(c, ^String.to_existing_atom(value)) or
-              ^dynamics
+            field(c, ^FatHelper.string_to_existing_atom(key)) >
+              field(c, ^FatHelper.string_to_existing_atom(value)) or ^dynamics
           )
         end
       else
         if opts[:dynamic_type] == :and do
           dynamic(
             [..., c],
-            field(c, ^String.to_existing_atom(key)) > ^value and ^dynamics
+            field(c, ^FatHelper.string_to_existing_atom(key)) > ^value and ^dynamics
           )
         else
           dynamic(
             [..., c],
-            field(c, ^String.to_existing_atom(key)) > ^value or ^dynamics
+            field(c, ^FatHelper.string_to_existing_atom(key)) > ^value or ^dynamics
           )
         end
       end
     else
-      if FatEcto.FatHelper.is_fat_ecto_field?(value) do
+      if FatHelper.is_fat_ecto_field?(value) do
         value = String.replace(value, "$", "", global: false)
 
         if opts[:dynamic_type] == :and do
           dynamic(
             [q],
-            field(q, ^String.to_existing_atom(key)) > field(q, ^String.to_existing_atom(value)) and
-              ^dynamics
+            field(q, ^FatHelper.string_to_existing_atom(key)) >
+              field(q, ^FatHelper.string_to_existing_atom(value)) and ^dynamics
           )
         else
           dynamic(
             [q],
-            field(q, ^String.to_existing_atom(key)) > field(q, ^String.to_existing_atom(value)) or
-              ^dynamics
+            field(q, ^FatHelper.string_to_existing_atom(key)) >
+              field(q, ^FatHelper.string_to_existing_atom(value)) or ^dynamics
           )
         end
       else
         if opts[:dynamic_type] == :and do
           dynamic(
             [q],
-            field(q, ^String.to_existing_atom(key)) > ^value and ^dynamics
+            field(q, ^FatHelper.string_to_existing_atom(key)) > ^value and ^dynamics
           )
         else
           dynamic(
             [q],
-            field(q, ^String.to_existing_atom(key)) > ^value or ^dynamics
+            field(q, ^FatHelper.string_to_existing_atom(key)) > ^value or ^dynamics
           )
         end
       end
@@ -123,62 +124,62 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
   def gte_dynamic(key, value, dynamics, opts \\ []) do
     if opts[:binding] == :last do
-      if FatEcto.FatHelper.is_fat_ecto_field?(value) do
+      if FatHelper.is_fat_ecto_field?(value) do
         value = String.replace(value, "$", "", global: false)
 
         if opts[:dynamic_type] == :and do
           dynamic(
             [..., c],
-            field(c, ^String.to_existing_atom(key)) >= field(c, ^String.to_existing_atom(value)) and
-              ^dynamics
+            field(c, ^FatHelper.string_to_existing_atom(key)) >=
+              field(c, ^FatHelper.string_to_existing_atom(value)) and ^dynamics
           )
         else
           dynamic(
             [..., c],
-            field(c, ^String.to_existing_atom(key)) >= field(c, ^String.to_existing_atom(value)) or
-              ^dynamics
+            field(c, ^FatHelper.string_to_existing_atom(key)) >=
+              field(c, ^FatHelper.string_to_existing_atom(value)) or ^dynamics
           )
         end
       else
         if opts[:dynamic_type] == :and do
           dynamic(
             [..., c],
-            field(c, ^String.to_existing_atom(key)) >= ^value and ^dynamics
+            field(c, ^FatHelper.string_to_existing_atom(key)) >= ^value and ^dynamics
           )
         else
           dynamic(
             [..., c],
-            field(c, ^String.to_existing_atom(key)) >= ^value or ^dynamics
+            field(c, ^FatHelper.string_to_existing_atom(key)) >= ^value or ^dynamics
           )
         end
       end
     else
-      if FatEcto.FatHelper.is_fat_ecto_field?(value) do
+      if FatHelper.is_fat_ecto_field?(value) do
         value = String.replace(value, "$", "", global: false)
 
         if opts[:dynamic_type] == :and do
           dynamic(
             [q],
-            field(q, ^String.to_existing_atom(key)) >= field(q, ^String.to_existing_atom(value)) and
-              ^dynamics
+            field(q, ^FatHelper.string_to_existing_atom(key)) >=
+              field(q, ^FatHelper.string_to_existing_atom(value)) and ^dynamics
           )
         else
           dynamic(
             [q],
-            field(q, ^String.to_existing_atom(key)) >= field(q, ^String.to_existing_atom(value)) or
-              ^dynamics
+            field(q, ^FatHelper.string_to_existing_atom(key)) >=
+              field(q, ^FatHelper.string_to_existing_atom(value)) or ^dynamics
           )
         end
       else
         if opts[:dynamic_type] == :and do
           dynamic(
             [q],
-            field(q, ^String.to_existing_atom(key)) >= ^value and ^dynamics
+            field(q, ^FatHelper.string_to_existing_atom(key)) >= ^value and ^dynamics
           )
         else
           dynamic(
             [q],
-            field(q, ^String.to_existing_atom(key)) >= ^value or ^dynamics
+            field(q, ^FatHelper.string_to_existing_atom(key)) >= ^value or ^dynamics
           )
         end
       end
@@ -187,62 +188,62 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
   def lte_dynamic(key, value, dynamics, opts \\ []) do
     if opts[:binding] == :last do
-      if FatEcto.FatHelper.is_fat_ecto_field?(value) do
+      if FatHelper.is_fat_ecto_field?(value) do
         value = String.replace(value, "$", "", global: false)
 
         if opts[:dynamic_type] == :and do
           dynamic(
             [..., c],
-            field(c, ^String.to_existing_atom(key)) <= field(c, ^String.to_existing_atom(value)) and
-              ^dynamics
+            field(c, ^FatHelper.string_to_existing_atom(key)) <=
+              field(c, ^FatHelper.string_to_existing_atom(value)) and ^dynamics
           )
         else
           dynamic(
             [..., c],
-            field(c, ^String.to_existing_atom(key)) <= field(c, ^String.to_existing_atom(value)) or
-              ^dynamics
+            field(c, ^FatHelper.string_to_existing_atom(key)) <=
+              field(c, ^FatHelper.string_to_existing_atom(value)) or ^dynamics
           )
         end
       else
         if opts[:dynamic_type] == :and do
           dynamic(
             [c],
-            field(c, ^String.to_existing_atom(key)) <= ^value and ^dynamics
+            field(c, ^FatHelper.string_to_existing_atom(key)) <= ^value and ^dynamics
           )
         else
           dynamic(
             [c],
-            field(c, ^String.to_existing_atom(key)) <= ^value or ^dynamics
+            field(c, ^FatHelper.string_to_existing_atom(key)) <= ^value or ^dynamics
           )
         end
       end
     else
-      if FatEcto.FatHelper.is_fat_ecto_field?(value) do
+      if FatHelper.is_fat_ecto_field?(value) do
         value = String.replace(value, "$", "", global: false)
 
         if opts[:dynamic_type] == :and do
           dynamic(
             [q],
-            field(q, ^String.to_existing_atom(key)) <= field(q, ^String.to_existing_atom(value)) and
-              ^dynamics
+            field(q, ^FatHelper.string_to_existing_atom(key)) <=
+              field(q, ^FatHelper.string_to_existing_atom(value)) and ^dynamics
           )
         else
           dynamic(
             [q],
-            field(q, ^String.to_existing_atom(key)) <= field(q, ^String.to_existing_atom(value)) or
-              ^dynamics
+            field(q, ^FatHelper.string_to_existing_atom(key)) <=
+              field(q, ^FatHelper.string_to_existing_atom(value)) or ^dynamics
           )
         end
       else
         if opts[:dynamic_type] == :and do
           dynamic(
             [q],
-            field(q, ^String.to_existing_atom(key)) <= ^value and ^dynamics
+            field(q, ^FatHelper.string_to_existing_atom(key)) <= ^value and ^dynamics
           )
         else
           dynamic(
             [q],
-            field(q, ^String.to_existing_atom(key)) <= ^value or ^dynamics
+            field(q, ^FatHelper.string_to_existing_atom(key)) <= ^value or ^dynamics
           )
         end
       end
@@ -251,62 +252,62 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
   def lt_dynamic(key, value, dynamics, opts \\ []) do
     if opts[:binding] == :last do
-      if FatEcto.FatHelper.is_fat_ecto_field?(value) do
+      if FatHelper.is_fat_ecto_field?(value) do
         value = String.replace(value, "$", "", global: false)
 
         if opts[:dynamic_type] == :and do
           dynamic(
             [..., c],
-            field(c, ^String.to_existing_atom(key)) < field(c, ^String.to_existing_atom(value)) and
-              ^dynamics
+            field(c, ^FatHelper.string_to_existing_atom(key)) <
+              field(c, ^FatHelper.string_to_existing_atom(value)) and ^dynamics
           )
         else
           dynamic(
             [..., c],
-            field(c, ^String.to_existing_atom(key)) < field(c, ^String.to_existing_atom(value)) or
-              ^dynamics
+            field(c, ^FatHelper.string_to_existing_atom(key)) <
+              field(c, ^FatHelper.string_to_existing_atom(value)) or ^dynamics
           )
         end
       else
         if opts[:dynamic_type] == :and do
           dynamic(
             [..., c],
-            field(c, ^String.to_existing_atom(key)) < ^value and ^dynamics
+            field(c, ^FatHelper.string_to_existing_atom(key)) < ^value and ^dynamics
           )
         else
           dynamic(
             [..., c],
-            field(c, ^String.to_existing_atom(key)) < ^value or ^dynamics
+            field(c, ^FatHelper.string_to_existing_atom(key)) < ^value or ^dynamics
           )
         end
       end
     else
-      if FatEcto.FatHelper.is_fat_ecto_field?(value) do
+      if FatHelper.is_fat_ecto_field?(value) do
         value = String.replace(value, "$", "", global: false)
 
         if opts[:dynamic_type] == :and do
           dynamic(
             [q],
-            field(q, ^String.to_existing_atom(key)) < field(q, ^String.to_existing_atom(value)) and
-              ^dynamics
+            field(q, ^FatHelper.string_to_existing_atom(key)) <
+              field(q, ^FatHelper.string_to_existing_atom(value)) and ^dynamics
           )
         else
           dynamic(
             [q],
-            field(q, ^String.to_existing_atom(key)) < field(q, ^String.to_existing_atom(value)) or
-              ^dynamics
+            field(q, ^FatHelper.string_to_existing_atom(key)) <
+              field(q, ^FatHelper.string_to_existing_atom(value)) or ^dynamics
           )
         end
       else
         if opts[:dynamic_type] == :and do
           dynamic(
             [q],
-            field(q, ^String.to_existing_atom(key)) < ^value and ^dynamics
+            field(q, ^FatHelper.string_to_existing_atom(key)) < ^value and ^dynamics
           )
         else
           dynamic(
             [q],
-            field(q, ^String.to_existing_atom(key)) < ^value or ^dynamics
+            field(q, ^FatHelper.string_to_existing_atom(key)) < ^value or ^dynamics
           )
         end
       end
@@ -319,7 +320,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
         dynamic(
           [..., c],
           ilike(
-            fragment("(?)::TEXT", field(c, ^String.to_existing_atom(key))),
+            fragment("(?)::TEXT", field(c, ^FatHelper.string_to_existing_atom(key))),
             ^value
           ) and ^dynamics
         )
@@ -327,7 +328,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
         dynamic(
           [..., c],
           ilike(
-            fragment("(?)::TEXT", field(c, ^String.to_existing_atom(key))),
+            fragment("(?)::TEXT", field(c, ^FatHelper.string_to_existing_atom(key))),
             ^value
           ) or ^dynamics
         )
@@ -337,7 +338,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
         dynamic(
           [q],
           ilike(
-            fragment("(?)::TEXT", field(q, ^String.to_existing_atom(key))),
+            fragment("(?)::TEXT", field(q, ^FatHelper.string_to_existing_atom(key))),
             ^value
           ) and ^dynamics
         )
@@ -345,7 +346,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
         dynamic(
           [q],
           ilike(
-            fragment("(?)::TEXT", field(q, ^String.to_existing_atom(key))),
+            fragment("(?)::TEXT", field(q, ^FatHelper.string_to_existing_atom(key))),
             ^value
           ) or ^dynamics
         )
@@ -359,7 +360,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
         dynamic(
           [..., c],
           not ilike(
-            fragment("(?)::TEXT", field(c, ^String.to_existing_atom(key))),
+            fragment("(?)::TEXT", field(c, ^FatHelper.string_to_existing_atom(key))),
             ^value
           ) and ^dynamics
         )
@@ -367,7 +368,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
         dynamic(
           [..., c],
           not ilike(
-            fragment("(?)::TEXT", field(c, ^String.to_existing_atom(key))),
+            fragment("(?)::TEXT", field(c, ^FatHelper.string_to_existing_atom(key))),
             ^value
           ) or ^dynamics
         )
@@ -377,7 +378,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
         dynamic(
           [q],
           not ilike(
-            fragment("(?)::TEXT", field(q, ^String.to_existing_atom(key))),
+            fragment("(?)::TEXT", field(q, ^FatHelper.string_to_existing_atom(key))),
             ^value
           ) and ^dynamics
         )
@@ -385,7 +386,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
         dynamic(
           [q],
           not ilike(
-            fragment("(?)::TEXT", field(q, ^String.to_existing_atom(key))),
+            fragment("(?)::TEXT", field(q, ^FatHelper.string_to_existing_atom(key))),
             ^value
           ) or ^dynamics
         )
@@ -399,7 +400,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
         dynamic(
           [..., c],
           like(
-            fragment("(?)::TEXT", field(c, ^String.to_existing_atom(key))),
+            fragment("(?)::TEXT", field(c, ^FatHelper.string_to_existing_atom(key))),
             ^value
           ) and ^dynamics
         )
@@ -407,7 +408,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
         dynamic(
           [..., c],
           like(
-            fragment("(?)::TEXT", field(c, ^String.to_existing_atom(key))),
+            fragment("(?)::TEXT", field(c, ^FatHelper.string_to_existing_atom(key))),
             ^value
           ) or ^dynamics
         )
@@ -417,7 +418,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
         dynamic(
           [q],
           like(
-            fragment("(?)::TEXT", field(q, ^String.to_existing_atom(key))),
+            fragment("(?)::TEXT", field(q, ^FatHelper.string_to_existing_atom(key))),
             ^value
           ) and ^dynamics
         )
@@ -425,7 +426,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
         dynamic(
           [q],
           like(
-            fragment("(?)::TEXT", field(q, ^String.to_existing_atom(key))),
+            fragment("(?)::TEXT", field(q, ^FatHelper.string_to_existing_atom(key))),
             ^value
           ) or ^dynamics
         )
@@ -439,7 +440,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
         dynamic(
           [..., c],
           not like(
-            fragment("(?)::TEXT", field(c, ^String.to_existing_atom(key))),
+            fragment("(?)::TEXT", field(c, ^FatHelper.string_to_existing_atom(key))),
             ^value
           ) and ^dynamics
         )
@@ -447,7 +448,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
         dynamic(
           [..., c],
           not like(
-            fragment("(?)::TEXT", field(c, ^String.to_existing_atom(key))),
+            fragment("(?)::TEXT", field(c, ^FatHelper.string_to_existing_atom(key))),
             ^value
           ) or ^dynamics
         )
@@ -457,7 +458,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
         dynamic(
           [q],
           not like(
-            fragment("(?)::TEXT", field(q, ^String.to_existing_atom(key))),
+            fragment("(?)::TEXT", field(q, ^FatHelper.string_to_existing_atom(key))),
             ^value
           ) and ^dynamics
         )
@@ -465,7 +466,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
         dynamic(
           [q],
           not like(
-            fragment("(?)::TEXT", field(q, ^String.to_existing_atom(key))),
+            fragment("(?)::TEXT", field(q, ^FatHelper.string_to_existing_atom(key))),
             ^value
           ) or ^dynamics
         )
@@ -478,24 +479,24 @@ defmodule FatEcto.FatQuery.FatDynamics do
       if opts[:dynamic_type] == :and do
         dynamic(
           [..., c],
-          field(c, ^String.to_existing_atom(key)) == ^value and ^dynamics
+          field(c, ^FatHelper.string_to_existing_atom(key)) == ^value and ^dynamics
         )
       else
         dynamic(
           [..., c],
-          field(c, ^String.to_existing_atom(key)) == ^value or ^dynamics
+          field(c, ^FatHelper.string_to_existing_atom(key)) == ^value or ^dynamics
         )
       end
     else
       if opts[:dynamic_type] == :and do
         dynamic(
           [q],
-          field(q, ^String.to_existing_atom(key)) == ^value and ^dynamics
+          field(q, ^FatHelper.string_to_existing_atom(key)) == ^value and ^dynamics
         )
       else
         dynamic(
           [q],
-          field(q, ^String.to_existing_atom(key)) == ^value or ^dynamics
+          field(q, ^FatHelper.string_to_existing_atom(key)) == ^value or ^dynamics
         )
       end
     end
@@ -506,28 +507,28 @@ defmodule FatEcto.FatQuery.FatDynamics do
       if opts[:dynamic_type] == :and do
         dynamic(
           [..., c],
-          field(c, ^String.to_existing_atom(key)) > ^Enum.min(values) and
-            field(c, ^String.to_existing_atom(key)) < ^Enum.max(values) and ^dynamics
+          field(c, ^FatHelper.string_to_existing_atom(key)) > ^Enum.min(values) and
+            field(c, ^FatHelper.string_to_existing_atom(key)) < ^Enum.max(values) and ^dynamics
         )
       else
         dynamic(
           [..., c],
-          (field(c, ^String.to_existing_atom(key)) > ^Enum.min(values) and
-             field(c, ^String.to_existing_atom(key)) < ^Enum.max(values)) or ^dynamics
+          (field(c, ^FatHelper.string_to_existing_atom(key)) > ^Enum.min(values) and
+             field(c, ^FatHelper.string_to_existing_atom(key)) < ^Enum.max(values)) or ^dynamics
         )
       end
     else
       if opts[:dynamic_type] == :and do
         dynamic(
           [q],
-          field(q, ^String.to_existing_atom(key)) > ^Enum.min(values) and
-            field(q, ^String.to_existing_atom(key)) < ^Enum.max(values) and ^dynamics
+          field(q, ^FatHelper.string_to_existing_atom(key)) > ^Enum.min(values) and
+            field(q, ^FatHelper.string_to_existing_atom(key)) < ^Enum.max(values) and ^dynamics
         )
       else
         dynamic(
           [q],
-          (field(q, ^String.to_existing_atom(key)) > ^Enum.min(values) and
-             field(q, ^String.to_existing_atom(key)) < ^Enum.max(values)) or ^dynamics
+          (field(q, ^FatHelper.string_to_existing_atom(key)) > ^Enum.min(values) and
+             field(q, ^FatHelper.string_to_existing_atom(key)) < ^Enum.max(values)) or ^dynamics
         )
       end
     end
@@ -538,28 +539,28 @@ defmodule FatEcto.FatQuery.FatDynamics do
       if opts[:dynamic_type] == :and do
         dynamic(
           [..., c],
-          (field(c, ^String.to_existing_atom(key)) < ^Enum.min(values) or
-             field(c, ^String.to_existing_atom(key)) > ^Enum.max(values)) and ^dynamics
+          (field(c, ^FatHelper.string_to_existing_atom(key)) < ^Enum.min(values) or
+             field(c, ^FatHelper.string_to_existing_atom(key)) > ^Enum.max(values)) and ^dynamics
         )
       else
         dynamic(
           [..., c],
-          field(c, ^String.to_existing_atom(key)) < ^Enum.min(values) or
-            field(c, ^String.to_existing_atom(key)) > ^Enum.max(values) or ^dynamics
+          field(c, ^FatHelper.string_to_existing_atom(key)) < ^Enum.min(values) or
+            field(c, ^FatHelper.string_to_existing_atom(key)) > ^Enum.max(values) or ^dynamics
         )
       end
     else
       if opts[:dynamic_type] == :and do
         dynamic(
           [q],
-          (field(q, ^String.to_existing_atom(key)) < ^Enum.min(values) or
-             field(q, ^String.to_existing_atom(key)) > ^Enum.max(values)) and ^dynamics
+          (field(q, ^FatHelper.string_to_existing_atom(key)) < ^Enum.min(values) or
+             field(q, ^FatHelper.string_to_existing_atom(key)) > ^Enum.max(values)) and ^dynamics
         )
       else
         dynamic(
           [q],
-          field(q, ^String.to_existing_atom(key)) < ^Enum.min(values) or
-            field(q, ^String.to_existing_atom(key)) > ^Enum.max(values) or ^dynamics
+          field(q, ^FatHelper.string_to_existing_atom(key)) < ^Enum.min(values) or
+            field(q, ^FatHelper.string_to_existing_atom(key)) > ^Enum.max(values) or ^dynamics
         )
       end
     end
@@ -570,24 +571,24 @@ defmodule FatEcto.FatQuery.FatDynamics do
       if opts[:dynamic_type] == :and do
         dynamic(
           [..., c],
-          field(c, ^String.to_existing_atom(key)) in ^values and ^dynamics
+          field(c, ^FatHelper.string_to_existing_atom(key)) in ^values and ^dynamics
         )
       else
         dynamic(
           [..., c],
-          field(c, ^String.to_existing_atom(key)) in ^values or ^dynamics
+          field(c, ^FatHelper.string_to_existing_atom(key)) in ^values or ^dynamics
         )
       end
     else
       if opts[:dynamic_type] == :and do
         dynamic(
           [q],
-          field(q, ^String.to_existing_atom(key)) in ^values and ^dynamics
+          field(q, ^FatHelper.string_to_existing_atom(key)) in ^values and ^dynamics
         )
       else
         dynamic(
           [q],
-          field(q, ^String.to_existing_atom(key)) in ^values or ^dynamics
+          field(q, ^FatHelper.string_to_existing_atom(key)) in ^values or ^dynamics
         )
       end
     end
@@ -598,19 +599,25 @@ defmodule FatEcto.FatQuery.FatDynamics do
       if opts[:dynamic_type] == :and do
         dynamic(
           [..., c],
-          field(c, ^String.to_existing_atom(key)) not in ^values and ^dynamics
+          field(c, ^FatHelper.string_to_existing_atom(key)) not in ^values and ^dynamics
         )
       else
         dynamic(
           [..., c],
-          field(c, ^String.to_existing_atom(key)) not in ^values or ^dynamics
+          field(c, ^FatHelper.string_to_existing_atom(key)) not in ^values or ^dynamics
         )
       end
     else
       if opts[:dynamic_type] == :and do
-        dynamic([q], field(q, ^String.to_existing_atom(key)) not in ^values and ^dynamics)
+        dynamic(
+          [q],
+          field(q, ^FatHelper.string_to_existing_atom(key)) not in ^values and ^dynamics
+        )
       else
-        dynamic([q], field(q, ^String.to_existing_atom(key)) not in ^values or ^dynamics)
+        dynamic(
+          [q],
+          field(q, ^FatHelper.string_to_existing_atom(key)) not in ^values or ^dynamics
+        )
       end
     end
   end
@@ -623,24 +630,28 @@ defmodule FatEcto.FatQuery.FatDynamics do
       if opts[:dynamic_type] == :and do
         dynamic(
           [..., c],
-          fragment("? @> ?", field(c, ^String.to_existing_atom(key)), ^values) and ^dynamics
+          fragment("? @> ?", field(c, ^FatHelper.string_to_existing_atom(key)), ^values) and
+            ^dynamics
         )
       else
         dynamic(
           [..., c],
-          fragment("? @> ?", field(c, ^String.to_existing_atom(key)), ^values) or ^dynamics
+          fragment("? @> ?", field(c, ^FatHelper.string_to_existing_atom(key)), ^values) or
+            ^dynamics
         )
       end
     else
       if opts[:dynamic_type] == :and do
         dynamic(
           [q],
-          fragment("? @> ?", field(q, ^String.to_existing_atom(key)), ^values) and ^dynamics
+          fragment("? @> ?", field(q, ^FatHelper.string_to_existing_atom(key)), ^values) and
+            ^dynamics
         )
       else
         dynamic(
           [q],
-          fragment("? @> ?", field(q, ^String.to_existing_atom(key)), ^values) or ^dynamics
+          fragment("? @> ?", field(q, ^FatHelper.string_to_existing_atom(key)), ^values) or
+            ^dynamics
         )
       end
     end
@@ -651,24 +662,28 @@ defmodule FatEcto.FatQuery.FatDynamics do
       if opts[:dynamic_type] == :and do
         dynamic(
           [..., c],
-          fragment("? && ?", field(c, ^String.to_existing_atom(key)), ^values) and ^dynamics
+          fragment("? && ?", field(c, ^FatHelper.string_to_existing_atom(key)), ^values) and
+            ^dynamics
         )
       else
         dynamic(
           [..., c],
-          fragment("? && ?", field(c, ^String.to_existing_atom(key)), ^values) or ^dynamics
+          fragment("? && ?", field(c, ^FatHelper.string_to_existing_atom(key)), ^values) or
+            ^dynamics
         )
       end
     else
       if opts[:dynamic_type] == :and do
         dynamic(
           [q],
-          fragment("? && ?", field(q, ^String.to_existing_atom(key)), ^values) and ^dynamics
+          fragment("? && ?", field(q, ^FatHelper.string_to_existing_atom(key)), ^values) and
+            ^dynamics
         )
       else
         dynamic(
           [q],
-          fragment("? && ?", field(q, ^String.to_existing_atom(key)), ^values) or ^dynamics
+          fragment("? && ?", field(q, ^FatHelper.string_to_existing_atom(key)), ^values) or
+            ^dynamics
         )
       end
     end

@@ -2,6 +2,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
   # TODO: Add docs and examples for ex_doc
   defmacro __using__(_options) do
     quote location: :keep do
+      alias FatEcto.FatHelper
       use FatEcto.FatQuery.FatMaximum
       use FatEcto.FatQuery.FatMinimum
       use FatEcto.FatQuery.FatAverage
@@ -89,7 +90,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
       end
 
       def build_max(queryable, field) do
-        field = String.to_atom(field)
+        field = FatHelper.string_to_atom(field)
 
         from(q in queryable,
           select: merge(q, %{"$aggregate": %{"$max": %{^field => max(field(q, ^field))}}})
@@ -97,7 +98,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
       end
 
       def build_min(queryable, field) do
-        field = String.to_atom(field)
+        field = FatHelper.string_to_atom(field)
 
         from(q in queryable,
           select: merge(q, %{"$aggregate": %{"$min": %{^field => min(field(q, ^field))}}})
@@ -105,7 +106,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
       end
 
       def build_avg(queryable, field) do
-        field = String.to_atom(field)
+        field = FatHelper.string_to_atom(field)
 
         from(q in queryable,
           select: merge(q, %{"$aggregate": %{"$avg": %{^field => avg(field(q, ^field))}}})
@@ -113,7 +114,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
       end
 
       def build_count(queryable, field) do
-        field = String.to_atom(field)
+        field = FatHelper.string_to_atom(field)
 
         from(q in queryable,
           select: merge(q, %{"$aggregate": %{"$count": %{^field => count(field(q, ^field))}}})
@@ -121,7 +122,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
       end
 
       def build_count_distinct(queryable, field) do
-        field = String.to_atom(field)
+        field = FatHelper.string_to_atom(field)
 
         from(q in queryable,
           select:
@@ -132,7 +133,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
       end
 
       def build_sum(queryable, field) do
-        field = String.to_atom(field)
+        field = FatHelper.string_to_atom(field)
 
         from(q in queryable,
           select: merge(q, %{"$aggregate": %{"$sum": %{^field => sum(field(q, ^field))}}})

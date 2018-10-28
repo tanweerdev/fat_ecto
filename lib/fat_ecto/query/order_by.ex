@@ -2,6 +2,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
   # TODO: Add docs and examples for ex_doc
   defmacro __using__(_options) do
     quote location: :keep do
+      alias FatEcto.FatHelper
       # TODO: Add docs and examples for ex_doc
       def build_order_by(queryable, opts_order_by) do
         if opts_order_by == nil do
@@ -14,7 +15,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
               from(
                 queryable,
                 order_by: [
-                  desc: ^String.to_existing_atom(field)
+                  desc: ^FatHelper.string_to_existing_atom(field)
                 ]
               )
             else
@@ -22,7 +23,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
               from(
                 queryable,
                 order_by: [
-                  asc: ^String.to_existing_atom(field)
+                  asc: ^FatHelper.string_to_existing_atom(field)
                 ]
               )
             end

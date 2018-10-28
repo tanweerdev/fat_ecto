@@ -66,7 +66,7 @@ defmodule FatEcto.FatHelper do
   def fields(select) do
     map = select
     fields = map["$fields"]
-    Enum.map(fields, &String.to_existing_atom/1)
+    Enum.map(fields, &string_to_existing_atom/1)
   end
 
   # TODO: Add docs and examples for ex_doc
@@ -93,7 +93,7 @@ defmodule FatEcto.FatHelper do
         related_key: _related_key
       } ->
         fields ++
-          [owner_key] ++ [{relation_name, Enum.map(assoc_fields, &String.to_existing_atom/1)}]
+          [owner_key] ++ [{relation_name, Enum.map(assoc_fields, &string_to_existing_atom/1)}]
 
       %Ecto.Association.BelongsTo{
         owner: _owner,
@@ -102,7 +102,7 @@ defmodule FatEcto.FatHelper do
         related_key: _related_key
       } ->
         fields ++
-          [owner_key] ++ [{relation_name, Enum.map(assoc_fields, &String.to_existing_atom/1)}]
+          [owner_key] ++ [{relation_name, Enum.map(assoc_fields, &string_to_existing_atom/1)}]
 
       nil ->
         fields
@@ -137,8 +137,10 @@ defmodule FatEcto.FatHelper do
     asso_model_name = Enum.at(asso_model, 0)
     queryable_fields = opts_select["$select"]["$fields"]
     model_fields = opts_select["$select"][asso_model_name]
-    queryable_f_exists = Enum.map(queryable_fields, &String.to_atom/1) -- queryable_schema_fields
-    model_f_exists = Enum.map(model_fields, &String.to_atom/1) -- model_schema_fields
+
+    queryable_f_exists = Enum.map(queryable_fields, &string_to_atom/1) -- queryable_schema_fields
+
+    model_f_exists = Enum.map(model_fields, &string_to_atom/1) -- model_schema_fields
     queryable_f_exists ++ model_f_exists
   end
 

@@ -2,6 +2,7 @@ defmodule FatEcto.FatQuery.FatSelect do
   # TODO: Add docs and examples for ex_doc
   defmacro __using__(_options) do
     quote location: :keep do
+      alias FatEcto.FatHelper
       # TODO: Add docs and examples for ex_doc
       def build_select(queryable, opts_select, model) do
         case opts_select do
@@ -14,13 +15,13 @@ defmodule FatEcto.FatQuery.FatSelect do
             fields =
               Enum.reduce(select, [], fn {key, value}, fields ->
                 if key == "$fields" do
-                  fields ++ Enum.map(value, &String.to_existing_atom/1)
+                  fields ++ Enum.map(value, &FatHelper.string_to_existing_atom/1)
                 else
                   # if map contain asso_table and fields
-                  relation_name = String.to_existing_atom(key)
+                  relation_name = FatHelper.string_to_existing_atom(key)
                   assoc_fields = value
 
-                  FatEcto.FatHelper.associations(
+                  FatHelper.associations(
                     model,
                     relation_name,
                     fields,
@@ -33,7 +34,7 @@ defmodule FatEcto.FatQuery.FatSelect do
 
           select when is_list(select) ->
             from(q in queryable,
-              select: map(q, ^Enum.uniq(Enum.map(select, &String.to_existing_atom/1)))
+              select: map(q, ^Enum.uniq(Enum.map(select, &FatHelper.string_to_existing_atom/1)))
             )
         end
       end

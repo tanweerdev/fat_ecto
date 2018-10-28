@@ -2,6 +2,7 @@ defmodule FatEcto.FatQuery.FatJoin do
   # TODO: Add docs and examples for ex_doc
   defmacro __using__(_options) do
     quote location: :keep do
+      alias FatEcto.FatHelper
       # TODO: Add docs and examples for ex_doc
       def build_join(queryable, opts, join_type \\ "$join") do
         case opts do
@@ -16,7 +17,7 @@ defmodule FatEcto.FatQuery.FatJoin do
               join =
                 String.replace(join_type, "_join", "")
                 |> String.replace("$", "")
-                |> String.to_atom()
+                |> FatHelper.string_to_atom()
 
               queryable =
                 case join_opts["$on_type"] do
@@ -27,8 +28,11 @@ defmodule FatEcto.FatQuery.FatJoin do
                       join,
                       [q],
                       jt in ^join_table,
-                      field(q, ^String.to_atom(join_opts["$on_field"])) !=
-                        field(jt, ^String.to_atom(join_opts["$on_join_table_field"]))
+                      field(q, ^FatHelper.string_to_atom(join_opts["$on_field"])) !=
+                        field(
+                          jt,
+                          ^FatHelper.string_to_atom(join_opts["$on_join_table_field"])
+                        )
                     )
 
                   # TODO: Add docs and examples of ex_doc for this case here
@@ -38,9 +42,9 @@ defmodule FatEcto.FatQuery.FatJoin do
                       join,
                       [q],
                       jt in ^join_table,
-                      field(q, ^String.to_atom(join_opts["$on_field"])) in field(
+                      field(q, ^FatHelper.string_to_atom(join_opts["$on_field"])) in field(
                         jt,
-                        ^String.to_atom(join_opts["$on_join_table_field"])
+                        ^FatHelper.string_to_atom(join_opts["$on_join_table_field"])
                       )
                     )
 
@@ -51,9 +55,12 @@ defmodule FatEcto.FatQuery.FatJoin do
                       join,
                       [q],
                       jt in ^join_table,
-                      field(jt, ^String.to_atom(join_opts["$on_join_table_field"])) in field(
+                      field(
+                        jt,
+                        ^FatHelper.string_to_atom(join_opts["$on_join_table_field"])
+                      ) in field(
                         q,
-                        ^String.to_atom(join_opts["$on_field"])
+                        ^FatHelper.string_to_atom(join_opts["$on_field"])
                       )
                     )
 
@@ -64,8 +71,11 @@ defmodule FatEcto.FatQuery.FatJoin do
                       join,
                       [q],
                       jt in ^join_table,
-                      field(q, ^String.to_atom(join_opts["$on_field"])) ==
-                        field(jt, ^String.to_atom(join_opts["$on_join_table_field"]))
+                      field(q, ^FatHelper.string_to_atom(join_opts["$on_field"])) ==
+                        field(
+                          jt,
+                          ^FatHelper.string_to_atom(join_opts["$on_join_table_field"])
+                        )
                     )
                 end
 
@@ -98,10 +108,12 @@ defmodule FatEcto.FatQuery.FatJoin do
             # dynamic = dynamic([q, ..., c], c.id == 1)
             # from query, where: ^dynamic
 
-            select_atoms = Enum.map(select, &String.to_atom/1)
+            select_atoms = Enum.map(select, &FatHelper.string_to_atom/1)
 
             from([q, ..., c] in queryable,
-              select_merge: %{^String.to_atom(join_table) => map(c, ^select_atoms)}
+              select_merge: %{
+                ^FatHelper.string_to_atom(join_table) => map(c, ^select_atoms)
+              }
             )
         end
       end
@@ -116,14 +128,14 @@ defmodule FatEcto.FatQuery.FatJoin do
               from(
                 [q, ..., c] in queryable,
                 order_by: [
-                  desc: field(c, ^String.to_existing_atom(field))
+                  desc: field(c, ^FatHelper.string_to_existing_atom(field))
                 ]
               )
             else
               from(
                 [q, ..., c] in queryable,
                 order_by: [
-                  asc: field(c, ^String.to_existing_atom(field))
+                  asc: field(c, ^FatHelper.string_to_existing_atom(field))
                 ]
               )
             end
