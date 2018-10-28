@@ -142,6 +142,14 @@ defmodule FatEcto.FatHelper do
     queryable_f_exists ++ model_f_exists
   end
 
+  def string_to_atom(str) do
+    String.to_atom(str)
+  end
+
+  def string_to_existing_atom(str) do
+    String.to_existing_atom(str)
+  end
+
   def model_related_owner(model, relation_name) do
     case model.__schema__(:association, relation_name) do
       %Ecto.Association.Has{

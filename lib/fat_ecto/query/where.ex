@@ -115,6 +115,9 @@ defmodule FatEcto.FatQuery.FatWhere do
                 # 		"$lt": 1
                 # 	}
                 # }
+                # First call the relevent dynamic then not_dynamic
+                # e.g id: {"$not": {"$eq": [1,2,3]}
+                # First call equal_dynamic with these params and then not_dynamic
 
                 # Example
                 # "$not": {
