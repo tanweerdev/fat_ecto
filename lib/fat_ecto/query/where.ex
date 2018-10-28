@@ -2,6 +2,7 @@ defmodule FatEcto.FatQuery.FatWhere do
   # TODO: Add docs and examples for ex_doc
   defmacro __using__(_options) do
     quote location: :keep do
+      alias FatEcto.FatQuery.FatDynamics
       # TODO: Add docs and examples for ex_doc
       def build_where(queryable, opts_where, opts \\ []) do
         if opts_where == nil do
@@ -23,194 +24,32 @@ defmodule FatEcto.FatQuery.FatWhere do
                 Enum.reduce(map_cond, false, fn {key, condition}, dynamics ->
                   case condition do
                     %{"$like" => value} ->
-                      # query = from q in CustomerModel, where: like(fragment("(?)::TEXT", q.id), "%1")
-                      if opts[:binding] == :last do
-                        dynamic(
-                          [..., c],
-                          like(
-                            fragment("(?)::TEXT", field(c, ^String.to_existing_atom(key))),
-                            ^value
-                          ) or ^dynamics
-                        )
-                      else
-                        dynamic(
-                          [q],
-                          like(
-                            fragment("(?)::TEXT", field(q, ^String.to_existing_atom(key))),
-                            ^value
-                          ) or ^dynamics
-                        )
-                      end
+                      FatDynamics.like_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
                     %{"$ilike" => value} ->
-                      if opts[:binding] == :last do
-                        dynamic(
-                          [..., c],
-                          ilike(
-                            fragment("(?)::TEXT", field(c, ^String.to_existing_atom(key))),
-                            ^value
-                          ) or ^dynamics
-                        )
-                      else
-                        dynamic(
-                          [q],
-                          ilike(
-                            fragment("(?)::TEXT", field(q, ^String.to_existing_atom(key))),
-                            ^value
-                          ) or ^dynamics
-                        )
-                      end
+                      FatDynamics.ilike_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
                     %{"$lt" => value} ->
-                      if opts[:binding] == :last do
-                        if FatEcto.FatHelper.is_fat_ecto_field?(value) do
-                          value = String.replace(value, "$", "", global: false)
-
-                          dynamic(
-                            [..., c],
-                            field(c, ^String.to_existing_atom(key)) <
-                              field(c, ^String.to_existing_atom(value)) or ^dynamics
-                          )
-                        else
-                          dynamic(
-                            [..., c],
-                            field(c, ^String.to_existing_atom(key)) < ^value or ^dynamics
-                          )
-                        end
-                      else
-                        if FatEcto.FatHelper.is_fat_ecto_field?(value) do
-                          value = String.replace(value, "$", "", global: false)
-
-                          dynamic(
-                            [q],
-                            field(q, ^String.to_existing_atom(key)) <
-                              field(q, ^String.to_existing_atom(value)) or ^dynamics
-                          )
-                        else
-                          dynamic(
-                            [q],
-                            field(q, ^String.to_existing_atom(key)) < ^value or ^dynamics
-                          )
-                        end
-                      end
+                      FatDynamics.lt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
                     %{"$lte" => value} ->
-                      if opts[:binding] == :last do
-                        if FatEcto.FatHelper.is_fat_ecto_field?(value) do
-                          value = String.replace(value, "$", "", global: false)
-
-                          dynamic(
-                            [..., c],
-                            field(c, ^String.to_existing_atom(key)) <=
-                              field(c, ^String.to_existing_atom(value)) or ^dynamics
-                          )
-                        else
-                          from(
-                            [..., c] in queryable,
-                            where: field(c, ^String.to_existing_atom(key)) <= ^value
-                          )
-                        end
-                      else
-                        if FatEcto.FatHelper.is_fat_ecto_field?(value) do
-                          value = String.replace(value, "$", "", global: false)
-
-                          dynamic(
-                            [q],
-                            field(q, ^String.to_existing_atom(key)) <=
-                              field(q, ^String.to_existing_atom(value)) or ^dynamics
-                          )
-                        else
-                          from(
-                            q in queryable,
-                            where: field(q, ^String.to_existing_atom(key)) <= ^value
-                          )
-                        end
-                      end
+                      FatDynamics.lte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
                     %{"$gt" => value} ->
-                      if opts[:binding] == :last do
-                        if FatEcto.FatHelper.is_fat_ecto_field?(value) do
-                          value = String.replace(value, "$", "", global: false)
-
-                          dynamic(
-                            [..., c],
-                            field(c, ^String.to_existing_atom(key)) >
-                              field(c, ^String.to_existing_atom(value)) or ^dynamics
-                          )
-                        else
-                          dynamic(
-                            [..., c],
-                            field(c, ^String.to_existing_atom(key)) > ^value or ^dynamics
-                          )
-                        end
-                      else
-                        if FatEcto.FatHelper.is_fat_ecto_field?(value) do
-                          value = String.replace(value, "$", "", global: false)
-
-                          dynamic(
-                            [q],
-                            field(q, ^String.to_existing_atom(key)) >
-                              field(q, ^String.to_existing_atom(value)) or ^dynamics
-                          )
-                        else
-                          dynamic(
-                            [q],
-                            field(q, ^String.to_existing_atom(key)) > ^value or ^dynamics
-                          )
-                        end
-                      end
+                      FatDynamics.gt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
                     %{"$gte" => value} ->
-                      if opts[:binding] == :last do
-                        if FatEcto.FatHelper.is_fat_ecto_field?(value) do
-                          value = String.replace(value, "$", "", global: false)
-
-                          dynamic(
-                            [..., c],
-                            field(c, ^String.to_existing_atom(key)) >=
-                              field(c, ^String.to_existing_atom(value)) or ^dynamics
-                          )
-                        else
-                          dynamic(
-                            [..., c],
-                            field(c, ^String.to_existing_atom(key)) >= ^value or ^dynamics
-                          )
-                        end
-                      else
-                        if FatEcto.FatHelper.is_fat_ecto_field?(value) do
-                          value = String.replace(value, "$", "", global: false)
-
-                          dynamic(
-                            [q],
-                            field(q, ^String.to_existing_atom(key)) >=
-                              field(q, ^String.to_existing_atom(value)) or ^dynamics
-                          )
-                        else
-                          dynamic(
-                            [q],
-                            field(q, ^String.to_existing_atom(key)) >= ^value or ^dynamics
-                          )
-                        end
-                      end
+                      FatDynamics.gte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
                     condition when not is_list(condition) and not is_map(condition) ->
-                      if opts[:binding] == :last do
-                        dynamic(
-                          [..., c],
-                          field(c, ^String.to_existing_atom(key)) == ^condition or ^dynamics
-                        )
-                      else
-                        dynamic(
-                          [q],
-                          field(q, ^String.to_existing_atom(key)) == ^condition or ^dynamics
-                        )
-                      end
+                      FatDynamics.eq_dynamic(key, condition, dynamics, opts ++ [dynamic_type: :or])
 
                     _whatever ->
                       dynamics
                   end
                 end)
 
+              # TODO: confirm its what should be used `where` or `or_where` below
               from(q in queryable, where: ^dynamics)
 
             "$not" ->
@@ -220,318 +59,136 @@ defmodule FatEcto.FatQuery.FatWhere do
               queryable
           end
 
-        Enum.reduce(map_cond, queryable, fn {key, value}, queryable ->
-          case key do
-            "$like" ->
-              if opts[:binding] == :last do
-                from([..., c] in queryable,
-                  where: like(field(c, ^String.to_existing_atom(k)), ^value)
-                )
-              else
-                from(q in queryable, where: like(field(q, ^String.to_existing_atom(k)), ^value))
-              end
+        dynamics =
+          Enum.reduce(map_cond, true, fn {key, value}, dynamics ->
+            case key do
+              "$like" ->
+                FatDynamics.like_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
-            "$ilike" ->
-              if opts[:binding] == :last do
-                from([..., c] in queryable,
-                  where: ilike(field(c, ^String.to_existing_atom(k)), ^value)
-                )
-              else
-                from(q in queryable, where: ilike(field(q, ^String.to_existing_atom(k)), ^value))
-              end
+              "$ilike" ->
+                FatDynamics.ilike_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
-            "$not_like" ->
-              if opts[:binding] == :last do
-                from([..., c] in queryable,
-                  where: not like(field(c, ^String.to_existing_atom(k)), ^value)
-                )
-              else
-                from(q in queryable, where: not like(field(q, ^String.to_existing_atom(k)), ^value))
-              end
+              "$not_like" ->
+                FatDynamics.not_like_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
-            "$not_ilike" ->
-              if opts[:binding] == :last do
-                from(
-                  [..., c] in queryable,
-                  where: not ilike(field(c, ^String.to_existing_atom(k)), ^value)
-                )
-              else
-                from(
-                  q in queryable,
-                  where: not ilike(field(q, ^String.to_existing_atom(k)), ^value)
-                )
-              end
+              "$not_ilike" ->
+                FatDynamics.not_ilike_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
-            "$lt" ->
-              if opts[:binding] == :last do
-                if FatEcto.FatHelper.is_fat_ecto_field?(value) do
-                  value = String.replace(value, "$", "", global: false)
+              "$lt" ->
+                FatDynamics.lt_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
-                  from(
-                    [..., c] in queryable,
-                    where:
-                      field(c, ^String.to_existing_atom(k)) <
-                        field(c, ^String.to_existing_atom(value))
-                  )
-                else
-                  from([..., c] in queryable, where: field(c, ^String.to_existing_atom(k)) < ^value)
-                end
-              else
-                if FatEcto.FatHelper.is_fat_ecto_field?(value) do
-                  value = String.replace(value, "$", "", global: false)
+              "$lte" ->
+                FatDynamics.lte_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
-                  from(
-                    q in queryable,
-                    where:
-                      field(q, ^String.to_existing_atom(k)) <
-                        field(q, ^String.to_existing_atom(value))
-                  )
-                else
-                  from(q in queryable, where: field(q, ^String.to_existing_atom(k)) < ^value)
-                end
-              end
+              "$gt" ->
+                FatDynamics.gt_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
-            "$lte" ->
-              if opts[:binding] == :last do
-                if FatEcto.FatHelper.is_fat_ecto_field?(value) do
-                  value = String.replace(value, "$", "", global: false)
+              "$gte" ->
+                FatDynamics.gte_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
-                  from(
-                    [..., c] in queryable,
-                    where:
-                      field(c, ^String.to_existing_atom(k)) <=
-                        field(c, ^String.to_existing_atom(value))
-                  )
-                else
-                  from([..., c] in queryable, where: field(c, ^String.to_existing_atom(k)) <= ^value)
-                end
-              else
-                if FatEcto.FatHelper.is_fat_ecto_field?(value) do
-                  value = String.replace(value, "$", "", global: false)
+              "$between" ->
+                FatDynamics.between_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
-                  from(
-                    q in queryable,
-                    where:
-                      field(q, ^String.to_existing_atom(k)) <=
-                        field(q, ^String.to_existing_atom(value))
-                  )
-                else
-                  from(q in queryable, where: field(q, ^String.to_existing_atom(k)) <= ^value)
-                end
-              end
+              "$not_between" ->
+                FatDynamics.not_between_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
-            "$gt" ->
-              if opts[:binding] == :last do
-                if FatEcto.FatHelper.is_fat_ecto_field?(value) do
-                  value = String.replace(value, "$", "", global: false)
+              "$in" ->
+                FatDynamics.in_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
-                  from(
-                    [..., c] in queryable,
-                    where:
-                      field(c, ^String.to_existing_atom(k)) >
-                        field(c, ^String.to_existing_atom(value))
-                  )
-                else
-                  from([..., c] in queryable, where: field(c, ^String.to_existing_atom(k)) > ^value)
-                end
-              else
-                if FatEcto.FatHelper.is_fat_ecto_field?(value) do
-                  value = String.replace(value, "$", "", global: false)
+              "$not_in" ->
+                FatDynamics.not_in_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
-                  from(
-                    q in queryable,
-                    where:
-                      field(q, ^String.to_existing_atom(k)) >
-                        field(q, ^String.to_existing_atom(value))
-                  )
-                else
-                  from(q in queryable, where: field(q, ^String.to_existing_atom(k)) > ^value)
-                end
-              end
+              "$contains" ->
+                FatDynamics.contains_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
-            "$gte" ->
-              if opts[:binding] == :last do
-                if FatEcto.FatHelper.is_fat_ecto_field?(value) do
-                  value = String.replace(value, "$", "", global: false)
+              "$contains_any" ->
+                FatDynamics.contains_any_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
-                  from(
-                    [..., c] in queryable,
-                    where:
-                      field(c, ^String.to_existing_atom(k)) >=
-                        field(c, ^String.to_existing_atom(value))
-                  )
-                else
-                  from([..., c] in queryable, where: field(c, ^String.to_existing_atom(k)) >= ^value)
-                end
-              else
-                if FatEcto.FatHelper.is_fat_ecto_field?(value) do
-                  value = String.replace(value, "$", "", global: false)
+              "$not" ->
+                # TODO:
+                # Example
+                # "id": {
+                # TODO: implement now
+                # 	"$not": {
+                # 		"$eq": [1,2,3],
+                # 		"$gt": 10,
+                # 		"$lt": 1
+                # 	}
+                # }
 
-                  from(
-                    q in queryable,
-                    where:
-                      field(q, ^String.to_existing_atom(k)) >=
-                        field(q, ^String.to_existing_atom(value))
-                  )
-                else
-                  from(q in queryable, where: field(q, ^String.to_existing_atom(k)) >= ^value)
-                end
-              end
+                # Example
+                # "$not": {
+                # 	"id": [
+                # 		1,2,3,
+                #    ],
+                #   "customer_rating": null,
+                # 	"$gt": { "id": 10 }
+                #  }
+                queryable
 
-            "$between" ->
-              if opts[:binding] == :last do
-                from(
-                  [..., c] in queryable,
-                  where:
-                    field(c, ^String.to_existing_atom(k)) > ^Enum.min(value) and
-                      field(c, ^String.to_existing_atom(k)) < ^Enum.max(value)
-                )
-              else
-                from(
-                  q in queryable,
-                  where:
-                    field(q, ^String.to_existing_atom(k)) > ^Enum.min(value) and
-                      field(q, ^String.to_existing_atom(k)) < ^Enum.max(value)
-                )
-              end
+              "$or" ->
+                # TODO:
+                # Example
+                # "id": {
+                # 	"$not": [
+                # 		[1,2,3],
+                # 		{ "$gt": 10 }
+                # 	]
+                # }
 
-            "$not_between" ->
-              if opts[:binding] == :last do
-                from(
-                  [..., c] in queryable,
-                  where:
-                    field(c, ^String.to_existing_atom(k)) < ^Enum.min(value) or
-                      field(c, ^String.to_existing_atom(k)) > ^Enum.max(value)
-                )
-              else
-                from(
-                  q in queryable,
-                  where:
-                    field(q, ^String.to_existing_atom(k)) < ^Enum.min(value) or
-                      field(q, ^String.to_existing_atom(k)) > ^Enum.max(value)
-                )
-              end
+                # Example
+                # "$or": {
+                # 	"id": [
+                # 		1,2,3,
+                #    ],
+                # 	"$gt": { "id": 10 }
+                #  }
+                queryable
 
-            "$in" ->
-              if opts[:binding] == :last do
-                from([..., c] in queryable, where: field(c, ^String.to_existing_atom(k)) in ^value)
-              else
-                from(q in queryable, where: field(q, ^String.to_existing_atom(k)) in ^value)
-              end
+              _ ->
+                # TODO:
+                queryable
+            end
+          end)
 
-            "$not_in" ->
-              if opts[:binding] == :last do
-                from([..., c] in queryable,
-                  where: field(c, ^String.to_existing_atom(k)) not in ^value
-                )
-              else
-                from(q in queryable, where: field(q, ^String.to_existing_atom(k)) not in ^value)
-              end
-
-            "$contains" ->
-              # value = Enum.join(value, " ")
-              # where: fragment("? @> ?::jsonb", c.exclusions, ^[dish_id])
-
-              if opts[:binding] == :last do
-                from(
-                  [..., c] in queryable,
-                  where: fragment("? @> ?", field(c, ^String.to_existing_atom(k)), ^value)
-                )
-              else
-                from(
-                  q in queryable,
-                  where: fragment("? @> ?", field(q, ^String.to_existing_atom(k)), ^value)
-                )
-              end
-
-            "$contains_any" ->
-              if opts[:binding] == :last do
-                from(
-                  [..., c] in queryable,
-                  where: fragment("? && ?", field(c, ^String.to_existing_atom(k)), ^value)
-                )
-              else
-                from(
-                  q in queryable,
-                  where: fragment("? && ?", field(q, ^String.to_existing_atom(k)), ^value)
-                )
-              end
-
-            "$not" ->
-              # TODO:
-              # Example
-              # "id": {
-              # TODO: implement now
-              # 	"$not": {
-              # 		"$eq": [1,2,3],
-              # 		"$gt": 10,
-              # 		"$lt": 1
-              # 	}
-              # }
-
-              # Example
-              # "$not": {
-              # 	"id": [
-              # 		1,2,3,
-              #    ],
-              #   "customer_rating": null,
-              # 	"$gt": { "id": 10 }
-              #  }
-              queryable
-
-            "$or" ->
-              # TODO:
-              # Example
-              # "id": {
-              # 	"$not": [
-              # 		[1,2,3],
-              # 		{ "$gt": 10 }
-              # 	]
-              # }
-
-              # Example
-              # "$or": {
-              # 	"id": [
-              # 		1,2,3,
-              #    ],
-              # 	"$gt": { "id": 10 }
-              #  }
-              queryable
-
-            _ ->
-              # TODO:
-              queryable
-          end
-        end)
+        from(q in queryable, where: ^dynamics)
       end
 
       # TODO: Add docs and examples of ex_doc for this case here
+      # $where: {score == nil}
       defp query_where(queryable, {k, map_cond}, opts) when is_nil(map_cond) do
-        if opts[:binding] == :last do
-          from([..., c] in queryable, where: is_nil(field(c, ^String.to_existing_atom(k))))
-        else
-          from(q in queryable, where: is_nil(field(q, ^String.to_existing_atom(k))))
-        end
+        from(q in queryable,
+          where: ^FatDynamics.is_nil_dynamic(k, true, opts ++ [dynamic_type: :and])
+        )
       end
 
       # TODO: Add docs and examples of ex_doc for this case here
+      # TODO: check if following code is needed
+      # $where: {score: 5}
       defp query_where(queryable, {k, map_cond}, opts) when not is_list(map_cond) do
-        if opts[:binding] == :last do
-          from([..., c] in queryable, where: field(c, ^String.to_existing_atom(k)) == ^map_cond)
-        else
-          from(q in queryable, where: field(q, ^String.to_existing_atom(k)) == ^map_cond)
-        end
+        from(q in queryable,
+          where: ^FatDynamics.eq_dynamic(k, map_cond, true, opts ++ [dynamic_type: :and])
+        )
       end
 
       # TODO: Add docs and examples of ex_doc for this case here
-      defp query_where(queryable, {k, map_cond}, opts) when is_list(map_cond) and k == "$notNull" do
+      # $where: {$not_null: [score, rating]}
+      defp query_where(queryable, {k, map_cond}, opts)
+           when is_list(map_cond) and k == "$not_null" do
         Enum.reduce(map_cond, queryable, fn key, queryable ->
-          if opts[:binding] == :last do
-            from([..., c] in queryable, where: not is_nil(field(c, ^String.to_existing_atom(key))))
-          else
-            from(q in queryable, where: not is_nil(field(q, ^String.to_existing_atom(key))))
-          end
+          from(q in queryable,
+            where: ^FatDynamics.not_is_nil_dynamic(key, true, opts ++ [dynamic_type: :and])
+          )
         end)
+      end
+
+      # TODO: Add docs and examples of ex_doc for this case here
+      # $where: {score: $not_null}
+      defp query_where(queryable, {k, map_cond}, opts)
+           when map_cond == "$not_null" do
+        from(q in queryable,
+          where: ^FatDynamics.not_is_nil_dynamic(k, true, opts ++ [dynamic_type: :and])
+        )
       end
     end
   end

@@ -20,7 +20,7 @@ defmodule Query.JoinTest do
         h in FatEcto.FatHospital,
         right_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
-        where: r.incharge == ^"John",
+        where: r.incharge == ^"John" and ^true,
         select: merge(h, %{^:fat_rooms => map(r, [:beds, :capacity, :level])})
       )
 
@@ -45,10 +45,10 @@ defmodule Query.JoinTest do
     expected =
       from(
         h in FatEcto.FatHospital,
-        where: h.rating == ^3,
+        where: h.rating == ^3 and ^true,
         right_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
-        where: r.incharge == ^"John",
+        where: r.incharge == ^"John" and ^true,
         select: merge(h, %{^:fat_rooms => map(r, [:beds, :capacity, :level])})
       )
 
@@ -99,10 +99,10 @@ defmodule Query.JoinTest do
     expected =
       from(
         h in FatEcto.FatHospital,
-        where: h.rating == ^3,
+        where: h.rating == ^3 and ^true,
         inner_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
-        where: r.incharge == ^"John",
+        where: r.incharge == ^"John" and ^true,
         select: merge(h, %{^:fat_rooms => map(r, [:beds, :capacity, :level])})
       )
 
@@ -126,10 +126,10 @@ defmodule Query.JoinTest do
     expected =
       from(
         h in FatEcto.FatHospital,
-        where: h.rating == ^3,
+        where: h.rating == ^3 and ^true,
         inner_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
-        where: r.incharge == ^"John",
+        where: r.incharge == ^"John" and ^true,
         select: merge(h, %{^:fat_rooms => map(r, [:beds, :capacity, :level])})
       )
 
@@ -153,10 +153,10 @@ defmodule Query.JoinTest do
     expected =
       from(
         h in FatEcto.FatHospital,
-        where: h.rating == ^3,
+        where: h.rating == ^3 and ^true,
         right_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
-        where: r.incharge == ^"John",
+        where: r.incharge == ^"John" and ^true,
         select: merge(h, %{^:fat_rooms => map(r, [:beds, :capacity, :level])})
       )
 

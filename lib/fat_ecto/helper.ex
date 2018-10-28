@@ -75,7 +75,7 @@ defmodule FatEcto.FatHelper do
       is_number(value) ->
         false
 
-      String.starts_with?(value, "$") == true ->
+      is_binary(value) && String.starts_with?(value, "$") == true ->
         true
 
       true ->

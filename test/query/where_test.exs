@@ -8,7 +8,9 @@ defmodule Query.WhereTest do
       "$where" => %{"name" => %{"$like" => "%Joh %"}}
     }
 
-    expected = from(d in FatEcto.FatDoctor, where: like(d.name, ^"%Joh %"))
+    # expected = from(d in FatEcto.FatDoctor, where: like(d.name, ^"%Joh %"))
+    expected =
+      from(d in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", d.name), ^"%Joh %") and ^true)
 
     result = build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
@@ -19,7 +21,12 @@ defmodule Query.WhereTest do
       "$where" => %{"designation" => %{"$ilike" => "%surge %"}}
     }
 
-    expected = from(d in FatEcto.FatDoctor, where: ilike(d.designation, ^"%surge %"))
+    # expected = from(d in FatEcto.FatDoctor, where: ilike(d.designation, ^"%surge %"))
+    expected =
+      from(d in FatEcto.FatDoctor,
+        where: ilike(fragment("(?)::TEXT", d.designation), ^"%surge %") and ^true
+      )
+
     result = build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
@@ -29,7 +36,12 @@ defmodule Query.WhereTest do
       "$where" => %{"email" => %{"$not_like" => "%john@ %"}}
     }
 
-    expected = from(d in FatEcto.FatDoctor, where: not like(d.email, ^"%john@ %"))
+    # expected = from(d in FatEcto.FatDoctor, where: not like(d.email, ^"%john@ %"))
+    expected =
+      from(d in FatEcto.FatDoctor,
+        where: not like(fragment("(?)::TEXT", d.email), ^"%john@ %") and ^true
+      )
+
     result = build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
@@ -39,7 +51,12 @@ defmodule Query.WhereTest do
       "$where" => %{"address" => %{"$not_ilike" => "%street2 %"}}
     }
 
-    expected = from(d in FatEcto.FatDoctor, where: not ilike(d.address, ^"%street2 %"))
+    # expected = from(d in FatEcto.FatDoctor, where: not ilike(d.address, ^"%street2 %"))
+    expected =
+      from(d in FatEcto.FatDoctor,
+        where: not ilike(fragment("(?)::TEXT", d.address), ^"%street2 %") and ^true
+      )
+
     result = build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
@@ -49,7 +66,7 @@ defmodule Query.WhereTest do
       "$where" => %{"rating" => %{"$lt" => 3}}
     }
 
-    expected = from(h in FatEcto.FatHospital, where: h.rating < ^3)
+    expected = from(h in FatEcto.FatHospital, where: h.rating < ^3 and ^true)
     result = build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
@@ -59,7 +76,7 @@ defmodule Query.WhereTest do
       "$where" => %{"total_staff" => %{"$lt" => "$rating"}}
     }
 
-    expected = from(h in FatEcto.FatHospital, where: h.total_staff < h.rating)
+    expected = from(h in FatEcto.FatHospital, where: h.total_staff < h.rating and ^true)
     result = build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
@@ -69,7 +86,7 @@ defmodule Query.WhereTest do
       "$where" => %{"total_staff" => %{"$lte" => 3}}
     }
 
-    expected = from(h in FatEcto.FatHospital, where: h.total_staff <= ^3)
+    expected = from(h in FatEcto.FatHospital, where: h.total_staff <= ^3 and ^true)
     result = build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
@@ -79,7 +96,7 @@ defmodule Query.WhereTest do
       "$where" => %{"rating" => %{"$lte" => "$total_staff"}}
     }
 
-    expected = from(h in FatEcto.FatHospital, where: h.rating <= h.total_staff)
+    expected = from(h in FatEcto.FatHospital, where: h.rating <= h.total_staff and ^true)
     result = build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
@@ -89,7 +106,7 @@ defmodule Query.WhereTest do
       "$where" => %{"beds" => %{"$gt" => 3}}
     }
 
-    expected = from(r in FatEcto.FatRoom, where: r.beds > ^3)
+    expected = from(r in FatEcto.FatRoom, where: r.beds > ^3 and ^true)
     result = build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
@@ -99,7 +116,7 @@ defmodule Query.WhereTest do
       "$where" => %{"beds" => %{"$gt" => "$capacity"}}
     }
 
-    expected = from(r in FatEcto.FatRoom, where: r.beds > r.capacity)
+    expected = from(r in FatEcto.FatRoom, where: r.beds > r.capacity and ^true)
     result = build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
@@ -109,7 +126,7 @@ defmodule Query.WhereTest do
       "$where" => %{"capacity" => %{"$gte" => 3}}
     }
 
-    expected = from(r in FatEcto.FatRoom, where: r.capacity >= ^3)
+    expected = from(r in FatEcto.FatRoom, where: r.capacity >= ^3 and ^true)
     result = build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
@@ -119,7 +136,7 @@ defmodule Query.WhereTest do
       "$where" => %{"rating" => %{"$gte" => "$total_staff"}}
     }
 
-    expected = from(r in FatEcto.FatRoom, where: r.rating >= r.total_staff)
+    expected = from(r in FatEcto.FatRoom, where: r.rating >= r.total_staff and ^true)
     result = build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
@@ -129,7 +146,9 @@ defmodule Query.WhereTest do
       "$where" => %{"total_staff" => %{"$between" => [10, 20]}}
     }
 
-    expected = from(r in FatEcto.FatRoom, where: r.total_staff > ^10 and r.total_staff < ^20)
+    expected =
+      from(r in FatEcto.FatRoom, where: r.total_staff > ^10 and r.total_staff < ^20 and ^true)
+
     result = build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
@@ -140,7 +159,9 @@ defmodule Query.WhereTest do
     }
 
     expected =
-      from(p in FatEcto.FatPatient, where: p.appointments_count < ^10 or p.appointments_count > ^20)
+      from(p in FatEcto.FatPatient,
+        where: (p.appointments_count < ^10 or p.appointments_count > ^20) and ^true
+      )
 
     result = build(FatEcto.FatPatient, opts)
     assert inspect(result) == inspect(expected)
@@ -151,7 +172,7 @@ defmodule Query.WhereTest do
       "$where" => %{"appointments_count" => %{"$in" => [20, 50]}}
     }
 
-    expected = from(p in FatEcto.FatPatient, where: p.appointments_count in ^[20, 50])
+    expected = from(p in FatEcto.FatPatient, where: p.appointments_count in ^[20, 50] and ^true)
     result = build(FatEcto.FatPatient, opts)
     assert inspect(result) == inspect(expected)
   end
@@ -161,7 +182,7 @@ defmodule Query.WhereTest do
       "$where" => %{"appointments_count" => %{"$not_in" => [20, 50]}}
     }
 
-    expected = from(p in FatEcto.FatPatient, where: p.appointments_count not in ^[20, 50])
+    expected = from(p in FatEcto.FatPatient, where: p.appointments_count not in ^[20, 50] and ^true)
     result = build(FatEcto.FatPatient, opts)
     assert inspect(result) == inspect(expected)
   end
@@ -171,17 +192,17 @@ defmodule Query.WhereTest do
       "$where" => %{"rating" => nil}
     }
 
-    expected = from(h in FatEcto.FatHospital, where: is_nil(h.rating))
+    expected = from(h in FatEcto.FatHospital, where: is_nil(h.rating) and ^true)
     result = build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
   test "returns the query where field not isnil" do
     opts = %{
-      "$where" => %{"$notNull" => ["rating"]}
+      "$where" => %{"$not_null" => ["rating"]}
     }
 
-    expected = from(h in FatEcto.FatHospital, where: not is_nil(h.rating))
+    expected = from(h in FatEcto.FatHospital, where: not is_nil(h.rating) and ^true)
     result = build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
@@ -191,7 +212,7 @@ defmodule Query.WhereTest do
       "$where" => %{"location" => "Geo"}
     }
 
-    expected = from(h in FatEcto.FatHospital, where: h.location == ^"Geo")
+    expected = from(h in FatEcto.FatHospital, where: h.location == ^"Geo" and ^true)
     result = build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
