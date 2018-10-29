@@ -7,6 +7,34 @@ defmodule FatEcto.FatPaginator do
       # TODO: @repo.all and @repo.one nil warning
       @repo unquote(options)[:repo]
       # TODO: Add docs and examples for ex_doc
+      @doc """
+        Apply limit and offset to the query if not provided and return meta.
+
+      ## Parameters
+
+        - `queryable`- Schema name that represents your database model.
+        - `query_opts` - include query options as a map
+
+      ## Examples
+          query_opts = %{
+          "$find" => "$all",
+          "$select" => %{"$fields" => ["name", "rating"], "fat_rooms" => ["beds"]},
+          "$where" => %{"id" => 10}
+          }
+
+          iex> build(FatEcto.FatHospital, query_opts)
+
+
+      ## Options
+
+        - `$find => $all`- To fetch all the results from database.
+        - `$find => $one`- To fetch single record from database.
+        - `$select`- Select the fields from `hospital` and `rooms`.
+        - `$where`- Added the where attribute in the query.
+
+      It will only work if you have configured your repo and default limit in the fat_ecto config.  
+
+      """
       def paginate(query, params) do
         {skip, params} = FatEcto.FatHelper.get_skip_value(params)
         {limit, _params} = FatEcto.FatHelper.get_limit_value(params)

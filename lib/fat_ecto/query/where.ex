@@ -4,6 +4,38 @@ defmodule FatEcto.FatQuery.FatWhere do
     quote location: :keep do
       alias FatEcto.FatQuery.FatDynamics
       # TODO: Add docs and examples for ex_doc
+
+      @doc """
+      Build a  `where query` depending on the params.
+      ## Parameters
+
+        - `queryable`- Schema name that represents your database model.
+        - `query_opts` - include query options as a map
+      ## Examples
+          query_opts = %{
+            "$select" => %{
+              "$fields" => ["name", "location", "rating"],
+              "fat_rooms" => ["beds", "capacity"]
+            },
+            "$order" => %{"id" => "$desc"},
+            "$where" => %{"location" => %{"$not_like" => "%addre %"}},            
+            "$group" => "total_staff"
+          }
+
+          iex> build(FatEcto.FatHospital, query_opts)
+               #Ecto.Query<from f in FatEcto.FatHospital,
+               where: not(like(fragment("(?)::TEXT", f.location), ^"%addre %")) and ^true,
+               group_by: [f.total_staff], order_by: [desc: f.id],
+               select: map(f, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])>
+
+      ## Options
+
+        - `$select`- Select the fields from `hospital` and `rooms`.
+        - `$where`- Added the where attribute in the query.
+        - `$not_like`- Added the notlike attribute in the where query.
+        - `$group`- Added the group_by attribute in the query.        
+        - `$order`- Sort the result based on the order attribute.
+      """
       def build_where(queryable, opts_where, opts \\ []) do
         if opts_where == nil do
           queryable
