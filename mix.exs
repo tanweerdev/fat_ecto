@@ -24,7 +24,7 @@ defmodule FatEcto.MixProject do
   defp deps do
     [
       {:csv, "~> 2.1"},
-      {:ecto, "~> 3.0.0-rc.1"},
+      {:ecto, "~> 3.0"},
       {:sweet_xml, "~> 0.6.5"},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:elixir_utils, github: "tanweerdev/elixir_utils"},
