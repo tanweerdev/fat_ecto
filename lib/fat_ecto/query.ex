@@ -37,6 +37,7 @@ defmodule FatEcto.FatQuery do
   use FatEcto.FatQuery.FatSelect
   use FatEcto.FatQuery.FatJoin
   use FatEcto.FatQuery.FatGroupBy
+  use FatEcto.FatQuery.FatAggregate
   # TODO: Should return {:ok, query}
   @doc """
   Call the `respective query method` depending on the params.
@@ -117,6 +118,7 @@ defmodule FatEcto.FatQuery do
     |> build_join(opts["$full_join"], "$full_join")
     |> build_include(opts["$include"], model)
     |> build_order_by(opts["$order"])
+    |> build_aggregate(opts["$aggregate"])
     |> build_group_by(opts["$group"])
   end
 

@@ -3,10 +3,10 @@ defmodule FatEcto.FatQuery.FatAggregate do
   defmacro __using__(_options) do
     quote location: :keep do
       alias FatEcto.FatHelper
-      use FatEcto.FatQuery.FatMaximum
-      use FatEcto.FatQuery.FatMinimum
-      use FatEcto.FatQuery.FatAverage
-      use FatEcto.FatQuery.FatCount
+      # use FatEcto.FatQuery.FatMaximum
+      # use FatEcto.FatQuery.FatMinimum
+      # use FatEcto.FatQuery.FatAverage
+      # use FatEcto.FatQuery.FatCount
 
       # TODO: Add docs and examples for ex_doc
       # $aggregate: {
@@ -22,7 +22,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
               "$max" ->
                 case fields do
                   fields when is_list(fields) ->
-                    Enum.reduce(fields, queryable, fn {aggregate_type, field}, queryable ->
+                    Enum.reduce(fields, queryable, fn field, queryable ->
                       build_max(queryable, field)
                     end)
 
@@ -33,7 +33,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
               "$min" ->
                 case fields do
                   fields when is_list(fields) ->
-                    Enum.reduce(fields, queryable, fn {aggregate_type, field}, queryable ->
+                    Enum.reduce(fields, queryable, fn field, queryable ->
                       build_min(queryable, field)
                     end)
 
@@ -44,7 +44,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
               "$avg" ->
                 case fields do
                   fields when is_list(fields) ->
-                    Enum.reduce(fields, queryable, fn {aggregate_type, field}, queryable ->
+                    Enum.reduce(fields, queryable, fn field, queryable ->
                       build_avg(queryable, field)
                     end)
 
@@ -55,7 +55,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
               "$count" ->
                 case fields do
                   fields when is_list(fields) ->
-                    Enum.reduce(fields, queryable, fn {aggregate_type, field}, queryable ->
+                    Enum.reduce(fields, queryable, fn field, queryable ->
                       build_count(queryable, field)
                     end)
 
@@ -66,7 +66,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
               "$count_distinct" ->
                 case fields do
                   fields when is_list(fields) ->
-                    Enum.reduce(fields, queryable, fn {aggregate_type, field}, queryable ->
+                    Enum.reduce(fields, queryable, fn field, queryable ->
                       build_count_distinct(queryable, field)
                     end)
 
@@ -77,7 +77,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
               "$sum" ->
                 case fields do
                   fields when is_list(fields) ->
-                    Enum.reduce(fields, queryable, fn {aggregate_type, field}, queryable ->
+                    Enum.reduce(fields, queryable, fn field, queryable ->
                       build_sum(queryable, field)
                     end)
 
@@ -93,7 +93,9 @@ defmodule FatEcto.FatQuery.FatAggregate do
         field = FatHelper.string_to_atom(field)
 
         from(q in queryable,
-          select: merge(q, %{"$aggregate": %{"$max": %{^field => max(field(q, ^field))}}})
+          select_merge: %{
+            "$aggregate": %{"$max": %{^field => max(field(q, ^field))}}
+          }
         )
       end
 
@@ -101,7 +103,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
         field = FatHelper.string_to_atom(field)
 
         from(q in queryable,
-          select: merge(q, %{"$aggregate": %{"$min": %{^field => min(field(q, ^field))}}})
+          select_merge: %{"$aggregate": %{"$min": %{^field => min(field(q, ^field))}}}
         )
       end
 
@@ -109,7 +111,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
         field = FatHelper.string_to_atom(field)
 
         from(q in queryable,
-          select: merge(q, %{"$aggregate": %{"$avg": %{^field => avg(field(q, ^field))}}})
+          select_merge: %{"$aggregate": %{"$avg": %{^field => avg(field(q, ^field))}}}
         )
       end
 
@@ -117,7 +119,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
         field = FatHelper.string_to_atom(field)
 
         from(q in queryable,
-          select: merge(q, %{"$aggregate": %{"$count": %{^field => count(field(q, ^field))}}})
+          select_merge: %{"$aggregate": %{"$count": %{^field => count(field(q, ^field))}}}
         )
       end
 
@@ -125,10 +127,9 @@ defmodule FatEcto.FatQuery.FatAggregate do
         field = FatHelper.string_to_atom(field)
 
         from(q in queryable,
-          select:
-            merge(q, %{
-              "$aggregate": %{"$count_distinct": %{^field => count(field(q, ^field), :distinct)}}
-            })
+          select_merge: %{
+            "$aggregate": %{"$count_distinct": %{^field => count(field(q, ^field), :distinct)}}
+          }
         )
       end
 
@@ -136,7 +137,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
         field = FatHelper.string_to_atom(field)
 
         from(q in queryable,
-          select: merge(q, %{"$aggregate": %{"$sum": %{^field => sum(field(q, ^field))}}})
+          select_merge: %{"$aggregate": %{"$sum": %{^field => sum(field(q, ^field))}}}
         )
       end
     end
