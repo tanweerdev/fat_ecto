@@ -7,8 +7,11 @@ defmodule FatEcto.MixProject do
       version: "0.1.0",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
+      build_embedded: Mix.env() == :prod,
       deps: deps(),
       name: "FatEcto",
+      description: description(),
+      package: package(),
       source_url: "https://github.com/tanweerdev/fat_ecto"
     ]
   end
@@ -27,9 +30,25 @@ defmodule FatEcto.MixProject do
       {:ecto, "~> 3.0"},
       {:sweet_xml, "~> 0.6.5"},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
-      {:elixir_utils, github: "tanweerdev/elixir_utils"},
+      {:elixir_utils, "~> 0.1.0"},
       {:earmark, "~> 1.2", only: :dev}
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
+    ]
+  end
+
+  defp description() do
+    "fat_ecto provides methods for dynamically building queries according to the parameters it receive."
+  end
+
+  defp package() do
+    [
+      # These are the default files included in the package
+      files: ~w(lib .formatter.exs mix.exs README*),
+      licenses: ["Apache 2.0"],
+      links: %{
+        "GitHub" => "https://github.com/tanweerdev/fat_ecto",
+        "Docs" => "https://hexdocs.pm/fat_ecto/"
+      }
     ]
   end
 end
