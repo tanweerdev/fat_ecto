@@ -138,7 +138,7 @@ defmodule FatEcto.FatQuery do
       "$where" => %{"id" => 10}
       }
 
-      iex> build(FatEcto.FatHospital, query_opts)
+      iex> fetch(FatEcto.FatHospital, query_opts)
 
 
   ## Options
@@ -148,7 +148,6 @@ defmodule FatEcto.FatQuery do
     - `$select`- Select the fields from `hospital` and `rooms`.
     - `$where`- Added the where attribute in the query.
 
-  It will only work if you have configured your repo in the fat_ecto config.  
 
   """
   def fetch(queryable, query_opts) do

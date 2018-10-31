@@ -19,10 +19,12 @@ defmodule FatEcto.FatPaginator do
           query_opts = %{
           "$find" => "$all",
           "$select" => %{"$fields" => ["name", "rating"], "fat_rooms" => ["beds"]},
-          "$where" => %{"id" => 10}
+          "$where" => %{"id" => 10},
+          "$limit" => 15,
+          "$skip" => 0
           }
 
-          iex> build(FatEcto.FatHospital, query_opts)
+          iex> fetch(FatEcto.FatHospital, query_opts)
 
 
       ## Options
@@ -31,8 +33,10 @@ defmodule FatEcto.FatPaginator do
         - `$find => $one`- To fetch single record from database.
         - `$select`- Select the fields from `hospital` and `rooms`.
         - `$where`- Added the where attribute in the query.
+        - `$limit`- Limit the number of records returned from the repo.
+        - `$skip`- Used an an offset.
 
-      It will only work if you have configured your repo and default limit in the fat_ecto config.  
+      If no limit is defined in the query. FAT uses the default limit specified in the fat_ecto config. 
 
       """
       def paginate(query, params) do
