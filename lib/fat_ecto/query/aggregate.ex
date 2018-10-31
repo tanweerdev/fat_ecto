@@ -1,4 +1,5 @@
 defmodule FatEcto.FatQuery.FatAggregate do
+  @moduledoc false
   # TODO: Add docs and examples for ex_doc
   defmacro __using__(_options) do
     quote location: :keep do
@@ -13,6 +14,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
       #   "$count" : "score"
       #   "$avg": ["total_marks", "rating"]
       # }
+      @doc false
       def build_aggregate(queryable, opts_aggregate) do
         if opts_aggregate == nil do
           queryable
@@ -89,6 +91,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
         end
       end
 
+      @doc false
       def build_max(queryable, field) do
         field = FatHelper.string_to_atom(field)
 
@@ -99,6 +102,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
         )
       end
 
+      @doc false
       def build_min(queryable, field) do
         field = FatHelper.string_to_atom(field)
 
@@ -107,6 +111,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
         )
       end
 
+      @doc false
       def build_avg(queryable, field) do
         field = FatHelper.string_to_atom(field)
 
@@ -115,6 +120,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
         )
       end
 
+      @doc false
       def build_count(queryable, field) do
         field = FatHelper.string_to_atom(field)
 
@@ -123,6 +129,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
         )
       end
 
+      @doc false
       def build_count_distinct(queryable, field) do
         field = FatHelper.string_to_atom(field)
 
@@ -133,6 +140,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
         )
       end
 
+      @doc false
       def build_sum(queryable, field) do
         field = FatHelper.string_to_atom(field)
 
