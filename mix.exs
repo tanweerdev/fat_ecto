@@ -4,7 +4,7 @@ defmodule FatEcto.MixProject do
   def project do
     [
       app: :fat_ecto,
-      version: "0.1.2",
+      version: "0.1.3",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       build_embedded: Mix.env() == :prod,
@@ -12,6 +12,11 @@ defmodule FatEcto.MixProject do
       name: "FatEcto",
       description: description(),
       package: package(),
+      docs: [
+        main: "README", # The main page in the docs
+        # logo: "path/to/logo.png",
+        extras: ["README.md"]
+      ],
       source_url: "https://github.com/tanweerdev/fat_ecto"
     ]
   end
