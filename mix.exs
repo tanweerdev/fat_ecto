@@ -30,7 +30,6 @@ defmodule FatEcto.MixProject do
       {:ecto, "~> 2.2"},
       {:sweet_xml, "~> 0.6.5"},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
-      {:elixir_utils, "~> 0.1"},
       {:earmark, "~> 1.2", only: :dev}
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
     ]

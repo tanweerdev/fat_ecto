@@ -1,5 +1,6 @@
 defmodule FatEcto.FatHelper do
   @moduledoc false
+  alias FatEcto.FatHelper
 
   require Ecto.Query
   @min_limit 0
@@ -12,7 +13,7 @@ defmodule FatEcto.FatHelper do
   # TODO: Add docs and examples for ex_doc
   def get_skip_value(params) do
     {skip, params} = Keyword.pop(params, :skip, @min_skip)
-    skip = Ex.IntegerUtils.parse!(skip)
+    skip = FatHelper.integer_parse!(skip)
     skip = if skip > @default_skip, do: skip, else: @default_skip
     {skip, params}
   end
@@ -20,7 +21,7 @@ defmodule FatEcto.FatHelper do
   # TODO: Add docs and examples for ex_doc
   def get_limit_value(params) do
     {limit, params} = Keyword.pop(params, :limit, @default_limit)
-    limit = Ex.IntegerUtils.parse!(limit)
+    limit = FatHelper.integer_parse!(limit)
     limit = if limit > @min_limit, do: limit, else: @min_limit
     limit = if limit > @max_limit, do: @max_limit, else: limit
     {limit, params}
@@ -57,7 +58,7 @@ defmodule FatEcto.FatHelper do
 
   # TODO: Add docs and examples for ex_doc
   def get_limit(limit_param) do
-    limit = Ex.IntegerUtils.parse!(limit_param || @default_limit)
+    limit = FatHelper.integer_parse!(limit_param || @default_limit)
     limit = if limit > @min_limit, do: limit, else: @min_limit
     if limit > @max_limit, do: @max_limit, else: limit
   end
@@ -192,6 +193,20 @@ defmodule FatEcto.FatHelper do
           related: related,
           related_key: nil
         }
+    end
+  end
+
+  def integer_parse!(int_str) do
+    if is_integer(int_str) do
+      int_str
+    else
+      case Integer.parse(int_str) do
+        {integer, _} ->
+          integer
+
+        _whatever ->
+          nil
+      end
     end
   end
 end
