@@ -8,7 +8,7 @@ defmodule FatEcto.FatPaginator do
       @repo unquote(options)[:repo]
       # TODO: Add docs and examples for ex_doc
       @doc """
-        Apply limit and offset to the query if not provided and return meta.
+         Apply limit and offset to the query if not provided and return meta.
 
       ## Parameters
 
@@ -16,15 +16,17 @@ defmodule FatEcto.FatPaginator do
         - `query_opts` - include query options as a map
 
       ## Examples
-          query_opts = %{
-          "$find" => "$all",
-          "$select" => %{"$fields" => ["name", "rating"], "fat_rooms" => ["beds"]},
-          "$where" => %{"id" => 10},
-          "$limit" => 15,
-          "$skip" => 0
-          }
+          iex> query_opts = %{
+          ...>  "$find" => "$all",
+          ...>  "$select" => %{"$fields" => ["name", "rating"], "fat_rooms" => ["beds"]},
+          ...>  "$where" => %{"id" => 10},
+          ...>  "$limit" => 15,
+          ...>  "$skip" => 0
+          ...> }
+          iex> build(FatEcto.FatHospital, query_opts)
+          #Result
 
-          iex> fetch(FatEcto.FatHospital, query_opts)
+
 
 
       ## Options
@@ -36,7 +38,7 @@ defmodule FatEcto.FatPaginator do
         - `$limit`- Limit the number of records returned from the repo.
         - `$skip`- Used an an offset.
 
-      If no limit is defined in the query. FAT uses the default limit specified in the fat_ecto config. 
+       If no limit is defined in the query. FAT uses the default limit specified in the fat_ecto config. 
 
       """
       def paginate(query, params) do

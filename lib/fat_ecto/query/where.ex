@@ -1,5 +1,54 @@
 defmodule FatEcto.FatQuery.FatWhere do
   # TODO: Add docs and examples for ex_doc
+  @moduledoc """
+  Where supports multiple query methods.
+
+
+
+
+  ## like
+  ### Parameters
+
+    - `queryable`- Schema name that represents your database model.
+    - `query_opts` - include query options as a map
+  ### Example  
+
+      iex> query_opts = %{
+      ...>   "$select" => %{"$fields" => ["name", "designation", "experience_years"]},
+      ...>   "$where" => %{"name" => %{"$like" => "%Joh %"}}
+      ...> }
+      iex> #{FatEcto.FatQuery}.build(FatEcto.FatDoctor, query_opts)
+      #Ecto.Query<from f in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", f.name), ^"%Joh %") and ^true, select: map(f, [:name, :designation, :experience_years])>
+
+
+  ### Options
+    - `$select`- Select the fields from `doctor`.
+    - `$like`- Added the like attribute in the where query.
+
+  ## iLike
+  ### Parameters
+
+    - `queryable`- Schema name that represents your database model.
+    - `query_opts` - include query options as a map
+  ### Example  
+
+      iex> query_opts = %{
+      ...>   "$select" => %{"$fields" => ["name", "designation", "experience_years"]},
+      ...>   "$where" => %{"designation" => %{"$ilike" => "%surge %"}},
+      ...>   "$order" => %{"rating" => "$asc"}
+      ...> }
+      iex> #{FatEcto.FatQuery}.build(FatEcto.FatDoctor, query_opts)
+      #Ecto.Query<from f in FatEcto.FatDoctor, where: ilike(fragment("(?)::TEXT", f.designation), ^"%surge %") and ^true, order_by: [asc: f.rating], select: map(f, [:name, :designation, :experience_years])>
+
+
+
+  ### Options
+    - `$select`- Select the fields from `doctor`.
+    - `$ilike`- Added the ilike attribute in the where query.
+    - `$order`- Sort the result based on the order attribute.
+
+
+  """
   defmacro __using__(_options) do
     quote location: :keep do
       alias FatEcto.FatQuery.FatDynamics
@@ -12,21 +61,19 @@ defmodule FatEcto.FatQuery.FatWhere do
         - `queryable`- Schema name that represents your database model.
         - `query_opts` - include query options as a map
       ## Examples
-          query_opts = %{
-            "$select" => %{
-              "$fields" => ["name", "location", "rating"],
-              "fat_rooms" => ["beds", "capacity"]
-            },
-            "$order" => %{"id" => "$desc"},
-            "$where" => %{"location" => %{"$not_like" => "%addre %"}},            
-            "$group" => "total_staff"
-          }
+          iex> query_opts = %{
+          ...>  "$select" => %{
+          ...>    "$fields" => ["name", "location", "rating"],
+          ...>    "fat_rooms" => ["beds", "capacity"]
+          ...>  },
+          ...>  "$order" => %{"id" => "$desc"},
+          ...>  "$where" => %{"location" => %{"$not_like" => "%addre %"}},            
+          ...>  "$group" => "total_staff"
+          ...> }
+          iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
+          #Ecto.Query<from f in FatEcto.FatHospital, where: not(like(fragment("(?)::TEXT", f.location), ^"%addre %")) and ^true, group_by: [f.total_staff], order_by: [desc: f.id], select: map(f, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])>
 
-          iex> build(FatEcto.FatHospital, query_opts)
-               #Ecto.Query<from f in FatEcto.FatHospital,
-               where: not(like(fragment("(?)::TEXT", f.location), ^"%addre %")) and ^true,
-               group_by: [f.total_staff], order_by: [desc: f.id],
-               select: map(f, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])>
+
 
       ## Options
 

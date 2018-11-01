@@ -11,27 +11,26 @@ defmodule FatEcto.FatQuery.FatSelect do
         - `queryable`- Schema name that represents your database model.
         - `query_opts` - include query options as a map
       ## Examples
-          query_opts = %{
-            "$select" => %{
-              "$fields" => ["name", "location", "rating"],
-              "fat_rooms" => ["beds", "capacity"]
-            },
-            "$order" => %{"id" => "$desc"},
-            "$where" => %{"rating" => 4},
-            "$include" => %{
-              "fat_doctors" => %{
-                "$include" => ["fat_patients"],
-                "$where" => %{"name" => "ham"},
-                "$order" => %{"id" => "$desc"}
-              }
-            }
-          }
+          iex> query_opts = %{
+          ...>  "$select" => %{
+          ...>    "$fields" => ["name", "location", "rating"],
+          ...>    "fat_rooms" => ["beds", "capacity"]
+          ...>  },
+          ...>  "$order" => %{"id" => "$desc"},
+          ...>  "$where" => %{"rating" => 4},
+          ...> "$include" => %{
+          ...>    "fat_doctors" => %{
+          ...>      "$include" => ["fat_patients"],
+          ...>      "$where" => %{"name" => "ham"},
+          ...>      "$order" => %{"id" => "$desc"}
+          ...>    }
+          ...>  }
+          ...> }
+          iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
+          #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: f0.rating == ^4 and ^true, order_by: [desc: f0.id], select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: f0.name == ^"ham" and ^true, order_by: [desc: f0.id], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
 
-          iex> build(FatEcto.FatHospital, query_opts)
-               #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors),
-               where: f0.rating == ^4 and ^true, order_by: [desc: f0.id],
-               select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]),
-               preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: f0.name == ^"ham" and ^true, order_by: [desc: f0.id], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
+
+
 
       ## Options
 

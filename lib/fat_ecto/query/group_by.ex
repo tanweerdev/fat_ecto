@@ -12,20 +12,19 @@ defmodule FatEcto.FatQuery.FatGroupBy do
         - `queryable`- Schema name that represents your database model.
         - `query_opts` - include query options as a map
       ## Examples
-          query_opts = %{
-            "$select" => %{
-              "$fields" => ["name", "location", "rating"],
-              "fat_rooms" => ["beds", "capacity"]
-            },
-            "$order" => %{"id" => "$desc"},
-            "$where" => %{"rating" => 4},
-            "$group" => "total_staff"
-          }
+          iex> query_opts = %{
+          ...>  "$select" => %{
+          ...>    "$fields" => ["name", "location", "rating"],
+          ...>    "fat_rooms" => ["beds", "capacity"]
+          ...>  },
+          ...>  "$order" => %{"id" => "$desc"},
+          ...>  "$where" => %{"rating" => 4},
+          ...>  "$group" => "total_staff"
+          ...> }
+          iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
+          #Ecto.Query<from f in FatEcto.FatHospital, where: f.rating == ^4 and ^true, group_by: [f.total_staff], order_by: [desc: f.id], select: map(f, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])>
 
-          iex> build(FatEcto.FatHospital, query_opts)
-               #Ecto.Query<from f in FatEcto.FatHospital, where: f.rating == ^4 and ^true,
-                group_by: [f.total_staff], order_by: [desc: f.id],
-                select: map(f, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])>
+
 
       ## Options
 

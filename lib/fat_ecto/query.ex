@@ -46,39 +46,36 @@ defmodule FatEcto.FatQuery do
     - `queryable`- Schema name that represents your database model.
     - `query_opts` - include query options as a map
   ## Examples
-      query_opts = %{
-      "$select" => %{
-        "$fields" => ["name", "location", "rating"],
-        "fat_rooms" => ["beds", "capacity"]
-      },
-      "$order" => %{"id" => "$desc"},
-      "$where" => %{"rating" => 4},
-      "$group" => "nurses",
-      "$include" => %{
-        "fat_doctors" => %{
-          "$include" => ["fat_patients"],
-          "$where" => %{"name" => "ham"},
-          "$order" => %{"id" => "$desc"},
-          "$join" => "$right"
-        }
-      },
-      "$right_join" => %{
-        "fat_rooms" => %{
-          "$on_field" => "id",
-          "$on_join_table_field" => "hospital_id",
-          "$select" => ["beds", "capacity", "level"],
-          "$where" => %{"incharge" => "John"}
-        }
-      }
-    }
-
+      iex> query_opts = %{
+      ...>   "$select" => %{
+      ...>     "$fields" => ["name", "location", "rating"],
+      ...>     "fat_rooms" => ["beds", "capacity"]
+      ...>  },
+      ...>   "$order" => %{"id" => "$desc"},
+      ...>   "$where" => %{"rating" => 4},
+      ...>   "$group" => "nurses",
+      ...>   "$include" => %{
+      ...>       "fat_doctors" => %{
+      ...>           "$include" => ["fat_patients"],
+      ...>           "$where" => %{"name" => "ham"},
+      ...>           "$order" => %{"id" => "$desc"},
+      ...>           "$join" => "$right"
+      ...>          }
+      ...>     },
+      ...>   "$right_join" => %{
+      ...>      "fat_rooms" => %{
+      ...>        "$on_field" => "id",
+      ...>        "$on_join_table_field" => "hospital_id",
+      ...>        "$select" => ["beds", "capacity", "level"],
+      ...>        "$where" => %{"incharge" => "John"}
+      ...>       }
+      ...>     }
+      ...>  }
       iex> build(FatEcto.FatHospital, query_opts)
-           #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms",
-           on: f0.id == f1.hospital_id, right_join: f2 in assoc(f0, :fat_doctors),
-           where: f0.rating == ^4 and ^true, where: f1.incharge == ^"John" and ^true,
-           group_by: [f0.nurses], order_by: [desc: f0.id],
-           select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}),
-           preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: f0.name == ^"ham" and ^true, order_by: [desc: f0.id], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
+      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, right_join: f2 in assoc(f0, :fat_doctors), where: f0.rating == ^4 and ^true, where: f1.incharge == ^"John" and ^true, group_by: [f0.nurses], order_by: [desc: f0.id], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: f0.name == ^"ham" and ^true, order_by: [desc: f0.id], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
+
+
+
 
   ## Options
 
@@ -124,7 +121,7 @@ defmodule FatEcto.FatQuery do
 
   # TODO: Add docs and examples for ex_doc
   @doc """
-    Fetch the result from the repo based on the query params.
+     Fetch the result from the repo based on the query params.
 
   ## Parameters
 
@@ -132,13 +129,15 @@ defmodule FatEcto.FatQuery do
     - `query_opts` - include query options as a map
 
   ## Examples
-      query_opts = %{
-      "$find" => "$all",
-      "$select" => %{"$fields" => ["name", "rating"], "fat_rooms" => ["beds"]},
-      "$where" => %{"id" => 10}
-      }
-
+      iex> query_opts = %{
+      ...>  "$find" => "$all",
+      ...>  "$select" => %{"$fields" => ["name", "rating"], "fat_rooms" => ["beds"]},
+      ...>  "$where" => %{"id" => 10}
+      ...> }
       iex> fetch(FatEcto.FatHospital, query_opts)
+      #Struct
+     
+
 
 
   ## Options
@@ -148,8 +147,8 @@ defmodule FatEcto.FatQuery do
     - `$select`- Select the fields from `hospital` and `rooms`.
     - `$where`- Added the where attribute in the query.
 
-
   """
+
   def fetch(queryable, query_opts) do
     opts = Ex.MapUtils.deep_merge(@default_query_opts, query_opts)
     queryable = FatEcto.FatQuery.build(queryable, opts)
