@@ -13,7 +13,8 @@ defmodule FatEcto.MixProject do
       description: description(),
       package: package(),
       docs: [
-        main: "README", # The main page in the docs
+        # The main page in the docs
+        main: "readme",
         # logo: "path/to/logo.png",
         extras: ["README.md"]
       ],
