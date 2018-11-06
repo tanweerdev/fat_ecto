@@ -358,12 +358,12 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>  "$include" => %{
       ...>    "fat_doctors" => %{
       ...>      "$where" => %{"rating" => %{"$gte" => 3}},
-      ...>      "$order" => %{"total_staff" => "$asc"}          
+      ...>      "$order" => %{"rating" => "$asc"}          
       ...>     }
       ...>   }   
       ...> }
       iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: f0.rating >= f0.total_staff and ^true, select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating >= ^3 and ^true, order_by: [asc: f.total_staff], limit: ^10, offset: ^0>]>
+      #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: f0.rating >= f0.total_staff and ^true, select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating >= ^3 and ^true, order_by: [asc: f.rating], limit: ^10, offset: ^0>]>
 
 
   ### Options
@@ -395,12 +395,12 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>    "fat_doctors" => %{
       ...>      "$include" => ["fat_patients"],
       ...>      "$where" => %{"rating" => %{"$gte" => "$total_staff"}},
-      ...>      "$order" => %{"total_staff" => "$asc"}          
+      ...>      "$order" => %{"rating" => "$asc"}          
       ...>    }
       ...>   }   
       ...> }
       iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: f0.rating > ^10 and f0.rating < ^20 and ^true, select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: f0.rating >= f0.total_staff and ^true, order_by: [asc: f0.total_staff], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
+      #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: f0.rating > ^10 and f0.rating < ^20 and ^true, select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: f0.rating >= f0.total_staff and ^true, order_by: [asc: f0.rating], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
 
   ### Options
     - `$select`- Select the fields from `hospital` and `rooms`.
@@ -430,12 +430,12 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>    "fat_doctors" => %{
       ...>      "$include" => ["fat_patients"],
       ...>      "$where" => %{"rating" => %{"$between" => [20, 30]}},
-      ...>      "$order" => %{"total_staff" => "$asc"}          
+      ...>      "$order" => %{"experience_years" => "$asc"}          
       ...>    }
       ...>   }   
       ...>  }
       iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: (f0.rating < ^10 or f0.rating > ^20) and ^true, select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: f0.rating > ^20 and f0.rating < ^30 and ^true, order_by: [asc: f0.total_staff], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
+      #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: (f0.rating < ^10 or f0.rating > ^20) and ^true, select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: f0.rating > ^20 and f0.rating < ^30 and ^true, order_by: [asc: f0.experience_years], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
 
 
 
@@ -469,7 +469,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>     "fat_doctors" => %{
       ...>      "$include" => ["fat_patients"],
       ...>      "$where" => %{"rating" => %{"$not_between" => [20, 30]}},
-      ...>      "$order" => %{"total_staff" => "$asc"}          
+      ...>      "$order" => %{"experience_years" => "$asc"}          
       ...>     }
       ...>    },
       ...>    "$right_join" => %{
@@ -482,7 +482,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>   }   
       ...>  }
       iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.rating in ^[10, 20] and ^true, where: f1.beds >= f1.nurses and ^true, select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: (f0.rating < ^20 or f0.rating > ^30) and ^true, order_by: [asc: f0.total_staff], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
+      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.rating in ^[10, 20] and ^true, where: f1.beds >= f1.nurses and ^true, select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: (f0.rating < ^20 or f0.rating > ^30) and ^true, order_by: [asc: f0.experience_years], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
 
 
   ### Options
@@ -508,7 +508,7 @@ defmodule FatEcto.FatQuery.FatWhere do
   ### Example  
 
       iex> query_opts = %{
-      ...> "$select" => %{
+      ...>  "$select" => %{
       ...>   "$fields" => ["name", "location", "rating"],
       ...>   "fat_rooms" => ["beds", "capacity"]
       ...>  },
@@ -517,7 +517,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>    "fat_doctors" => %{
       ...>     "$include" => ["fat_patients"],
       ...>     "$where" => %{"rating" => %{"$not_between" => [20, 30]}},
-      ...>     "$order" => %{"total_staff" => "$asc"}          
+      ...>     "$order" => %{"rating" => "$desc"}          
       ...>    }
       ...>   },
       ...>  "$right_join" => %{
@@ -530,7 +530,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>   }   
       ...>  }
       iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.rating not in ^[10, 20] and ^true, where: f1.beds not in ^[5, 15] and ^true, select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: (f0.rating < ^20 or f0.rating > ^30) and ^true, order_by: [asc: f0.total_staff], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
+      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.rating not in ^[10, 20] and ^true, where: f1.beds not in ^[5, 15] and ^true, select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: (f0.rating < ^20 or f0.rating > ^30) and ^true, order_by: [desc: f0.rating], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
 
 
   ### Options
@@ -543,6 +543,160 @@ defmodule FatEcto.FatQuery.FatWhere do
     - `$not_in`- Added the in attribute in the where query.
     - `$order`- Sort the result based on the order attribute.
 
+
+  ## => is_nil
+
+
+  ### Parameters
+
+    - `queryable`- Schema name that represents your database model.
+    - `query_opts` - include query options as a map.
+
+
+  ### Example  
+
+      iex> query_opts = %{
+      ...>  "$select" => %{
+      ...>   "$fields" => ["name", "location", "rating"],
+      ...>   "fat_rooms" => ["beds", "capacity"]
+      ...>  },
+      ...>  "$where" => %{"rating" => nil},
+      ...>  "$include" => %{
+      ...>    "fat_doctors" => %{
+      ...>     "$include" => ["fat_patients"],
+      ...>     "$where" => %{"rating" => %{"$between" => [20, 30]}},
+      ...>     "$order" => %{"experience_years" => "$desc"}          
+      ...>    }
+      ...>   },
+      ...>  "$right_join" => %{
+      ...>    "fat_rooms" => %{
+      ...>      "$on_field" => "id",
+      ...>      "$on_join_table_field" => "hospital_id",
+      ...>      "$select" => ["beds", "capacity", "level"],
+      ...>      "$where" => %{"beds" => %{"$in" => [5, 15]}},
+      ...>      "$order" => %{"id" => "$asc"}           
+      ...>     }
+      ...>   }   
+      ...>  }
+      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: is_nil(f0.rating) and ^true, where: f1.beds in ^[5, 15] and ^true, order_by: [asc: f1.id], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: f0.rating > ^20 and f0.rating < ^30 and ^true, order_by: [desc: f0.experience_years], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
+
+  ### Options
+    - `$select`- Select the fields from `hospital` and `rooms`.
+    - `$right_join: :$select`- Select the fields from  `rooms`.
+    - `$right_join`- Right join the table `rooms`.
+    - `$in`- Added the  in attribute in the where query inside join.
+    - `$include`- Include the assoication model `doctors` and `patients`.
+    - `$between`- Added the between in the  where query inside include .
+    - `nil`- Added the nil attribute in the where query.
+    - `$order`- Sort the result based on the order attribute.
+    - `$right_join: :$order`- Sort the result based on the order attribute inside join.
+
+
+  ## => not_null
+
+
+  ### Parameters
+
+    - `queryable`- Schema name that represents your database model.
+    - `query_opts` - include query options as a map.
+
+
+  ### Example  
+
+      iex> query_opts = %{
+      ...>  "$select" => %{
+      ...>   "$fields" => ["name", "location", "rating"],
+      ...>   "fat_rooms" => ["beds", "capacity"]
+      ...>  },
+      ...>  "$where" => %{"$not_null" => ["total_staff"]},
+      ...>  "$include" => %{
+      ...>    "fat_doctors" => %{
+      ...>     "$include" => ["fat_patients"],
+      ...>     "$where" => %{"rating" => %{"$in" => [20, 30]}},
+      ...>     "$order" => %{"rating" => "$asc"},
+      ...>     "$select" => ["name", "designation", "phone"]
+      ...>    }
+      ...>   },
+      ...>  "$right_join" => %{
+      ...>    "fat_rooms" => %{
+      ...>      "$on_field" => "id",
+      ...>      "$on_join_table_field" => "hospital_id",
+      ...>      "$select" => ["beds", "capacity", "level"],
+      ...>      "$where" => %{"beds" => nil},
+      ...>      "$order" => %{"id" => "$asc"}           
+      ...>     }
+      ...>   }   
+      ...> }
+      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: not(is_nil(f0.total_staff)) and ^true, where: is_nil(f1.beds) and ^true, order_by: [asc: f1.id], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: f0.rating in ^[20, 30] and ^true, order_by: [asc: f0.rating], limit: ^10, offset: ^0, select: map(f0, [:name, :designation, :phone]), preload: [:fat_patients]>]>
+
+
+
+  ### Options
+    - `$select`- Select the fields from `hospital` and `rooms`.
+    - `$right_join: :$select`- Select the fields from  `rooms`.
+    - `$include: :$select`- Select the fields from  `doctors`.
+    - `$right_join`- Right join the table `rooms`.
+    - `nil`- Added the  nil attribute in the where query inside join.
+    - `$include`- Include the assoication model `doctors` and `patients`.
+    - `$in`- Added the in attribute in the  where query inside include .
+    - `$not_null`- Added the notnil attribute in the where query.
+    - `$order`- Sort the result based on the order attribute.
+    - `$right_join: :$order`- Sort the result based on the order attribute inside join.
+
+
+
+  ## => field
+
+
+  ### Parameters
+
+    - `queryable`- Schema name that represents your database model.
+    - `query_opts` - include query options as a map.
+
+
+  ### Example  
+
+      iex> query_opts = %{
+      ...> "$select" => %{
+      ...>   "$fields" => ["name", "location", "rating"],
+      ...>   "fat_rooms" => ["beds", "capacity"]
+      ...>  },
+      ...>  "$where" => %{"name" => "saint claire"},
+      ...>  "$group" => "rating",
+      ...>  "$include" => %{
+      ...>    "fat_doctors" => %{
+      ...>     "$include" => ["fat_patients"],
+      ...>     "$where" => %{"rating" => %{"$gt" => 5}},
+      ...>     "$order" => %{"experience_years" => "$desc"},
+      ...>     "$select" => ["name", "designation", "phone"]
+      ...>    }
+      ...>   },
+      ...>  "$right_join" => %{
+      ...>    "fat_rooms" => %{
+      ...>      "$on_field" => "id",
+      ...>      "$on_join_table_field" => "hospital_id",
+      ...>      "$select" => ["beds", "capacity", "level"],
+      ...>      "$where" => %{"beds" => 10},
+      ...>      "$order" => %{"id" => "$asc"}           
+      ...>     }
+      ...>   }   
+      ...> }
+      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.name == ^"saint claire" and ^true, where: f1.beds == ^10 and ^true, group_by: [f0.rating], order_by: [asc: f1.id], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: f0.rating > ^5 and ^true, order_by: [desc: f0.experience_years], limit: ^10, offset: ^0, select: map(f0, [:name, :designation, :phone]), preload: [:fat_patients]>]>
+
+
+  ### Options
+    - `$select`- Select the fields from `hospital` and `rooms`.
+    - `$right_join: :$select`- Select the fields from  `rooms`.
+    - `$include: :$select`- Select the fields from  `doctors`.
+    - `$right_join`- Right join the table `rooms`.
+    - `$include`- Include the assoication model `doctors` and `patients`.
+    - `$gt`- Added the greaterthan attribute in the  where query inside include .
+    - `$order`- Sort the result based on the order attribute.
+    - `$right_join: :$order`- Sort the result based on the order attribute inside join.
+    - `$group`- Added the group_by attribute in the query.        
 
 
   """
