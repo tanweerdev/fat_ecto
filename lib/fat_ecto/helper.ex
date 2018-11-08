@@ -209,4 +209,16 @@ defmodule FatEcto.FatHelper do
       end
     end
   end
+
+  def map_deep_merge(left, right) do
+    Map.merge(left, right, &deep_resolve/3)
+  end
+
+  defp deep_resolve(_key, %{} = left, %{} = right) do
+    map_deep_merge(left, right)
+  end
+
+  defp deep_resolve(_key, _left, right) do
+    right
+  end
 end

@@ -83,7 +83,7 @@ defmodule FatEcto.FatQuery do
     - `$include: :fat_patients`- Include the assoication `patients`. Which has association with `doctors`.
     - `$select`- Select the fields from `hospital` and `rooms`.
     - `$where`- Added the where attribute in the query.
-    - `$group`- Added the group_by attribute in the query.        
+    - `$group`- Added the group_by attribute in the query.
     - `$order`- Sort the result based on the order attribute.
     - `$right_join`- Specify the type of join.
     - `$on_field`- Specify the field for join.
@@ -136,7 +136,7 @@ defmodule FatEcto.FatQuery do
       ...> }
       iex> fetch(FatEcto.FatHospital, query_opts)
       #Struct
-     
+
 
 
 
@@ -150,7 +150,7 @@ defmodule FatEcto.FatQuery do
   """
 
   def fetch(queryable, query_opts) do
-    opts = Ex.MapUtils.deep_merge(@default_query_opts, query_opts)
+    opts = FatEcto.FatHelper.map_deep_merge(@default_query_opts, query_opts)
     queryable = FatEcto.FatQuery.build(queryable, opts)
 
     case opts["$find"] do
