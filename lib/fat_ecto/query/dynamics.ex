@@ -534,6 +534,38 @@ defmodule FatEcto.FatQuery.FatDynamics do
     end
   end
 
+  def between_equal_dynamic(key, values, dynamics, opts \\ []) do
+    if opts[:binding] == :last do
+      if opts[:dynamic_type] == :and do
+        dynamic(
+          [..., c],
+          field(c, ^FatHelper.string_to_existing_atom(key)) >= ^Enum.min(values) and
+            field(c, ^FatHelper.string_to_existing_atom(key)) <= ^Enum.max(values) and ^dynamics
+        )
+      else
+        dynamic(
+          [..., c],
+          (field(c, ^FatHelper.string_to_existing_atom(key)) >= ^Enum.min(values) and
+             field(c, ^FatHelper.string_to_existing_atom(key)) <= ^Enum.max(values)) or ^dynamics
+        )
+      end
+    else
+      if opts[:dynamic_type] == :and do
+        dynamic(
+          [q],
+          field(q, ^FatHelper.string_to_existing_atom(key)) >= ^Enum.min(values) and
+            field(q, ^FatHelper.string_to_existing_atom(key)) <= ^Enum.max(values) and ^dynamics
+        )
+      else
+        dynamic(
+          [q],
+          (field(q, ^FatHelper.string_to_existing_atom(key)) >= ^Enum.min(values) and
+             field(q, ^FatHelper.string_to_existing_atom(key)) <= ^Enum.max(values)) or ^dynamics
+        )
+      end
+    end
+  end
+
   def not_between_dynamic(key, values, dynamics, opts \\ []) do
     if opts[:binding] == :last do
       if opts[:dynamic_type] == :and do
@@ -561,6 +593,38 @@ defmodule FatEcto.FatQuery.FatDynamics do
           [q],
           field(q, ^FatHelper.string_to_existing_atom(key)) < ^Enum.min(values) or
             field(q, ^FatHelper.string_to_existing_atom(key)) > ^Enum.max(values) or ^dynamics
+        )
+      end
+    end
+  end
+
+  def not_between_equal_dynamic(key, values, dynamics, opts \\ []) do
+    if opts[:binding] == :last do
+      if opts[:dynamic_type] == :and do
+        dynamic(
+          [..., c],
+          (field(c, ^FatHelper.string_to_existing_atom(key)) <= ^Enum.min(values) or
+             field(c, ^FatHelper.string_to_existing_atom(key)) >= ^Enum.max(values)) and ^dynamics
+        )
+      else
+        dynamic(
+          [..., c],
+          field(c, ^FatHelper.string_to_existing_atom(key)) <= ^Enum.min(values) or
+            field(c, ^FatHelper.string_to_existing_atom(key)) >= ^Enum.max(values) or ^dynamics
+        )
+      end
+    else
+      if opts[:dynamic_type] == :and do
+        dynamic(
+          [q],
+          (field(q, ^FatHelper.string_to_existing_atom(key)) <= ^Enum.min(values) or
+             field(q, ^FatHelper.string_to_existing_atom(key)) >= ^Enum.max(values)) and ^dynamics
+        )
+      else
+        dynamic(
+          [q],
+          field(q, ^FatHelper.string_to_existing_atom(key)) <= ^Enum.min(values) or
+            field(q, ^FatHelper.string_to_existing_atom(key)) >= ^Enum.max(values) or ^dynamics
         )
       end
     end

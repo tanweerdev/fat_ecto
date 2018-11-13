@@ -153,6 +153,18 @@ defmodule Query.WhereTest do
     assert inspect(result) == inspect(expected)
   end
 
+  test "returns the query where field between equal" do
+    opts = %{
+      "$where" => %{"total_staff" => %{"$between_equal" => [10, 20]}}
+    }
+
+    expected =
+      from(r in FatEcto.FatRoom, where: r.total_staff >= ^10 and r.total_staff <= ^20 and ^true)
+
+    result = build(FatEcto.FatRoom, opts)
+    assert inspect(result) == inspect(expected)
+  end
+
   test "returns the query where field notbetween" do
     opts = %{
       "$where" => %{"appointments_count" => %{"$not_between" => [10, 20]}}
@@ -161,6 +173,20 @@ defmodule Query.WhereTest do
     expected =
       from(p in FatEcto.FatPatient,
         where: (p.appointments_count < ^10 or p.appointments_count > ^20) and ^true
+      )
+
+    result = build(FatEcto.FatPatient, opts)
+    assert inspect(result) == inspect(expected)
+  end
+
+  test "returns the query where field notbetween equal" do
+    opts = %{
+      "$where" => %{"appointments_count" => %{"$not_between_equal" => [10, 20]}}
+    }
+
+    expected =
+      from(p in FatEcto.FatPatient,
+        where: (p.appointments_count <= ^10 or p.appointments_count >= ^20) and ^true
       )
 
     result = build(FatEcto.FatPatient, opts)

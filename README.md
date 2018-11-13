@@ -101,4 +101,4 @@ These are the options supported
 | $on_field               | Specify the field for join                                               |
 | $on_join_table_field    | Specify the field for join in the joining table                          |
 
-see [Docs](https://hexdocs.pm/fat_ecto/api-reference.html) for more details.
+see [Docs](https://hexdocs.pm/fat_ecto/) for more details.

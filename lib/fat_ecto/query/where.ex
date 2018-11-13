@@ -821,8 +821,19 @@ defmodule FatEcto.FatQuery.FatWhere do
               "$between" ->
                 FatDynamics.between_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
+              "$between_equal" ->
+                FatDynamics.between_equal_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
               "$not_between" ->
                 FatDynamics.not_between_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
+              "$not_between_equal" ->
+                FatDynamics.not_between_equal_dynamic(
+                  k,
+                  value,
+                  dynamics,
+                  opts ++ [dynamic_type: :and]
+                )
 
               "$in" ->
                 FatDynamics.in_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
