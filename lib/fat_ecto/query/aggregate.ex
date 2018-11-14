@@ -95,7 +95,8 @@ defmodule FatEcto.FatQuery.FatAggregate do
       def build_max(queryable, field) do
         field = FatHelper.string_to_atom(field)
 
-        from(q in queryable,
+        from(
+          q in queryable,
           select_merge: %{
             "$aggregate": %{"$max": %{^field => max(field(q, ^field))}}
           }
@@ -106,7 +107,8 @@ defmodule FatEcto.FatQuery.FatAggregate do
       def build_min(queryable, field) do
         field = FatHelper.string_to_atom(field)
 
-        from(q in queryable,
+        from(
+          q in queryable,
           select_merge: %{"$aggregate": %{"$min": %{^field => min(field(q, ^field))}}}
         )
       end
@@ -115,7 +117,8 @@ defmodule FatEcto.FatQuery.FatAggregate do
       def build_avg(queryable, field) do
         field = FatHelper.string_to_atom(field)
 
-        from(q in queryable,
+        from(
+          q in queryable,
           select_merge: %{"$aggregate": %{"$avg": %{^field => avg(field(q, ^field))}}}
         )
       end
@@ -124,7 +127,8 @@ defmodule FatEcto.FatQuery.FatAggregate do
       def build_count(queryable, field) do
         field = FatHelper.string_to_atom(field)
 
-        from(q in queryable,
+        from(
+          q in queryable,
           select_merge: %{"$aggregate": %{"$count": %{^field => count(field(q, ^field))}}}
         )
       end
@@ -133,7 +137,8 @@ defmodule FatEcto.FatQuery.FatAggregate do
       def build_count_distinct(queryable, field) do
         field = FatHelper.string_to_atom(field)
 
-        from(q in queryable,
+        from(
+          q in queryable,
           select_merge: %{
             "$aggregate": %{"$count_distinct": %{^field => count(field(q, ^field), :distinct)}}
           }
@@ -144,7 +149,8 @@ defmodule FatEcto.FatQuery.FatAggregate do
       def build_sum(queryable, field) do
         field = FatHelper.string_to_atom(field)
 
-        from(q in queryable,
+        from(
+          q in queryable,
           select_merge: %{"$aggregate": %{"$sum": %{^field => sum(field(q, ^field))}}}
         )
       end

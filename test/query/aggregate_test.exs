@@ -10,7 +10,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.beds == ^3 and ^true,
         select: merge(f, %{"$aggregate": %{"$count": %{^:beds => count(f.beds)}}})
       )
@@ -27,7 +28,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         order_by: [desc: f.beds],
         select:
@@ -47,7 +49,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         order_by: [desc: f.beds],
         group_by: f.capacity,
@@ -66,7 +69,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         group_by: f.capacity,
         select: merge(f, %{"$aggregate": %{"$max": %{^:nurses => max(f.nurses)}}})
@@ -85,7 +89,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         group_by: f.capacity,
         order_by: [asc: f.beds],
@@ -105,7 +110,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         group_by: f.capacity,
         order_by: [asc: f.beds],
@@ -132,7 +138,8 @@ defmodule Query.AggregateTest do
     }
 
     query =
-      from(f in FatEcto.FatHospital,
+      from(
+        f in FatEcto.FatHospital,
         where: f.name == ^"Saint" and ^true,
         order_by: [desc: f.id],
         limit: ^10,
@@ -140,7 +147,8 @@ defmodule Query.AggregateTest do
       )
 
     expected =
-      from(f0 in FatEcto.FatRoom,
+      from(
+        f0 in FatEcto.FatRoom,
         full_join: f1 in assoc(f0, :fat_hospital),
         where: f0.capacity == ^5 and ^true,
         group_by: f0.capacity,
@@ -171,7 +179,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f0 in FatEcto.FatRoom,
+      from(
+        f0 in FatEcto.FatRoom,
         right_join: f1 in "fat_hospital",
         on: f0.hospital_id == f1.id,
         where: f0.capacity == ^5 and ^true,
@@ -197,7 +206,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         group_by: f.capacity,
         select:
@@ -219,7 +229,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         group_by: f.capacity,
         select:
@@ -241,7 +252,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         group_by: f.capacity,
         select:
@@ -263,7 +275,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         group_by: f.capacity,
         select:
@@ -285,7 +298,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         group_by: f.capacity,
         select:
@@ -313,7 +327,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         group_by: f.capacity,
         select:
@@ -341,7 +356,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         group_by: f.capacity,
         select:
@@ -368,7 +384,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.beds == ^3 and ^true,
         select:
           merge(merge(f, %{"$aggregate": %{"$count": %{^:beds => count(f.beds)}}}), %{
@@ -389,7 +406,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         order_by: [desc: f.beds],
         select:
@@ -415,7 +433,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         order_by: [desc: f.beds],
         group_by: f.capacity,
@@ -438,7 +457,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         group_by: f.capacity,
         select:
@@ -461,7 +481,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         group_by: f.capacity,
         order_by: [asc: f.beds],
@@ -485,7 +506,8 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
+      from(
+        f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         group_by: f.capacity,
         order_by: [asc: f.beds],

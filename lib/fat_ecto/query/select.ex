@@ -72,7 +72,8 @@ defmodule FatEcto.FatQuery.FatSelect do
             from(q in queryable, select: map(q, ^Enum.uniq(fields)))
 
           select when is_list(select) ->
-            from(q in queryable,
+            from(
+              q in queryable,
               select: map(q, ^Enum.uniq(Enum.map(select, &FatHelper.string_to_existing_atom/1)))
             )
         end

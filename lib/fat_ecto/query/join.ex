@@ -162,7 +162,8 @@ defmodule FatEcto.FatQuery.FatJoin do
 
             select_atoms = Enum.map(select, &FatHelper.string_to_atom/1)
 
-            from([q, ..., c] in queryable,
+            from(
+              [q, ..., c] in queryable,
               select_merge: %{
                 ^FatHelper.string_to_atom(join_table) => map(c, ^select_atoms)
               }

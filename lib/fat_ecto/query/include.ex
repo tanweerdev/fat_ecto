@@ -78,7 +78,7 @@ defmodule FatEcto.FatQuery.FatInclude do
           include when is_binary(include) ->
             from(
               q in queryable,
-              left_join: a in assoc(q, ^FatHelper.string_to_existing_atom(include)),
+              # left_join: a in assoc(q, ^FatHelper.string_to_existing_atom(include)),
               preload: [^FatHelper.string_to_existing_atom(include)]
             )
 
@@ -94,7 +94,7 @@ defmodule FatEcto.FatQuery.FatInclude do
               #   m when is_binary(m) ->
               from(
                 q in queryable,
-                left_join: a in assoc(q, ^FatHelper.string_to_existing_atom(model)),
+                # left_join: a in assoc(q, ^FatHelper.string_to_existing_atom(model)),
                 preload: [^FatHelper.string_to_existing_atom(model)]
               )
 

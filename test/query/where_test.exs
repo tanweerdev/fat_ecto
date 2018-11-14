@@ -23,7 +23,8 @@ defmodule Query.WhereTest do
 
     # expected = from(d in FatEcto.FatDoctor, where: ilike(d.designation, ^"%surge %"))
     expected =
-      from(d in FatEcto.FatDoctor,
+      from(
+        d in FatEcto.FatDoctor,
         where: ilike(fragment("(?)::TEXT", d.designation), ^"%surge %") and ^true
       )
 
@@ -38,7 +39,8 @@ defmodule Query.WhereTest do
 
     # expected = from(d in FatEcto.FatDoctor, where: not like(d.email, ^"%john@ %"))
     expected =
-      from(d in FatEcto.FatDoctor,
+      from(
+        d in FatEcto.FatDoctor,
         where: not like(fragment("(?)::TEXT", d.email), ^"%john@ %") and ^true
       )
 
@@ -53,7 +55,8 @@ defmodule Query.WhereTest do
 
     # expected = from(d in FatEcto.FatDoctor, where: not ilike(d.address, ^"%street2 %"))
     expected =
-      from(d in FatEcto.FatDoctor,
+      from(
+        d in FatEcto.FatDoctor,
         where: not ilike(fragment("(?)::TEXT", d.address), ^"%street2 %") and ^true
       )
 
@@ -171,7 +174,8 @@ defmodule Query.WhereTest do
     }
 
     expected =
-      from(p in FatEcto.FatPatient,
+      from(
+        p in FatEcto.FatPatient,
         where: (p.appointments_count < ^10 or p.appointments_count > ^20) and ^true
       )
 
@@ -185,7 +189,8 @@ defmodule Query.WhereTest do
     }
 
     expected =
-      from(p in FatEcto.FatPatient,
+      from(
+        p in FatEcto.FatPatient,
         where: (p.appointments_count <= ^10 or p.appointments_count >= ^20) and ^true
       )
 

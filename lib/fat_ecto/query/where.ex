@@ -903,7 +903,8 @@ defmodule FatEcto.FatQuery.FatWhere do
       # TODO: Add docs and examples of ex_doc for this case here
       # $where: {score == nil}
       defp query_where(queryable, {k, map_cond}, opts) when is_nil(map_cond) do
-        from(q in queryable,
+        from(
+          q in queryable,
           where: ^FatDynamics.is_nil_dynamic(k, true, opts ++ [dynamic_type: :and])
         )
       end
@@ -912,7 +913,8 @@ defmodule FatEcto.FatQuery.FatWhere do
       # TODO: check if following code is needed
       # $where: {score: 5}
       defp query_where(queryable, {k, map_cond}, opts) when not is_list(map_cond) do
-        from(q in queryable,
+        from(
+          q in queryable,
           where: ^FatDynamics.eq_dynamic(k, map_cond, true, opts ++ [dynamic_type: :and])
         )
       end
@@ -922,7 +924,8 @@ defmodule FatEcto.FatQuery.FatWhere do
       defp query_where(queryable, {k, map_cond}, opts)
            when is_list(map_cond) and k == "$not_null" do
         Enum.reduce(map_cond, queryable, fn key, queryable ->
-          from(q in queryable,
+          from(
+            q in queryable,
             where: ^FatDynamics.not_is_nil_dynamic(key, true, opts ++ [dynamic_type: :and])
           )
         end)
@@ -932,7 +935,8 @@ defmodule FatEcto.FatQuery.FatWhere do
       # $where: {score: $not_null}
       defp query_where(queryable, {k, map_cond}, opts)
            when map_cond == "$not_null" do
-        from(q in queryable,
+        from(
+          q in queryable,
           where: ^FatDynamics.not_is_nil_dynamic(k, true, opts ++ [dynamic_type: :and])
         )
       end

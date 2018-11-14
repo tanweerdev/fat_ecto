@@ -55,7 +55,8 @@ defmodule Query.IncludeTest do
     }
 
     query =
-      from(h in FatEcto.FatHospital,
+      from(
+        h in FatEcto.FatHospital,
         where: h.id == ^10 and ^true,
         order_by: [asc: h.id],
         limit: ^10,
@@ -85,7 +86,8 @@ defmodule Query.IncludeTest do
     }
 
     query =
-      from(h in FatEcto.FatHospital,
+      from(
+        h in FatEcto.FatHospital,
         where: h.id == ^10 and ^true,
         order_by: [asc: h.id],
         limit: ^10,
@@ -116,7 +118,8 @@ defmodule Query.IncludeTest do
     }
 
     query =
-      from(h in FatEcto.FatHospital,
+      from(
+        h in FatEcto.FatHospital,
         where: h.name == ^"Saint" and ^true,
         order_by: [desc: h.id],
         limit: ^10,
@@ -150,7 +153,8 @@ defmodule Query.IncludeTest do
     }
 
     query =
-      from(h in FatEcto.FatHospital,
+      from(
+        h in FatEcto.FatHospital,
         where: h.name == ^"Saint" and ^true,
         order_by: [desc: h.id],
         limit: ^10,
@@ -183,7 +187,8 @@ defmodule Query.IncludeTest do
     }
 
     query =
-      from(h in FatEcto.FatHospital,
+      from(
+        h in FatEcto.FatHospital,
         where: h.name == ^"Saint" and ^true,
         order_by: [desc: h.id],
         limit: ^10,
@@ -224,7 +229,8 @@ defmodule Query.IncludeTest do
     }
 
     query =
-      from(h in FatEcto.FatHospital,
+      from(
+        h in FatEcto.FatHospital,
         left_join: r in assoc(h, :fat_rooms),
         limit: ^10,
         offset: ^0,
@@ -232,7 +238,8 @@ defmodule Query.IncludeTest do
       )
 
     expected =
-      from(d in FatEcto.FatDoctor,
+      from(
+        d in FatEcto.FatDoctor,
         join: h in assoc(d, :fat_hospitals),
         preload: [fat_hospitals: ^query]
       )
@@ -252,7 +259,8 @@ defmodule Query.IncludeTest do
     }
 
     query =
-      from(h in FatEcto.FatHospital,
+      from(
+        h in FatEcto.FatHospital,
         left_join: r in assoc(h, :fat_rooms),
         where: h.name == ^"ham" and ^true,
         limit: ^10,
@@ -261,7 +269,8 @@ defmodule Query.IncludeTest do
       )
 
     expected =
-      from(d in FatEcto.FatDoctor,
+      from(
+        d in FatEcto.FatDoctor,
         join: h in assoc(d, :fat_hospitals),
         preload: [fat_hospitals: ^query]
       )
@@ -281,7 +290,8 @@ defmodule Query.IncludeTest do
     }
 
     query =
-      from(h in FatEcto.FatHospital,
+      from(
+        h in FatEcto.FatHospital,
         left_join: r in assoc(h, :fat_rooms),
         order_by: [desc: h.id],
         limit: ^10,
@@ -290,7 +300,8 @@ defmodule Query.IncludeTest do
       )
 
     expected =
-      from(d in FatEcto.FatDoctor,
+      from(
+        d in FatEcto.FatDoctor,
         join: h in assoc(d, :fat_hospitals),
         preload: [fat_hospitals: ^query]
       )
@@ -305,7 +316,8 @@ defmodule Query.IncludeTest do
     }
 
     query =
-      from(h in FatEcto.FatHospital,
+      from(
+        h in FatEcto.FatHospital,
         left_join: r in assoc(h, :fat_rooms),
         left_join: p in assoc(h, :fat_patients),
         limit: ^10,
@@ -314,7 +326,8 @@ defmodule Query.IncludeTest do
       )
 
     expected =
-      from(d in FatEcto.FatDoctor,
+      from(
+        d in FatEcto.FatDoctor,
         join: h in assoc(d, :fat_hospitals),
         preload: [fat_hospitals: ^query]
       )
@@ -334,7 +347,8 @@ defmodule Query.IncludeTest do
     }
 
     query =
-      from(h in FatEcto.FatHospital,
+      from(
+        h in FatEcto.FatHospital,
         left_join: r in assoc(h, :fat_rooms),
         left_join: p in assoc(h, :fat_patients),
         where: h.name == ^"ham" and ^true,
@@ -344,7 +358,8 @@ defmodule Query.IncludeTest do
       )
 
     expected =
-      from(d in FatEcto.FatDoctor,
+      from(
+        d in FatEcto.FatDoctor,
         join: h in assoc(d, :fat_hospitals),
         preload: [fat_hospitals: ^query]
       )
@@ -364,7 +379,8 @@ defmodule Query.IncludeTest do
     }
 
     query =
-      from(h in FatEcto.FatHospital,
+      from(
+        h in FatEcto.FatHospital,
         left_join: r in assoc(h, :fat_rooms),
         order_by: [asc: h.id],
         left_join: p in assoc(h, :fat_patients),
@@ -374,7 +390,8 @@ defmodule Query.IncludeTest do
       )
 
     expected =
-      from(d in FatEcto.FatDoctor,
+      from(
+        d in FatEcto.FatDoctor,
         join: h in assoc(d, :fat_hospitals),
         preload: [fat_hospitals: ^query]
       )
@@ -389,7 +406,8 @@ defmodule Query.IncludeTest do
     }
 
     expected =
-      from(d in FatEcto.FatDoctor,
+      from(
+        d in FatEcto.FatDoctor,
         left_join: h in assoc(d, :fat_hospitals),
         left_join: p in assoc(d, :fat_patients),
         preload: [:fat_patients, :fat_hospitals]
