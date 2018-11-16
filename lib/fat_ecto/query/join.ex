@@ -41,7 +41,7 @@ defmodule FatEcto.FatQuery.FatJoin do
 
 
 
-               
+
       ## Options
 
         - `$include`- Include the assoication `doctors`.
@@ -56,15 +56,15 @@ defmodule FatEcto.FatQuery.FatJoin do
 
       """
 
-      def build_join(queryable, opts, join_type \\ "$join") do
-        case opts do
+      def build_join(queryable, join_params, join_type \\ "$join") do
+        case join_params do
           nil ->
             queryable
 
           # TODO: Add docs and examples of ex_doc for this case here
-          _opts ->
-            Enum.reduce(opts, queryable, fn {join_key, join_opts}, queryable ->
-              join_table = join_opts["$table"] || join_key
+          _join_params ->
+            Enum.reduce(join_params, queryable, fn {join_key, join_item}, queryable ->
+              join_table = join_item["$table"] || join_key
 
               join =
                 String.replace(join_type, "_join", "")
@@ -72,7 +72,7 @@ defmodule FatEcto.FatQuery.FatJoin do
                 |> FatHelper.string_to_atom()
 
               queryable =
-                case join_opts["$on_type"] do
+                case join_item["$on_type"] do
                   # TODO: Add docs and examples of ex_doc for this case here
                   "$not_eq" ->
                     queryable
@@ -80,10 +80,10 @@ defmodule FatEcto.FatQuery.FatJoin do
                       join,
                       [q],
                       jt in ^join_table,
-                      field(q, ^FatHelper.string_to_atom(join_opts["$on_field"])) !=
+                      field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) !=
                         field(
                           jt,
-                          ^FatHelper.string_to_atom(join_opts["$on_join_table_field"])
+                          ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
                         )
                     )
 
@@ -94,9 +94,9 @@ defmodule FatEcto.FatQuery.FatJoin do
                       join,
                       [q],
                       jt in ^join_table,
-                      field(q, ^FatHelper.string_to_atom(join_opts["$on_field"])) in field(
+                      field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) in field(
                         jt,
-                        ^FatHelper.string_to_atom(join_opts["$on_join_table_field"])
+                        ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
                       )
                     )
 
@@ -109,10 +109,10 @@ defmodule FatEcto.FatQuery.FatJoin do
                       jt in ^join_table,
                       field(
                         jt,
-                        ^FatHelper.string_to_atom(join_opts["$on_join_table_field"])
+                        ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
                       ) in field(
                         q,
-                        ^FatHelper.string_to_atom(join_opts["$on_field"])
+                        ^FatHelper.string_to_atom(join_item["$on_field"])
                       )
                     )
 
@@ -123,30 +123,30 @@ defmodule FatEcto.FatQuery.FatJoin do
                       join,
                       [q],
                       jt in ^join_table,
-                      field(q, ^FatHelper.string_to_atom(join_opts["$on_field"])) ==
+                      field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) ==
                         field(
                           jt,
-                          ^FatHelper.string_to_atom(join_opts["$on_join_table_field"])
+                          ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
                         )
                     )
                 end
 
               queryable =
-                if join_opts["$where"] == nil do
+                if join_item["$where"] == nil do
                   queryable
                 else
                   # TODO: Add docs and examples of ex_doc for this case here
-                  FatEcto.FatQuery.build_where(queryable, join_opts["$where"], binding: :last)
+                  FatEcto.FatQuery.build_where(queryable, join_item["$where"], binding: :last)
                 end
 
-              queryable = order(queryable, join_opts["$order"])
-              queryable = _select(queryable, join_opts, join_key)
+              queryable = order(queryable, join_item["$order"])
+              queryable = _select(queryable, join_item, join_key)
             end)
         end
       end
 
-      defp _select(queryable, join_opts, join_table) do
-        case join_opts["$select"] do
+      defp _select(queryable, join_params, join_table) do
+        case join_params["$select"] do
           nil ->
             queryable
 
@@ -172,11 +172,11 @@ defmodule FatEcto.FatQuery.FatJoin do
       end
 
       # TODO: Add docs and examples of ex_doc for this case here. try to use generic order
-      defp order(queryable, opts_order_by) do
-        if opts_order_by == nil do
+      defp order(queryable, order_by_params) do
+        if order_by_params == nil do
           queryable
         else
-          Enum.reduce(opts_order_by, queryable, fn {field, format}, queryable ->
+          Enum.reduce(order_by_params, queryable, fn {field, format}, queryable ->
             if format == "$desc" do
               from(
                 [q, ..., c] in queryable,

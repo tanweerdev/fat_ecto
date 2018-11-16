@@ -43,8 +43,8 @@ defmodule FatEcto.FatQuery.FatSelect do
 
       """
 
-      def build_select(queryable, opts_select, model) do
-        case opts_select do
+      def build_select(queryable, select_params, model) do
+        case select_params do
           nil ->
             queryable
 

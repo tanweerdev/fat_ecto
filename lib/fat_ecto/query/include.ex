@@ -43,8 +43,8 @@ defmodule FatEcto.FatQuery.FatInclude do
         - `$join`- Join the `doctors` table with `hospital` .
 
       """
-      def build_include(queryable, opts_include, model) do
-        case opts_include do
+      def build_include(queryable, include_params, model) do
+        case include_params do
           nil ->
             queryable
 

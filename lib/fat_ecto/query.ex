@@ -5,7 +5,7 @@ defmodule FatEcto.FatQuery do
   `import` or `alias` it inside your module.
   """
 
-  @default_query_opts %{
+  @query_param_defaults %{
     "$find" => "$all",
     "$where" => nil,
     # TODO: $max and $min should be part of select as in example docs
@@ -149,16 +149,16 @@ defmodule FatEcto.FatQuery do
 
   """
 
-  def fetch(queryable, query_opts) do
-    opts = FatEcto.FatHelper.map_deep_merge(@default_query_opts, query_opts)
-    queryable = FatEcto.FatQuery.build(queryable, opts)
+  def fetch(queryable, query_params) do
+    query_params = FatEcto.FatHelper.map_deep_merge(@query_param_defaults, query_params)
+    queryable = FatEcto.FatQuery.build(queryable, query_params)
 
-    case opts["$find"] do
+    case query_params["$find"] do
       "$one" ->
         {:ok, @repo.one(Ecto.Query.limit(queryable, 1))}
 
       "$all" ->
-        {:ok, paginate(queryable, skip: opts["$skip"], limit: opts["$limit"])}
+        {:ok, paginate(queryable, skip: query_params["$skip"], limit: query_params["$limit"])}
 
       nil ->
         {:error, "Method not found"}

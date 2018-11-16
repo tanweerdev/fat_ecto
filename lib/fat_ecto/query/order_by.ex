@@ -15,7 +15,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
   - `query_opts` - include query options as a map.
 
 
-  ### Example  
+  ### Example
 
        iex> query_opts = %{
        ...> "$select" => %{
@@ -24,7 +24,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
        ...>  },
        ...>  "$where" => %{"name" => "saint claire"},
        ...>  "$group" => ["rating", "total_staff"],
-       ...>  "$order" => %{"total_staff" => "$asc"}, 
+       ...>  "$order" => %{"total_staff" => "$asc"},
        ...>  "$include" => %{
        ...>    "fat_doctors" => %{
        ...>     "$include" => ["fat_patients"],
@@ -39,9 +39,9 @@ defmodule FatEcto.FatQuery.FatOrderBy do
        ...>      "$on_join_table_field" => "hospital_id",
        ...>      "$select" => ["beds", "capacity", "level"],
        ...>      "$where" => %{"beds" => 10},
-       ...>      "$order" => %{"nurses" => "$asc"}           
+       ...>      "$order" => %{"nurses" => "$asc"}
        ...>     }
-       ...>   }   
+       ...>   }
        ...> }
        iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
        #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.name == ^"saint claire" and ^true, where: f1.beds == ^10 and ^true, group_by: [f0.rating], group_by: [f0.total_staff], order_by: [asc: f1.nurses], order_by: [asc: f0.total_staff], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: f0.rating > ^5 and ^true, order_by: [asc: f0.experience_years], limit: ^10, offset: ^0, select: map(f0, [:name, :designation, :phone]), preload: [:fat_patients]>]>
@@ -57,7 +57,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
   - `$order`- Sort the result based on the order attribute.
   - `$right_join: :$order`- Sort the result based on the order attribute inside join.
   - `$include: :$order`- Sort the result based on the order attribute inside include.
-  - `$group`- Added the group_by attribute in the query.       
+  - `$group`- Added the group_by attribute in the query.
 
 
   ## => $desc
@@ -69,7 +69,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
   - `query_opts` - include query options as a map.
 
 
-  ### Example  
+  ### Example
 
        iex> query_opts = %{
        ...> "$select" => %{
@@ -78,7 +78,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
        ...>  },
        ...>  "$where" => %{"name" => "saint claire"},
        ...>  "$group" => ["rating", "total_staff"],
-       ...>  "$order" => %{"rating" => "$desc"}, 
+       ...>  "$order" => %{"rating" => "$desc"},
        ...>  "$include" => %{
        ...>    "fat_doctors" => %{
        ...>     "$include" => ["fat_patients"],
@@ -93,9 +93,9 @@ defmodule FatEcto.FatQuery.FatOrderBy do
        ...>      "$on_join_table_field" => "hospital_id",
        ...>      "$select" => ["beds", "capacity", "level"],
        ...>      "$where" => %{"beds" => 10},
-       ...>      "$order" => %{"capacity" => "$desc"}           
+       ...>      "$order" => %{"capacity" => "$desc"}
        ...>     }
-       ...>   }   
+       ...>   }
        ...> }
        iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
        #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.name == ^"saint claire" and ^true, where: f1.beds == ^10 and ^true, group_by: [f0.rating], group_by: [f0.total_staff], order_by: [desc: f1.capacity], order_by: [desc: f0.rating], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: f0.rating > ^5 and ^true, order_by: [asc: f0.experience_years], limit: ^10, offset: ^0, select: map(f0, [:name, :designation, :phone]), preload: [:fat_patients]>]>
@@ -111,7 +111,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
   - `$order`- Sort the result based on the order attribute.
   - `$right_join: :$order`- Sort the result based on the order attribute inside join.
   - `$include: :$order`- Sort the result based on the order attribute inside include.
-  - `$group`- Added the group_by attribute in the query.        
+  - `$group`- Added the group_by attribute in the query.
 
   """
 
@@ -154,12 +154,12 @@ defmodule FatEcto.FatQuery.FatOrderBy do
         - `$where`- Added the where attribute in the query.
         - `$order`- Sort the result based on the order attribute.
       """
-      def build_order_by(queryable, opts_order_by) do
-        if opts_order_by == nil do
+      def build_order_by(queryable, order_by_params) do
+        if order_by_params == nil do
           queryable
         else
           # TODO: Add docs and examples of ex_doc for this case here
-          Enum.reduce(opts_order_by, queryable, fn {field, format}, queryable ->
+          Enum.reduce(order_by_params, queryable, fn {field, format}, queryable ->
             # TODO: Add docs and examples of ex_doc for this case here
             if format == "$desc" do
               from(

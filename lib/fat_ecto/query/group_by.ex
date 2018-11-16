@@ -30,27 +30,27 @@ defmodule FatEcto.FatQuery.FatGroupBy do
 
         - `$select`- Select the fields from `hospital` and `rooms`.
         - `$where`- Added the where attribute in the query.
-        - `$group`- Added the group_by attribute in the query.        
+        - `$group`- Added the group_by attribute in the query.
         - `$order`- Sort the result based on the order attribute.
       """
 
-      def build_group_by(queryable, opts_group_by) do
-        if opts_group_by == nil do
+      def build_group_by(queryable, group_by_params) do
+        if group_by_params == nil do
           queryable
         else
-          case opts_group_by do
-            opts_group_by when is_list(opts_group_by) ->
-              Enum.reduce(opts_group_by, queryable, fn group_by_field, queryable ->
+          case group_by_params do
+            group_by_params when is_list(group_by_params) ->
+              Enum.reduce(group_by_params, queryable, fn group_by_field, queryable ->
                 from(
                   q in queryable,
                   group_by: field(q, ^FatHelper.string_to_existing_atom(group_by_field))
                 )
               end)
 
-            opts_group_by when is_binary(opts_group_by) ->
+            group_by_params when is_binary(group_by_params) ->
               from(
                 q in queryable,
-                group_by: field(q, ^FatHelper.string_to_existing_atom(opts_group_by))
+                group_by: field(q, ^FatHelper.string_to_existing_atom(group_by_params))
               )
           end
         end

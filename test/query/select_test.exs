@@ -110,7 +110,6 @@ defmodule Query.SelectTest do
     query =
       from(
         d in FatEcto.FatDoctor,
-        left_join: p in assoc(d, :fat_patients),
         where: d.name == ^"ham" and ^true,
         order_by: [desc: d.id],
         limit: ^10,

@@ -15,11 +15,11 @@ defmodule FatEcto.FatQuery.FatAggregate do
       #   "$avg": ["total_marks", "rating"]
       # }
       @doc false
-      def build_aggregate(queryable, opts_aggregate) do
-        if opts_aggregate == nil do
+      def build_aggregate(queryable, aggregate_params) do
+        if aggregate_params == nil do
           queryable
         else
-          Enum.reduce(opts_aggregate, queryable, fn {aggregate_type, fields}, queryable ->
+          Enum.reduce(aggregate_params, queryable, fn {aggregate_type, fields}, queryable ->
             case aggregate_type do
               "$max" ->
                 case fields do
