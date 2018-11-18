@@ -44,7 +44,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
        ...>   }
        ...> }
        iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-       #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.name == ^"saint claire" and ^true, where: f1.beds == ^10 and ^true, group_by: [f0.rating], group_by: [f0.total_staff], order_by: [asc: f1.nurses], order_by: [asc: f0.total_staff], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: f0.rating > ^5 and ^true, order_by: [asc: f0.experience_years], limit: ^10, offset: ^0, select: map(f0, [:name, :designation, :phone]), preload: [:fat_patients]>]>
+       #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.name == ^"saint claire" and ^true, where: f1.beds == ^10 and ^true, group_by: [f0.rating], group_by: [f0.total_staff], order_by: [asc: f1.nurses], order_by: [asc: f0.total_staff], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating > ^5 and ^true, order_by: [asc: f.experience_years], limit: ^10, offset: ^0, select: map(f, [:name, :designation, :phone]), preload: [:fat_patients]>]>
 
 
   ### Options
@@ -98,7 +98,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
        ...>   }
        ...> }
        iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-       #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.name == ^"saint claire" and ^true, where: f1.beds == ^10 and ^true, group_by: [f0.rating], group_by: [f0.total_staff], order_by: [desc: f1.capacity], order_by: [desc: f0.rating], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: f0.rating > ^5 and ^true, order_by: [asc: f0.experience_years], limit: ^10, offset: ^0, select: map(f0, [:name, :designation, :phone]), preload: [:fat_patients]>]>
+       #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.name == ^"saint claire" and ^true, where: f1.beds == ^10 and ^true, group_by: [f0.rating], group_by: [f0.total_staff], order_by: [desc: f1.capacity], order_by: [desc: f0.rating], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating > ^5 and ^true, order_by: [asc: f.experience_years], limit: ^10, offset: ^0, select: map(f, [:name, :designation, :phone]), preload: [:fat_patients]>]>
 
 
   ### Options
