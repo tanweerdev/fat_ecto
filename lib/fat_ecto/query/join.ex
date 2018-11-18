@@ -87,6 +87,60 @@ defmodule FatEcto.FatQuery.FatJoin do
                         )
                     )
 
+                  "$gt" ->
+                    if FatHelper.is_fat_ecto_field?(join_item["$gt"]) do
+                      queryable
+                      |> join(
+                        join,
+                        [q],
+                        jt in ^join_table,
+                        field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) >
+                          field(
+                            jt,
+                            ^FatHelper.string_to_atom(join_item["$gt"])
+                          )
+                      )
+                    else
+                      queryable
+                      |> join(
+                        join,
+                        [q],
+                        jt in ^join_table,
+                        field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) >
+                          field(
+                            jt,
+                            ^FatHelper.string_to_atom(join_item["$gt"])
+                          )
+                      )
+                    end
+
+                  "$lt" ->
+                    if FatHelper.is_fat_ecto_field?(join_item["$gt"]) do
+                      queryable
+                      |> join(
+                        join,
+                        [q],
+                        jt in ^join_table,
+                        field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) <
+                          field(
+                            jt,
+                            ^FatHelper.string_to_atom(join_item["$gt"])
+                          )
+                      )
+                    else
+                      queryable
+                      |> join(
+                        join,
+                        [q],
+                        jt in ^join_table,
+                        field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) <
+                          field(
+                            jt,
+                            ^FatHelper.string_to_atom(join_item["$gt"])
+                          )
+                      )
+                    end
+
                   # TODO: Add docs and examples of ex_doc for this case here
                   "$in_x" ->
                     queryable
@@ -131,13 +185,9 @@ defmodule FatEcto.FatQuery.FatJoin do
                     )
                 end
 
+              # TODO: Add docs and examples of ex_doc for this case here
               queryable =
-                if join_item["$where"] == nil do
-                  queryable
-                else
-                  # TODO: Add docs and examples of ex_doc for this case here
-                  FatEcto.FatQuery.build_where(queryable, join_item["$where"], binding: :last)
-                end
+                FatEcto.FatQuery.build_where(queryable, join_item["$where"], binding: :last)
 
               queryable = order(queryable, join_item["$order"])
               queryable = _select(queryable, join_item, join_key)
