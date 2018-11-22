@@ -4,8 +4,8 @@ defmodule FatEcto.MixProject do
   def project do
     [
       app: :fat_ecto,
-      version: "0.1.9",
-      elixir: "~> 1.7",
+      version: "0.2.0",
+      elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       build_embedded: Mix.env() == :prod,
       deps: deps(),
@@ -32,9 +32,7 @@ defmodule FatEcto.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:csv, "~> 2.1"},
       {:ecto, "~> 2.2"},
-      {:sweet_xml, "~> 0.6.5"},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:earmark, "~> 1.2", only: :dev}
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
