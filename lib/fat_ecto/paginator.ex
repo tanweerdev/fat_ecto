@@ -38,7 +38,7 @@ defmodule FatEcto.FatPaginator do
         - `$limit`- Limit the number of records returned from the repo.
         - `$skip`- Used an an offset.
 
-       If no limit is defined in the query. FAT uses the default limit specified in the fat_ecto config. 
+       If no limit is defined in the query. FAT uses the default limit specified in the fat_ecto config.
 
       """
       def paginate(query, params) do
@@ -72,15 +72,6 @@ defmodule FatEcto.FatPaginator do
           |> exclude(:order_by)
           |> exclude(:preload)
           |> exclude(:select)
-
-        queryable =
-          case FatEcto.FatHelper.field_exists?(queryable, :deleted_at) do
-            false ->
-              queryable
-
-            true ->
-              from(p in queryable, where: is_nil(p.deleted_at))
-          end
 
         @repo.one(from(q in queryable, select: fragment("count(*)")))
       end
