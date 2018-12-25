@@ -36,7 +36,7 @@ defmodule FatEcto.FatQuery.FatJoin do
           ...>  }
           ...> }
           iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-          #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.rating == ^4 and ^true, where: f1.incharge == ^"John" and ^true, order_by: [desc: f0.id], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f0 in FatEcto.FatDoctor, left_join: f1 in assoc(f0, :fat_patients), where: f0.name == ^"ham" and ^true, order_by: [desc: f0.id], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
+          #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.rating == ^4 and ^true, where: f1.incharge == ^"John" and ^true, order_by: [desc: f0.id], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.name == ^"ham" and ^true, order_by: [desc: f.id], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
 
 
 
@@ -80,11 +80,12 @@ defmodule FatEcto.FatQuery.FatJoin do
                       join,
                       [q],
                       jt in ^join_table,
-                      field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) !=
-                        field(
-                          jt,
-                          ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
-                        )
+                      on:
+                        field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) !=
+                          field(
+                            jt,
+                            ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
+                          )
                     )
 
                   "$gt" ->
@@ -94,11 +95,12 @@ defmodule FatEcto.FatQuery.FatJoin do
                         join,
                         [q],
                         jt in ^join_table,
-                        field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) >
-                          field(
-                            jt,
-                            ^FatHelper.string_to_atom(join_item["$gt"])
-                          )
+                        on:
+                          field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) >
+                            field(
+                              jt,
+                              ^FatHelper.string_to_atom(join_item["$gt"])
+                            )
                       )
                     else
                       queryable
@@ -106,11 +108,12 @@ defmodule FatEcto.FatQuery.FatJoin do
                         join,
                         [q],
                         jt in ^join_table,
-                        field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) >
-                          field(
-                            jt,
-                            ^FatHelper.string_to_atom(join_item["$gt"])
-                          )
+                        on:
+                          field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) >
+                            field(
+                              jt,
+                              ^FatHelper.string_to_atom(join_item["$gt"])
+                            )
                       )
                     end
 
@@ -121,11 +124,12 @@ defmodule FatEcto.FatQuery.FatJoin do
                         join,
                         [q],
                         jt in ^join_table,
-                        field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) <
-                          field(
-                            jt,
-                            ^FatHelper.string_to_atom(join_item["$gt"])
-                          )
+                        on:
+                          field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) <
+                            field(
+                              jt,
+                              ^FatHelper.string_to_atom(join_item["$gt"])
+                            )
                       )
                     else
                       queryable
@@ -133,11 +137,12 @@ defmodule FatEcto.FatQuery.FatJoin do
                         join,
                         [q],
                         jt in ^join_table,
-                        field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) <
-                          field(
-                            jt,
-                            ^FatHelper.string_to_atom(join_item["$gt"])
-                          )
+                        on:
+                          field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) <
+                            field(
+                              jt,
+                              ^FatHelper.string_to_atom(join_item["$gt"])
+                            )
                       )
                     end
 
@@ -148,10 +153,11 @@ defmodule FatEcto.FatQuery.FatJoin do
                       join,
                       [q],
                       jt in ^join_table,
-                      field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) in field(
-                        jt,
-                        ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
-                      )
+                      on:
+                        field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) in field(
+                          jt,
+                          ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
+                        )
                     )
 
                   # TODO: Add docs and examples of ex_doc for this case here
@@ -161,13 +167,14 @@ defmodule FatEcto.FatQuery.FatJoin do
                       join,
                       [q],
                       jt in ^join_table,
-                      field(
-                        jt,
-                        ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
-                      ) in field(
-                        q,
-                        ^FatHelper.string_to_atom(join_item["$on_field"])
-                      )
+                      on:
+                        field(
+                          jt,
+                          ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
+                        ) in field(
+                          q,
+                          ^FatHelper.string_to_atom(join_item["$on_field"])
+                        )
                     )
 
                   # TODO: Add docs and examples of ex_doc for this case here
@@ -177,11 +184,12 @@ defmodule FatEcto.FatQuery.FatJoin do
                       join,
                       [q],
                       jt in ^join_table,
-                      field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) ==
-                        field(
-                          jt,
-                          ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
-                        )
+                      on:
+                        field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) ==
+                          field(
+                            jt,
+                            ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
+                          )
                     )
                 end
 
