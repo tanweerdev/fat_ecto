@@ -136,7 +136,7 @@ defmodule FatEcto.Context do
     #   end
 
     schema
-    |> @repo.get_all_by(keyword_cond)
+    |> @repo.all(Ecto.Query.where(schema, ^keyword_cond))
     |> @repo.preload(preloads)
   end
 end
