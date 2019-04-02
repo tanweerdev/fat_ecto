@@ -73,9 +73,10 @@ defmodule FatEcto.Context do
 
   # Context.get(User, 2, assoc)
   def get(schema, id, preloads \\ []) do
-    schema
-    |> @repo.get(id)
-    |> @repo.preload(preloads)
+    case @repo.get(schema, id) do
+      nil -> {:error, :not_found}
+      record -> {:ok, @repo.preload(record, preloads)}
+    end
   end
 
   def get_catch(schema, id, preloads \\ []) do
