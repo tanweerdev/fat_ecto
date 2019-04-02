@@ -9,8 +9,7 @@ defmodule Query.WhereTest do
     }
 
     # expected = from(d in FatEcto.FatDoctor, where: like(d.name, ^"%Joh %"))
-    expected =
-      from(d in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", d.name), ^"%Joh %") and ^true)
+    expected = from(d in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", d.name), ^"%Joh %") and ^true)
 
     result = build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
@@ -149,8 +148,7 @@ defmodule Query.WhereTest do
       "$where" => %{"total_staff" => %{"$between" => [10, 20]}}
     }
 
-    expected =
-      from(r in FatEcto.FatRoom, where: r.total_staff > ^10 and r.total_staff < ^20 and ^true)
+    expected = from(r in FatEcto.FatRoom, where: r.total_staff > ^10 and r.total_staff < ^20 and ^true)
 
     result = build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
@@ -161,8 +159,7 @@ defmodule Query.WhereTest do
       "$where" => %{"total_staff" => %{"$between_equal" => [10, 20]}}
     }
 
-    expected =
-      from(r in FatEcto.FatRoom, where: r.total_staff >= ^10 and r.total_staff <= ^20 and ^true)
+    expected = from(r in FatEcto.FatRoom, where: r.total_staff >= ^10 and r.total_staff <= ^20 and ^true)
 
     result = build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)

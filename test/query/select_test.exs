@@ -8,8 +8,7 @@ defmodule Query.SelectTest do
       "$select" => %{"$fields" => ["name", "designation", "experience_years"]}
     }
 
-    expected =
-      from(d in FatEcto.FatDoctor, select: map(d, [:name, :designation, :experience_years]))
+    expected = from(d in FatEcto.FatDoctor, select: map(d, [:name, :designation, :experience_years]))
 
     result = build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)

@@ -32,8 +32,7 @@ defmodule Query.AggregateTest do
         f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
         order_by: [desc: f.beds],
-        select:
-          merge(f, %{"$aggregate": %{"$count_distinct": %{^:nurses => count(f.nurses, :distinct)}}})
+        select: merge(f, %{"$aggregate": %{"$count_distinct": %{^:nurses => count(f.nurses, :distinct)}}})
       )
 
     result = build(FatEcto.FatRoom, opts)

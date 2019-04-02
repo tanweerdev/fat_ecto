@@ -20,5 +20,5 @@
   # importing configs from other libraries it is depending
   # import_deps: [:dependency1, :dependency2],
 
-  line_length: 100
+  line_length: 120
 ]

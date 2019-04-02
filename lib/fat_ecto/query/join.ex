@@ -194,8 +194,7 @@ defmodule FatEcto.FatQuery.FatJoin do
                 end
 
               # TODO: Add docs and examples of ex_doc for this case here
-              queryable =
-                FatEcto.FatQuery.build_where(queryable, join_item["$where"], binding: :last)
+              queryable = FatEcto.FatQuery.build_where(queryable, join_item["$where"], binding: :last)
 
               queryable = order(queryable, join_item["$order"])
               queryable = _select(queryable, join_item, join_key)
