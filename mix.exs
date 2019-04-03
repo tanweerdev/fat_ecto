@@ -13,6 +13,7 @@ defmodule FatEcto.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       description: description(),
       package: package(),
+      aliases: aliases(),
       docs: [
         # The main page in the docs
         main: "readme",
@@ -38,6 +39,8 @@ defmodule FatEcto.MixProject do
   defp deps do
     [
       {:ecto, "~> 3.0"},
+      {:ecto_sql, "~> 3.0", only: :test},
+      {:postgrex, "~> 0.14.1", only: :test},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:earmark, "~> 1.2", only: :dev}
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
@@ -57,6 +60,22 @@ defmodule FatEcto.MixProject do
         "GitHub" => "https://github.com/tanweerdev/fat_ecto",
         "Docs" => "https://hexdocs.pm/fat_ecto/"
       }
+    ]
+  end
+
+  defp aliases do
+    [
+      "ecto.init": [],
+      "ecto.create": ["ecto.create"],
+      "ecto.migrate": ["ecto.migrate"],
+      role_action_seeds: [],
+      "ecto.setup.quite": ["ecto.create", "ecto.init", "ecto.migrate"],
+      test: [
+        "ecto.setup.quite",
+        #"run apps/haitracker/priv/repo/role_action_seeds.exs",
+        "role_action_seeds",
+        "test"
+      ],
     ]
   end
 end

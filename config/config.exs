@@ -2,6 +2,20 @@
 # and its dependencies with the aid of the Mix.Config module.
 use Mix.Config
 
+config :fat_ecto,
+  ecto_repos: [FatEcto.Repo]
+
+config :fat_ecto, FatEcto.Repo,
+  username: "postgres",
+  # adapter: Ecto.Adapters.Postgres,
+  password: "postgres",
+  superuser: "postgres",
+  superpass: "postgres",
+  database: "fat_ecto_test",
+  hostname: "localhost",
+  pool: Ecto.Adapters.SQL.Sandbox
+
+
 # This configuration is loaded before any dependency and is restricted
 # to this project. If another project depends on this project, this
 # file won't be loaded nor affect the parent project. For this reason,
