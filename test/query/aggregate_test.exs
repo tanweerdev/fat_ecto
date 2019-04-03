@@ -1,6 +1,6 @@
 defmodule Query.AggregateTest do
   use ExUnit.Case
-  import FatEcto.FatQuery
+  import MyApp.Query
   import Ecto.Query
 
   test "returns the query with aggregate count" do
@@ -141,7 +141,7 @@ defmodule Query.AggregateTest do
         f in FatEcto.FatHospital,
         where: f.name == ^"Saint" and ^true,
         order_by: [desc: f.id],
-        limit: ^10,
+        limit: ^103,
         offset: ^0
       )
 

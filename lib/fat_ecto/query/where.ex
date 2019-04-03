@@ -1,5 +1,7 @@
 defmodule FatEcto.FatQuery.FatWhere do
   # TODO: Add docs and examples for ex_doc
+  import Ecto.Query
+
   @moduledoc """
   Where supports multiple query methods.
 
@@ -20,7 +22,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>   "$select" => %{"$fields" => ["name", "designation", "experience_years"]},
       ...>   "$where" => %{"name" => %{"$like" => "%Joh %"}}
       ...> }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatDoctor, query_opts)
+      iex> #{MyApp.Query}.build(FatEcto.FatDoctor, query_opts)
       #Ecto.Query<from f in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", f.name), ^"%Joh %") and ^true, select: map(f, [:name, :designation, :experience_years])>
 
 
@@ -46,7 +48,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>   "$where" => %{"designation" => %{"$ilike" => "%surge %"}},
       ...>   "$order" => %{"rating" => "$asc"}
       ...> }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatDoctor, query_opts)
+      iex> #{MyApp.Query}.build(FatEcto.FatDoctor, query_opts)
       #Ecto.Query<from f in FatEcto.FatDoctor, where: ilike(fragment("(?)::TEXT", f.designation), ^"%surge %") and ^true, order_by: [asc: f.rating], select: map(f, [:name, :designation, :experience_years])>
 
 
@@ -77,7 +79,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>  "$where" => %{"location" => %{"$not_like" => "%street2 %"}},
       ...>  "$order" => %{"id" => "$desc"}
       ...> }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f in FatEcto.FatHospital, where: not(like(fragment("(?)::TEXT", f.location), ^"%street2 %")) and ^true, order_by: [desc: f.id], select: map(f, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])>
 
 
@@ -106,7 +108,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>  "$where" => %{"location" => %{"$not_ilike" => "%street2 %"}},
       ...>  "$group" => "rating"
       ...> }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f in FatEcto.FatHospital, where: not(ilike(fragment("(?)::TEXT", f.location), ^"%street2 %")) and ^true, group_by: [f.rating], select: map(f, [:name, :location, :rating])>
 
 
@@ -135,7 +137,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>    },
       ...>   "$where" => %{"rating" => %{"$lt" => 4}}
       ...>  }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f in FatEcto.FatHospital, where: f.rating < ^4 and ^true, select: map(f, [:name, :location, :rating])>
 
 
@@ -165,7 +167,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>    "$where" => %{"total_staff" => %{"$lt" => "$rating"}},
       ...>    "$order" => %{"id" => "$desc"}
       ...>  }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f in FatEcto.FatHospital, where: f.total_staff < f.rating and ^true, order_by: [desc: f.id], select: map(f, [:name, :location, :rating])>
 
 
@@ -195,7 +197,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>    },
       ...>   "$where" => %{"total_staff" => %{"$lte" => 3}},
       ...>  }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f in FatEcto.FatHospital, where: f.total_staff <= ^3 and ^true, select: map(f, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])>
 
 
@@ -224,7 +226,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>  "$where" => %{"total_staff" => %{"$lte" => "$rating"}},
       ...>  "$group" => "total_staff"
       ...> }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f in FatEcto.FatHospital, where: f.total_staff <= f.rating and ^true, group_by: [f.total_staff], select: map(f, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])>
 
   ### Options
@@ -254,7 +256,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>  "$group" => "total_staff",
       ...>  "$order" => %{"rating" => "$desc"}
       ...> }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f in FatEcto.FatHospital, where: f.total_staff > ^4 and ^true, group_by: [f.total_staff], order_by: [desc: f.rating], select: map(f, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])>
 
 
@@ -291,8 +293,8 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>    }
       ...>   }
       ...> }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: f0.total_staff > f0.rating and ^true, select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating < ^3 and ^true, order_by: [desc: f.id], limit: ^10, offset: ^0>]>
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: f0.total_staff > f0.rating and ^true, select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating < ^3 and ^true, order_by: [desc: f.id], limit: ^103, offset: ^0>]>
 
   ### Options
     - `$select`- Select the fields from `hospital`.
@@ -325,8 +327,8 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>   }
       ...>  }
       ...> }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: f0.total_staff >= ^5 and ^true, select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating <= ^3 and ^true, limit: ^10, offset: ^0>]>
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: f0.total_staff >= ^5 and ^true, select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating <= ^3 and ^true, limit: ^103, offset: ^0>]>
 
   ### Options
     - `$select`- Select the fields from `hospital` and `rooms`.
@@ -362,8 +364,8 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>     }
       ...>   }
       ...> }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: f0.rating >= f0.total_staff and ^true, select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating >= ^3 and ^true, order_by: [asc: f.rating], limit: ^10, offset: ^0>]>
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: f0.rating >= f0.total_staff and ^true, select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating >= ^3 and ^true, order_by: [asc: f.rating], limit: ^103, offset: ^0>]>
 
 
   ### Options
@@ -399,8 +401,8 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>    }
       ...>   }
       ...> }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: f0.rating > ^10 and f0.rating < ^20 and ^true, select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating >= f.total_staff and ^true, order_by: [asc: f.rating], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: f0.rating > ^10 and f0.rating < ^20 and ^true, select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating >= f.total_staff and ^true, order_by: [asc: f.rating], limit: ^103, offset: ^0, preload: [:fat_patients]>]>
 
   ### Options
     - `$select`- Select the fields from `hospital` and `rooms`.
@@ -434,8 +436,8 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>    }
       ...>   }
       ...>  }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: (f0.rating < ^10 or f0.rating > ^20) and ^true, select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating > ^20 and f.rating < ^30 and ^true, order_by: [asc: f.experience_years], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: (f0.rating < ^10 or f0.rating > ^20) and ^true, select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating > ^20 and f.rating < ^30 and ^true, order_by: [asc: f.experience_years], limit: ^103, offset: ^0, preload: [:fat_patients]>]>
 
 
 
@@ -481,8 +483,8 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>    }
       ...>   }
       ...>  }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.rating in ^[10, 20] and ^true, where: f1.beds >= f1.nurses and ^true, select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: (f.rating < ^20 or f.rating > ^30) and ^true, order_by: [asc: f.experience_years], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.rating in ^[10, 20] and ^true, where: f1.beds >= f1.nurses and ^true, select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: (f.rating < ^20 or f.rating > ^30) and ^true, order_by: [asc: f.experience_years], limit: ^103, offset: ^0, preload: [:fat_patients]>]>
 
 
   ### Options
@@ -529,8 +531,8 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>     }
       ...>   }
       ...>  }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.rating not in ^[10, 20] and ^true, where: f1.beds not in ^[5, 15] and ^true, select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: (f.rating < ^20 or f.rating > ^30) and ^true, order_by: [desc: f.rating], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.rating not in ^[10, 20] and ^true, where: f1.beds not in ^[5, 15] and ^true, select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: (f.rating < ^20 or f.rating > ^30) and ^true, order_by: [desc: f.rating], limit: ^103, offset: ^0, preload: [:fat_patients]>]>
 
 
   ### Options
@@ -578,8 +580,8 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>     }
       ...>   }
       ...>  }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: is_nil(f0.rating) and ^true, where: f1.beds in ^[5, 15] and ^true, order_by: [asc: f1.id], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating > ^20 and f.rating < ^30 and ^true, order_by: [desc: f.experience_years], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: is_nil(f0.rating) and ^true, where: f1.beds in ^[5, 15] and ^true, order_by: [asc: f1.id], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating > ^20 and f.rating < ^30 and ^true, order_by: [desc: f.experience_years], limit: ^103, offset: ^0, preload: [:fat_patients]>]>
 
   ### Options
     - `$select`- Select the fields from `hospital` and `rooms`.
@@ -628,8 +630,8 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>     }
       ...>   }
       ...> }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: not(is_nil(f0.total_staff)) and ^true, where: is_nil(f1.beds) and ^true, order_by: [asc: f1.id], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating in ^[20, 30] and ^true, order_by: [asc: f.rating], limit: ^10, offset: ^0, select: map(f, [:name, :designation, :phone]), preload: [:fat_patients]>]>
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: not(is_nil(f0.total_staff)) and ^true, where: is_nil(f1.beds) and ^true, order_by: [asc: f1.id], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating in ^[20, 30] and ^true, order_by: [asc: f.rating], limit: ^103, offset: ^0, select: map(f, [:name, :designation, :phone]), preload: [:fat_patients]>]>
 
 
 
@@ -683,8 +685,8 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>     }
       ...>   }
       ...> }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.name == ^"saint claire" and ^true, where: f1.beds == ^10 and ^true, group_by: [f0.rating], order_by: [asc: f1.id], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating > ^5 and ^true, order_by: [desc: f.experience_years], limit: ^10, offset: ^0, select: map(f, [:name, :designation, :phone]), preload: [:fat_patients]>]>
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.name == ^"saint claire" and ^true, where: f1.beds == ^10 and ^true, group_by: [f0.rating], order_by: [asc: f1.id], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.rating > ^5 and ^true, order_by: [desc: f.experience_years], limit: ^103, offset: ^0, select: map(f, [:name, :designation, :phone]), preload: [:fat_patients]>]>
 
 
   ### Options
@@ -701,245 +703,241 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   """
 
-  defmacro __using__(_options) do
-    quote location: :keep do
-      alias FatEcto.FatQuery.FatDynamics
-      # TODO: Add docs and examples for ex_doc
+  alias FatEcto.FatQuery.FatDynamics
+  # TODO: Add docs and examples for ex_doc
 
-      @doc """
-      Build a  `where query` depending on the params.
-      ## Parameters
+  @doc """
+  Build a  `where query` depending on the params.
+  ## Parameters
 
-        - `queryable`- Schema name that represents your database model.
-        - `query_opts` - include query options as a map
-      ## Examples
-          iex> query_opts = %{
-          ...>  "$select" => %{
-          ...>    "$fields" => ["name", "location", "rating"],
-          ...>    "fat_rooms" => ["beds", "capacity"]
-          ...>  },
-          ...>  "$order" => %{"id" => "$desc"},
-          ...>  "$where" => %{"location" => %{"$not_like" => "%addre %"}},
-          ...>  "$group" => "total_staff"
-          ...> }
-          iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-          #Ecto.Query<from f in FatEcto.FatHospital, where: not(like(fragment("(?)::TEXT", f.location), ^"%addre %")) and ^true, group_by: [f.total_staff], order_by: [desc: f.id], select: map(f, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])>
+    - `queryable`- Schema name that represents your database model.
+    - `query_opts` - include query options as a map
+  ## Examples
+      iex> query_opts = %{
+      ...>  "$select" => %{
+      ...>    "$fields" => ["name", "location", "rating"],
+      ...>    "fat_rooms" => ["beds", "capacity"]
+      ...>  },
+      ...>  "$order" => %{"id" => "$desc"},
+      ...>  "$where" => %{"location" => %{"$not_like" => "%addre %"}},
+      ...>  "$group" => "total_staff"
+      ...> }
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f in FatEcto.FatHospital, where: not(like(fragment("(?)::TEXT", f.location), ^"%addre %")) and ^true, group_by: [f.total_staff], order_by: [desc: f.id], select: map(f, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])>
 
 
 
-      ## Options
+  ## Options
 
-        - `$select`- Select the fields from `hospital` and `rooms`.
-        - `$where`- Added the where attribute in the query.
-        - `$not_like`- Added the notlike attribute in the where query.
-        - `$group`- Added the group_by attribute in the query.
-        - `$order`- Sort the result based on the order attribute.
+    - `$select`- Select the fields from `hospital` and `rooms`.
+    - `$where`- Added the where attribute in the query.
+    - `$not_like`- Added the notlike attribute in the where query.
+    - `$group`- Added the group_by attribute in the query.
+    - `$order`- Sort the result based on the order attribute.
 
-      """
-      def build_where(queryable, where_params, opts \\ []) do
-        if where_params == nil do
-          queryable
-        else
-          # TODO: Add docs and examples of ex_doc for this case here
-          Enum.reduce(where_params, queryable, fn {k, v}, queryable ->
-            query_where(queryable, {k, v}, opts)
-          end)
-        end
-      end
-
+  """
+  def build_where(queryable, where_params, opts \\ []) do
+    if where_params == nil do
+      queryable
+    else
       # TODO: Add docs and examples of ex_doc for this case here
-      defp query_where(queryable, {k, map_cond}, opts) when is_map(map_cond) do
-        queryable =
-          case k do
-            "$or" ->
-              dynamics =
-                Enum.reduce(map_cond, false, fn {key, condition}, dynamics ->
-                  case condition do
-                    %{"$like" => value} ->
-                      FatDynamics.like_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
-
-                    %{"$ilike" => value} ->
-                      FatDynamics.ilike_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
-
-                    %{"$lt" => value} ->
-                      FatDynamics.lt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
-
-                    %{"$lte" => value} ->
-                      FatDynamics.lte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
-
-                    %{"$gt" => value} ->
-                      FatDynamics.gt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
-
-                    %{"$gte" => value} ->
-                      FatDynamics.gte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
-
-                    condition when not is_list(condition) and not is_map(condition) ->
-                      FatDynamics.eq_dynamic(key, condition, dynamics, opts ++ [dynamic_type: :or])
-
-                    _whatever ->
-                      dynamics
-                  end
-                end)
-
-              # TODO: confirm its what should be used `where` or `or_where` below
-              from(q in queryable, where: ^dynamics)
-
-            "$not" ->
-              queryable
-
-            _whatever ->
-              queryable
-          end
-
-        dynamics =
-          Enum.reduce(map_cond, true, fn {key, value}, dynamics ->
-            case key do
-              "$like" ->
-                FatDynamics.like_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
-
-              "$ilike" ->
-                FatDynamics.ilike_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
-
-              "$not_like" ->
-                FatDynamics.not_like_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
-
-              "$not_ilike" ->
-                FatDynamics.not_ilike_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
-
-              "$lt" ->
-                FatDynamics.lt_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
-
-              "$lte" ->
-                FatDynamics.lte_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
-
-              "$gt" ->
-                FatDynamics.gt_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
-
-              "$gte" ->
-                FatDynamics.gte_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
-
-              "$between" ->
-                FatDynamics.between_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
-
-              "$between_equal" ->
-                FatDynamics.between_equal_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
-
-              "$not_between" ->
-                FatDynamics.not_between_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
-
-              "$not_between_equal" ->
-                FatDynamics.not_between_equal_dynamic(
-                  k,
-                  value,
-                  dynamics,
-                  opts ++ [dynamic_type: :and]
-                )
-
-              "$in" ->
-                FatDynamics.in_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
-
-              "$not_in" ->
-                FatDynamics.not_in_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
-
-              "$contains" ->
-                FatDynamics.contains_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
-
-              "$contains_any" ->
-                FatDynamics.contains_any_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
-
-              "$not" ->
-                # TODO:
-                # Example
-                # "id": {
-                # TODO: implement now
-                # 	"$not": {
-                # 		"$eq": [1,2,3],
-                # 		"$gt": 10,
-                # 		"$lt": 1
-                # 	}
-                # }
-                # First call the relevent dynamic then not_dynamic
-                # e.g id: {"$not": {"$eq": [1,2,3]}
-                # First call equal_dynamic with these params and then not_dynamic
-
-                # Example
-                # "$not": {
-                # 	"id": [
-                # 		1,2,3,
-                #    ],
-                #   "customer_rating": null,
-                # 	"$gt": { "id": 10 }
-                #  }
-                queryable
-
-              "$or" ->
-                # TODO:
-                # Example
-                # "id": {
-                # 	"$not": [
-                # 		[1,2,3],
-                # 		{ "$gt": 10 }
-                # 	]
-                # }
-
-                # Example
-                # "$or": {
-                # 	"id": [
-                # 		1,2,3,
-                #    ],
-                # 	"$gt": { "id": 10 }
-                #  }
-                queryable
-
-              _ ->
-                # TODO:
-                queryable
-            end
-          end)
-
-        from(q in queryable, where: ^dynamics)
-      end
-
-      # TODO: Add docs and examples of ex_doc for this case here
-      # $where: {score == nil}
-      defp query_where(queryable, {k, map_cond}, opts) when is_nil(map_cond) do
-        from(
-          q in queryable,
-          where: ^FatDynamics.is_nil_dynamic(k, true, opts ++ [dynamic_type: :and])
-        )
-      end
-
-      # TODO: Add docs and examples of ex_doc for this case here
-      # TODO: check if following code is needed
-      # $where: {score: 5}
-      defp query_where(queryable, {k, map_cond}, opts) when not is_list(map_cond) do
-        from(
-          q in queryable,
-          where: ^FatDynamics.eq_dynamic(k, map_cond, true, opts ++ [dynamic_type: :and])
-        )
-      end
-
-      # TODO: Add docs and examples of ex_doc for this case here
-      # $where: {$not_null: [score, rating]}
-      defp query_where(queryable, {k, map_cond}, opts)
-           when is_list(map_cond) and k == "$not_null" do
-        Enum.reduce(map_cond, queryable, fn key, queryable ->
-          from(
-            q in queryable,
-            where: ^FatDynamics.not_is_nil_dynamic(key, true, opts ++ [dynamic_type: :and])
-          )
-        end)
-      end
-
-      # TODO: Add docs and examples of ex_doc for this case here
-      # $where: {score: $not_null}
-      defp query_where(queryable, {k, map_cond}, opts)
-           when map_cond == "$not_null" do
-        from(
-          q in queryable,
-          where: ^FatDynamics.not_is_nil_dynamic(k, true, opts ++ [dynamic_type: :and])
-        )
-      end
+      Enum.reduce(where_params, queryable, fn {k, v}, queryable ->
+        query_where(queryable, {k, v}, opts)
+      end)
     end
+  end
+
+  # TODO: Add docs and examples of ex_doc for this case here
+  defp query_where(queryable, {k, map_cond}, opts) when is_map(map_cond) do
+    queryable =
+      case k do
+        "$or" ->
+          dynamics =
+            Enum.reduce(map_cond, false, fn {key, condition}, dynamics ->
+              case condition do
+                %{"$like" => value} ->
+                  FatDynamics.like_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+
+                %{"$ilike" => value} ->
+                  FatDynamics.ilike_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+
+                %{"$lt" => value} ->
+                  FatDynamics.lt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+
+                %{"$lte" => value} ->
+                  FatDynamics.lte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+
+                %{"$gt" => value} ->
+                  FatDynamics.gt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+
+                %{"$gte" => value} ->
+                  FatDynamics.gte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+
+                condition when not is_list(condition) and not is_map(condition) ->
+                  FatDynamics.eq_dynamic(key, condition, dynamics, opts ++ [dynamic_type: :or])
+
+                _whatever ->
+                  dynamics
+              end
+            end)
+
+          # TODO: confirm its what should be used `where` or `or_where` below
+          from(q in queryable, where: ^dynamics)
+
+        "$not" ->
+          queryable
+
+        _whatever ->
+          queryable
+      end
+
+    dynamics =
+      Enum.reduce(map_cond, true, fn {key, value}, dynamics ->
+        case key do
+          "$like" ->
+            FatDynamics.like_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
+          "$ilike" ->
+            FatDynamics.ilike_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
+          "$not_like" ->
+            FatDynamics.not_like_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
+          "$not_ilike" ->
+            FatDynamics.not_ilike_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
+          "$lt" ->
+            FatDynamics.lt_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
+          "$lte" ->
+            FatDynamics.lte_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
+          "$gt" ->
+            FatDynamics.gt_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
+          "$gte" ->
+            FatDynamics.gte_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
+          "$between" ->
+            FatDynamics.between_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
+          "$between_equal" ->
+            FatDynamics.between_equal_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
+          "$not_between" ->
+            FatDynamics.not_between_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
+          "$not_between_equal" ->
+            FatDynamics.not_between_equal_dynamic(
+              k,
+              value,
+              dynamics,
+              opts ++ [dynamic_type: :and]
+            )
+
+          "$in" ->
+            FatDynamics.in_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
+          "$not_in" ->
+            FatDynamics.not_in_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
+          "$contains" ->
+            FatDynamics.contains_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
+          "$contains_any" ->
+            FatDynamics.contains_any_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
+          "$not" ->
+            # TODO:
+            # Example
+            # "id": {
+            # TODO: implement now
+            # 	"$not": {
+            # 		"$eq": [1,2,3],
+            # 		"$gt": 10,
+            # 		"$lt": 1
+            # 	}
+            # }
+            # First call the relevent dynamic then not_dynamic
+            # e.g id: {"$not": {"$eq": [1,2,3]}
+            # First call equal_dynamic with these params and then not_dynamic
+
+            # Example
+            # "$not": {
+            # 	"id": [
+            # 		1,2,3,
+            #    ],
+            #   "customer_rating": null,
+            # 	"$gt": { "id": 10 }
+            #  }
+            queryable
+
+          "$or" ->
+            # TODO:
+            # Example
+            # "id": {
+            # 	"$not": [
+            # 		[1,2,3],
+            # 		{ "$gt": 10 }
+            # 	]
+            # }
+
+            # Example
+            # "$or": {
+            # 	"id": [
+            # 		1,2,3,
+            #    ],
+            # 	"$gt": { "id": 10 }
+            #  }
+            queryable
+
+          _ ->
+            # TODO:
+            queryable
+        end
+      end)
+
+    from(q in queryable, where: ^dynamics)
+  end
+
+  # TODO: Add docs and examples of ex_doc for this case here
+  # $where: {score == nil}
+  defp query_where(queryable, {k, map_cond}, opts) when is_nil(map_cond) do
+    from(
+      q in queryable,
+      where: ^FatDynamics.is_nil_dynamic(k, true, opts ++ [dynamic_type: :and])
+    )
+  end
+
+  # TODO: Add docs and examples of ex_doc for this case here
+  # TODO: check if following code is needed
+  # $where: {score: 5}
+  defp query_where(queryable, {k, map_cond}, opts) when not is_list(map_cond) do
+    from(
+      q in queryable,
+      where: ^FatDynamics.eq_dynamic(k, map_cond, true, opts ++ [dynamic_type: :and])
+    )
+  end
+
+  # TODO: Add docs and examples of ex_doc for this case here
+  # $where: {$not_null: [score, rating]}
+  defp query_where(queryable, {k, map_cond}, opts)
+       when is_list(map_cond) and k == "$not_null" do
+    Enum.reduce(map_cond, queryable, fn key, queryable ->
+      from(
+        q in queryable,
+        where: ^FatDynamics.not_is_nil_dynamic(key, true, opts ++ [dynamic_type: :and])
+      )
+    end)
+  end
+
+  # TODO: Add docs and examples of ex_doc for this case here
+  # $where: {score: $not_null}
+  defp query_where(queryable, {k, map_cond}, opts)
+       when map_cond == "$not_null" do
+    from(
+      q in queryable,
+      where: ^FatDynamics.not_is_nil_dynamic(k, true, opts ++ [dynamic_type: :and])
+    )
   end
 end

@@ -1,6 +1,6 @@
 defmodule Query.SelectTest do
   use ExUnit.Case
-  import FatEcto.FatQuery
+  import MyApp.Query
   import Ecto.Query
 
   test "returns the select query fields" do
@@ -100,6 +100,7 @@ defmodule Query.SelectTest do
       "$include" => %{
         "fat_doctors" => %{
           "$include" => ["fat_patients"],
+          "$limit" => 200,
           "$where" => %{"name" => "ham"},
           "$order" => %{"id" => "$desc"}
         }
@@ -111,7 +112,7 @@ defmodule Query.SelectTest do
         d in FatEcto.FatDoctor,
         where: d.name == ^"ham" and ^true,
         order_by: [desc: d.id],
-        limit: ^10,
+        limit: ^107,
         offset: ^0,
         preload: [:fat_patients]
       )
@@ -126,7 +127,7 @@ defmodule Query.SelectTest do
         preload: [fat_doctors: ^query]
       )
 
-    result = build(FatEcto.FatHospital, opts)
+    result = build(FatEcto.FatHospital, opts, max_limit: 107)
     assert inspect(result) == inspect(expected)
   end
 end

@@ -10,6 +10,7 @@ defmodule FatEcto.MixProject do
       build_embedded: Mix.env() == :prod,
       deps: deps(),
       name: "FatEcto",
+      elixirc_paths: elixirc_paths(Mix.env()),
       description: description(),
       package: package(),
       docs: [
@@ -28,6 +29,10 @@ defmodule FatEcto.MixProject do
       extra_applications: [:logger]
     ]
   end
+
+  # Specifies which paths to compile per environment.
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do

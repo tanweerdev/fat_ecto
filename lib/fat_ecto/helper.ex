@@ -1,74 +1,72 @@
 defmodule FatEcto.FatHelper do
   @moduledoc false
-  alias FatEcto.FatHelper
+  # alias FatEcto.FatHelper
 
   require Ecto.Query
   @min_limit 0
-  @max_limit Application.get_env(:fat_ecto, :repo)[:max_limit] || 100
-  @default_limit Application.get_env(:fat_ecto, :repo)[:default_limit] || 10
 
   @min_skip 0
   @default_skip 0
 
+  def get_limit_bounds(options) do
+    max_limit = options[:max_limit] || 100
+    default_limit = options[:default_limit] || 10
+    {max_limit, default_limit}
+  end
+
   # TODO: Add docs and examples for ex_doc
   def get_skip_value(params) do
     {skip, params} = Keyword.pop(params, :skip, @min_skip)
-    skip = FatHelper.integer_parse!(skip)
+    skip = FatUtils.Integer.parse!(skip)
     skip = if skip > @default_skip, do: skip, else: @default_skip
     {skip, params}
   end
 
   # TODO: Add docs and examples for ex_doc
-  def get_limit_value(params) do
-    {limit, params} = Keyword.pop(params, :limit, @default_limit)
-    limit = FatHelper.integer_parse!(limit)
+  def get_limit_value(params, options \\ []) do
+    {max_limit, default_limit} = get_limit_bounds(options)
+    {limit, params} = Keyword.pop(params, :limit, default_limit)
+    limit = FatUtils.Integer.parse!(limit)
     limit = if limit > @min_limit, do: limit, else: @min_limit
-    limit = if limit > @max_limit, do: @max_limit, else: limit
+    limit = if limit > max_limit, do: max_limit, else: limit
     {limit, params}
   end
 
   # TODO: Add docs and examples for ex_doc
-  def to_struct(kind, attrs) do
-    struct = struct(kind)
+  # def to_struct(kind, attrs) do
+  #   struct = struct(kind)
 
-    Enum.reduce(Map.to_list(struct), struct, fn {k, _}, acc ->
-      case Map.fetch(attrs, Atom.to_string(k)) do
-        {:ok, v} -> %{acc | k => v}
-        :error -> acc
-      end
-    end)
-  end
+  #   Enum.reduce(Map.to_list(struct), struct, fn {k, _}, acc ->
+  #     case Map.fetch(attrs, Atom.to_string(k)) do
+  #       {:ok, v} -> %{acc | k => v}
+  #       :error -> acc
+  #     end
+  #   end)
+  # end
 
-  defp schema_fields(%{from: {_source, schema}}) when schema != nil,
-    do: schema.__schema__(:fields)
+  # defp schema_fields(%{from: {_source, schema}}) when schema != nil,
+  #   do: schema.__schema__(:fields)
 
-  defp schema_fields(_query), do: nil
-
-  # TODO: Add docs and examples for ex_doc
-  def field_exists?(queryable, column) do
-    query = Ecto.Queryable.to_query(queryable)
-    fields = schema_fields(query)
-
-    if fields == nil do
-      true
-    else
-      Enum.member?(fields, column)
-    end
-  end
+  # defp schema_fields(_query), do: nil
 
   # TODO: Add docs and examples for ex_doc
-  def get_limit(limit_param) do
-    limit = FatHelper.integer_parse!(limit_param || @default_limit)
-    limit = if limit > @min_limit, do: limit, else: @min_limit
-    if limit > @max_limit, do: @max_limit, else: limit
-  end
+  # def field_exists?(queryable, column) do
+  #   query = Ecto.Queryable.to_query(queryable)
+  #   fields = schema_fields(query)
+
+  #   if fields == nil do
+  #     true
+  #   else
+  #     Enum.member?(fields, column)
+  #   end
+  # end
 
   # TODO: Add docs and examples for ex_doc
-  def fields(select) do
-    map = select
-    fields = map["$fields"]
-    Enum.map(fields, &string_to_existing_atom/1)
-  end
+  # def fields(select) do
+  #   map = select
+  #   fields = map["$fields"]
+  #   Enum.map(fields, &string_to_existing_atom/1)
+  # end
 
   # TODO: Add docs and examples for ex_doc
   def is_fat_ecto_field?(value) do
@@ -110,40 +108,40 @@ defmodule FatEcto.FatHelper do
     end
   end
 
-  defp replacement_for(key, tuple) do
-    map = Enum.into(tuple, %{})
+  # defp replacement_for(key, tuple) do
+  #   map = Enum.into(tuple, %{})
 
-    if Map.has_key?(map, to_string(key)) do
-      tuple
-      |> Enum.find(fn {x, _} -> x == to_string(key) end)
-      |> elem(1)
-    else
-      key
-    end
-  end
+  #   if Map.has_key?(map, to_string(key)) do
+  #     tuple
+  #     |> Enum.find(fn {x, _} -> x == to_string(key) end)
+  #     |> elem(1)
+  #   else
+  #     key
+  #   end
+  # end
+
+  # # TODO: Add docs and examples for ex_doc
+  # def replace_keys(map, tuple) do
+  #   for {k, v} <- map, into: %{}, do: {replacement_for(k, tuple), v}
+  # end
 
   # TODO: Add docs and examples for ex_doc
-  def replace_keys(map, tuple) do
-    for {k, v} <- map, into: %{}, do: {replacement_for(k, tuple), v}
-  end
+  # def field_exists(queryable, opts_select, model) do
+  #   queryable_schema_fields = queryable.__schema__(:fields)
+  #   model_schema_fields = model.__schema__(:fields)
+  #   values = Map.values(opts_select)
+  #   map_keys = Enum.map(values, &Map.keys/1)
+  #   single_list = Enum.at(map_keys, 0)
+  #   asso_model = single_list -- ["$fields"]
+  #   asso_model_name = Enum.at(asso_model, 0)
+  #   queryable_fields = opts_select["$select"]["$fields"]
+  #   model_fields = opts_select["$select"][asso_model_name]
 
-  # TODO: Add docs and examples for ex_doc
-  def field_exists(queryable, opts_select, model) do
-    queryable_schema_fields = queryable.__schema__(:fields)
-    model_schema_fields = model.__schema__(:fields)
-    values = Map.values(opts_select)
-    map_keys = Enum.map(values, &Map.keys/1)
-    single_list = Enum.at(map_keys, 0)
-    asso_model = single_list -- ["$fields"]
-    asso_model_name = Enum.at(asso_model, 0)
-    queryable_fields = opts_select["$select"]["$fields"]
-    model_fields = opts_select["$select"][asso_model_name]
+  #   queryable_f_exists = Enum.map(queryable_fields, &string_to_atom/1) -- queryable_schema_fields
 
-    queryable_f_exists = Enum.map(queryable_fields, &string_to_atom/1) -- queryable_schema_fields
-
-    model_f_exists = Enum.map(model_fields, &string_to_atom/1) -- model_schema_fields
-    queryable_f_exists ++ model_f_exists
-  end
+  #   model_f_exists = Enum.map(model_fields, &string_to_atom/1) -- model_schema_fields
+  #   queryable_f_exists ++ model_f_exists
+  # end
 
   def string_to_atom(str) do
     String.to_atom(str)
@@ -194,31 +192,5 @@ defmodule FatEcto.FatHelper do
           related_key: nil
         }
     end
-  end
-
-  def integer_parse!(int_str) do
-    if is_integer(int_str) do
-      int_str
-    else
-      case Integer.parse(int_str) do
-        {integer, _} ->
-          integer
-
-        _whatever ->
-          nil
-      end
-    end
-  end
-
-  def map_deep_merge(left, right) do
-    Map.merge(left, right, &deep_resolve/3)
-  end
-
-  defp deep_resolve(_key, %{} = left, %{} = right) do
-    map_deep_merge(left, right)
-  end
-
-  defp deep_resolve(_key, _left, right) do
-    right
   end
 end

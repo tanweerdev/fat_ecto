@@ -1,6 +1,6 @@
 defmodule Query.OrderTest do
   use ExUnit.Case
-  import FatEcto.FatQuery
+  import MyApp.Query
   import Ecto.Query
 
   test "returns the query where field is desc " do

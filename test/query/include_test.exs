@@ -1,6 +1,6 @@
 defmodule Query.IncludeTest do
   use ExUnit.Case
-  import FatEcto.FatQuery
+  import MyApp.Query
   import Ecto.Query
 
   test "returns the query with include associated model" do
@@ -90,7 +90,7 @@ defmodule Query.IncludeTest do
         h in FatEcto.FatHospital,
         where: h.id == ^10 and ^true,
         order_by: [asc: h.id],
-        limit: ^10,
+        limit: ^103,
         offset: ^0
       )
 
@@ -122,7 +122,7 @@ defmodule Query.IncludeTest do
         h in FatEcto.FatHospital,
         where: h.name == ^"Saint" and ^true,
         order_by: [desc: h.id],
-        limit: ^10,
+        limit: ^103,
         offset: ^0
       )
 
@@ -138,7 +138,6 @@ defmodule Query.IncludeTest do
     assert inspect(result) == inspect(expected)
   end
 
-  @tag :dev
   test "returns the query with include associated model and inner join" do
     opts = %{
       "$include" => %{
@@ -157,7 +156,7 @@ defmodule Query.IncludeTest do
         h in FatEcto.FatHospital,
         where: h.name == ^"Saint" and ^true,
         order_by: [desc: h.id],
-        limit: ^10,
+        limit: ^103,
         offset: ^0
       )
 
@@ -191,7 +190,7 @@ defmodule Query.IncludeTest do
         h in FatEcto.FatHospital,
         where: h.name == ^"Saint" and ^true,
         order_by: [desc: h.id],
-        limit: ^10,
+        limit: ^103,
         offset: ^0
       )
 
@@ -230,7 +229,7 @@ defmodule Query.IncludeTest do
     query =
       from(
         h in FatEcto.FatHospital,
-        limit: ^10,
+        limit: ^103,
         offset: ^0,
         preload: [:fat_rooms]
       )
@@ -260,7 +259,7 @@ defmodule Query.IncludeTest do
       from(
         h in FatEcto.FatHospital,
         where: h.name == ^"ham" and ^true,
-        limit: ^10,
+        limit: ^103,
         offset: ^0,
         preload: [:fat_rooms]
       )
@@ -290,7 +289,7 @@ defmodule Query.IncludeTest do
       from(
         h in FatEcto.FatHospital,
         order_by: [desc: h.id],
-        limit: ^10,
+        limit: ^103,
         offset: ^0,
         preload: [:fat_rooms]
       )
@@ -314,7 +313,7 @@ defmodule Query.IncludeTest do
     query =
       from(
         h in FatEcto.FatHospital,
-        limit: ^10,
+        limit: ^103,
         offset: ^0,
         preload: [:fat_patients, :fat_rooms]
       )
@@ -344,7 +343,7 @@ defmodule Query.IncludeTest do
       from(
         h in FatEcto.FatHospital,
         where: h.name == ^"ham" and ^true,
-        limit: ^10,
+        limit: ^103,
         offset: ^0,
         preload: [:fat_patients, :fat_rooms]
       )
@@ -374,7 +373,7 @@ defmodule Query.IncludeTest do
       from(
         h in FatEcto.FatHospital,
         order_by: [asc: h.id],
-        limit: ^10,
+        limit: ^103,
         offset: ^0,
         preload: [:fat_patients, :fat_rooms]
       )

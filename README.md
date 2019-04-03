@@ -26,16 +26,15 @@ or
 ## Config
 
 ```elixir
-config :fat_ecto, :repo,
-  seed_base_path: "priv/seed/csvs/",
-  query_repo: ExApi.Repo,
+config :my_app, :fat_ecto,
+  repo: ExApi.Repo,
   default_limit: 10,
   max_limit: 100
 ```
 
 ## Usage
 
-Once installed you can _import_ **FatEcto.FatQuery** inside your module and use the `build method`. Which is the entry method for building every query. And also the main method for the **FatEcto.FatQuery**.
+Once installed you can _use_ **FatEcto.FatQuery** inside your module and use the `build method`. Which is the entry method for building every query. And also the main method for the **FatEcto.FatQuery**.
 
 ```elixir
 build(schema_name, params)
@@ -44,7 +43,11 @@ build(schema_name, params)
 #### Example
 
 ```eliixir
-import FatEcto.FatQuery
+defmodule MyApp.Query do
+  use FatEcto.FatQuery, otp_app: :my_app, max_limit: 103, default_limit: 34
+end
+
+import MyApp.Query
 query_opts = %{
       "$select" => %{
         "$fields" => ["name", "location", "rating"],
