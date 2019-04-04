@@ -42,20 +42,69 @@ defmodule FatUtils.Changeset do
     start_date = Ecto.Changeset.get_field(changeset, start_date_key)
     end_date = Ecto.Changeset.get_field(changeset, end_date_key)
 
+    {error_message_title, error_message} =
+      error_msg_title(options, start_date_key, "must be before #{end_date_key}")
+
     cond do
       options[:compare_type] == :time ->
-        if start_date && end_date && Time.diff(end_date, start_date) <= 0 do
-          Ecto.Changeset.add_error(changeset, start_date_key, "must be before #{end_date_key}")
+        if start_date && end_date && Time.diff(start_date, end_date) >= 0 do
+          add_error(changeset, error_message_title, error_message)
         else
           changeset
         end
 
       true ->
-        if start_date && end_date && DateTime.diff(end_date, start_date) <= 0 do
-          Ecto.Changeset.add_error(changeset, start_date_key, "must be before #{end_date_key}")
+        if start_date && end_date && DateTime.diff(start_date, end_date) >= 0 do
+          add_error(changeset, error_message_title, error_message)
         else
           changeset
         end
     end
+  end
+
+  def validate_before_equal(changeset, start_date_key, end_date_key, options \\ []) do
+    start_date = Ecto.Changeset.get_field(changeset, start_date_key)
+    end_date = Ecto.Changeset.get_field(changeset, end_date_key)
+
+    {error_message_title, error_message} =
+      error_msg_title(options, start_date_key, "must be before or equal to #{end_date_key}")
+
+    cond do
+      options[:compare_type] == :time ->
+        if start_date && end_date && Time.diff(start_date, end_date) > 0 do
+          add_error(changeset, error_message_title, error_message)
+        else
+          changeset
+        end
+
+      true ->
+        if start_date && end_date && DateTime.diff(start_date, end_date) > 0 do
+          add_error(changeset, error_message_title, error_message)
+        else
+          changeset
+        end
+    end
+  end
+
+  def error_msg_title(options, field_key, default_error_msg) do
+    error_message_title =
+      if options[:error_message_title] do
+        options[:error_message_title]
+      else
+        field_key
+      end
+
+    error_message =
+      if options[:error_message] do
+        options[:error_message]
+      else
+        default_error_msg
+      end
+
+    {error_message_title, error_message}
+  end
+
+  def add_error(changeset, error_message_title, error_message \\ "is invalid") do
+    Ecto.Changeset.add_error(changeset, error_message_title, error_message)
   end
 end
