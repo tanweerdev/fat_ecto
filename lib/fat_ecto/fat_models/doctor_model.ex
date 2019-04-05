@@ -20,6 +20,6 @@ defmodule FatEcto.FatDoctor do
   def changeset(data) when is_map(data) do
     %__MODULE__{}
     |> cast(data, @fields)
-    |> apply_changes()
+    |> validate_required([:name, :designation])
   end
 end
