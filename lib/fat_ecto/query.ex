@@ -177,7 +177,7 @@ defmodule FatEcto.FatQuery do
         queryable = build(queryable, query_params, fetch_options)
 
         fetch_options =
-          [paginate: true]
+          [paginate: true, timeout: 15000]
           |> Keyword.merge(@options)
           |> Keyword.merge(fetch_options)
 
@@ -187,7 +187,31 @@ defmodule FatEcto.FatQuery do
 
           "$all" ->
             if fetch_options[:paginate] == true do
-              {:ok, paginate(queryable, skip: query_params["$skip"], limit: query_params["$limit"])}
+              %{
+                data_query: data_query,
+                skip: skip,
+                limit: limit,
+                count_query: count_query
+              } = paginate(queryable, skip: query_params["$skip"], limit: query_params["$limit"])
+
+              try do
+                {:ok,
+                 %{
+                   data: @repo.all(data_query, timeout: fetch_options[:timeout]),
+                   meta: %{
+                     skip: skip,
+                     limit: limit,
+                     count: @repo.one(count_query, timeout: fetch_options[:timeout])
+                   }
+                 }}
+              rescue
+                DBConnection.ConnectionError ->
+                  # IO.inspect("fat ecto fetch timeout error")
+                  {:error, :timeout}
+
+                other_error ->
+                  {:error, other_error}
+              end
             else
               {:ok, @repo.all(queryable)}
             end

@@ -5,7 +5,6 @@ defmodule FatEcto.FatPaginator do
     quote location: :keep do
       import Ecto.Query
       # TODO: @repo.all and @repo.one nil warning
-      @repo unquote(options)[:repo]
       @options unquote(options)
       # TODO: Add docs and examples for ex_doc
       @doc """
@@ -47,34 +46,27 @@ defmodule FatEcto.FatPaginator do
         {limit, _params} = FatEcto.FatHelper.get_limit_value(params, @options)
 
         %{
-          data: data(query, skip, limit),
-          meta: meta(query, skip, limit)
-        }
-      end
-
-      defp meta(query, skip, limit) do
-        %{
+          data_query: data_query(query, skip, limit),
           skip: skip,
           limit: limit,
-          count: count(query)
+          count_query: count_query(query)
         }
       end
 
-      defp data(query, skip, limit) do
+      defp data_query(query, skip, limit) do
         query
         |> limit([q], ^limit)
         |> offset([q], ^skip)
-        |> @repo.all()
       end
 
-      defp count(query) do
+      defp count_query(query) do
         queryable =
           query
           |> exclude(:order_by)
           |> exclude(:preload)
           |> exclude(:select)
 
-        @repo.one(from(q in queryable, select: fragment("count(*)")))
+        from(q in queryable, select: fragment("count(*)"))
       end
     end
   end
