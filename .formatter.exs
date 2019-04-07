@@ -8,6 +8,7 @@
     assert_format: 3,
     assert_same: 1,
     assert_same: 2,
+    line_length: 110,
 
     # Errors tests
     assert_eval_raise: 3,
@@ -20,5 +21,5 @@
   # importing configs from other libraries it is depending
   # import_deps: [:dependency1, :dependency2],
 
-  line_length: 120
+  line_length: 110
 ]

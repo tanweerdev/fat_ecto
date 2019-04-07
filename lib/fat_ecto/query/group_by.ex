@@ -40,18 +40,87 @@ defmodule FatEcto.FatQuery.FatGroupBy do
       case group_by_params do
         group_by_params when is_list(group_by_params) ->
           Enum.reduce(group_by_params, queryable, fn group_by_field, queryable ->
-            from(
-              q in queryable,
-              group_by: field(q, ^FatHelper.string_to_existing_atom(group_by_field))
-            )
+            _group_by(queryable, group_by_field)
+          end)
+
+        group_by_params when is_map(group_by_params) ->
+          Enum.reduce(group_by_params, queryable, fn {group_by_field, type}, queryable ->
+            case type do
+              "$date_part_month" ->
+                # from u in User,
+                # group_by: fragment("date_part('month', ?)", u.inserted_at),
+                # select:   {fragment("date_part('month', ?)", u.inserted_at), count(u.id)}
+
+                from(
+                  q in queryable,
+                  group_by:
+                    fragment(
+                      "date_part('month', ?)",
+                      field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+                    ),
+                  select_merge: %{
+                    ^group_by_field =>
+                      fragment(
+                        "date_part('month', ?)",
+                        field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+                      )
+                  }
+                )
+
+              "$date_part_year" ->
+                # from u in User,
+                # group_by: fragment("date_part('year', ?)", u.inserted_at),
+                # select:   {fragment("date_part('year', ?)", u.inserted_at), count(u.id)}
+
+                from(
+                  q in queryable,
+                  group_by:
+                    fragment(
+                      "date_part('year', ?)",
+                      field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+                    ),
+                  select_merge: %{
+                    ^group_by_field =>
+                      fragment(
+                        "date_part('year', ?)",
+                        field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+                      )
+                  }
+                )
+
+              # "$date_part_month_count" ->
+              #   # from u in User,
+              #   # group_by: fragment("date_part('month', ?)", u.inserted_at),
+              #   # select:   {fragment("date_part('month', ?)", u.inserted_at), count(u.id)}
+
+              #   from(
+              #     q in queryable,
+              #     group_by:
+              #       fragment(
+              #         "date_part('month', ?)",
+              #         field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+              #       ),
+              #       select_merge: %{group_by_field => fragment(
+              #         "date_part('month', ?)",
+              #         field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+              #       ), count: fragment("count(*)")}
+              #   )
+
+              "$field" ->
+                _group_by(queryable, group_by_field)
+            end
           end)
 
         group_by_params when is_binary(group_by_params) ->
-          from(
-            q in queryable,
-            group_by: field(q, ^FatHelper.string_to_existing_atom(group_by_params))
-          )
+          _group_by(queryable, group_by_params)
       end
     end
+  end
+
+  defp _group_by(queryable, group_by_param) do
+    from(
+      q in queryable,
+      group_by: field(q, ^FatHelper.string_to_existing_atom(group_by_param))
+    )
   end
 end

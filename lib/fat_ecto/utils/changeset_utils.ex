@@ -42,7 +42,8 @@ defmodule FatUtils.Changeset do
     start_date = Ecto.Changeset.get_field(changeset, start_date_key)
     end_date = Ecto.Changeset.get_field(changeset, end_date_key)
 
-    {error_message_title, error_message} = error_msg_title(options, start_date_key, "must be before #{end_date_key}")
+    {error_message_title, error_message} =
+      error_msg_title(options, start_date_key, "must be before #{end_date_key}")
 
     cond do
       options[:compare_type] == :time ->
