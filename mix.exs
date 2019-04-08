@@ -72,10 +72,10 @@ defmodule FatEcto.MixProject do
       "ecto.setup.quite": ["ecto.create", "ecto.init", "ecto.migrate"],
       test: [
         "ecto.setup.quite",
-        #"run apps/haitracker/priv/repo/role_action_seeds.exs",
+        # "run apps/haitracker/priv/repo/role_action_seeds.exs",
         "role_action_seeds",
         "test"
-      ],
+      ]
     ]
   end
 end
