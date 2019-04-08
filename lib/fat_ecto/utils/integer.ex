@@ -1,5 +1,11 @@
 defmodule FatUtils.Integer do
-  @moduledoc false
+  @moduledoc """
+    Parse integer from strings.
+  """
+
+  @doc """
+    Parse integer from string and return result in the form of tuple. 
+  """
   def parse(int_str) do
     if is_integer(int_str) do
       {:ok, int_str}
@@ -13,6 +19,10 @@ defmodule FatUtils.Integer do
       end
     end
   end
+
+  @doc """
+    Parse integer from string and return result.
+  """
 
   def parse!(int_str) do
     if is_integer(int_str) do
