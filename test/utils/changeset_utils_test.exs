@@ -33,7 +33,12 @@ defmodule Utils.ChangesetTest do
     {:ok, end_date, _} = DateTime.from_iso8601("2016-01-02T01:00:00Z")
 
     changeset =
-      FatEcto.FatDoctor.changeset(%{start_date: start_date, end_date: end_date, name: "12345", designation: "testing"})
+      FatEcto.FatDoctor.changeset(%{
+        start_date: start_date,
+        end_date: end_date,
+        name: "12345",
+        designation: "testing"
+      })
 
     changeset = validate_before(changeset, :start_date, :end_date)
     assert changeset.errors == [start_date: {"must be before end_date", []}]
@@ -44,7 +49,12 @@ defmodule Utils.ChangesetTest do
     {:ok, end_date, _} = DateTime.from_iso8601("2017-01-01T00:00:00Z")
 
     changeset =
-      FatEcto.FatDoctor.changeset(%{start_date: start_date, end_date: end_date, name: "12345", designation: "testing"})
+      FatEcto.FatDoctor.changeset(%{
+        start_date: start_date,
+        end_date: end_date,
+        name: "12345",
+        designation: "testing"
+      })
 
     changeset = validate_before(changeset, :start_date, :end_date)
     assert changeset.errors == [start_date: {"must be before end_date", []}]
@@ -55,7 +65,12 @@ defmodule Utils.ChangesetTest do
     {:ok, end_date, _} = DateTime.from_iso8601("2016-01-02T01:00:00Z")
 
     changeset =
-      FatEcto.FatDoctor.changeset(%{start_date: start_date, end_date: end_date, name: "12345", designation: "testing"})
+      FatEcto.FatDoctor.changeset(%{
+        start_date: start_date,
+        end_date: end_date,
+        name: "12345",
+        designation: "testing"
+      })
 
     changeset = validate_before_equal(changeset, :start_date, :end_date)
     assert changeset.errors == [start_date: {"must be before or equal to end_date", []}]
@@ -66,7 +81,12 @@ defmodule Utils.ChangesetTest do
     {:ok, end_date, _} = DateTime.from_iso8601("2017-01-01T00:00:00Z")
 
     changeset =
-      FatEcto.FatDoctor.changeset(%{start_date: start_date, end_date: end_date, name: "12345", designation: "testing"})
+      FatEcto.FatDoctor.changeset(%{
+        start_date: start_date,
+        end_date: end_date,
+        name: "12345",
+        designation: "testing"
+      })
 
     changeset = validate_before_equal(changeset, :start_date, :end_date)
     assert changeset.valid?

@@ -71,7 +71,8 @@ defmodule FatUtils.Map do
 
     Enum.reduce(Map.drop(record, schema_keys), %{}, fn {k, v}, acc ->
       cond do
-        is_list(v) && List.first(v) && is_map(List.first(v)) && Enum.all?(schema_keys, &Map.has_key?(List.first(v), &1)) ->
+        is_list(v) && List.first(v) && is_map(List.first(v)) &&
+            Enum.all?(schema_keys, &Map.has_key?(List.first(v), &1)) ->
           values =
             Enum.reduce(v, [], fn rec, acc ->
               acc ++ [sanitize_map(rec)]

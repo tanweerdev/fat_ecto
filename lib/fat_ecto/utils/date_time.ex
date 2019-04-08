@@ -7,6 +7,16 @@ defmodule FatUtils.DateTime do
     Takes date time in the form of integer to convert to unix format and also in binary format to convert to iso8601.
   """
   def parse(dtu) do
+    case parse!(dtu) do
+      nil -> :error
+      datetime -> {:ok, datetime}
+    end
+  end
+
+  @doc """
+    Takes date time in the form of integer to convert to unix format and also in binary format to convert to iso8601.
+  """
+  def parse!(dtu) do
     cond do
       is_integer(dtu) && from_uni?(dtu) ->
         {:ok, dt} = DateTime.from_unix(dtu)
