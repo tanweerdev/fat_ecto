@@ -10,7 +10,7 @@ defmodule Utils.BasicLoggerTest do
              "details => data: #[name: {\"can't be blank\", [validation: :required]}, designation: {\"can't be blank\", [validation: :required]}]"
   end
 
-  test "log sucess message" do
+  test "log success message" do
     changeset = FatEcto.FatDoctor.changeset(%{name: "John", designation: "testing"})
     assert capture_log(fn -> log_action_success(changeset.valid?) end) =~ ""
   end
