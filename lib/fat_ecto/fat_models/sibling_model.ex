@@ -9,7 +9,7 @@ defmodule FatEcto.Sibling do
     field(:description, :string)
     field(:phone, :string)
     field(:is_active, :boolean)
-    belongs_to(:context, FatEcto.Context, foreign_key: :context_id)
+    belongs_to(:context, FatEcto.ContextModel, foreign_key: :context_id)
   end
 
   def changeset(struct, params \\ %{}) do
