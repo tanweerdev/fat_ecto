@@ -204,7 +204,6 @@ defmodule Fat.ContextTest do
     assert changeset.valid?
   end
 
-  @tag :failing
   test "Get all records with associations and which meets specific condition" do
     {:ok, context} =
       Repo.insert(%Context{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
@@ -218,6 +217,6 @@ defmodule Fat.ContextTest do
       phone: "123456"
     })
 
-    # record =  ContextMacro.get_all_by(Context, name: "Doe", [:siblings])
+    record = ContextMacro.get_all_by(Context, [name: "Doe"], [:siblings])
   end
 end

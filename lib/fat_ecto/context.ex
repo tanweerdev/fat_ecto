@@ -147,7 +147,8 @@ defmodule FatEcto.FatContext do
         #   end
 
         schema
-        |> @repo.all(Ecto.Query.where(schema, ^keyword_cond))
+        |> Ecto.Query.where(^keyword_cond)
+        |> @repo.all()
         |> @repo.preload(preloads)
       end
     end
