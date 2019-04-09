@@ -1,4 +1,4 @@
-defmodule FatEcto.Context do
+defmodule FatEcto.ContextModel do
   @moduledoc false
   use Ecto.Schema
   import Ecto.Changeset
@@ -8,7 +8,7 @@ defmodule FatEcto.Context do
     field(:purpose, :string)
     field(:description, :string)
     field(:is_active, :boolean)
-    has_many(:siblings, FatEcto.Sibling)
+    has_many(:siblings, FatEcto.Sibling, foreign_key: :context_id)
   end
 
   def changeset(struct, params \\ %{}) do
