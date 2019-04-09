@@ -19,13 +19,13 @@ defmodule FatEcto.FatContext do
       def first(schema, preloads \\ []) do
         query =
           cond do
-            # Enum.member?(schema.__schema__(:fields), :id) &&
-            #     schema.__schema__(:field_source, :id) == :id ->
-            #   from(q in schema, order_by: q.id, limit: 1)
+            Enum.member?(schema.__schema__(:fields), :id) &&
+                schema.__schema__(:field_source, :id) == :id ->
+              from(q in schema, order_by: q.id, limit: 1)
 
-            # Enum.member?(schema.__schema__(:fields), :inserted_at) &&
-            #     schema.__schema__(:field_source, :inserted_at) == :naive_datetime ->
-            #   from(q in schema, order_by: q.inserted_at, limit: 1)
+            Enum.member?(schema.__schema__(:fields), :inserted_at) &&
+                schema.__schema__(:field_source, :inserted_at) == :naive_datetime ->
+              from(q in schema, order_by: q.inserted_at, limit: 1)
 
             true ->
               from(q in schema, limit: 1)
@@ -38,13 +38,13 @@ defmodule FatEcto.FatContext do
       def last(schema, preloads \\ []) do
         query =
           cond do
-            # Enum.member?(schema.__schema__(:fields), :id) &&
-            #     schema.__schema__(:field_source, :id) == :id ->
-            #   from(q in schema, order_by: [desc: q.id], limit: 1)
+            Enum.member?(schema.__schema__(:fields), :id) &&
+                schema.__schema__(:field_source, :id) == :id ->
+              from(q in schema, order_by: [desc: q.id], limit: 1)
 
-            # Enum.member?(schema.__schema__(:fields), :inserted_at) &&
-            #     schema.__schema__(:field_source, :inserted_at) == :naive_datetime ->
-            #   from(q in schema, order_by: [desc: q.inserted_at], limit: 1)
+            Enum.member?(schema.__schema__(:fields), :inserted_at) &&
+                schema.__schema__(:field_source, :inserted_at) == :naive_datetime ->
+              from(q in schema, order_by: [desc: q.inserted_at], limit: 1)
 
             true ->
               from(q in schema, limit: 1)
