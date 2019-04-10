@@ -55,151 +55,151 @@ defmodule FatEcto.FatQuery.FatJoin do
 
   """
 
-  def build_join(queryable, join_params, join_type \\ "$join") do
-    case join_params do
-      nil ->
-        queryable
+  def build_join(queryable, join_params, join_type \\ "$join")
 
-      # TODO: Add docs and examples of ex_doc for this case here
-      _join_params ->
-        Enum.reduce(join_params, queryable, fn {join_key, join_item}, queryable ->
-          join_table = join_item["$table"] || join_key
+  def build_join(queryable, nil, _join_type) do
+    queryable
+  end
 
-          join =
-            join_type
-            |> String.replace("_join", "")
-            |> String.replace("$", "")
-            |> FatHelper.string_to_atom()
+  def build_join(queryable, join_params, join_type) do
+    # TODO: Add docs and examples of ex_doc for this case here
+    Enum.reduce(join_params, queryable, fn {join_key, join_item}, queryable ->
+      join_table = join_item["$table"] || join_key
 
-          queryable =
-            case join_item["$on_type"] do
-              # TODO: Add docs and examples of ex_doc for this case here
-              "$not_eq" ->
-                join(
-                  queryable,
-                  join,
-                  [q],
-                  jt in ^join_table,
-                  on:
-                    field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) !=
-                      field(
-                        jt,
-                        ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
-                      )
-                )
+      join =
+        join_type
+        |> String.replace("_join", "")
+        |> String.replace("$", "")
+        |> FatHelper.string_to_atom()
 
-              "$gt" ->
-                if FatHelper.is_fat_ecto_field?(join_item["$gt"]) do
-                  join(
-                    queryable,
-                    join,
-                    [q],
-                    jt in ^join_table,
-                    on:
-                      field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) >
-                        field(
-                          jt,
-                          ^FatHelper.string_to_atom(join_item["$gt"])
-                        )
+      queryable =
+        case join_item["$on_type"] do
+          # TODO: Add docs and examples of ex_doc for this case here
+          "$not_eq" ->
+            join(
+              queryable,
+              join,
+              [q],
+              jt in ^join_table,
+              on:
+                field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) !=
+                  field(
+                    jt,
+                    ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
                   )
-                else
-                  join(
-                    queryable,
-                    join,
-                    [q],
-                    jt in ^join_table,
-                    on:
-                      field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) >
-                        field(
-                          jt,
-                          ^FatHelper.string_to_atom(join_item["$gt"])
-                        )
-                  )
-                end
+            )
 
-              "$lt" ->
-                if FatHelper.is_fat_ecto_field?(join_item["$gt"]) do
-                  join(
-                    queryable,
-                    join,
-                    [q],
-                    jt in ^join_table,
-                    on:
-                      field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) <
-                        field(
-                          jt,
-                          ^FatHelper.string_to_atom(join_item["$gt"])
-                        )
-                  )
-                else
-                  join(
-                    queryable,
-                    join,
-                    [q],
-                    jt in ^join_table,
-                    on:
-                      field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) <
-                        field(
-                          jt,
-                          ^FatHelper.string_to_atom(join_item["$gt"])
-                        )
-                  )
-                end
-
-              # TODO: Add docs and examples of ex_doc for this case here
-              "$in_x" ->
-                join(
-                  queryable,
-                  join,
-                  [q],
-                  jt in ^join_table,
-                  on:
-                    field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) in field(
-                      jt,
-                      ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
-                    )
-                )
-
-              # TODO: Add docs and examples of ex_doc for this case here
-              "$in" ->
-                join(
-                  queryable,
-                  join,
-                  [q],
-                  jt in ^join_table,
-                  on:
+          "$gt" ->
+            if FatHelper.is_fat_ecto_field?(join_item["$gt"]) do
+              join(
+                queryable,
+                join,
+                [q],
+                jt in ^join_table,
+                on:
+                  field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) >
                     field(
                       jt,
-                      ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
-                    ) in field(
-                      q,
-                      ^FatHelper.string_to_atom(join_item["$on_field"])
+                      ^FatHelper.string_to_atom(join_item["$gt"])
                     )
-                )
+              )
+            else
+              join(
+                queryable,
+                join,
+                [q],
+                jt in ^join_table,
+                on:
+                  field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) >
+                    field(
+                      jt,
+                      ^FatHelper.string_to_atom(join_item["$gt"])
+                    )
+              )
+            end
 
-              # TODO: Add docs and examples of ex_doc for this case here
-              _whatever ->
-                join(
-                  queryable,
-                  join,
-                  [q],
-                  jt in ^join_table,
-                  on:
-                    field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) ==
-                      field(
-                        jt,
-                        ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
-                      )
-                )
+          "$lt" ->
+            if FatHelper.is_fat_ecto_field?(join_item["$gt"]) do
+              join(
+                queryable,
+                join,
+                [q],
+                jt in ^join_table,
+                on:
+                  field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) <
+                    field(
+                      jt,
+                      ^FatHelper.string_to_atom(join_item["$gt"])
+                    )
+              )
+            else
+              join(
+                queryable,
+                join,
+                [q],
+                jt in ^join_table,
+                on:
+                  field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) <
+                    field(
+                      jt,
+                      ^FatHelper.string_to_atom(join_item["$gt"])
+                    )
+              )
             end
 
           # TODO: Add docs and examples of ex_doc for this case here
-          queryable = FatEcto.FatQuery.FatWhere.build_where(queryable, join_item["$where"], binding: :last)
+          "$in_x" ->
+            join(
+              queryable,
+              join,
+              [q],
+              jt in ^join_table,
+              on:
+                field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) in field(
+                  jt,
+                  ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
+                )
+            )
 
-          queryable = order(queryable, join_item["$order"])
-          _select(queryable, join_item, join_key)
-        end)
-    end
+          # TODO: Add docs and examples of ex_doc for this case here
+          "$in" ->
+            join(
+              queryable,
+              join,
+              [q],
+              jt in ^join_table,
+              on:
+                field(
+                  jt,
+                  ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
+                ) in field(
+                  q,
+                  ^FatHelper.string_to_atom(join_item["$on_field"])
+                )
+            )
+
+          # TODO: Add docs and examples of ex_doc for this case here
+          _whatever ->
+            join(
+              queryable,
+              join,
+              [q],
+              jt in ^join_table,
+              on:
+                field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) ==
+                  field(
+                    jt,
+                    ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
+                  )
+            )
+        end
+
+      # TODO: Add docs and examples of ex_doc for this case here
+      queryable = FatEcto.FatQuery.FatWhere.build_where(queryable, join_item["$where"], binding: :last)
+
+      queryable = order(queryable, join_item["$order"])
+      _select(queryable, join_item, join_key)
+    end)
   end
 
   defp _select(queryable, join_params, join_table) do

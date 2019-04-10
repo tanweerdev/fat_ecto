@@ -42,11 +42,12 @@ defmodule FatEcto.FatQuery.FatSelect do
 
   """
 
+  def build_select(queryable, nil, _model) do
+    queryable
+  end
+
   def build_select(queryable, select_params, model) do
     case select_params do
-      nil ->
-        queryable
-
       # TODO: Add docs and examples of ex_doc for this case here
       select when is_map(select) ->
         # TODO: Add docs and examples of ex_doc for this case here

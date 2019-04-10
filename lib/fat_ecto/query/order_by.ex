@@ -154,30 +154,31 @@ defmodule FatEcto.FatQuery.FatOrderBy do
     - `$where`- Added the where attribute in the query.
     - `$order`- Sort the result based on the order attribute.
   """
+
+  def build_order_by(queryable, nil) do
+    queryable
+  end
+
   def build_order_by(queryable, order_by_params) do
-    if order_by_params == nil do
-      queryable
-    else
+    # TODO: Add docs and examples of ex_doc for this case here
+    Enum.reduce(order_by_params, queryable, fn {field, format}, queryable ->
       # TODO: Add docs and examples of ex_doc for this case here
-      Enum.reduce(order_by_params, queryable, fn {field, format}, queryable ->
+      if format == "$desc" do
+        from(
+          queryable,
+          order_by: [
+            desc: ^FatHelper.string_to_existing_atom(field)
+          ]
+        )
+      else
         # TODO: Add docs and examples of ex_doc for this case here
-        if format == "$desc" do
-          from(
-            queryable,
-            order_by: [
-              desc: ^FatHelper.string_to_existing_atom(field)
-            ]
-          )
-        else
-          # TODO: Add docs and examples of ex_doc for this case here
-          from(
-            queryable,
-            order_by: [
-              asc: ^FatHelper.string_to_existing_atom(field)
-            ]
-          )
-        end
-      end)
-    end
+        from(
+          queryable,
+          order_by: [
+            asc: ^FatHelper.string_to_existing_atom(field)
+          ]
+        )
+      end
+    end)
   end
 end

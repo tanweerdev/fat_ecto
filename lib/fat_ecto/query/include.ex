@@ -42,11 +42,13 @@ defmodule FatEcto.FatQuery.FatInclude do
     - `$join`- Join the `doctors` table with `hospital` .
 
   """
+
+  def build_include(queryable, nil, _model, _build_options) do
+    queryable
+  end
+
   def build_include(queryable, include_params, model, build_options) do
     case include_params do
-      nil ->
-        queryable
-
       # TODO: Add docs and examples for ex_doc
       include when is_map(include) ->
         Enum.reduce(include, queryable, fn {key, value}, queryable ->

@@ -736,15 +736,17 @@ defmodule FatEcto.FatQuery.FatWhere do
     - `$order`- Sort the result based on the order attribute.
 
   """
-  def build_where(queryable, where_params, opts \\ []) do
-    if where_params == nil do
-      queryable
-    else
-      # TODO: Add docs and examples of ex_doc for this case here
-      Enum.reduce(where_params, queryable, fn {k, v}, queryable ->
-        query_where(queryable, {k, v}, opts)
-      end)
-    end
+  def build_where(queryable, where_params, opts \\ [])
+
+  def build_where(queryable, nil, _opts) do
+    queryable
+  end
+
+  def build_where(queryable, where_params, opts) do
+    # TODO: Add docs and examples of ex_doc for this case here
+    Enum.reduce(where_params, queryable, fn {k, v}, queryable ->
+      query_where(queryable, {k, v}, opts)
+    end)
   end
 
   # TODO: Add docs and examples of ex_doc for this case here

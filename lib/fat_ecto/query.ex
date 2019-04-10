@@ -128,6 +128,7 @@ defmodule FatEcto.FatQuery do
 
       defp build_query(queryable, opts, model, build_options) do
         # TODO: LIMP: first confirm the field exist in the schema
+        # from(q in queryable, as: :base_table)
         queryable
         |> FatEcto.FatQuery.FatSelect.build_select(opts["$select"], model)
         |> FatEcto.FatQuery.FatWhere.build_where(opts["$where"])

@@ -14,80 +14,80 @@ defmodule FatEcto.FatQuery.FatAggregate do
   #   "$avg": ["total_marks", "rating"]
   # }
   @doc false
+  def build_aggregate(queryable, nil) do
+    queryable
+  end
+
   def build_aggregate(queryable, aggregate_params) do
-    if aggregate_params == nil do
-      queryable
-    else
-      Enum.reduce(aggregate_params, queryable, fn {aggregate_type, fields}, queryable ->
-        case aggregate_type do
-          "$max" ->
-            case fields do
-              fields when is_list(fields) ->
-                Enum.reduce(fields, queryable, fn field, queryable ->
-                  build_max(queryable, field)
-                end)
-
-              field when is_binary(field) ->
+    Enum.reduce(aggregate_params, queryable, fn {aggregate_type, fields}, queryable ->
+      case aggregate_type do
+        "$max" ->
+          case fields do
+            fields when is_list(fields) ->
+              Enum.reduce(fields, queryable, fn field, queryable ->
                 build_max(queryable, field)
-            end
+              end)
 
-          "$min" ->
-            case fields do
-              fields when is_list(fields) ->
-                Enum.reduce(fields, queryable, fn field, queryable ->
-                  build_min(queryable, field)
-                end)
+            field when is_binary(field) ->
+              build_max(queryable, field)
+          end
 
-              field when is_binary(field) ->
+        "$min" ->
+          case fields do
+            fields when is_list(fields) ->
+              Enum.reduce(fields, queryable, fn field, queryable ->
                 build_min(queryable, field)
-            end
+              end)
 
-          "$avg" ->
-            case fields do
-              fields when is_list(fields) ->
-                Enum.reduce(fields, queryable, fn field, queryable ->
-                  build_avg(queryable, field)
-                end)
+            field when is_binary(field) ->
+              build_min(queryable, field)
+          end
 
-              field when is_binary(field) ->
+        "$avg" ->
+          case fields do
+            fields when is_list(fields) ->
+              Enum.reduce(fields, queryable, fn field, queryable ->
                 build_avg(queryable, field)
-            end
+              end)
 
-          "$count" ->
-            case fields do
-              fields when is_list(fields) ->
-                Enum.reduce(fields, queryable, fn field, queryable ->
-                  build_count(queryable, field)
-                end)
+            field when is_binary(field) ->
+              build_avg(queryable, field)
+          end
 
-              field when is_binary(field) ->
+        "$count" ->
+          case fields do
+            fields when is_list(fields) ->
+              Enum.reduce(fields, queryable, fn field, queryable ->
                 build_count(queryable, field)
-            end
+              end)
 
-          "$count_distinct" ->
-            case fields do
-              fields when is_list(fields) ->
-                Enum.reduce(fields, queryable, fn field, queryable ->
-                  build_count_distinct(queryable, field)
-                end)
+            field when is_binary(field) ->
+              build_count(queryable, field)
+          end
 
-              field when is_binary(field) ->
+        "$count_distinct" ->
+          case fields do
+            fields when is_list(fields) ->
+              Enum.reduce(fields, queryable, fn field, queryable ->
                 build_count_distinct(queryable, field)
-            end
+              end)
 
-          "$sum" ->
-            case fields do
-              fields when is_list(fields) ->
-                Enum.reduce(fields, queryable, fn field, queryable ->
-                  build_sum(queryable, field)
-                end)
+            field when is_binary(field) ->
+              build_count_distinct(queryable, field)
+          end
 
-              field when is_binary(field) ->
+        "$sum" ->
+          case fields do
+            fields when is_list(fields) ->
+              Enum.reduce(fields, queryable, fn field, queryable ->
                 build_sum(queryable, field)
-            end
-        end
-      end)
-    end
+              end)
+
+            field when is_binary(field) ->
+              build_sum(queryable, field)
+          end
+      end
+    end)
   end
 
   @doc false
