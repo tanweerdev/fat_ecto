@@ -502,6 +502,34 @@ defmodule FatEcto.FatQuery.FatDynamics do
     end
   end
 
+  def not_eq_dynamic(key, value, dynamics, opts \\ []) do
+    if opts[:binding] == :last do
+      if opts[:dynamic_type] == :and do
+        dynamic(
+          [..., c],
+          field(c, ^FatHelper.string_to_existing_atom(key)) != ^value and ^dynamics
+        )
+      else
+        dynamic(
+          [..., c],
+          field(c, ^FatHelper.string_to_existing_atom(key)) != ^value or ^dynamics
+        )
+      end
+    else
+      if opts[:dynamic_type] == :and do
+        dynamic(
+          [q],
+          field(q, ^FatHelper.string_to_existing_atom(key)) != ^value and ^dynamics
+        )
+      else
+        dynamic(
+          [q],
+          field(q, ^FatHelper.string_to_existing_atom(key)) != ^value or ^dynamics
+        )
+      end
+    end
+  end
+
   def between_dynamic(key, values, dynamics, opts \\ []) do
     if opts[:binding] == :last do
       if opts[:dynamic_type] == :and do
