@@ -66,7 +66,8 @@ defmodule FatEcto.FatQuery.FatJoin do
           join_table = join_item["$table"] || join_key
 
           join =
-            String.replace(join_type, "_join", "")
+            join_type
+            |> String.replace("_join", "")
             |> String.replace("$", "")
             |> FatHelper.string_to_atom()
 
@@ -74,8 +75,8 @@ defmodule FatEcto.FatQuery.FatJoin do
             case join_item["$on_type"] do
               # TODO: Add docs and examples of ex_doc for this case here
               "$not_eq" ->
-                queryable
-                |> join(
+                join(
+                  queryable,
                   join,
                   [q],
                   jt in ^join_table,
@@ -89,8 +90,8 @@ defmodule FatEcto.FatQuery.FatJoin do
 
               "$gt" ->
                 if FatHelper.is_fat_ecto_field?(join_item["$gt"]) do
-                  queryable
-                  |> join(
+                  join(
+                    queryable,
                     join,
                     [q],
                     jt in ^join_table,
@@ -102,8 +103,8 @@ defmodule FatEcto.FatQuery.FatJoin do
                         )
                   )
                 else
-                  queryable
-                  |> join(
+                  join(
+                    queryable,
                     join,
                     [q],
                     jt in ^join_table,
@@ -118,8 +119,8 @@ defmodule FatEcto.FatQuery.FatJoin do
 
               "$lt" ->
                 if FatHelper.is_fat_ecto_field?(join_item["$gt"]) do
-                  queryable
-                  |> join(
+                  join(
+                    queryable,
                     join,
                     [q],
                     jt in ^join_table,
@@ -131,8 +132,8 @@ defmodule FatEcto.FatQuery.FatJoin do
                         )
                   )
                 else
-                  queryable
-                  |> join(
+                  join(
+                    queryable,
                     join,
                     [q],
                     jt in ^join_table,
@@ -147,8 +148,8 @@ defmodule FatEcto.FatQuery.FatJoin do
 
               # TODO: Add docs and examples of ex_doc for this case here
               "$in_x" ->
-                queryable
-                |> join(
+                join(
+                  queryable,
                   join,
                   [q],
                   jt in ^join_table,
@@ -161,8 +162,8 @@ defmodule FatEcto.FatQuery.FatJoin do
 
               # TODO: Add docs and examples of ex_doc for this case here
               "$in" ->
-                queryable
-                |> join(
+                join(
+                  queryable,
                   join,
                   [q],
                   jt in ^join_table,
@@ -178,8 +179,8 @@ defmodule FatEcto.FatQuery.FatJoin do
 
               # TODO: Add docs and examples of ex_doc for this case here
               _whatever ->
-                queryable
-                |> join(
+                join(
+                  queryable,
                   join,
                   [q],
                   jt in ^join_table,
