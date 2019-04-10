@@ -1,6 +1,6 @@
 defmodule Fat.ContextTest do
   use ExUnit.Case
-  alias FatTest.ContextMacro
+  alias Fat.ContextMacro
   alias FatEcto.{Repo, ContextModel, Sibling}
   import Ecto.Query
 
@@ -208,6 +208,8 @@ defmodule Fat.ContextTest do
     {:ok, context} =
       Repo.insert(%ContextModel{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
 
+    Repo.insert(%ContextModel{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
+
     Repo.insert(%Sibling{
       name: "John",
       purpose: "Testing",
@@ -218,5 +220,6 @@ defmodule Fat.ContextTest do
     })
 
     record = ContextMacro.get_all_by(ContextModel, [name: "Doe"], [:siblings])
+    assert record |> Enum.count() == 2
   end
 end
