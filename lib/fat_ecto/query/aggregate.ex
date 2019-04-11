@@ -90,8 +90,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
     end)
   end
 
-  @doc false
-  def build_max(queryable, field) do
+  defp build_max(queryable, field) do
     field = FatHelper.string_to_atom(field)
 
     from(
@@ -102,8 +101,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
     )
   end
 
-  @doc false
-  def build_min(queryable, field) do
+  defp build_min(queryable, field) do
     field = FatHelper.string_to_atom(field)
 
     from(
@@ -112,8 +110,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
     )
   end
 
-  @doc false
-  def build_avg(queryable, field) do
+  defp build_avg(queryable, field) do
     field = FatHelper.string_to_atom(field)
 
     from(
@@ -122,8 +119,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
     )
   end
 
-  @doc false
-  def build_count(queryable, field) do
+  defp build_count(queryable, field) do
     field = FatHelper.string_to_atom(field)
 
     from(
@@ -132,8 +128,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
     )
   end
 
-  @doc false
-  def build_count_distinct(queryable, field) do
+  defp build_count_distinct(queryable, field) do
     field = FatHelper.string_to_atom(field)
 
     from(
@@ -144,8 +139,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
     )
   end
 
-  @doc false
-  def build_sum(queryable, field) do
+  defp build_sum(queryable, field) do
     field = FatHelper.string_to_atom(field)
 
     from(

@@ -703,7 +703,7 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   """
 
-  alias FatEcto.FatQuery.FatDynamics
+  alias FatEcto.FatQuery.{FatDynamics, FatNotDynamics}
   # TODO: Add docs and examples for ex_doc
 
   @doc """
@@ -766,6 +766,9 @@ defmodule FatEcto.FatQuery.FatWhere do
                 %{"$lt" => value} ->
                   FatDynamics.lt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
+                %{"$not" => value} ->
+                  FatNotDynamics.not_eq_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+
                 %{"$lte" => value} ->
                   FatDynamics.lte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
@@ -787,7 +790,37 @@ defmodule FatEcto.FatQuery.FatWhere do
           from(q in queryable, where: ^dynamics)
 
         "$not" ->
-          queryable
+          dynamics =
+            Enum.reduce(map_cond, false, fn {key, condition}, dynamics ->
+              case condition do
+                %{"$like" => value} ->
+                  FatNotDynamics.not_like_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+
+                %{"$ilike" => value} ->
+                  FatNotDynamics.not_ilike_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+
+                %{"$lt" => value} ->
+                  FatNotDynamics.not_lt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+
+                %{"$lte" => value} ->
+                  FatNotDynamics.not_lte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+
+                %{"$gt" => value} ->
+                  FatNotDynamics.not_gt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+
+                %{"$gte" => value} ->
+                  FatNotDynamics.not_gte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+
+                condition when not is_list(condition) and not is_map(condition) ->
+                  FatNotDynamics.not_eq_dynamic(key, condition, dynamics, opts ++ [dynamic_type: :or])
+
+                _whatever ->
+                  dynamics
+              end
+            end)
+
+          # TODO: confirm its what should be used `where` or `or_where` below
+          from(q in queryable, where: ^dynamics)
 
         _whatever ->
           queryable
@@ -803,10 +836,10 @@ defmodule FatEcto.FatQuery.FatWhere do
             FatDynamics.ilike_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
           "$not_like" ->
-            FatDynamics.not_like_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+            FatNotDynamics.not_like_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
           "$not_ilike" ->
-            FatDynamics.not_ilike_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+            FatNotDynamics.not_ilike_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
           "$lt" ->
             FatDynamics.lt_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
@@ -827,10 +860,10 @@ defmodule FatEcto.FatQuery.FatWhere do
             FatDynamics.between_equal_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
           "$not_between" ->
-            FatDynamics.not_between_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+            FatNotDynamics.not_between_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
           "$not_between_equal" ->
-            FatDynamics.not_between_equal_dynamic(
+            FatNotDynamics.not_between_equal_dynamic(
               k,
               value,
               dynamics,
@@ -841,7 +874,7 @@ defmodule FatEcto.FatQuery.FatWhere do
             FatDynamics.in_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
           "$not_in" ->
-            FatDynamics.not_in_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+            FatNotDynamics.not_in_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
           "$contains" ->
             FatDynamics.contains_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
@@ -928,7 +961,7 @@ defmodule FatEcto.FatQuery.FatWhere do
     Enum.reduce(map_cond, queryable, fn key, queryable ->
       from(
         q in queryable,
-        where: ^FatDynamics.not_is_nil_dynamic(key, true, opts ++ [dynamic_type: :and])
+        where: ^FatNotDynamics.not_is_nil_dynamic(key, true, opts ++ [dynamic_type: :and])
       )
     end)
   end
@@ -939,7 +972,7 @@ defmodule FatEcto.FatQuery.FatWhere do
        when map_cond == "$not_null" do
     from(
       q in queryable,
-      where: ^FatDynamics.not_is_nil_dynamic(k, true, opts ++ [dynamic_type: :and])
+      where: ^FatNotDynamics.not_is_nil_dynamic(k, true, opts ++ [dynamic_type: :and])
     )
   end
 end
