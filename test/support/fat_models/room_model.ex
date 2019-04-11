@@ -3,21 +3,25 @@ defmodule FatEcto.FatRoom do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @fields [:beds, :capacity, :incharge, :nurses, :level]
-
   schema "fat_rooms" do
-    field(:beds, :integer)
-    field(:capacity, :integer)
-    field(:incharge, :string)
-    field(:nurses, :integer)
-    field(:level, :integer)
+    field(:name, :string)
+    field(:purpose, :string)
+    field(:description, :string)
+    field(:floor, :integer)
+    field(:is_active, :boolean)
 
     belongs_to(:fat_hospital, FatEcto.FatHospital)
+    has_many(:fat_beds, FatEcto.FatBed)
   end
 
-  def changeset(data) when is_map(data) do
-    %__MODULE__{}
-    |> cast(data, @fields)
-    |> apply_changes()
+  def changeset(struct, params \\ %{}) do
+    struct
+    |> cast(params, [
+      :name,
+      :purpose,
+      :description,
+      :floor,
+      :is_active
+    ])
   end
 end

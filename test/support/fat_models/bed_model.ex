@@ -1,15 +1,14 @@
-defmodule FatEcto.Sibling do
+defmodule FatEcto.FatBed do
   @moduledoc false
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "siblings" do
+  schema "fat_beds" do
     field(:name, :string)
     field(:purpose, :string)
     field(:description, :string)
-    field(:phone, :string)
     field(:is_active, :boolean)
-    belongs_to(:context, FatEcto.ContextModel, foreign_key: :context_id)
+    belongs_to(:fat_room, FatEcto.FatRoom)
   end
 
   def changeset(struct, params \\ %{}) do
@@ -18,9 +17,8 @@ defmodule FatEcto.Sibling do
       :name,
       :purpose,
       :description,
-      :phone,
       :is_active,
-      :context_id
+      :fat_room_id
     ])
   end
 end

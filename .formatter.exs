@@ -1,6 +1,10 @@
 # Used by "mix format"
 [
-  inputs: ["{mix,.formatter}.exs", "{config,lib,test}/**/*.{ex,exs}"],
+  inputs: [
+    "{mix,.formatter}.exs",
+    "{config,lib,test,priv}/**/*.{ex,exs}",
+    "{priv}/**/**/*.{ex,exs}"
+  ],
   # By default the formatter will turn any definition with out () like below
   locals_without_parens: [
     # Formatter tests
