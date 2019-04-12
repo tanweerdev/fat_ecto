@@ -1,6 +1,7 @@
 defmodule Fat.ContextTest do
   use ExUnit.Case
   alias Fat.ContextMacro
+  alias MyApp.Query, as: Query
   alias FatEcto.{Repo, FatRoom, FatBed}
   import Ecto.Query
 
@@ -214,5 +215,37 @@ defmodule Fat.ContextTest do
 
     record = ContextMacro.get_all_by(FatRoom, [name: "Doe"], [:fat_beds])
     assert record |> Enum.count() == 2
+  end
+
+  @tag :failing
+  test "insert record and use fat ecto to query the result" do
+    {:ok, room} =
+      Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
+
+    Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
+
+    {:ok, bed} =
+      Repo.insert(%FatBed{
+        name: "John",
+        purpose: "Testing",
+        description: "descriptive",
+        is_active: false,
+        fat_room_id: room.id
+      })
+
+    opts = %{
+      "$right_join" => %{
+        "fat_beds" => %{
+          "$on_field" => "id",
+          "$on_join_table_field" => "fat_room_id",
+          "$select" => ["name", "purpose", "description"],
+          "$where" => %{"id" => bed.id}
+        }
+      },
+      "$where" => %{"id" => room.id}
+    }
+
+    result = Query.build(FatEcto.FatHospital, opts)
+    Repo.all(result)
   end
 end
