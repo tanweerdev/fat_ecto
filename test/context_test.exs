@@ -245,7 +245,7 @@ defmodule Fat.ContextTest do
       "$where" => %{"id" => room.id}
     }
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     Repo.all(result)
   end
 end
