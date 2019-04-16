@@ -206,7 +206,7 @@ defmodule Query.AggregateTest do
     assert inspect(result) == inspect(expected)
   end
 
-  @tag :failing
+  @tag :incorrect
   test "returns the query with aggregate max/select" do
     opts = %{
       "$aggregate" => %{"$max" => "nurses"},
@@ -216,14 +216,16 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(
-        f in FatEcto.FatRoom,
+      from(f in FatEcto.FatRoom,
         where: f.capacity == ^5 and ^true,
-        group_by: f.capacity,
+        group_by: [f.capacity],
         select:
-          merge(map(f, [:beds, :nurses, :capacity]), %{
-            "$aggregate": %{"$max": %{^:nurses => max(f.nurses)}}
-          })
+          merge(
+            merge(map(f, [:beds, :nurses, :capacity]), %{
+              "$aggregate": %{"$max": %{^:nurses => max(f.nurses)}}
+            }),
+            %{"$group" => %{^:nurses => f.capacity}}
+          )
       )
 
     result = build(FatEcto.FatRoom, opts)
