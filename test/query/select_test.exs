@@ -25,7 +25,7 @@ defmodule Query.SelectTest do
     expected =
       from(
         h in FatEcto.FatHospital,
-        select: map(h, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])
+        select: map(h, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}])
       )
 
     result = build(FatEcto.FatHospital, opts)
@@ -45,7 +45,7 @@ defmodule Query.SelectTest do
       from(
         h in FatEcto.FatHospital,
         order_by: [desc: h.id],
-        select: map(h, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])
+        select: map(h, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}])
       )
 
     result = build(FatEcto.FatHospital, opts)
@@ -82,7 +82,7 @@ defmodule Query.SelectTest do
         h in FatEcto.FatHospital,
         where: h.rating == ^4 and ^true,
         order_by: [desc: h.id],
-        select: map(h, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])
+        select: map(h, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}])
       )
 
     result = build(FatEcto.FatHospital, opts)
@@ -120,10 +120,9 @@ defmodule Query.SelectTest do
     expected =
       from(
         h in FatEcto.FatHospital,
-        join: d in assoc(h, :fat_doctors),
         where: h.rating == ^4 and ^true,
         order_by: [desc: h.id],
-        select: map(h, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]),
+        select: map(h, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}]),
         preload: [fat_doctors: ^query]
       )
 
