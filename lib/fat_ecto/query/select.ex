@@ -74,7 +74,7 @@ defmodule FatEcto.FatQuery.FatSelect do
         key != "$fields" and is_map(value) ->
           fields ++ [{FatHelper.string_to_existing_atom(key), select_map_field(value)}]
 
-        key != "$fields" and is_map(value) ->
+        key != "$fields" and is_list(value) ->
           fields ++
             [{FatHelper.string_to_existing_atom(key), Enum.map(value, &FatHelper.string_to_existing_atom/1)}]
       end
