@@ -61,7 +61,6 @@ defmodule FatEcto.FatQuery.FatInclude do
 
           include_kwery =
             related_model
-            |> FatEcto.FatQuery.FatSelect.build_select(value["$select"], related_model)
             |> FatEcto.FatQuery.FatWhere.build_where(value["$where"], binding: :last)
             |> FatEcto.FatQuery.FatOrderBy.build_order_by(value["$order"])
             |> FatEcto.FatQuery.FatGroupBy.build_group_by(value["$group"])
@@ -70,12 +69,17 @@ defmodule FatEcto.FatQuery.FatInclude do
             |> offset([q], ^(value["$offset"] || 0))
 
           join =
-            String.replace(value["$join"] || "$inner", "$", "")
+            String.replace(value["$join"] || "", "$", "")
             |> FatHelper.string_to_atom()
 
-          queryable
-          |> join(join, [q], jn in assoc(q, ^relation_name))
-          |> preload([q, ..., jt], [{^relation_name, ^include_kwery}])
+          if join != :"" do
+            queryable
+            |> join(join, [q], jn in assoc(q, ^relation_name))
+            |> preload([q, ..., jt], [{^relation_name, ^include_kwery}])
+          else
+            queryable
+            |> preload([q, ..., jt], [{^relation_name, ^include_kwery}])
+          end
         end)
 
       # TODO: Add docs and examples of ex_doc for this case here

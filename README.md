@@ -23,6 +23,14 @@ or
 {:fat_ecto, "~> 0.1"}
 ```
 
+#### Please do not pass custom $join type for associations which are related via has_many or many_to_many eg
+```elixir
+# Please dont pass join like below to avoid un-expected/duplicated records
+"$include": %{"doctors" => %{"$join" => "left"}}
+# correct way
+"$include": %{"doctors" => %{}}
+```
+
 ## Config
 
 ```elixir

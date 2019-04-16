@@ -46,28 +46,12 @@ defmodule FatEcto.FatQuery.FatSelect do
     queryable
   end
 
-  def build_select(queryable, select_params, model) do
+  def build_select(queryable, select_params, _model) do
     case select_params do
       # TODO: Add docs and examples of ex_doc for this case here
       select when is_map(select) ->
         # TODO: Add docs and examples of ex_doc for this case here
-        fields =
-          Enum.reduce(select, [], fn {key, value}, fields ->
-            if key == "$fields" do
-              fields ++ Enum.map(value, &FatHelper.string_to_existing_atom/1)
-            else
-              # if map contain asso_table and fields
-              relation_name = FatHelper.string_to_existing_atom(key)
-              assoc_fields = value
-
-              FatHelper.associations(
-                model,
-                relation_name,
-                fields,
-                assoc_fields
-              )
-            end
-          end)
+        fields = select_map_field(select)
 
         from(q in queryable, select: map(q, ^Enum.uniq(fields)))
 
@@ -77,5 +61,23 @@ defmodule FatEcto.FatQuery.FatSelect do
           select: map(q, ^Enum.uniq(Enum.map(select, &FatHelper.string_to_existing_atom/1)))
         )
     end
+  end
+
+  defp select_map_field(fields, fields \\ [])
+
+  defp select_map_field(fields_map, fields) when is_map(fields_map) do
+    Enum.reduce(fields_map, fields, fn {key, value}, fields ->
+      cond do
+        key == "$fields" and is_list(value) ->
+          fields ++ Enum.map(value, &FatHelper.string_to_existing_atom/1)
+
+        key != "$fields" and is_map(value) ->
+          fields ++ [{FatHelper.string_to_existing_atom(key), select_map_field(value)}]
+
+        key != "$fields" and is_map(value) ->
+          fields ++
+            [{FatHelper.string_to_existing_atom(key), Enum.map(value, &FatHelper.string_to_existing_atom/1)}]
+      end
+    end)
   end
 end
