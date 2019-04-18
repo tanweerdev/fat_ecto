@@ -506,28 +506,24 @@ defmodule FatEcto.FatQuery.FatDynamics do
       if opts[:dynamic_type] == :and do
         dynamic(
           [..., c],
-          fragment("? @> ?", field(c, ^FatHelper.string_to_existing_atom(key)), ^values) and
-            ^dynamics
+          fragment("? @> ?", field(c, ^FatHelper.string_to_existing_atom(key)), ^values) and ^dynamics
         )
       else
         dynamic(
           [..., c],
-          fragment("? @> ?", field(c, ^FatHelper.string_to_existing_atom(key)), ^values) or
-            ^dynamics
+          fragment("? @> ?", field(c, ^FatHelper.string_to_existing_atom(key)), ^values) or ^dynamics
         )
       end
     else
       if opts[:dynamic_type] == :and do
         dynamic(
           [q],
-          fragment("? @> ?", field(q, ^FatHelper.string_to_existing_atom(key)), ^values) and
-            ^dynamics
+          fragment("? @> ?", field(q, ^FatHelper.string_to_existing_atom(key)), ^values) and ^dynamics
         )
       else
         dynamic(
           [q],
-          fragment("? @> ?", field(q, ^FatHelper.string_to_existing_atom(key)), ^values) or
-            ^dynamics
+          fragment("? @> ?", field(q, ^FatHelper.string_to_existing_atom(key)), ^values) or ^dynamics
         )
       end
     end
@@ -539,28 +535,24 @@ defmodule FatEcto.FatQuery.FatDynamics do
       if opts[:dynamic_type] == :and do
         dynamic(
           [..., c],
-          fragment("? && ?", field(c, ^FatHelper.string_to_existing_atom(key)), ^values) and
-            ^dynamics
+          fragment("? && ?", field(c, ^FatHelper.string_to_existing_atom(key)), ^values) and ^dynamics
         )
       else
         dynamic(
           [..., c],
-          fragment("? && ?", field(c, ^FatHelper.string_to_existing_atom(key)), ^values) or
-            ^dynamics
+          fragment("? && ?", field(c, ^FatHelper.string_to_existing_atom(key)), ^values) or ^dynamics
         )
       end
     else
       if opts[:dynamic_type] == :and do
         dynamic(
           [q],
-          fragment("? && ?", field(q, ^FatHelper.string_to_existing_atom(key)), ^values) and
-            ^dynamics
+          fragment("? && ?", field(q, ^FatHelper.string_to_existing_atom(key)), ^values) and ^dynamics
         )
       else
         dynamic(
           [q],
-          fragment("? && ?", field(q, ^FatHelper.string_to_existing_atom(key)), ^values) or
-            ^dynamics
+          fragment("? && ?", field(q, ^FatHelper.string_to_existing_atom(key)), ^values) or ^dynamics
         )
       end
     end

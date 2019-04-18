@@ -1,5 +1,5 @@
 defmodule Utils.MapTest do
-  use ExUnit.Case
+  use FatEcto.ConnCase
   import FatUtils.Map
 
   test "has all keys" do

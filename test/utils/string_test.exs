@@ -1,5 +1,5 @@
 defmodule Utils.StringTest do
-  use ExUnit.Case
+  use FatEcto.ConnCase
   import FatUtils.String
 
   test "Generate random strings of different lengths" do

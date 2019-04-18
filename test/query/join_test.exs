@@ -1,7 +1,5 @@
 defmodule Query.JoinTest do
-  use ExUnit.Case
-  alias MyApp.Query, as: Query
-  import Ecto.Query
+  use FatEcto.ConnCase
 
   test "returns the query with right join and selected fields" do
     opts = %{

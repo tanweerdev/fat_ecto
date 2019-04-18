@@ -1,7 +1,5 @@
 defmodule Query.SelectTest do
-  use ExUnit.Case
-  import MyApp.Query
-  import Ecto.Query
+  use FatEcto.ConnCase
 
   test "returns the select query fields" do
     opts = %{
@@ -10,7 +8,7 @@ defmodule Query.SelectTest do
 
     expected = from(d in FatEcto.FatDoctor, select: map(d, [:name, :designation, :experience_years]))
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -28,7 +26,7 @@ defmodule Query.SelectTest do
         select: map(h, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}])
       )
 
-    result = build(FatEcto.FatHospital, opts)
+    result = Query.build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -48,7 +46,7 @@ defmodule Query.SelectTest do
         select: map(h, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}])
       )
 
-    result = build(FatEcto.FatHospital, opts)
+    result = Query.build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -63,7 +61,7 @@ defmodule Query.SelectTest do
         select: map(h, [:name, :location, :rating])
       )
 
-    result = build(FatEcto.FatHospital, opts)
+    result = Query.build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -85,7 +83,7 @@ defmodule Query.SelectTest do
         select: map(h, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}])
       )
 
-    result = build(FatEcto.FatHospital, opts)
+    result = Query.build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -126,7 +124,7 @@ defmodule Query.SelectTest do
         preload: [fat_doctors: ^query]
       )
 
-    result = build(FatEcto.FatHospital, opts, max_limit: 107)
+    result = Query.build(FatEcto.FatHospital, opts, max_limit: 107)
     assert inspect(result) == inspect(expected)
   end
 end
