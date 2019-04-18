@@ -3,8 +3,6 @@ defmodule FatEcto.FatPatient do
   use Ecto.Schema
   import Ecto.Changeset
 
- 
-
   schema "fat_patients" do
     field(:name, :string)
     field(:location, :string)
@@ -20,14 +18,14 @@ defmodule FatEcto.FatPatient do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [
-    :name,
-    :location,
-    :phone,
-    :address,
-    :prescription,
-    :symtoms,
-    :date_of_birth,
-    :appointments_count
+      :name,
+      :location,
+      :phone,
+      :address,
+      :prescription,
+      :symtoms,
+      :date_of_birth,
+      :appointments_count
     ])
   end
 end

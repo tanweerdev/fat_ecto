@@ -3,7 +3,6 @@ defmodule FatEcto.FatDoctorPatient do
   use Ecto.Schema
   import Ecto.Changeset
 
-
   schema "fat_doctors_patients" do
     belongs_to(:fat_doctor, FatEcto.FatDoctor)
     belongs_to(:fat_patient, FatEcto.FatPatient)

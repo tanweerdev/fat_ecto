@@ -3,7 +3,6 @@ defmodule FatEcto.FatDoctor do
   use Ecto.Schema
   import Ecto.Changeset
 
-
   schema "fat_doctors" do
     field(:name, :string)
     field(:designation, :string)
@@ -21,7 +20,15 @@ defmodule FatEcto.FatDoctor do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [
-      :name, :designation, :phone, :address, :email, :experience_years, :rating, :start_date, :end_date
+      :name,
+      :designation,
+      :phone,
+      :address,
+      :email,
+      :experience_years,
+      :rating,
+      :start_date,
+      :end_date
     ])
     |> validate_required([:name, :designation])
   end
