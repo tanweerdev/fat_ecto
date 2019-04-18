@@ -60,7 +60,7 @@ defmodule FatEcto.FatQuery.FatGroupBy do
                     field(q, ^FatHelper.string_to_existing_atom(group_by_field))
                   ),
                 select_merge: %{
-                  "$group" => %{
+                  "$group": %{
                     ^group_by_field =>
                       fragment(
                         "date_part('month', ?)",
@@ -83,7 +83,7 @@ defmodule FatEcto.FatQuery.FatGroupBy do
                     field(q, ^FatHelper.string_to_existing_atom(group_by_field))
                   ),
                 select_merge: %{
-                  "$group" => %{
+                  "$group": %{
                     ^group_by_field =>
                       fragment(
                         "date_part('year', ?)",
@@ -126,7 +126,7 @@ defmodule FatEcto.FatQuery.FatGroupBy do
       q in queryable,
       group_by: field(q, ^FatHelper.string_to_existing_atom(group_by_param)),
       select_merge: %{
-        "$group" => %{
+        "$group": %{
           ^group_by_param => field(q, ^FatHelper.string_to_existing_atom(group_by_param))
         }
       }

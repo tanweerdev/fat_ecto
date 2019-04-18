@@ -10,10 +10,9 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(
-        f in FatEcto.FatRoom,
-        where: f.beds == ^3 and ^true,
-        select: merge(f, %{"$aggregate": %{"$count": %{^:beds => count(f.beds)}}})
+      from(f0 in FatEcto.FatRoom,
+        where: f0.beds == ^3 and ^true,
+        select: merge(f0, %{"$aggregate": %{"$count": %{^"beds" => count(f0.beds)}}})
       )
 
     result = build(FatEcto.FatRoom, opts)
@@ -28,11 +27,10 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(
-        f in FatEcto.FatRoom,
-        where: f.capacity == ^5 and ^true,
-        order_by: [desc: f.beds],
-        select: merge(f, %{"$aggregate": %{"$count_distinct": %{^:nurses => count(f.nurses, :distinct)}}})
+      from(f0 in FatEcto.FatRoom,
+        where: f0.capacity == ^5 and ^true,
+        order_by: [desc: f0.beds],
+        select: merge(f0, %{"$aggregate": %{"$count_distinct": %{^"nurses" => count(f0.nurses, :distinct)}}})
       )
 
     result = build(FatEcto.FatRoom, opts)
@@ -48,13 +46,13 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
-        where: f.capacity == ^5 and ^true,
-        group_by: [f.capacity],
-        order_by: [desc: f.beds],
+      from(f0 in FatEcto.FatRoom,
+        where: f0.capacity == ^5 and ^true,
+        group_by: [f0.capacity],
+        order_by: [desc: f0.beds],
         select:
-          merge(merge(f, %{"$aggregate": %{"$min": %{^:nurses => min(f.nurses)}}}), %{
-            "$group" => %{^:nurses => f.capacity}
+          merge(merge(f0, %{"$aggregate": %{"$min": %{^"nurses" => min(f0.nurses)}}}), %{
+            "$group": %{^"capacity" => f0.capacity}
           })
       )
 
@@ -70,12 +68,12 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
-        where: f.capacity == ^5 and ^true,
-        group_by: [f.capacity],
+      from(f0 in FatEcto.FatRoom,
+        where: f0.capacity == ^5 and ^true,
+        group_by: [f0.capacity],
         select:
-          merge(merge(f, %{"$aggregate": %{"$max": %{^:nurses => max(f.nurses)}}}), %{
-            "$group" => %{^:nurses => f.capacity}
+          merge(merge(f0, %{"$aggregate": %{"$max": %{^"nurses" => max(f0.nurses)}}}), %{
+            "$group": %{^"capacity" => f0.capacity}
           })
       )
 
@@ -92,13 +90,13 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
-        where: f.capacity == ^5 and ^true,
-        group_by: [f.capacity],
-        order_by: [asc: f.beds],
+      from(f0 in FatEcto.FatRoom,
+        where: f0.capacity == ^5 and ^true,
+        group_by: [f0.capacity],
+        order_by: [asc: f0.beds],
         select:
-          merge(merge(f, %{"$aggregate": %{"$sum": %{^:nurses => sum(f.nurses)}}}), %{
-            "$group" => %{^:nurses => f.capacity}
+          merge(merge(f0, %{"$aggregate": %{"$sum": %{^"nurses" => sum(f0.nurses)}}}), %{
+            "$group": %{^"capacity" => f0.capacity}
           })
       )
 
@@ -115,13 +113,13 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
-        where: f.capacity == ^5 and ^true,
-        group_by: [f.capacity],
-        order_by: [asc: f.beds],
+      from(f0 in FatEcto.FatRoom,
+        where: f0.capacity == ^5 and ^true,
+        group_by: [f0.capacity],
+        order_by: [asc: f0.beds],
         select:
-          merge(merge(f, %{"$aggregate": %{"$avg": %{^:level => avg(f.level)}}}), %{
-            "$group" => %{^:level => f.capacity}
+          merge(merge(f0, %{"$aggregate": %{"$avg": %{^"level" => avg(f0.level)}}}), %{
+            "$group": %{^"capacity" => f0.capacity}
           })
       )
 
@@ -159,8 +157,8 @@ defmodule Query.AggregateTest do
         group_by: [f0.capacity],
         order_by: [asc: f0.beds],
         select:
-          merge(merge(f0, %{"$aggregate": %{"$avg": %{^:level => avg(f0.level)}}}), %{
-            "$group" => %{^:level => f0.capacity}
+          merge(merge(f0, %{"$aggregate": %{"$avg": %{^"level" => avg(f0.level)}}}), %{
+            "$group": %{^"capacity" => f0.capacity}
           }),
         preload: [fat_hospital: ^hospital_query]
       )
@@ -196,9 +194,9 @@ defmodule Query.AggregateTest do
         select:
           merge(
             merge(merge(f0, %{^:fat_hospital => map(f1, [:name, :location, :phone])}), %{
-              "$aggregate": %{"$sum": %{^:fat_hospital => sum(f0.level)}}
+              "$aggregate": %{"$sum": %{^"level" => sum(f0.level)}}
             }),
-            %{"$group" => %{^:fat_hospital => f0.capacity}}
+            %{"$group": %{^"capacity" => f0.capacity}}
           )
       )
 
@@ -216,15 +214,15 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
-        where: f.capacity == ^5 and ^true,
-        group_by: [f.capacity],
+      from(f0 in FatEcto.FatRoom,
+        where: f0.capacity == ^5 and ^true,
+        group_by: [f0.capacity],
         select:
           merge(
-            merge(map(f, [:beds, :nurses, :capacity]), %{
-              "$aggregate": %{"$max": %{^:nurses => max(f.nurses)}}
+            merge(map(f0, [:beds, :nurses, :capacity]), %{
+              "$aggregate": %{"$max": %{^"nurses" => max(f0.nurses)}}
             }),
-            %{"$group" => %{^:nurses => f.capacity}}
+            %{"$group": %{^"capacity" => f0.capacity}}
           )
       )
 
@@ -240,15 +238,15 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
-        where: f.capacity == ^5 and ^true,
-        group_by: [f.capacity],
+      from(f0 in FatEcto.FatRoom,
+        where: f0.capacity == ^5 and ^true,
+        group_by: [f0.capacity],
         select:
           merge(
-            merge(merge(f, %{"$aggregate": %{"$max": %{^:nurses => max(f.nurses)}}}), %{
-              "$aggregate": %{"$min": %{^:nurses => min(f.capacity)}}
+            merge(merge(f0, %{"$aggregate": %{"$max": %{^"nurses" => max(f0.nurses)}}}), %{
+              "$aggregate": %{"$min": %{^"capacity" => min(f0.capacity)}}
             }),
-            %{"$group" => %{^:nurses => f.capacity}}
+            %{"$group": %{^"capacity" => f0.capacity}}
           )
       )
 
@@ -264,15 +262,15 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
-        where: f.capacity == ^5 and ^true,
-        group_by: [f.capacity],
+      from(f0 in FatEcto.FatRoom,
+        where: f0.capacity == ^5 and ^true,
+        group_by: [f0.capacity],
         select:
           merge(
-            merge(merge(f, %{"$aggregate": %{"$count": %{^:nurses => count(f.nurses)}}}), %{
-              "$aggregate": %{"$count_distinct": %{^:nurses => count(f.capacity, :distinct)}}
+            merge(merge(f0, %{"$aggregate": %{"$count": %{^"nurses" => count(f0.nurses)}}}), %{
+              "$aggregate": %{"$count_distinct": %{^"capacity" => count(f0.capacity, :distinct)}}
             }),
-            %{"$group" => %{^:nurses => f.capacity}}
+            %{"$group": %{^"capacity" => f0.capacity}}
           )
       )
 
@@ -288,15 +286,15 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
-        where: f.capacity == ^5 and ^true,
-        group_by: [f.capacity],
+      from(f0 in FatEcto.FatRoom,
+        where: f0.capacity == ^5 and ^true,
+        group_by: [f0.capacity],
         select:
           merge(
-            merge(merge(f, %{"$aggregate": %{"$avg": %{^:capacity => avg(f.capacity)}}}), %{
-              "$aggregate": %{"$sum": %{^:capacity => sum(f.nurses)}}
+            merge(merge(f0, %{"$aggregate": %{"$avg": %{^"capacity" => avg(f0.capacity)}}}), %{
+              "$aggregate": %{"$sum": %{^"nurses" => sum(f0.nurses)}}
             }),
-            %{"$group" => %{^:capacity => f.capacity}}
+            %{"$group": %{^"capacity" => f0.capacity}}
           )
       )
 
@@ -312,21 +310,21 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
-        where: f.capacity == ^5 and ^true,
-        group_by: [f.capacity],
+      from(f0 in FatEcto.FatRoom,
+        where: f0.capacity == ^5 and ^true,
+        group_by: [f0.capacity],
         select:
           merge(
             merge(
               merge(
-                merge(merge(f, %{"$aggregate": %{"$avg": %{^:capacity => avg(f.capacity)}}}), %{
-                  "$aggregate": %{"$avg": %{^:capacity => avg(f.nurses)}}
+                merge(merge(f0, %{"$aggregate": %{"$avg": %{^"capacity" => avg(f0.capacity)}}}), %{
+                  "$aggregate": %{"$avg": %{^"nurses" => avg(f0.nurses)}}
                 }),
-                %{"$aggregate": %{"$sum": %{^:capacity => sum(f.nurses)}}}
+                %{"$aggregate": %{"$sum": %{^"nurses" => sum(f0.nurses)}}}
               ),
-              %{"$aggregate": %{"$sum": %{^:capacity => sum(f.beds)}}}
+              %{"$aggregate": %{"$sum": %{^"beds" => sum(f0.beds)}}}
             ),
-            %{"$group" => %{^:capacity => f.capacity}}
+            %{"$group": %{^"capacity" => f0.capacity}}
           )
       )
 
@@ -342,21 +340,21 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
-        where: f.capacity == ^5 and ^true,
-        group_by: [f.capacity],
+      from(f0 in FatEcto.FatRoom,
+        where: f0.capacity == ^5 and ^true,
+        group_by: [f0.capacity],
         select:
           merge(
             merge(
               merge(
-                merge(merge(f, %{"$aggregate": %{"$count": %{^:nurses => count(f.nurses)}}}), %{
-                  "$aggregate": %{"$count": %{^:nurses => count(f.rating)}}
+                merge(merge(f0, %{"$aggregate": %{"$count": %{^"nurses" => count(f0.nurses)}}}), %{
+                  "$aggregate": %{"$count": %{^"rating" => count(f0.rating)}}
                 }),
-                %{"$aggregate": %{"$count_distinct": %{^:nurses => count(f.capacity, :distinct)}}}
+                %{"$aggregate": %{"$count_distinct": %{^"capacity" => count(f0.capacity, :distinct)}}}
               ),
-              %{"$aggregate": %{"$count_distinct": %{^:nurses => count(f.beds, :distinct)}}}
+              %{"$aggregate": %{"$count_distinct": %{^"beds" => count(f0.beds, :distinct)}}}
             ),
-            %{"$group" => %{^:nurses => f.capacity}}
+            %{"$group": %{^"capacity" => f0.capacity}}
           )
       )
 
@@ -372,21 +370,21 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
-        where: f.capacity == ^5 and ^true,
-        group_by: [f.capacity],
+      from(f0 in FatEcto.FatRoom,
+        where: f0.capacity == ^5 and ^true,
+        group_by: [f0.capacity],
         select:
           merge(
             merge(
               merge(
-                merge(merge(f, %{"$aggregate": %{"$max": %{^:nurses => max(f.nurses)}}}), %{
-                  "$aggregate": %{"$max": %{^:nurses => max(f.beds)}}
+                merge(merge(f0, %{"$aggregate": %{"$max": %{^"nurses" => max(f0.nurses)}}}), %{
+                  "$aggregate": %{"$max": %{^"beds" => max(f0.beds)}}
                 }),
-                %{"$aggregate": %{"$min": %{^:nurses => min(f.capacity)}}}
+                %{"$aggregate": %{"$min": %{^"capacity" => min(f0.capacity)}}}
               ),
-              %{"$aggregate": %{"$min": %{^:nurses => min(f.level)}}}
+              %{"$aggregate": %{"$min": %{^"level" => min(f0.level)}}}
             ),
-            %{"$group" => %{^:nurses => f.capacity}}
+            %{"$group": %{^"capacity" => f0.capacity}}
           )
       )
 
@@ -401,11 +399,11 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
-        where: f.beds == ^3 and ^true,
+      from(f0 in FatEcto.FatRoom,
+        where: f0.beds == ^3 and ^true,
         select:
-          merge(merge(f, %{"$aggregate": %{"$count": %{^:beds => count(f.beds)}}}), %{
-            "$aggregate": %{"$count": %{^:beds => count(f.rating)}}
+          merge(merge(f0, %{"$aggregate": %{"$count": %{^"beds" => count(f0.beds)}}}), %{
+            "$aggregate": %{"$count": %{^"rating" => count(f0.rating)}}
           })
       )
 
@@ -421,13 +419,14 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
-        where: f.capacity == ^5 and ^true,
-        order_by: [desc: f.beds],
+      from(f0 in FatEcto.FatRoom,
+        where: f0.capacity == ^5 and ^true,
+        order_by: [desc: f0.beds],
         select:
-          merge(merge(f, %{"$aggregate": %{"$count_distinct": %{^:nurses => count(f.nurses, :distinct)}}}), %{
-            "$aggregate": %{"$count_distinct": %{^:nurses => count(f.level, :distinct)}}
-          })
+          merge(
+            merge(f0, %{"$aggregate": %{"$count_distinct": %{^"nurses" => count(f0.nurses, :distinct)}}}),
+            %{"$aggregate": %{"$count_distinct": %{^"level" => count(f0.level, :distinct)}}}
+          )
       )
 
     result = build(FatEcto.FatRoom, opts)
@@ -443,16 +442,16 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
-        where: f.capacity == ^5 and ^true,
-        group_by: [f.capacity],
-        order_by: [desc: f.beds],
+      from(f0 in FatEcto.FatRoom,
+        where: f0.capacity == ^5 and ^true,
+        group_by: [f0.capacity],
+        order_by: [desc: f0.beds],
         select:
           merge(
-            merge(merge(f, %{"$aggregate": %{"$min": %{^:nurses => min(f.nurses)}}}), %{
-              "$aggregate": %{"$min": %{^:nurses => min(f.capacity)}}
+            merge(merge(f0, %{"$aggregate": %{"$min": %{^"nurses" => min(f0.nurses)}}}), %{
+              "$aggregate": %{"$min": %{^"capacity" => min(f0.capacity)}}
             }),
-            %{"$group" => %{^:nurses => f.capacity}}
+            %{"$group": %{^"capacity" => f0.capacity}}
           )
       )
 
@@ -468,15 +467,15 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
-        where: f.capacity == ^5 and ^true,
-        group_by: [f.capacity],
+      from(f0 in FatEcto.FatRoom,
+        where: f0.capacity == ^5 and ^true,
+        group_by: [f0.capacity],
         select:
           merge(
-            merge(merge(f, %{"$aggregate": %{"$max": %{^:nurses => max(f.nurses)}}}), %{
-              "$aggregate": %{"$max": %{^:nurses => max(f.level)}}
+            merge(merge(f0, %{"$aggregate": %{"$max": %{^"nurses" => max(f0.nurses)}}}), %{
+              "$aggregate": %{"$max": %{^"level" => max(f0.level)}}
             }),
-            %{"$group" => %{^:nurses => f.capacity}}
+            %{"$group": %{^"capacity" => f0.capacity}}
           )
       )
 
@@ -493,16 +492,16 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
-        where: f.capacity == ^5 and ^true,
-        group_by: [f.capacity],
-        order_by: [asc: f.beds],
+      from(f0 in FatEcto.FatRoom,
+        where: f0.capacity == ^5 and ^true,
+        group_by: [f0.capacity],
+        order_by: [asc: f0.beds],
         select:
           merge(
-            merge(merge(f, %{"$aggregate": %{"$sum": %{^:nurses => sum(f.nurses)}}}), %{
-              "$aggregate": %{"$sum": %{^:nurses => sum(f.level)}}
+            merge(merge(f0, %{"$aggregate": %{"$sum": %{^"nurses" => sum(f0.nurses)}}}), %{
+              "$aggregate": %{"$sum": %{^"level" => sum(f0.level)}}
             }),
-            %{"$group" => %{^:nurses => f.capacity}}
+            %{"$group": %{^"capacity" => f0.capacity}}
           )
       )
 
@@ -519,16 +518,16 @@ defmodule Query.AggregateTest do
     }
 
     expected =
-      from(f in FatEcto.FatRoom,
-        where: f.capacity == ^5 and ^true,
-        group_by: [f.capacity],
-        order_by: [asc: f.beds],
+      from(f0 in FatEcto.FatRoom,
+        where: f0.capacity == ^5 and ^true,
+        group_by: [f0.capacity],
+        order_by: [asc: f0.beds],
         select:
           merge(
-            merge(merge(f, %{"$aggregate": %{"$avg": %{^:level => avg(f.level)}}}), %{
-              "$aggregate": %{"$avg": %{^:level => avg(f.capacity)}}
+            merge(merge(f0, %{"$aggregate": %{"$avg": %{^"level" => avg(f0.level)}}}), %{
+              "$aggregate": %{"$avg": %{^"capacity" => avg(f0.capacity)}}
             }),
-            %{"$group" => %{^:level => f.capacity}}
+            %{"$group": %{^"capacity" => f0.capacity}}
           )
       )
 

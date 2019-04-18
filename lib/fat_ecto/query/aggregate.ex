@@ -91,60 +91,60 @@ defmodule FatEcto.FatQuery.FatAggregate do
   end
 
   defp build_max(queryable, field) do
-    field = FatHelper.string_to_atom(field)
+    atom_field = FatHelper.string_to_atom(field)
 
     from(
       q in queryable,
       select_merge: %{
-        "$aggregate": %{"$max": %{^field => max(field(q, ^field))}}
+        "$aggregate": %{"$max": %{^field => max(field(q, ^atom_field))}}
       }
     )
   end
 
   defp build_min(queryable, field) do
-    field = FatHelper.string_to_atom(field)
+    atom_field = FatHelper.string_to_atom(field)
 
     from(
       q in queryable,
-      select_merge: %{"$aggregate": %{"$min": %{^field => min(field(q, ^field))}}}
+      select_merge: %{"$aggregate": %{"$min": %{^field => min(field(q, ^atom_field))}}}
     )
   end
 
   defp build_avg(queryable, field) do
-    field = FatHelper.string_to_atom(field)
+    atom_field = FatHelper.string_to_atom(field)
 
     from(
       q in queryable,
-      select_merge: %{"$aggregate": %{"$avg": %{^field => avg(field(q, ^field))}}}
+      select_merge: %{"$aggregate": %{"$avg": %{^field => avg(field(q, ^atom_field))}}}
     )
   end
 
   defp build_count(queryable, field) do
-    field = FatHelper.string_to_atom(field)
+    atom_field = FatHelper.string_to_atom(field)
 
     from(
       q in queryable,
-      select_merge: %{"$aggregate": %{"$count": %{^field => count(field(q, ^field))}}}
+      select_merge: %{"$aggregate": %{"$count": %{^field => count(field(q, ^atom_field))}}}
     )
   end
 
   defp build_count_distinct(queryable, field) do
-    field = FatHelper.string_to_atom(field)
+    atom_field = FatHelper.string_to_atom(field)
 
     from(
       q in queryable,
       select_merge: %{
-        "$aggregate": %{"$count_distinct": %{^field => count(field(q, ^field), :distinct)}}
+        "$aggregate": %{"$count_distinct": %{^field => count(field(q, ^atom_field), :distinct)}}
       }
     )
   end
 
   defp build_sum(queryable, field) do
-    field = FatHelper.string_to_atom(field)
+    atom_field = FatHelper.string_to_atom(field)
 
     from(
       q in queryable,
-      select_merge: %{"$aggregate": %{"$sum": %{^field => sum(field(q, ^field))}}}
+      select_merge: %{"$aggregate": %{"$sum": %{^field => sum(field(q, ^atom_field))}}}
     )
   end
 end

@@ -38,8 +38,9 @@ defmodule FatEcto.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ecto, "~> 3.0"},
-      {:ecto_sql, "~> 3.0", only: :test},
+      {:ecto, github: "elixir-ecto/ecto", branch: "master", override: true},
+      # {:ecto_sql, "~> 3.0", only: :test},
+      {:ecto_sql, "~> 3.0"},
       {:postgrex, "~> 0.14.1", only: :test},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:earmark, "~> 1.2", only: :dev}
