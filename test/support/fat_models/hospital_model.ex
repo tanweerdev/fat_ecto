@@ -3,7 +3,6 @@ defmodule FatEcto.FatHospital do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @fields [:name, :location, :phone, :address, :total_staff, :rating]
 
   schema "fat_hospitals" do
     field(:name, :string)
@@ -18,9 +17,10 @@ defmodule FatEcto.FatHospital do
     many_to_many(:fat_doctors, FatEcto.FatDoctor, join_through: FatEcto.FatHospitalDoctor)
   end
 
-  def changeset(data) when is_map(data) do
-    %__MODULE__{}
-    |> cast(data, @fields)
-    |> apply_changes()
+  def changeset(struct, params \\ %{}) do
+    struct
+    |> cast(params, [
+      :name, :location, :phone, :address, :total_staff, :rating
+    ])
   end
 end
