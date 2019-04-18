@@ -1,7 +1,5 @@
 defmodule Query.IncludeTest do
-  use ExUnit.Case
-  import MyApp.Query
-  import Ecto.Query
+  use FatEcto.ConnCase
 
   test "returns the query with include associated model" do
     opts = %{
@@ -17,7 +15,7 @@ defmodule Query.IncludeTest do
         preload: [fat_hospitals: ^query]
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -37,7 +35,7 @@ defmodule Query.IncludeTest do
         preload: [fat_hospitals: ^query]
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -67,7 +65,7 @@ defmodule Query.IncludeTest do
         preload: [fat_hospitals: ^query]
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -98,7 +96,7 @@ defmodule Query.IncludeTest do
         preload: [fat_hospitals: ^query]
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -131,7 +129,7 @@ defmodule Query.IncludeTest do
         preload: [fat_hospitals: ^query]
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -166,7 +164,7 @@ defmodule Query.IncludeTest do
         preload: [fat_hospitals: ^query]
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -199,7 +197,7 @@ defmodule Query.IncludeTest do
         preload: [fat_hospitals: ^query]
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -214,7 +212,7 @@ defmodule Query.IncludeTest do
         preload: [:fat_hospitals]
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -237,7 +235,7 @@ defmodule Query.IncludeTest do
         preload: [fat_hospitals: ^query]
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -266,7 +264,7 @@ defmodule Query.IncludeTest do
         preload: [fat_hospitals: ^query]
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -295,7 +293,7 @@ defmodule Query.IncludeTest do
         preload: [fat_hospitals: ^query]
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -318,7 +316,7 @@ defmodule Query.IncludeTest do
         preload: [fat_hospitals: ^query]
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -347,7 +345,7 @@ defmodule Query.IncludeTest do
         preload: [fat_hospitals: ^query]
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -376,7 +374,7 @@ defmodule Query.IncludeTest do
         preload: [fat_hospitals: ^query]
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -391,7 +389,7 @@ defmodule Query.IncludeTest do
         preload: [:fat_patients, :fat_hospitals]
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 end

@@ -1,5 +1,5 @@
 defmodule Utils.DateTimeTest do
-  use ExUnit.Case
+  use FatEcto.ConnCase
   import FatUtils.DateTime
 
   test "parse! integer datetime" do

@@ -1,13 +1,9 @@
 defmodule Fat.ContextTest do
-  use ExUnit.Case
+  use FatEcto.ConnCase
   alias Fat.ContextMacro
-  alias MyApp.Query, as: Query
   alias FatEcto.{Repo, FatRoom, FatBed}
-  import Ecto.Query
 
   setup do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
-    Ecto.Adapters.SQL.Sandbox.mode(Repo, {:shared, self()})
     Repo.start_link()
     Repo.insert(%FatRoom{name: "John", purpose: "Testing", description: "descriptive", is_active: true})
 

@@ -1,7 +1,5 @@
 defmodule Query.WhereTest do
-  use ExUnit.Case
-  import MyApp.Query
-  import Ecto.Query
+  use FatEcto.ConnCase
 
   test "returns the query where field like" do
     opts = %{
@@ -11,7 +9,7 @@ defmodule Query.WhereTest do
     # expected = from(d in FatEcto.FatDoctor, where: like(d.name, ^"%Joh %"))
     expected = from(d in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", d.name), ^"%Joh %") and ^true)
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -27,7 +25,7 @@ defmodule Query.WhereTest do
         where: ilike(fragment("(?)::TEXT", d.designation), ^"%surge %") and ^true
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -43,7 +41,7 @@ defmodule Query.WhereTest do
         where: not like(fragment("(?)::TEXT", d.email), ^"%john@ %") and ^true
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -59,7 +57,7 @@ defmodule Query.WhereTest do
         where: not ilike(fragment("(?)::TEXT", d.address), ^"%street2 %") and ^true
       )
 
-    result = build(FatEcto.FatDoctor, opts)
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -69,7 +67,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: h.rating < ^3 and ^true)
-    result = build(FatEcto.FatHospital, opts)
+    result = Query.build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -79,7 +77,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: h.total_staff < h.rating and ^true)
-    result = build(FatEcto.FatHospital, opts)
+    result = Query.build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -89,7 +87,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: h.total_staff <= ^3 and ^true)
-    result = build(FatEcto.FatHospital, opts)
+    result = Query.build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -99,7 +97,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: h.rating <= h.total_staff and ^true)
-    result = build(FatEcto.FatHospital, opts)
+    result = Query.build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -109,7 +107,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(r in FatEcto.FatRoom, where: r.beds > ^3 and ^true)
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -119,7 +117,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(r in FatEcto.FatRoom, where: r.beds > r.capacity and ^true)
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -129,7 +127,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(r in FatEcto.FatRoom, where: r.capacity >= ^3 and ^true)
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -139,7 +137,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(r in FatEcto.FatRoom, where: r.rating >= r.total_staff and ^true)
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -150,7 +148,7 @@ defmodule Query.WhereTest do
 
     expected = from(r in FatEcto.FatRoom, where: r.total_staff > ^10 and r.total_staff < ^20 and ^true)
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -161,7 +159,7 @@ defmodule Query.WhereTest do
 
     expected = from(r in FatEcto.FatRoom, where: r.total_staff >= ^10 and r.total_staff <= ^20 and ^true)
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -176,7 +174,7 @@ defmodule Query.WhereTest do
         where: (p.appointments_count < ^10 or p.appointments_count > ^20) and ^true
       )
 
-    result = build(FatEcto.FatPatient, opts)
+    result = Query.build(FatEcto.FatPatient, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -191,7 +189,7 @@ defmodule Query.WhereTest do
         where: (p.appointments_count <= ^10 or p.appointments_count >= ^20) and ^true
       )
 
-    result = build(FatEcto.FatPatient, opts)
+    result = Query.build(FatEcto.FatPatient, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -201,7 +199,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(p in FatEcto.FatPatient, where: p.appointments_count in ^[20, 50] and ^true)
-    result = build(FatEcto.FatPatient, opts)
+    result = Query.build(FatEcto.FatPatient, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -211,7 +209,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(p in FatEcto.FatPatient, where: p.appointments_count not in ^[20, 50] and ^true)
-    result = build(FatEcto.FatPatient, opts)
+    result = Query.build(FatEcto.FatPatient, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -221,7 +219,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: is_nil(h.rating) and ^true)
-    result = build(FatEcto.FatHospital, opts)
+    result = Query.build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -231,7 +229,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: not is_nil(h.rating) and ^true)
-    result = build(FatEcto.FatHospital, opts)
+    result = Query.build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -241,7 +239,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: h.location == ^"Geo" and ^true)
-    result = build(FatEcto.FatHospital, opts)
+    result = Query.build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 end

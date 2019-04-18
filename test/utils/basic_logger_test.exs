@@ -1,5 +1,5 @@
 defmodule Utils.BasicLoggerTest do
-  use ExUnit.Case
+  use FatEcto.ConnCase
   import ExUnit.CaptureLog
   import FatUtils.BasicLogger
 

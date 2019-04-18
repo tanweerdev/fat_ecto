@@ -1,7 +1,5 @@
 defmodule Query.AggregateTest do
-  use ExUnit.Case
-  import MyApp.Query
-  import Ecto.Query
+  use FatEcto.ConnCase
 
   test "returns the query with aggregate count" do
     opts = %{
@@ -15,7 +13,7 @@ defmodule Query.AggregateTest do
         select: merge(f0, %{"$aggregate": %{"$count": %{^"beds" => count(f0.beds)}}})
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -33,7 +31,7 @@ defmodule Query.AggregateTest do
         select: merge(f0, %{"$aggregate": %{"$count_distinct": %{^"nurses" => count(f0.nurses, :distinct)}}})
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -56,7 +54,7 @@ defmodule Query.AggregateTest do
           })
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -77,7 +75,7 @@ defmodule Query.AggregateTest do
           })
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -100,7 +98,7 @@ defmodule Query.AggregateTest do
           })
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -123,7 +121,7 @@ defmodule Query.AggregateTest do
           })
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -163,7 +161,7 @@ defmodule Query.AggregateTest do
         preload: [fat_hospital: ^hospital_query]
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -200,7 +198,7 @@ defmodule Query.AggregateTest do
           )
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -226,7 +224,7 @@ defmodule Query.AggregateTest do
           )
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -250,7 +248,7 @@ defmodule Query.AggregateTest do
           )
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -274,7 +272,7 @@ defmodule Query.AggregateTest do
           )
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -298,7 +296,7 @@ defmodule Query.AggregateTest do
           )
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -328,7 +326,7 @@ defmodule Query.AggregateTest do
           )
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -358,7 +356,7 @@ defmodule Query.AggregateTest do
           )
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -388,7 +386,7 @@ defmodule Query.AggregateTest do
           )
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -407,7 +405,7 @@ defmodule Query.AggregateTest do
           })
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -429,7 +427,7 @@ defmodule Query.AggregateTest do
           )
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -455,7 +453,7 @@ defmodule Query.AggregateTest do
           )
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -479,7 +477,7 @@ defmodule Query.AggregateTest do
           )
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -505,7 +503,7 @@ defmodule Query.AggregateTest do
           )
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -531,7 +529,7 @@ defmodule Query.AggregateTest do
           )
       )
 
-    result = build(FatEcto.FatRoom, opts)
+    result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
   end
 end

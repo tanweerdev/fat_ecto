@@ -1,5 +1,5 @@
 defmodule Utils.IntegerTest do
-  use ExUnit.Case
+  use FatEcto.ConnCase
   import FatUtils.Integer
 
   test "parse integer/integer string with returning tuple" do

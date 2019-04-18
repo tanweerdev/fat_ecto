@@ -1,7 +1,5 @@
 defmodule Query.OrderTest do
-  use ExUnit.Case
-  import MyApp.Query
-  import Ecto.Query
+  use FatEcto.ConnCase
 
   test "returns the query where field is desc " do
     opts = %{
@@ -10,7 +8,7 @@ defmodule Query.OrderTest do
 
     expected = from(h in FatEcto.FatHospital, order_by: [desc: h.rating])
 
-    result = build(FatEcto.FatHospital, opts)
+    result = Query.build(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -21,7 +19,7 @@ defmodule Query.OrderTest do
 
     expected = from(p in FatEcto.FatPatient, order_by: [asc: p.appointments_count])
 
-    result = build(FatEcto.FatPatient, opts)
+    result = Query.build(FatEcto.FatPatient, opts)
     assert inspect(result) == inspect(expected)
   end
 end

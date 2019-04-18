@@ -1,5 +1,5 @@
 defmodule Utils.RecordUtils do
-  use ExUnit.Case
+  use FatEcto.ConnCase
   import FatEcto.TestRecordUtils
 
   test "sanitize_map" do
