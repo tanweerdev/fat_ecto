@@ -13,7 +13,8 @@ config :fat_ecto, FatEcto.Repo,
   superpass: "postgres",
   database: "fat_ecto_test",
   hostname: "localhost",
-  pool: Ecto.Adapters.SQL.Sandbox
+  pool: Ecto.Adapters.SQL.Sandbox,
+  log: false
 
 # This configuration is loaded before any dependency and is restricted
 # to this project. If another project depends on this project, this

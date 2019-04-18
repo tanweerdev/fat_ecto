@@ -18,6 +18,5 @@ defmodule FatEcto.ConnCase do
   setup do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(FatEcto.Repo)
     Ecto.Adapters.SQL.Sandbox.mode(FatEcto.Repo, {:shared, self()})
-    # Repo.start_link()
   end
 end

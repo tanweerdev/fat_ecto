@@ -1,20 +1,20 @@
 defmodule Utils.ChangesetTest do
-  use ExUnit.Case
+  use FatEcto.ConnCase
   alias FatUtils.Changeset, as: Change
 
   test "xor changeset" do
-    changeset = FatEcto.FatDoctor.changeset(%{name: "12345", designation: "testing"})
-    struct = FatEcto.FatDoctor.struct(%{name: "12345", designation: "testing"})
+    changeset = FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "testing"})
+    {:ok, struct} = Repo.insert(changeset)
 
     changeset = Change.xor(changeset, struct, [:name, :designation])
     assert changeset.errors == [designation: {"name XOR designation", []}, name: {"name XOR designation", []}]
 
-    changeset = FatEcto.FatDoctor.changeset(%{name: "12345", designation: "testing"})
+    changeset = FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "testing"})
 
     changeset = Change.xor(changeset, struct, [:name])
     assert changeset.errors == [name: {"name", []}]
 
-    changeset = FatEcto.FatDoctor.changeset(%{name: "12345", designation: "testing"})
+    changeset = FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "testing"})
     changeset = Change.xor(changeset, struct, [:phone])
 
     assert changeset.errors == [
@@ -23,7 +23,7 @@ defmodule Utils.ChangesetTest do
   end
 
   test "require if change present" do
-    changeset = FatEcto.FatDoctor.changeset(%{name: "12345", designation: "testing"})
+    changeset = FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "testing"})
     changeset = Change.require_if_change_present(changeset, if_change_key: :name, require_key: :phone)
     assert changeset.errors == [phone: {"can't be blank", [validation: :required]}]
   end
@@ -33,7 +33,7 @@ defmodule Utils.ChangesetTest do
     {:ok, end_date, _} = DateTime.from_iso8601("2016-01-02T01:00:00Z")
 
     changeset =
-      FatEcto.FatDoctor.changeset(%{
+      FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{
         start_date: start_date,
         end_date: end_date,
         name: "12345",
@@ -49,7 +49,7 @@ defmodule Utils.ChangesetTest do
     {:ok, end_date, _} = DateTime.from_iso8601("2017-01-01T00:00:00Z")
 
     changeset =
-      FatEcto.FatDoctor.changeset(%{
+      FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{
         start_date: start_date,
         end_date: end_date,
         name: "12345",
@@ -65,7 +65,7 @@ defmodule Utils.ChangesetTest do
     {:ok, end_date, _} = DateTime.from_iso8601("2016-01-02T01:00:00Z")
 
     changeset =
-      FatEcto.FatDoctor.changeset(%{
+      FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{
         start_date: start_date,
         end_date: end_date,
         name: "12345",
@@ -81,7 +81,7 @@ defmodule Utils.ChangesetTest do
     {:ok, end_date, _} = DateTime.from_iso8601("2017-01-01T00:00:00Z")
 
     changeset =
-      FatEcto.FatDoctor.changeset(%{
+      FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{
         start_date: start_date,
         end_date: end_date,
         name: "12345",
@@ -106,7 +106,9 @@ defmodule Utils.ChangesetTest do
   end
 
   test "add error" do
-    orgnl_changeset = FatEcto.FatDoctor.changeset(%{name: "12345", designation: "testing"})
+    orgnl_changeset =
+      FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "testing"})
+
     changeset = Change.add_error(orgnl_changeset, :phone, "must be present")
     assert changeset.errors == [phone: {"must be present", []}]
     changeset = Change.add_error(orgnl_changeset, :name)
