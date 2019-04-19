@@ -1,6 +1,14 @@
 defmodule Query.SelectTest do
   use FatEcto.ConnCase
 
+  setup do
+    insert(:doctor)
+    insert(:hospital)
+    room = insert(:room)
+    insert(:bed, fat_room_id: room.id)
+    :ok
+  end
+
   test "returns the select query fields" do
     opts = %{
       "$select" => %{"$fields" => ["name", "designation", "experience_years"]}
@@ -8,26 +16,35 @@ defmodule Query.SelectTest do
 
     expected = from(d in FatEcto.FatDoctor, select: map(d, [:name, :designation, :experience_years]))
 
-    result = Query.build(FatEcto.FatDoctor, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatDoctor, opts)
+    assert inspect(query) == inspect(expected)
+    assert Repo.all(query) == [%{designation: "Surgeon", experience_years: 7, name: "John"}]
   end
 
+  @tag :failing
   test "returns the select query with related fields " do
+    room = Repo.one(FatEcto.FatRoom)
+
     opts = %{
       "$select" => %{
-        "$fields" => ["name", "location", "rating"],
-        "fat_rooms" => ["beds", "capacity"]
-      }
+        "$fields" => ["name", "purpose", "description"],
+        "fat_beds" => ["purpose", "description", "is_active"]
+      },
+      "$where" => %{"id" => room.id}
     }
 
     expected =
       from(
-        h in FatEcto.FatHospital,
-        select: map(h, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}])
+        f in FatEcto.FatRoom,
+        where: f.id == ^room.id and ^true,
+        select: map(f, [:name, :purpose, :description, {:fat_beds, [:purpose, :description, :is_active]}])
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatRoom, opts)
+    assert inspect(query) == inspect(expected)
+
+    Repo.all(query)
+    |> IO.inspect()
   end
 
   test "returns the select query with related fields with order by " do
@@ -46,8 +63,8 @@ defmodule Query.SelectTest do
         select: map(h, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}])
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
   end
 
   test "returns the select query with related fields inside direct array" do
@@ -61,8 +78,8 @@ defmodule Query.SelectTest do
         select: map(h, [:name, :location, :rating])
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
   end
 
   test "returns the select query with related fields with order by/where " do
@@ -83,8 +100,8 @@ defmodule Query.SelectTest do
         select: map(h, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}])
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
   end
 
   test "returns the select query with related fields with order by/where/include " do
@@ -124,7 +141,7 @@ defmodule Query.SelectTest do
         preload: [fat_doctors: ^query]
       )
 
-    result = Query.build(FatEcto.FatHospital, opts, max_limit: 107)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatHospital, opts, max_limit: 107)
+    assert inspect(query) == inspect(expected)
   end
 end

@@ -1,14 +1,21 @@
 defmodule Query.JoinTest do
   use FatEcto.ConnCase
 
+  setup do
+    hospital = insert(:hospital)
+    insert(:room, fat_hospital_id: hospital.id)
+    :ok
+  end
+
+  @tag :failing
   test "returns the query with right join and selected fields" do
     opts = %{
       "$right_join" => %{
         "fat_rooms" => %{
           "$on_field" => "id",
-          "$on_join_table_field" => "hospital_id",
-          "$select" => ["beds", "capacity", "level"],
-          "$where" => %{"incharge" => "John"}
+          "$on_join_table_field" => "fat_hospital_id",
+          "$select" => ["name", "purpose", "description"],
+          "$where" => %{"name" => "room 1"}
         }
       }
     }
@@ -17,14 +24,15 @@ defmodule Query.JoinTest do
       from(
         h in FatEcto.FatHospital,
         right_join: r in "fat_rooms",
-        on: h.id == r.hospital_id,
-        where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^:fat_rooms => map(r, [:beds, :capacity, :level])})
+        on: h.id == r.fat_hospital_id,
+        where: r.name == ^"room 1" and ^true,
+        select: merge(h, %{^:fat_rooms => map(r, [:name, :purpose, :description])})
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build(FatEcto.FatHospital, opts)
 
-    assert inspect(result) == inspect(expected)
+    assert inspect(query) == inspect(expected)
+    IO.inspect(Repo.one(query))
   end
 
   test "returns the query with left join and selected fields" do
