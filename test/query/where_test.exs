@@ -1,64 +1,134 @@
 defmodule Query.WhereTest do
   use FatEcto.ConnCase
+  import FatEcto.TestRecordUtils
+
+  setup do
+    insert(:doctor)
+    insert(:hospital)
+    room = insert(:room)
+    insert(:bed, fat_room_id: room.id)
+    :ok
+  end
 
   test "returns the query where field like" do
     opts = %{
-      "$where" => %{"name" => %{"$like" => "%Joh %"}}
+      "$where" => %{"name" => %{"$like" => "%Joh%"}}
     }
 
     # expected = from(d in FatEcto.FatDoctor, where: like(d.name, ^"%Joh %"))
-    expected = from(d in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", d.name), ^"%Joh %") and ^true)
+    expected = from(d in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", d.name), ^"%Joh%") and ^true)
 
-    result = Query.build(FatEcto.FatDoctor, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatDoctor, opts)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.one(query)
+      |> sanitize_map()
+      |> Map.drop([:start_date, :end_date, :id])
+
+    assert result == %{
+             address: "main bulevard",
+             designation: "Surgeon",
+             email: "test@test.com",
+             experience_years: 7,
+             name: "John",
+             phone: "12345",
+             rating: 9
+           }
   end
 
   test "returns the query where field ilike" do
     opts = %{
-      "$where" => %{"designation" => %{"$ilike" => "%surge %"}}
+      "$where" => %{"designation" => %{"$ilike" => "%Surge%"}}
     }
 
     # expected = from(d in FatEcto.FatDoctor, where: ilike(d.designation, ^"%surge %"))
     expected =
       from(
         d in FatEcto.FatDoctor,
-        where: ilike(fragment("(?)::TEXT", d.designation), ^"%surge %") and ^true
+        where: ilike(fragment("(?)::TEXT", d.designation), ^"%Surge%") and ^true
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatDoctor, opts)
+
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.one(query)
+      |> sanitize_map()
+      |> Map.drop([:start_date, :end_date, :id])
+
+    assert result == %{
+             address: "main bulevard",
+             designation: "Surgeon",
+             email: "test@test.com",
+             experience_years: 7,
+             name: "John",
+             phone: "12345",
+             rating: 9
+           }
   end
 
   test "returns the query where field notlike" do
     opts = %{
-      "$where" => %{"email" => %{"$not_like" => "%john@ %"}}
+      "$where" => %{"email" => %{"$not_like" => "%john@%"}}
     }
 
     # expected = from(d in FatEcto.FatDoctor, where: not like(d.email, ^"%john@ %"))
     expected =
       from(
         d in FatEcto.FatDoctor,
-        where: not like(fragment("(?)::TEXT", d.email), ^"%john@ %") and ^true
+        where: not like(fragment("(?)::TEXT", d.email), ^"%john@%") and ^true
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatDoctor, opts)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.one(query)
+      |> sanitize_map()
+      |> Map.drop([:start_date, :end_date, :id])
+
+    assert result == %{
+             address: "main bulevard",
+             designation: "Surgeon",
+             email: "test@test.com",
+             experience_years: 7,
+             name: "John",
+             phone: "12345",
+             rating: 9
+           }
   end
 
   test "returns the query where field notilike" do
     opts = %{
-      "$where" => %{"address" => %{"$not_ilike" => "%street2 %"}}
+      "$where" => %{"address" => %{"$not_ilike" => "%street2%"}}
     }
 
     # expected = from(d in FatEcto.FatDoctor, where: not ilike(d.address, ^"%street2 %"))
     expected =
       from(
         d in FatEcto.FatDoctor,
-        where: not ilike(fragment("(?)::TEXT", d.address), ^"%street2 %") and ^true
+        where: not ilike(fragment("(?)::TEXT", d.address), ^"%street2%") and ^true
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatDoctor, opts)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.one(query)
+      |> sanitize_map()
+      |> Map.drop([:start_date, :end_date, :id])
+
+    assert result == %{
+             address: "main bulevard",
+             designation: "Surgeon",
+             email: "test@test.com",
+             experience_years: 7,
+             name: "John",
+             phone: "12345",
+             rating: 9
+           }
   end
 
   test "returns the query where field lt" do
@@ -67,8 +137,9 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: h.rating < ^3 and ^true)
-    result = Query.build(FatEcto.FatHospital, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+    assert Repo.one(query) == nil
   end
 
   test "returns the query where field lt another field" do
@@ -77,8 +148,22 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: h.total_staff < h.rating and ^true)
-    result = Query.build(FatEcto.FatHospital, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.one(query)
+      |> sanitize_map()
+      |> Map.drop([:id])
+
+    assert result == %{
+             address: "123 street",
+             location: "main bullevard",
+             name: "st marry",
+             phone: "12345",
+             rating: 5,
+             total_staff: 3
+           }
   end
 
   test "returns the query where field lte" do
@@ -87,8 +172,22 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: h.total_staff <= ^3 and ^true)
-    result = Query.build(FatEcto.FatHospital, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.one(query)
+      |> sanitize_map()
+      |> Map.drop([:id])
+
+    assert result == %{
+             address: "123 street",
+             location: "main bullevard",
+             name: "st marry",
+             phone: "12345",
+             rating: 5,
+             total_staff: 3
+           }
   end
 
   test "returns the query where field lte another field" do
@@ -97,38 +196,68 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: h.rating <= h.total_staff and ^true)
-    result = Query.build(FatEcto.FatHospital, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+    assert Repo.one(query) == nil
   end
 
   test "returns the query where field gt" do
     opts = %{
-      "$where" => %{"beds" => %{"$gt" => 3}}
+      "$where" => %{"floor" => %{"$gt" => 3}}
     }
 
-    expected = from(r in FatEcto.FatRoom, where: r.beds > ^3 and ^true)
-    result = Query.build(FatEcto.FatRoom, opts)
-    assert inspect(result) == inspect(expected)
+    expected = from(r in FatEcto.FatRoom, where: r.floor > ^3 and ^true)
+    query = Query.build(FatEcto.FatRoom, opts)
+    assert inspect(query) == inspect(expected)
+    assert Repo.one(query) == nil
   end
 
   test "returns the query where field gt another field" do
     opts = %{
-      "$where" => %{"beds" => %{"$gt" => "$capacity"}}
+      "$where" => %{"rating" => %{"$gt" => "$total_staff"}}
     }
 
-    expected = from(r in FatEcto.FatRoom, where: r.beds > r.capacity and ^true)
-    result = Query.build(FatEcto.FatRoom, opts)
-    assert inspect(result) == inspect(expected)
+    expected = from(r in FatEcto.FatHospital, where: r.rating > r.total_staff and ^true)
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.one(query)
+      |> sanitize_map()
+      |> Map.drop([:id])
+
+    assert result == %{
+             address: "123 street",
+             location: "main bullevard",
+             name: "st marry",
+             phone: "12345",
+             rating: 5,
+             total_staff: 3
+           }
   end
 
   test "returns the query where field gte" do
     opts = %{
-      "$where" => %{"capacity" => %{"$gte" => 3}}
+      "$where" => %{"floor" => %{"$gte" => 3}}
     }
 
-    expected = from(r in FatEcto.FatRoom, where: r.capacity >= ^3 and ^true)
-    result = Query.build(FatEcto.FatRoom, opts)
-    assert inspect(result) == inspect(expected)
+    expected = from(r in FatEcto.FatRoom, where: r.floor >= ^3 and ^true)
+    query = Query.build(FatEcto.FatRoom, opts)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.one(query)
+      |> sanitize_map()
+      |> Map.drop([:id])
+
+    assert result == %{
+             description: "sensitive",
+             fat_hospital_id: nil,
+             floor: 3,
+             is_active: true,
+             name: "room 1",
+             purpose: "serious patients"
+           }
   end
 
   test "returns the query where field gte another field" do
@@ -136,9 +265,23 @@ defmodule Query.WhereTest do
       "$where" => %{"rating" => %{"$gte" => "$total_staff"}}
     }
 
-    expected = from(r in FatEcto.FatRoom, where: r.rating >= r.total_staff and ^true)
-    result = Query.build(FatEcto.FatRoom, opts)
-    assert inspect(result) == inspect(expected)
+    expected = from(r in FatEcto.FatHospital, where: r.rating >= r.total_staff and ^true)
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.one(query)
+      |> sanitize_map()
+      |> Map.drop([:id])
+
+    assert result == %{
+             address: "123 street",
+             location: "main bullevard",
+             name: "st marry",
+             phone: "12345",
+             rating: 5,
+             total_staff: 3
+           }
   end
 
   test "returns the query where field between" do
@@ -146,10 +289,11 @@ defmodule Query.WhereTest do
       "$where" => %{"total_staff" => %{"$between" => [10, 20]}}
     }
 
-    expected = from(r in FatEcto.FatRoom, where: r.total_staff > ^10 and r.total_staff < ^20 and ^true)
+    expected = from(r in FatEcto.FatHospital, where: r.total_staff > ^10 and r.total_staff < ^20 and ^true)
 
-    result = Query.build(FatEcto.FatRoom, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+    assert Repo.one(query) == nil
   end
 
   test "returns the query where field between equal" do
@@ -157,10 +301,11 @@ defmodule Query.WhereTest do
       "$where" => %{"total_staff" => %{"$between_equal" => [10, 20]}}
     }
 
-    expected = from(r in FatEcto.FatRoom, where: r.total_staff >= ^10 and r.total_staff <= ^20 and ^true)
+    expected = from(r in FatEcto.FatHospital, where: r.total_staff >= ^10 and r.total_staff <= ^20 and ^true)
 
-    result = Query.build(FatEcto.FatRoom, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+    assert Repo.one(query) == nil
   end
 
   test "returns the query where field notbetween" do
@@ -174,8 +319,9 @@ defmodule Query.WhereTest do
         where: (p.appointments_count < ^10 or p.appointments_count > ^20) and ^true
       )
 
-    result = Query.build(FatEcto.FatPatient, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatPatient, opts)
+    assert inspect(query) == inspect(expected)
+    assert Repo.one(query) == nil
   end
 
   test "returns the query where field notbetween equal" do
@@ -189,19 +335,24 @@ defmodule Query.WhereTest do
         where: (p.appointments_count <= ^10 or p.appointments_count >= ^20) and ^true
       )
 
-    result = Query.build(FatEcto.FatPatient, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatPatient, opts)
+    assert inspect(query) == inspect(expected)
+    assert Repo.one(query) == nil
   end
 
+  @tag :failing
   test "returns the query where field in" do
     opts = %{
-      "$where" => %{"appointments_count" => %{"$in" => [20, 50]}}
+      "$where" => %{"appointments_count" => %{"$in" => [4]}}
     }
 
-    expected = from(p in FatEcto.FatPatient, where: p.appointments_count in ^[20, 50] and ^true)
-    result = Query.build(FatEcto.FatPatient, opts)
-    assert inspect(result) == inspect(expected)
+    expected = from(p in FatEcto.FatPatient, where: p.appointments_count in ^[4] and ^true)
+    query = Query.build(FatEcto.FatPatient, opts)
+    assert inspect(query) == inspect(expected)
+    assert Repo.one(query) == nil
   end
+
+  @tag :failing
 
   test "returns the query where field notin" do
     opts = %{
@@ -209,18 +360,35 @@ defmodule Query.WhereTest do
     }
 
     expected = from(p in FatEcto.FatPatient, where: p.appointments_count not in ^[20, 50] and ^true)
-    result = Query.build(FatEcto.FatPatient, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatPatient, opts)
+    assert inspect(query) == inspect(expected)
+    assert Repo.one(query) == nil
   end
 
   test "returns the query where field isnil" do
+    Repo.insert(%FatEcto.FatHospital{name: "Doe", phone: "1234"})
+
     opts = %{
       "$where" => %{"rating" => nil}
     }
 
     expected = from(h in FatEcto.FatHospital, where: is_nil(h.rating) and ^true)
-    result = Query.build(FatEcto.FatHospital, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.one(query)
+      |> sanitize_map()
+      |> Map.drop([:id])
+
+    assert result == %{
+             address: nil,
+             location: nil,
+             name: "Doe",
+             phone: "1234",
+             rating: nil,
+             total_staff: nil
+           }
   end
 
   test "returns the query where field not isnil" do
@@ -229,17 +397,46 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: not is_nil(h.rating) and ^true)
-    result = Query.build(FatEcto.FatHospital, opts)
-    assert inspect(result) == inspect(expected)
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.one(query)
+      |> sanitize_map()
+      |> Map.drop([:id])
+
+    assert result == %{
+             address: "123 street",
+             location: "main bullevard",
+             name: "st marry",
+             phone: "12345",
+             rating: 5,
+             total_staff: 3
+           }
   end
 
   test "returns the query where field is binary" do
     opts = %{
-      "$where" => %{"location" => "Geo"}
+      "$where" => %{"location" => "main bullevard"}
     }
 
-    expected = from(h in FatEcto.FatHospital, where: h.location == ^"Geo" and ^true)
-    result = Query.build(FatEcto.FatHospital, opts)
-    assert inspect(result) == inspect(expected)
+    expected = from(h in FatEcto.FatHospital, where: h.location == ^"main bullevard" and ^true)
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.one(query)
+      |> sanitize_map()
+      |> Map.drop([:id])
+
+    assert result == %{
+             address: "123 street",
+             location: "main bullevard",
+             name: "st marry",
+             phone: "12345",
+             rating: 5,
+             total_staff: 3
+           }
   end
 end

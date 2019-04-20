@@ -8,7 +8,7 @@ defmodule FatEcto.FatBed do
     field(:purpose, :string)
     field(:description, :string)
     field(:is_active, :boolean)
-    belongs_to(:fat_room, FatEcto.FatRoom)
+    belongs_to(:fat_room, FatEcto.FatRoom, foreign_key: :fat_room_id)
   end
 
   def changeset(struct, params \\ %{}) do
