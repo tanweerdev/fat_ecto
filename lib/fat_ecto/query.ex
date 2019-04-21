@@ -50,13 +50,13 @@ defmodule FatEcto.FatQuery do
       alias FatEcto.FatQuery.FatGroupBy
       alias FatEcto.FatQuery.FatAggregate
 
-      defdelegate build_where(params, model), to: FatWhere
-      defdelegate build_order_by(params, model), to: FatOrderBy
-      defdelegate build_include(params, model, other, os), to: FatInclude
-      defdelegate build_select(params, model, other), to: FatSelect
-      defdelegate build_join(params, model), to: FatJoin
-      defdelegate build_group_by(params, model), to: FatGroupBy
-      defdelegate build_aggregate(params, model), to: FatAggregate
+      defdelegate build_where(queryable, params), to: FatWhere
+      defdelegate build_order_by(queryable, params), to: FatOrderBy
+      defdelegate build_include(queryable, params, model, build_options), to: FatInclude
+      defdelegate build_select(queryable, params, model), to: FatSelect
+      defdelegate build_join(queryable, params), to: FatJoin
+      defdelegate build_group_by(queryable, params), to: FatGroupBy
+      defdelegate build_aggregate(queryable, params), to: FatAggregate
 
       # TODO: Should return {:ok, query}
       @doc """
