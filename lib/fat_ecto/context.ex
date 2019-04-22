@@ -149,10 +149,20 @@ defmodule FatEcto.FatContext do
         |> @repo.insert()
       end
 
+      # Context.create!(User, %{name: "John Doe"})
+      @doc """
+        Create a record by passing schema and attributes to a changeset. It will return the record created.
+      """
+      def create!(schema, attrs) do
+        schema.__struct__
+        |> schema.changeset(attrs)
+        |> @repo.insert!()
+      end
+
       # Context.update(User, %User{name: "old name", id: ...}, %{name: "new name"})
       @doc """
         Update a record by passing schema and attributes and record to a changeset. It will return the record updated.
-        
+
       """
       def update(schema, item, attrs) do
         item
