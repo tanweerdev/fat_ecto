@@ -98,6 +98,16 @@ defmodule FatEcto.FatContext do
         @repo.all(schema) |> @repo.preload(preloads)
       end
 
+      # Context.list(User,[name: "john"] , [:actions])
+      @doc """
+        Return all records and preload the associations from schema in a list.
+      """
+      def list_by(schema, keyword_cond, preloads \\ []) do
+        query = Ecto.Query.where(schema, ^keyword_cond)
+
+        @repo.all(query) |> @repo.preload(preloads)
+      end
+
       # Context.get!(User, 2)
       @doc """
         Return record from schema which matches the id and raise if no record found.
@@ -149,6 +159,16 @@ defmodule FatEcto.FatContext do
         |> @repo.insert()
       end
 
+      # Context.create(User, &User.changeset/2, %{name: "John Doe"})
+      @doc """
+        Create a record by passing schema, struct and attributes to a changeset. It will return the record created.
+      """
+      def create(struct, changeset_fn, attrs) do
+        struct
+        |> changeset_fn.(attrs)
+        |> @repo.insert()
+      end
+
       # Context.create!(User, %{name: "John Doe"})
       @doc """
         Create a record by passing schema and attributes to a changeset. It will return the record created.
@@ -156,6 +176,16 @@ defmodule FatEcto.FatContext do
       def create!(schema, attrs) do
         schema.__struct__
         |> schema.changeset(attrs)
+        |> @repo.insert!()
+      end
+
+      # Context.create!(User, &User.changeset/2, %{name: "John Doe"})
+      @doc """
+        Create a record by passing schema and attributes to a changeset. It will return the record created.
+      """
+      def create!(struct, changeset_fn, attrs) do
+        struct
+        |> changeset_fn.(attrs)
         |> @repo.insert!()
       end
 
