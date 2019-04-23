@@ -159,7 +159,7 @@ defmodule FatEcto.FatContext do
         |> @repo.insert()
       end
 
-      # Context.create(User, &User.changeset/2, %{name: "John Doe"})
+      # Context.create(%User{}, &User.changeset/2, %{name: "John Doe"})
       @doc """
         Create a record by passing schema, struct and attributes to a changeset. It will return the record created.
       """
@@ -179,7 +179,7 @@ defmodule FatEcto.FatContext do
         |> @repo.insert!()
       end
 
-      # Context.create!(User, &User.changeset/2, %{name: "John Doe"})
+      # Context.create!(%User{}, &User.changeset/2, %{name: "John Doe"})
       @doc """
         Create a record by passing schema and attributes to a changeset. It will return the record created.
       """
