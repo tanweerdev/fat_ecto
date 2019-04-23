@@ -167,7 +167,7 @@ defmodule Fat.ContextTest do
     {:ok, context} =
       Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
 
-    {:ok, record} = ContextMacro.update(FatRoom, context, %{name: "John"})
+    {:ok, record} = ContextMacro.update(context, FatRoom, %{name: "John"})
     assert record.name == "John"
   end
 

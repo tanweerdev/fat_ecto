@@ -189,45 +189,45 @@ defmodule FatEcto.FatContext do
         |> @repo.insert!()
       end
 
-      # Context.update(&User.changeset/2, %User{name: "old name", id: ...}, %{name: "new name"})
+      # Context.update(%User{name: "old name", id: ...}, &User.changeset/2, %{name: "new name"})
       @doc """
-        Update a record by passing changeset_fn, record and attributes. It will return the record updated.
+        Update a record by passing record, changeset_fn and attributes. It will return the record updated.
 
       """
-      def update(changeset_fn, item, attrs) when is_function(changeset_fn) do
+      def update(item, changeset_fn, attrs) when is_function(changeset_fn) do
         item
         |> changeset_fn.(attrs)
         |> @repo.update()
       end
 
-      # Context.update(User, %User{name: "old name", id: ...}, %{name: "new name"})
+      # Context.update(%User{name: "old name", id: ...}, User, %{name: "new name"})
       @doc """
-        Update a record by passing schema and attributes and record to a changeset. It will return the record updated.
+        Update a record by passing record, schema and attributes to a changeset. It will return the record updated.
 
       """
-      def update(schema, item, attrs) do
+      def update(item, schema, attrs) do
         item
         |> schema.changeset(attrs)
         |> @repo.update()
       end
 
-      # Context.update!(&User.changeset/2, %User{name: "old name", id: ...}, %{name: "new name"})
+      # Context.update!(%User{name: "old name", id: ...}, &User.changeset/2, %{name: "new name"})
       @doc """
-        Update a record by passing changeset_fn, record and attributes. It will return the record updated or raises.
+        Update a record by passing record, changeset_fn and attributes. It will return the record updated or raises.
 
       """
-      def update!(changeset_fn, item, attrs) when is_function(changeset_fn) do
+      def update!(item, changeset_fn, attrs) when is_function(changeset_fn) do
         item
         |> changeset_fn.(attrs)
         |> @repo.update!()
       end
 
-      # Context.update!(User, %User{name: "old name", id: ...}, %{name: "new name"})
+      # Context.update!(%User{name: "old name", id: ...}, User, %{name: "new name"})
       @doc """
-        Update a record by passing schema and attributes and record to a changeset. It will return the record updated or raises.
+        Update a record by passing record, schema and attributes to a changeset. It will return the record updated or raises.
 
       """
-      def update!(schema, item, attrs) do
+      def update!(item, schema, attrs) do
         item
         |> schema.changeset(attrs)
         |> @repo.update!()
