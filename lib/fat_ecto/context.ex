@@ -189,6 +189,17 @@ defmodule FatEcto.FatContext do
         |> @repo.insert!()
       end
 
+      # Context.update(&User.changeset/2, %User{name: "old name", id: ...}, %{name: "new name"})
+      @doc """
+        Update a record by passing changeset_fn, record and attributes. It will return the record updated.
+
+      """
+      def update(changeset_fn, item, attrs) when is_function(changeset_fn) do
+        item
+        |> changeset_fn.(attrs)
+        |> @repo.update()
+      end
+
       # Context.update(User, %User{name: "old name", id: ...}, %{name: "new name"})
       @doc """
         Update a record by passing schema and attributes and record to a changeset. It will return the record updated.
