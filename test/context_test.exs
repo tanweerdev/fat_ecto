@@ -149,10 +149,10 @@ defmodule Fat.ContextTest do
       fat_room_id: room.id
     })
 
-    record = ContextMacro.get_by(FatRoom, name: "Doe")
+    {:ok, record} = ContextMacro.get_by(FatRoom, name: "Doe")
     assert record.name == "Doe"
 
-    record = ContextMacro.get_by(FatRoom, [name: "Doe"], [:fat_beds])
+    {:ok, record} = ContextMacro.get_by(FatRoom, [name: "Doe"], [:fat_beds])
 
     sibling = record.fat_beds |> List.first()
     assert sibling.fat_room_id == room.id

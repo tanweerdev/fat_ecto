@@ -144,9 +144,15 @@ defmodule FatEcto.FatContext do
         Get record which meets the creteria. Clauses should be passed in a list.
       """
       def get_by(schema, clauses, preloads \\ []) do
-        schema
-        |> @repo.get_by(clauses)
-        |> @repo.preload(preloads)
+        record =
+          schema
+          |> @repo.get_by(clauses)
+          |> @repo.preload(preloads)
+
+        case record do
+          nil -> {:error, :not_found}
+          _record -> {:ok, record}
+        end
       end
 
       # Context.create(User, %{name: "John Doe"})
