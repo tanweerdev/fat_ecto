@@ -2,23 +2,41 @@ defmodule Utils.ChangesetTest do
   use FatEcto.ConnCase
   alias FatUtils.Changeset, as: Change
 
-  test "xor changeset" do
+  test "require_xor changeset" do
     changeset = FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "testing"})
     {:ok, struct} = Repo.insert(changeset)
 
-    changeset = Change.xor(changeset, struct, [:name, :designation])
+    changeset = Change.require_xor(changeset, struct, [:name, :designation])
     assert changeset.errors == [designation: {"name XOR designation", []}, name: {"name XOR designation", []}]
 
     changeset = FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "testing"})
 
-    changeset = Change.xor(changeset, struct, [:name])
+    changeset = Change.require_xor(changeset, struct, [:name])
     assert changeset.errors == [name: {"name", []}]
 
     changeset = FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "testing"})
-    changeset = Change.xor(changeset, struct, [:phone])
+    changeset = Change.require_xor(changeset, struct, [:phone])
 
     assert changeset.errors == [
              phone: {"phone fields can not be empty at the same time", [validation: :required]}
+           ]
+  end
+
+  test "require_or changeset" do
+    changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{name: "12345", designation: "testing"})
+    changeset = Change.require_or(changeset, %FatEcto.FatBed{}, [:name, :designation])
+    assert changeset.errors == []
+
+    changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{name: "12345"})
+    changeset = Change.require_or(changeset, %FatEcto.FatBed{}, [:name, :designation])
+    assert changeset.errors == []
+
+    changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{})
+    changeset = Change.require_or(changeset, %FatEcto.FatBed{}, [:name, :designation])
+
+    assert changeset.errors == [
+             designation: {"name OR designation required", []},
+             name: {"name OR designation required", []}
            ]
   end
 

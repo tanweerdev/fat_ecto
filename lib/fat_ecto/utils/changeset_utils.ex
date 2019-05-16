@@ -6,7 +6,7 @@ defmodule FatUtils.Changeset do
   @doc """
     Takes changeset and check if xor keys are present and return changeset error and also checks if xor keys are empty in the record and return error.
   """
-  def xor(changeset, record, xor_keys, _options \\ []) do
+  def require_xor(changeset, record, xor_keys, _options \\ []) do
     changeset =
       if FatUtils.Map.has_all_keys?(changeset.changes, xor_keys) do
         error_msg = Enum.join(xor_keys, " XOR ")
@@ -31,6 +31,21 @@ defmodule FatUtils.Changeset do
       end)
     else
       changeset
+    end
+  end
+
+  @doc """
+    Takes changeset and check if none of or keys are present and return changeset error.
+  """
+  def require_or(changeset, _record, or_keys, _options \\ []) do
+    if FatUtils.Map.has_any_of_keys?(changeset.changes, or_keys) do
+      changeset
+    else
+      error_msg = Enum.join(or_keys, " OR ")
+
+      Enum.reduce(or_keys, changeset, fn or_key, acc ->
+        Ecto.Changeset.add_error(acc, or_key, error_msg <> " required")
+      end)
     end
   end
 
