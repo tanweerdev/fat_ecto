@@ -116,7 +116,7 @@ defmodule FatEcto.FatQuery do
         query_opts = FatUtils.Map.deep_merge(@query_param_defaults, query_opts)
 
         model =
-          if is_atom(queryable) do
+          if is_atom(queryable) || is_binary(queryable) do
             queryable
           else
             {_table, model} = queryable.from

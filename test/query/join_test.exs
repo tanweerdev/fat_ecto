@@ -7,13 +7,14 @@ defmodule Query.JoinTest do
     :ok
   end
 
-  @tag :failing
   test "returns the query with right join and selected fields" do
     opts = %{
+      "$select" => ["name", "location", "phone"],
       "$right_join" => %{
-        "fat_rooms" => %{
+        "fat_roomz" => %{
           "$on_field" => "id",
           "$on_join_table_field" => "fat_hospital_id",
+          "$table" => "fat_rooms",
           "$select" => ["name", "purpose", "description"],
           "$where" => %{"name" => "room 1"}
         }
@@ -22,17 +23,39 @@ defmodule Query.JoinTest do
 
     expected =
       from(
-        h in FatEcto.FatHospital,
+        h in "fat_hospitals",
         right_join: r in "fat_rooms",
         on: h.id == r.fat_hospital_id,
         where: r.name == ^"room 1" and ^true,
-        select: merge(h, %{^:fat_rooms => map(r, [:name, :purpose, :description])})
+        select:
+          merge(map(h, [:name, :location, :phone]), %{^"fat_roomz" => map(r, [:name, :purpose, :description])})
       )
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    # opts = %{
+    #   "$right_join" => %{
+    #     "fat_rooms" => %{
+    #       "$on_field" => "id",
+    #       "$on_join_table_field" => "fat_hospital_id",
+    #       "$select" => ["name", "purpose", "description"],
+    #       "$where" => %{"name" => "room 1"}
+    #     }
+    #   }
+    # }
+
+    # expected =
+    #   from(
+    #     h in FatEcto.FatHospital,
+    #     right_join: r in "fat_rooms",
+    #     on: h.id == r.fat_hospital_id,
+    #     where: r.name == ^"room 1" and ^true,
+    #     select: merge(h, %{^:fat_rooms => map(r, [:name, :purpose, :description])})
+    #   )
+
+    query = Query.build("fat_hospitals", opts)
 
     assert inspect(query) == inspect(expected)
-    IO.inspect(Repo.one(query))
+    # TODO: match on results returned
+    Repo.all(query)
   end
 
   test "returns the query with left join and selected fields" do
@@ -55,7 +78,7 @@ defmodule Query.JoinTest do
         right_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^:fat_rooms => map(r, [:beds, :capacity, :level])})
+        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -81,7 +104,7 @@ defmodule Query.JoinTest do
         on: d.id == p.doctor_id,
         select:
           merge(map(d, [:name, :designation, :experience_years]), %{
-            ^:fat_patients => map(p, [:name, :prescription, :symptoms])
+            ^"fat_patients" => map(p, [:name, :prescription, :symptoms])
           })
       )
 
@@ -109,7 +132,7 @@ defmodule Query.JoinTest do
         inner_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^:fat_rooms => map(r, [:beds, :capacity, :level])})
+        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -136,7 +159,7 @@ defmodule Query.JoinTest do
         inner_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^:fat_rooms => map(r, [:beds, :capacity, :level])})
+        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -163,7 +186,7 @@ defmodule Query.JoinTest do
         right_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^:fat_rooms => map(r, [:beds, :capacity, :level])})
+        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
       )
 
     result = Query.build(FatEcto.FatHospital, opts)

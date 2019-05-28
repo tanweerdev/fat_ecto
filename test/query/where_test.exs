@@ -340,7 +340,6 @@ defmodule Query.WhereTest do
     assert Repo.one(query) == nil
   end
 
-  @tag :failing
   test "returns the query where field in" do
     opts = %{
       "$where" => %{"appointments_count" => %{"$in" => [4]}}
@@ -351,8 +350,6 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
     assert Repo.one(query) == nil
   end
-
-  @tag :failing
 
   test "returns the query where field notin" do
     opts = %{

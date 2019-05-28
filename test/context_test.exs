@@ -213,7 +213,6 @@ defmodule Fat.ContextTest do
     assert record |> Enum.count() == 2
   end
 
-  @tag :failing
   test "insert record and use fat ecto to query the result" do
     {:ok, room} =
       Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
@@ -230,6 +229,7 @@ defmodule Fat.ContextTest do
       })
 
     opts = %{
+      "$select" => ["name", "purpose", "description"],
       "$right_join" => %{
         "fat_beds" => %{
           "$on_field" => "id",
@@ -241,7 +241,22 @@ defmodule Fat.ContextTest do
       "$where" => %{"id" => room.id}
     }
 
-    result = Query.build(FatEcto.FatRoom, opts)
-    Repo.all(result)
+    query = Query.build(FatEcto.FatRoom, opts)
+
+    expected =
+      from(fr in FatEcto.FatRoom,
+        right_join: fb in "fat_beds",
+        on: fr.id == fb.fat_room_id,
+        where: fr.id == ^room.id and ^true,
+        where: fb.id == ^bed.id and ^true,
+        select:
+          merge(map(fr, [:name, :purpose, :description]), %{
+            ^"fat_beds" => map(fb, [:name, :purpose, :description])
+          })
+      )
+
+    assert inspect(query) == inspect(expected)
+    # TODO: match on records returned
+    Repo.all(query)
   end
 end
