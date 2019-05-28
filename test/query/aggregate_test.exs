@@ -1,20 +1,29 @@
 defmodule Query.AggregateTest do
   use FatEcto.ConnCase
-
+  setup do
+     insert(:room)
+     insert(:room)
+    :ok
+  end
+  @tag :failing
   test "returns the query with aggregate count" do
     opts = %{
-      "$aggregate" => %{"$count" => "beds"},
-      "$where" => %{"beds" => 3}
+      "$aggregate" => %{"$count" => "id"},
+      "$where" => %{"floor" => %{"$gt" => 2}},
+      "$group" => ["id"]
+
     }
 
     expected =
       from(f0 in FatEcto.FatRoom,
-        where: f0.beds == ^3 and ^true,
-        select: merge(f0, %{"$aggregate": %{"$count": %{^"beds" => count(f0.beds)}}})
+        where: f0.floor > ^2 and ^true,
+        group_by: [f0.id],
+        select: merge(merge(f0, %{"$aggregate": %{"$count": %{^"id" => count(f0.id)}}}), %{"$group": %{^"id" => f0.id}})
       )
 
     result = Query.build(FatEcto.FatRoom, opts)
     assert inspect(result) == inspect(expected)
+    IO.inspect Repo.all(result)
   end
 
   test "returns the query with aggregate distinct count" do
