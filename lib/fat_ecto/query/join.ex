@@ -222,7 +222,7 @@ defmodule FatEcto.FatQuery.FatJoin do
         from(
           [q, ..., c] in queryable,
           select_merge: %{
-            ^FatHelper.string_to_atom(join_table) => map(c, ^select_atoms)
+            ^join_table => map(c, ^select_atoms)
           }
         )
     end

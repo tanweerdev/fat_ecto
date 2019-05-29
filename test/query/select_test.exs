@@ -21,7 +21,6 @@ defmodule Query.SelectTest do
     assert Repo.all(query) == [%{designation: "Surgeon", experience_years: 7, name: "John"}]
   end
 
-  @tag :failing
   test "returns the select query with related fields " do
     room = Repo.one(FatEcto.FatRoom)
 
@@ -43,8 +42,8 @@ defmodule Query.SelectTest do
     query = Query.build(FatEcto.FatRoom, opts)
     assert inspect(query) == inspect(expected)
 
+    # TODO: match on results returned
     Repo.all(query)
-    |> IO.inspect()
   end
 
   test "returns the select query with related fields with order by " do

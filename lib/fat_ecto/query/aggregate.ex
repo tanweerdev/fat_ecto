@@ -96,7 +96,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
     from(
       q in queryable,
       select_merge: %{
-        "$aggregate": %{"$max": %{^field => max(field(q, ^atom_field))}}
+        "$aggregate" => %{"$max": %{^field => max(field(q, ^atom_field))}}
       }
     )
   end
@@ -106,7 +106,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
 
     from(
       q in queryable,
-      select_merge: %{"$aggregate": %{"$min": %{^field => min(field(q, ^atom_field))}}}
+      select_merge: %{"$aggregate" => %{"$min": %{^field => min(field(q, ^atom_field))}}}
     )
   end
 
@@ -115,7 +115,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
 
     from(
       q in queryable,
-      select_merge: %{"$aggregate": %{"$avg": %{^field => avg(field(q, ^atom_field))}}}
+      select_merge: %{"$aggregate" => %{"$avg": %{^field => avg(field(q, ^atom_field))}}}
     )
   end
 
@@ -124,7 +124,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
 
     from(
       q in queryable,
-      select_merge: %{"$aggregate": %{"$count": %{^field => count(field(q, ^atom_field))}}}
+      select_merge: %{"$aggregate" => %{"$count": %{^field => count(field(q, ^atom_field))}}}
     )
   end
 
@@ -134,7 +134,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
     from(
       q in queryable,
       select_merge: %{
-        "$aggregate": %{"$count_distinct": %{^field => count(field(q, ^atom_field), :distinct)}}
+        "$aggregate" => %{"$count_distinct": %{^field => count(field(q, ^atom_field), :distinct)}}
       }
     )
   end
@@ -144,7 +144,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
 
     from(
       q in queryable,
-      select_merge: %{"$aggregate": %{"$sum": %{^field => sum(field(q, ^atom_field))}}}
+      select_merge: %{"$aggregate" => %{"$sum": %{^field => sum(field(q, ^atom_field))}}}
     )
   end
 end
