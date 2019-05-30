@@ -1,15 +1,15 @@
 {
-  "$model": "infections", 
+  "$model": "infections",
 	"$select": {
      "$fields": ["is_active", "form_version", "nhsn_reportable"],
      "criterias": ["criteria_id", "element_id"]
   },
   "$order": {"id": "$desc"},
-  "$where": {"instance_id": 15}      
+  "$where": {"instance_id": 15}
 }
 
 {
-  "$model": "infections", 
+  "$model": "infections",
 	"$select": {
     "$fields": ["is_active", "form_version", "nhsn_reportable"],
     "criterias": ["criteria_id", "element_id"]
@@ -22,13 +22,13 @@
       "$order": {"id": "$desc"},
       "$join": "$right"
     }
-  }     
+  }
 }
 
 {
-  "$model": "infections", 
+  "$model": "infections",
 	"$select": {
-    "$fields": ["event_date", "schema_version", "form_version"]     
+    "$fields": ["event_date", "schema_version", "form_version"]
   },
   "$order": {"id": "$asc"},
   "$where": {"bed_id": 10},
@@ -37,31 +37,31 @@
       "$where": {"rx_id": 2},
       "$order": {"infection_id": "$asc"},
       "$join": "$left",
-      "$select": ["rx_id", "infection_id"]      
+      "$select": ["rx_id", "infection_id"]
     }
-  }     
+  }
 }
 
 {
-  "$model": "facilities", 
+  "$model": "facilities",
 	"$select": {
-    "$fields": ["name", "import_name", "description"]     
+    "$fields": ["name", "import_name", "description"]
   },
   "$order": {"id": "$asc"},
   "$where": {"instance_id": 10},
   "$right_join": {
     "units": {
       "$on_field": "id",
-      "$on_join_table_field": "facility_id",
+      "$on_table_field": "facility_id",
       "$order": {"id": "$asc"}
     }
-  }     
+  }
 }
 
 {
-  "$model": "facilities", 
+  "$model": "facilities",
 	"$select": {
-      "$fields": ["name", "import_name", "description"]     
+      "$fields": ["name", "import_name", "description"]
   },
   "$order": {"id": "$asc"},
   "$where": {"instance_id": 10},
@@ -76,16 +76,16 @@
   "$right_join": {
     "units": {
        "$on_field": "id",
-       "$on_join_table_field": "facility_id",
+       "$on_table_field": "facility_id",
        "$order": {"id": "$asc"}
     }
-  }     
+  }
 }
 
 {
-  "$model": "facilities", 
+  "$model": "facilities",
 	"$select": {
-    "$fields": ["name", "import_name", "description"]   
+    "$fields": ["name", "import_name", "description"]
   },
   "$order": {"id": "$asc"},
   "$where": {"instance_id": 10},
@@ -101,16 +101,16 @@
   "$left_join": {
     "units": {
       "$on_field": "id",
-      "$on_join_table_field": "facility_id",
+      "$on_table_field": "facility_id",
       "$order": {"id": "$asc"}
     }
-  }     
+  }
 }
 
 {
-  "$model": "facilities", 
+  "$model": "facilities",
 	"$select": {
-    "$fields": ["name", "import_name", "description"]     
+    "$fields": ["name", "import_name", "description"]
   },
   "$order": {"id": "$asc"},
   "$where": {"instance_id": 10},
@@ -127,16 +127,16 @@
   "$inner_join": {
     "units": {
       "$on_field": "id",
-      "$on_join_table_field": "facility_id",
+      "$on_table_field": "facility_id",
       "$order": {"id": "$asc"}
     }
-  }      
+  }
 }
 
 {
-  "$model": "facilities", 
+  "$model": "facilities",
 	"$select": {
-    "$fields": ["name", "import_name", "description"]      
+    "$fields": ["name", "import_name", "description"]
   },
   "$order": {"id": "$desc"},
   "$where": {"instance_id": 11},
@@ -153,17 +153,17 @@
   "$inner_join": {
     "units": {
       "$on_field": "id",
-      "$on_join_table_field": "facility_id",
+      "$on_table_field": "facility_id",
       "$order": {"id": "$asc"},
       "$group": ["is_active"]
     }
-  }      
+  }
 }
 
 {
-  "$model": "facilities", 
+  "$model": "facilities",
 	"$select": {
-    "$fields": ["name", "import_name", "description"]     
+    "$fields": ["name", "import_name", "description"]
   },
   "$order": {"id": "$descc"},
   "$where": {"instance_id": 11, "id": 1},
@@ -180,16 +180,16 @@
   "$inner_join": {
     "units": {
       "$on_field": "id",
-      "$on_join_table_field": "facility_id",
+      "$on_table_field": "facility_id",
       "$order": {"id": "$asc"},
       "$group": ["is_active"]
     }
-  }     
+  }
 }
 
 {
-  "$model": "facilities", 
-	"$select": 
+  "$model": "facilities",
+	"$select":
       ["name", "import_name", "description"],
   "$order": {"id": "$descc"},
   "$where": {"instance_id": 11, "id": 1},
@@ -206,9 +206,9 @@
   "$inner_join": {
     "units": {
       "$on_field": "id",
-      "$on_join_table_field": "facility_id",
+      "$on_table_field": "facility_id",
       "$order": {"id": "$asc"},
       "$group": ["is_active"]
     }
-  }     
+  }
 }

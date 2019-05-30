@@ -222,7 +222,7 @@ defmodule Query.AggregateTest do
       "$right_join" => %{
         "fat_hospital" => %{
           "$on_field" => "hospital_id",
-          "$on_join_table_field" => "id",
+          "$on_table_field" => "id",
           "$select" => ["name", "location", "phone"],
           "$where" => %{"address" => "street 2"}
         }

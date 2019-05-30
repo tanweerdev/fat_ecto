@@ -101,7 +101,7 @@ defmodule FatEcto do
         "$right_join" => %{
           "fat_rooms" => %{
             "$on_field" => "id",
-            "$on_join_table_field" => "hospital_id",
+            "$on_table_field" => "hospital_id",
             "$select" => ["beds", "capacity", "level"],
             "$where" => %{"incharge" => "John"},
             "$order" => %{"nurses" => "$asc"}
@@ -181,7 +181,7 @@ defmodule FatEcto do
         "$inner_join" => %{
           "fat_rooms" => %{
             "$on_field" => "id",
-            "$on_join_table_field" => "hospital_id",
+            "$on_table_field" => "hospital_id",
             "$select" => ["beds", "capacity", "level"],
             "$where" => %{"incharge" => "John"}
           }

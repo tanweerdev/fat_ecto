@@ -233,7 +233,7 @@ defmodule Fat.ContextTest do
       "$right_join" => %{
         "fat_beds" => %{
           "$on_field" => "id",
-          "$on_join_table_field" => "fat_room_id",
+          "$on_table_field" => "fat_room_id",
           "$select" => ["name", "purpose", "description"],
           "$where" => %{"id" => bed.id}
         }

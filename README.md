@@ -75,7 +75,7 @@ query_opts = %{
       "$right_join" => %{
         "fat_rooms" => %{
           "$on_field" => "id",
-          "$on_join_table_field" => "hospital_id",
+          "$on_table_field" => "hospital_id",
           "$select" => ["beds", "capacity", "level"],
           "$where" => %{"incharge" => "John"},
           "$order" => %{"level" => "$asc"}
@@ -110,6 +110,6 @@ These are the options supported
 | $order                  | Sort the result based on the order attribute                             |
 | $right_join             | Specify the type of join                                                 |
 | $on_field               | Specify the field for join                                               |
-| $on_join_table_field    | Specify the field for join in the joining table                          |
+| $on_table_field    | Specify the field for join in the joining table                          |
 
 see [Docs](https://hexdocs.pm/fat_ecto/) for more details.

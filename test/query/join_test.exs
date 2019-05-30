@@ -13,8 +13,8 @@ defmodule Query.JoinTest do
       "$right_join" => %{
         "fat_roomz" => %{
           "$on_field" => "id",
-          "$on_join_table_field" => "fat_hospital_id",
-          "$table" => "fat_rooms",
+          "$on_table_field" => "fat_hospital_id",
+          "$on_table" => "fat_rooms",
           "$select" => ["name", "purpose", "description"],
           "$where" => %{"name" => "room 1"}
         }
@@ -35,7 +35,7 @@ defmodule Query.JoinTest do
     #   "$right_join" => %{
     #     "fat_rooms" => %{
     #       "$on_field" => "id",
-    #       "$on_join_table_field" => "fat_hospital_id",
+    #       "$on_table_field" => "fat_hospital_id",
     #       "$select" => ["name", "purpose", "description"],
     #       "$where" => %{"name" => "room 1"}
     #     }
@@ -63,7 +63,7 @@ defmodule Query.JoinTest do
       "$right_join" => %{
         "fat_rooms" => %{
           "$on_field" => "id",
-          "$on_join_table_field" => "hospital_id",
+          "$on_table_field" => "hospital_id",
           "$select" => ["beds", "capacity", "level"],
           "$where" => %{"incharge" => "John"}
         }
@@ -91,7 +91,7 @@ defmodule Query.JoinTest do
       "$full_join" => %{
         "fat_patients" => %{
           "$on_field" => "id",
-          "$on_join_table_field" => "doctor_id",
+          "$on_table_field" => "doctor_id",
           "$select" => ["name", "prescription", "symptoms"]
         }
       }
@@ -117,7 +117,7 @@ defmodule Query.JoinTest do
       "$inner_join" => %{
         "fat_rooms" => %{
           "$on_field" => "id",
-          "$on_join_table_field" => "hospital_id",
+          "$on_table_field" => "hospital_id",
           "$select" => ["beds", "capacity", "level"],
           "$where" => %{"incharge" => "John"}
         }
@@ -144,7 +144,7 @@ defmodule Query.JoinTest do
       "$inner_join" => %{
         "fat_rooms" => %{
           "$on_field" => "id",
-          "$on_join_table_field" => "hospital_id",
+          "$on_table_field" => "hospital_id",
           "$select" => ["beds", "capacity", "level"],
           "$where" => %{"incharge" => "John"}
         }
@@ -171,7 +171,7 @@ defmodule Query.JoinTest do
       "$right_join" => %{
         "fat_rooms" => %{
           "$on_field" => "id",
-          "$on_join_table_field" => "hospital_id",
+          "$on_table_field" => "hospital_id",
           "$select" => ["beds", "capacity", "level"],
           "$where" => %{"incharge" => "John"}
         }

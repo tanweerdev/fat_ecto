@@ -477,7 +477,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>    "$right_join" => %{
       ...>     "fat_rooms" => %{
       ...>      "$on_field" => "id",
-      ...>      "$on_join_table_field" => "hospital_id",
+      ...>      "$on_table_field" => "hospital_id",
       ...>      "$select" => ["beds", "capacity", "level"],
       ...>      "$where" => %{"beds" => %{"$gte" => "$nurses"}}
       ...>    }
@@ -525,7 +525,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>  "$right_join" => %{
       ...>    "fat_rooms" => %{
       ...>      "$on_field" => "id",
-      ...>      "$on_join_table_field" => "hospital_id",
+      ...>      "$on_table_field" => "hospital_id",
       ...>      "$select" => ["beds", "capacity", "level"],
       ...>      "$where" => %{"beds" => %{"$not_in" => [5, 15]}}
       ...>     }
@@ -573,7 +573,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>  "$right_join" => %{
       ...>    "fat_rooms" => %{
       ...>      "$on_field" => "id",
-      ...>      "$on_join_table_field" => "hospital_id",
+      ...>      "$on_table_field" => "hospital_id",
       ...>      "$select" => ["beds", "capacity", "level"],
       ...>      "$where" => %{"beds" => %{"$in" => [5, 15]}},
       ...>      "$order" => %{"id" => "$asc"}
@@ -623,7 +623,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>  "$right_join" => %{
       ...>    "fat_rooms" => %{
       ...>      "$on_field" => "id",
-      ...>      "$on_join_table_field" => "hospital_id",
+      ...>      "$on_table_field" => "hospital_id",
       ...>      "$select" => ["beds", "capacity", "level"],
       ...>      "$where" => %{"beds" => nil},
       ...>      "$order" => %{"id" => "$asc"}
@@ -678,7 +678,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>  "$right_join" => %{
       ...>    "fat_rooms" => %{
       ...>      "$on_field" => "id",
-      ...>      "$on_join_table_field" => "hospital_id",
+      ...>      "$on_table_field" => "hospital_id",
       ...>      "$select" => ["beds", "capacity", "level"],
       ...>      "$where" => %{"beds" => 10},
       ...>      "$order" => %{"id" => "$asc"}

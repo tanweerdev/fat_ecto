@@ -28,7 +28,7 @@ defmodule FatEcto.FatQuery.FatJoin do
       ...>  "$right_join" => %{
       ...>    "fat_rooms" => %{
       ...>      "$on_field" => "id",
-      ...>      "$on_join_table_field" => "hospital_id",
+      ...>      "$on_table_field" => "hospital_id",
       ...>      "$select" => ["beds", "capacity", "level"],
       ...>      "$where" => %{"incharge" => "John"}
       ...>    }
@@ -50,7 +50,7 @@ defmodule FatEcto.FatQuery.FatJoin do
     - `$order`- Sort the result based on the order attribute.
     - `$right_join`- Specify the type of join.
     - `$on_field`- Specify the field for join.
-    - `$on_join_table_field`- Specify the field for join in the joining table.
+    - `$on_table_field`- Specify the field for join in the joining table.
 
 
   """
@@ -64,7 +64,7 @@ defmodule FatEcto.FatQuery.FatJoin do
   def build_join(queryable, join_params, join_type) do
     # TODO: Add docs and examples of ex_doc for this case here
     Enum.reduce(join_params, queryable, fn {join_key, join_item}, queryable ->
-      join_table = join_item["$table"] || join_key
+      join_table = join_item["$on_table"] || join_key
 
       join =
         join_type
@@ -85,7 +85,7 @@ defmodule FatEcto.FatQuery.FatJoin do
                 field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) !=
                   field(
                     jt,
-                    ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
+                    ^FatHelper.string_to_atom(join_item["$on_table_field"])
                   )
             )
 
@@ -157,7 +157,7 @@ defmodule FatEcto.FatQuery.FatJoin do
               on:
                 field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) in field(
                   jt,
-                  ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
+                  ^FatHelper.string_to_atom(join_item["$on_table_field"])
                 )
             )
 
@@ -171,7 +171,7 @@ defmodule FatEcto.FatQuery.FatJoin do
               on:
                 field(
                   jt,
-                  ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
+                  ^FatHelper.string_to_atom(join_item["$on_table_field"])
                 ) in field(
                   q,
                   ^FatHelper.string_to_atom(join_item["$on_field"])
@@ -189,7 +189,7 @@ defmodule FatEcto.FatQuery.FatJoin do
                 field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) ==
                   field(
                     jt,
-                    ^FatHelper.string_to_atom(join_item["$on_join_table_field"])
+                    ^FatHelper.string_to_atom(join_item["$on_table_field"])
                   )
             )
         end
