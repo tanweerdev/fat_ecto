@@ -165,11 +165,11 @@ defmodule FatEcto.FatContext do
         |> @repo.insert()
       end
 
-      # Context.create(%User{}, &User.changeset/2, %{name: "John Doe"})
+      # Context.create_by(%User{}, &User.changeset/2, %{name: "John Doe"})
       @doc """
         Create a record by passing schema, struct and attributes to a changeset. It will return the record created.
       """
-      def create(struct, changeset_fn, attrs) do
+      def create_by(struct, changeset_fn, attrs) do
         struct
         |> changeset_fn.(attrs)
         |> @repo.insert()
@@ -185,22 +185,22 @@ defmodule FatEcto.FatContext do
         |> @repo.insert!()
       end
 
-      # Context.create!(%User{}, &User.changeset/2, %{name: "John Doe"})
+      # Context.create_by!(%User{}, &User.changeset/2, %{name: "John Doe"})
       @doc """
         Create a record by passing schema and attributes to a changeset. It will return the record created.
       """
-      def create!(struct, changeset_fn, attrs) do
+      def create_by!(struct, changeset_fn, attrs) do
         struct
         |> changeset_fn.(attrs)
         |> @repo.insert!()
       end
 
-      # Context.update(%User{name: "old name", id: ...}, &User.changeset/2, %{name: "new name"})
+      # Context.update_by(%User{name: "old name", id: ...}, &User.changeset/2, %{name: "new name"})
       @doc """
         Update a record by passing record, changeset_fn and attributes. It will return the record updated.
 
       """
-      def update(item, changeset_fn, attrs) when is_function(changeset_fn) do
+      def update_by(item, changeset_fn, attrs) when is_function(changeset_fn) do
         item
         |> changeset_fn.(attrs)
         |> @repo.update()
@@ -217,12 +217,12 @@ defmodule FatEcto.FatContext do
         |> @repo.update()
       end
 
-      # Context.update!(%User{name: "old name", id: ...}, &User.changeset/2, %{name: "new name"})
+      # Context.update_by!(%User{name: "old name", id: ...}, &User.changeset/2, %{name: "new name"})
       @doc """
         Update a record by passing record, changeset_fn and attributes. It will return the record updated or raises.
 
       """
-      def update!(item, changeset_fn, attrs) when is_function(changeset_fn) do
+      def update_by!(item, changeset_fn, attrs) when is_function(changeset_fn) do
         item
         |> changeset_fn.(attrs)
         |> @repo.update!()
