@@ -159,40 +159,40 @@ defmodule FatEcto.FatContext do
       @doc """
         Create a record by passing schema and attributes to a changeset. It will return the record created.
       """
-      def create(schema, attrs) do
+      def create(schema, attrs, opts \\ []) do
         schema.__struct__
         |> schema.changeset(attrs)
-        |> @repo.insert()
+        |> @repo.insert(opts)
       end
 
       # Context.create_by(%User{}, &User.changeset/2, %{name: "John Doe"})
       @doc """
         Create a record by passing schema, struct and attributes to a changeset. It will return the record created.
       """
-      def create_by(struct, changeset_fn, attrs) do
+      def create_by(struct, changeset_fn, attrs, opts \\ []) do
         struct
         |> changeset_fn.(attrs)
-        |> @repo.insert()
+        |> @repo.insert(opts)
       end
 
       # Context.create!(User, %{name: "John Doe"})
       @doc """
         Create a record by passing schema and attributes to a changeset. It will return the record created.
       """
-      def create!(schema, attrs) do
+      def create!(schema, attrs, opts \\ []) do
         schema.__struct__
         |> schema.changeset(attrs)
-        |> @repo.insert!()
+        |> @repo.insert!(opts)
       end
 
       # Context.create_by!(%User{}, &User.changeset/2, %{name: "John Doe"})
       @doc """
         Create a record by passing schema and attributes to a changeset. It will return the record created.
       """
-      def create_by!(struct, changeset_fn, attrs) do
+      def create_by!(struct, changeset_fn, attrs, opts \\ []) do
         struct
         |> changeset_fn.(attrs)
-        |> @repo.insert!()
+        |> @repo.insert!(opts)
       end
 
       # Context.update_by(%User{name: "old name", id: ...}, &User.changeset/2, %{name: "new name"})
@@ -200,10 +200,10 @@ defmodule FatEcto.FatContext do
         Update a record by passing record, changeset_fn and attributes. It will return the record updated.
 
       """
-      def update_by(item, changeset_fn, attrs) when is_function(changeset_fn) do
+      def update_by(item, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn) do
         item
         |> changeset_fn.(attrs)
-        |> @repo.update()
+        |> @repo.update(opts)
       end
 
       # Context.update(%User{name: "old name", id: ...}, User, %{name: "new name"})
@@ -211,10 +211,10 @@ defmodule FatEcto.FatContext do
         Update a record by passing record, schema and attributes to a changeset. It will return the record updated.
 
       """
-      def update(item, schema, attrs) do
+      def update(item, schema, attrs, opts \\ []) do
         item
         |> schema.changeset(attrs)
-        |> @repo.update()
+        |> @repo.update(opts)
       end
 
       # Context.update_by!(%User{name: "old name", id: ...}, &User.changeset/2, %{name: "new name"})
@@ -222,10 +222,10 @@ defmodule FatEcto.FatContext do
         Update a record by passing record, changeset_fn and attributes. It will return the record updated or raises.
 
       """
-      def update_by!(item, changeset_fn, attrs) when is_function(changeset_fn) do
+      def update_by!(item, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn) do
         item
         |> changeset_fn.(attrs)
-        |> @repo.update!()
+        |> @repo.update!(opts)
       end
 
       # Context.update!(%User{name: "old name", id: ...}, User, %{name: "new name"})
@@ -233,10 +233,10 @@ defmodule FatEcto.FatContext do
         Update a record by passing record, schema and attributes to a changeset. It will return the record updated or raises.
 
       """
-      def update!(item, schema, attrs) do
+      def update!(item, schema, attrs, opts \\ []) do
         item
         |> schema.changeset(attrs)
-        |> @repo.update!()
+        |> @repo.update!(opts)
       end
 
       # Context.delete(%User{name: "name", id: 1})

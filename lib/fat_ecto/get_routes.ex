@@ -30,8 +30,10 @@ defmodule FatEcto.Routes do
         {opts, [], _} -> {router(opts[:router], base), opts}
       end
 
-    str_paths = router_mod
-    |> ConsoleFormatter.format(endpoint(opts[:endpoint], base))
+    str_paths =
+      router_mod
+      |> ConsoleFormatter.format(endpoint(opts[:endpoint], base))
+
     # |> Mix.shell.info()
 
     # Code to return path list
@@ -41,7 +43,8 @@ defmodule FatEcto.Routes do
     #  "swagger_file:", "\"swagger_manual.json\"]"],
     # TODO: parse options and convert into array before splitting array
     path_list = String.split(str_paths, "\n")
-    Enum.reduce(path_list,[], fn path, acc ->
+
+    Enum.reduce(path_list, [], fn path, acc ->
       acc ++ [String.split(path)]
     end)
   end
@@ -49,29 +52,33 @@ defmodule FatEcto.Routes do
   defp endpoint(nil, base) do
     loaded(web_mod(base, "Endpoint"))
   end
+
   defp endpoint(module, _base) do
     loaded(Module.concat([module]))
   end
 
   defp router(nil, base) do
     if Mix.Project.umbrella?() do
-      Mix.raise """
+      Mix.raise("""
       umbrella applications require an explicit router to be given to phx.routes, for example:
           $ mix phx.routes MyAppWeb.Router
-      """
+      """)
     end
+
     web_router = web_mod(base, "Router")
     old_router = app_mod(base, "Router")
 
-    loaded(web_router) || loaded(old_router) || Mix.raise """
-    no router found at #{inspect web_router} or #{inspect old_router}.
-    An explicit router module may be given to phx.routes, for example:
-        $ mix phx.routes MyAppWeb.Router
-    """
+    loaded(web_router) || loaded(old_router) ||
+      Mix.raise("""
+      no router found at #{inspect(web_router)} or #{inspect(old_router)}.
+      An explicit router module may be given to phx.routes, for example:
+          $ mix phx.routes MyAppWeb.Router
+      """)
   end
+
   defp router(router_name, _base) do
     arg_router = Module.concat([router_name])
-    loaded(arg_router) || Mix.raise "the provided router, #{inspect(arg_router)}, does not exist"
+    loaded(arg_router) || Mix.raise("the provided router, #{inspect(arg_router)}, does not exist")
   end
 
   defp loaded(module) do
