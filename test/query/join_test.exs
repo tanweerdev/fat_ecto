@@ -139,6 +139,66 @@ defmodule Query.JoinTest do
     assert inspect(result) == inspect(expected)
   end
 
+  test "returns the query with inner join and selected fields and additional on clause $in" do
+    opts = %{
+      "$inner_join" => %{
+        "fat_rooms" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "hospital_id",
+          "$additional_on_clauses" => %{
+            "rating" => %{"$in" => [1, 2, 3]}
+          },
+          "$select" => ["beds", "capacity", "level"],
+          "$where" => %{"incharge" => "John"}
+        }
+      },
+      "$where" => %{"rating" => 3}
+    }
+
+    expected =
+      from(
+        h in FatEcto.FatHospital,
+        where: h.rating == ^3 and ^true,
+        inner_join: r in "fat_rooms",
+        on: h.rating in ^[1, 2, 3] and h.id == r.hospital_id,
+        where: r.incharge == ^"John" and ^true,
+        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+      )
+
+    result = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(result) == inspect(expected)
+  end
+
+  test "returns the query with inner join and selected fields and additional on clause $between" do
+    opts = %{
+      "$inner_join" => %{
+        "fat_rooms" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "hospital_id",
+          "$additional_on_clauses" => %{
+            "rating" => %{"$between_equal" => [1, 3]}
+          },
+          "$select" => ["beds", "capacity", "level"],
+          "$where" => %{"incharge" => "John"}
+        }
+      },
+      "$where" => %{"rating" => 3}
+    }
+
+    expected =
+      from(
+        h in FatEcto.FatHospital,
+        where: h.rating == ^3 and ^true,
+        inner_join: r in "fat_rooms",
+        on: h.rating >= ^1 and h.rating <= ^3 and h.id == r.hospital_id,
+        where: r.incharge == ^"John" and ^true,
+        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+      )
+
+    result = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(result) == inspect(expected)
+  end
+
   test "returns the query with inner join and selected fields and inner where" do
     opts = %{
       "$inner_join" => %{

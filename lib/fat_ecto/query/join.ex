@@ -180,18 +180,17 @@ defmodule FatEcto.FatQuery.FatJoin do
 
           # TODO: Add docs and examples of ex_doc for this case here
           _whatever ->
+            on_caluses = build_on_dynamic(join_item, join_item["$additional_on_clauses"])
+
             join(
               queryable,
               join,
               [q],
               jt in ^join_table,
-              on:
-                field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) ==
-                  field(
-                    jt,
-                    ^FatHelper.string_to_atom(join_item["$on_table_field"])
-                  )
+              on: ^on_caluses
             )
+
+            # |> IO.inspect()
         end
 
       # TODO: Add docs and examples of ex_doc for this case here
@@ -334,5 +333,62 @@ defmodule FatEcto.FatQuery.FatJoin do
         }
       }
     )
+  end
+
+  def build_on_dynamic(join_items, nil) do
+    dynamic(
+      [q, c],
+      field(
+        q,
+        ^FatHelper.string_to_atom(join_items["$on_field"])
+      ) ==
+        field(
+          c,
+          ^FatHelper.string_to_atom(join_items["$on_table_field"])
+        )
+    )
+  end
+
+  def build_on_dynamic(join_items, additional_join) do
+    Enum.reduce(additional_join, true, fn {field, map}, _query ->
+      query =
+        dynamic(
+          [q, c],
+          field(
+            q,
+            ^FatHelper.string_to_atom(join_items["$on_field"])
+          ) ==
+            field(
+              c,
+              ^FatHelper.string_to_atom(join_items["$on_table_field"])
+            )
+        )
+
+      query =
+        if Map.has_key?(map, "$in") do
+          query =
+            dynamic(
+              [q],
+              field(
+                q,
+                ^FatHelper.string_to_atom(field)
+              ) in ^map["$in"] and ^query
+            )
+        else
+          query
+        end
+
+      if Map.has_key?(map, "$between_equal") do
+        query =
+          dynamic(
+            [q],
+            field(q, ^FatHelper.string_to_existing_atom(field)) >= ^Enum.min(map["$between_equal"]) and
+              field(q, ^FatHelper.string_to_existing_atom(field)) <= ^Enum.max(map["$between_equal"]) and
+              ^query
+          )
+      else
+        query
+      end
+    end)
   end
 end
