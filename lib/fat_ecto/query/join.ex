@@ -2,6 +2,8 @@ defmodule FatEcto.FatQuery.FatJoin do
   # TODO: Add docs and examples for ex_doc
   alias FatEcto.FatHelper
   import Ecto.Query
+  alias FatEcto.FatQuery.{FatDynamics, FatNotDynamics}
+
   # TODO: Add docs and examples for ex_doc
 
   @doc """
@@ -180,17 +182,14 @@ defmodule FatEcto.FatQuery.FatJoin do
 
           # TODO: Add docs and examples of ex_doc for this case here
           _whatever ->
+            on_caluses = build_on_dynamic(join_item, join_item["$additional_on_clauses"])
+
             join(
               queryable,
               join,
               [q],
               jt in ^join_table,
-              on:
-                field(q, ^FatHelper.string_to_atom(join_item["$on_field"])) ==
-                  field(
-                    jt,
-                    ^FatHelper.string_to_atom(join_item["$on_table_field"])
-                  )
+              on: ^on_caluses
             )
         end
 
@@ -334,5 +333,97 @@ defmodule FatEcto.FatQuery.FatJoin do
         }
       }
     )
+  end
+
+  def build_on_dynamic(join_items, nil) do
+    dynamic(
+      [q, c],
+      field(
+        q,
+        ^FatHelper.string_to_atom(join_items["$on_field"])
+      ) ==
+        field(
+          c,
+          ^FatHelper.string_to_atom(join_items["$on_table_field"])
+        )
+    )
+  end
+
+  def build_on_dynamic(join_items, additional_join) do
+    dynamics =
+      Enum.reduce(additional_join, true, fn {field, map}, dynamics ->
+        build_on_dynamic(join_items, {field, map}, dynamics)
+      end)
+
+    dynamic(
+      [q, c],
+      field(
+        q,
+        ^FatHelper.string_to_atom(join_items["$on_field"])
+      ) ==
+        field(
+          c,
+          ^FatHelper.string_to_atom(join_items["$on_table_field"])
+        ) and ^dynamics
+    )
+  end
+
+  def build_on_dynamic(_join_items, {field, map}, dynamics) do
+    Enum.reduce(map, [], fn {k, value}, opts ->
+      case k do
+        "$in" ->
+          FatDynamics.in_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$between_equal" ->
+          FatDynamics.between_equal_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$between" ->
+          FatDynamics.between_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$gt" ->
+          FatDynamics.gt_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$gte" ->
+          FatDynamics.gte_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$lt" ->
+          FatDynamics.lt_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$lte" ->
+          FatDynamics.lte_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$like" ->
+          FatDynamics.like_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$ilike" ->
+          FatDynamics.ilike_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$not_like" ->
+          FatNotDynamics.not_like_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$not_ilike" ->
+          FatNotDynamics.not_ilike_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$not_between" ->
+          FatNotDynamics.not_between_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$not_between_equal" ->
+          FatNotDynamics.not_between_equal_dynamic(
+            field,
+            value,
+            dynamics,
+            opts ++ [dynamic_type: :and]
+          )
+
+        "$not_in" ->
+          FatNotDynamics.not_in_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$equal" ->
+          FatDynamics.eq_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        _ ->
+          dynamics
+      end
+    end)
   end
 end
