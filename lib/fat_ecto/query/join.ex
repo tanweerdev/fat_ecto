@@ -2,6 +2,8 @@ defmodule FatEcto.FatQuery.FatJoin do
   # TODO: Add docs and examples for ex_doc
   alias FatEcto.FatHelper
   import Ecto.Query
+  alias FatEcto.FatQuery.{FatDynamics, FatNotDynamics}
+
   # TODO: Add docs and examples for ex_doc
 
   @doc """
@@ -189,8 +191,6 @@ defmodule FatEcto.FatQuery.FatJoin do
               jt in ^join_table,
               on: ^on_caluses
             )
-
-            # |> IO.inspect()
         end
 
       # TODO: Add docs and examples of ex_doc for this case here
@@ -350,44 +350,79 @@ defmodule FatEcto.FatQuery.FatJoin do
   end
 
   def build_on_dynamic(join_items, additional_join) do
-    Enum.reduce(additional_join, true, fn {field, map}, _query ->
-      query =
-        dynamic(
-          [q, c],
-          field(
-            q,
-            ^FatHelper.string_to_atom(join_items["$on_field"])
-          ) ==
-            field(
-              c,
-              ^FatHelper.string_to_atom(join_items["$on_table_field"])
-            )
-        )
+    dynamics =
+      Enum.reduce(additional_join, true, fn {field, map}, dynamics ->
+        build_on_dynamic(join_items, {field, map}, dynamics)
+      end)
 
-      query =
-        if Map.has_key?(map, "$in") do
-          query =
-            dynamic(
-              [q],
-              field(
-                q,
-                ^FatHelper.string_to_atom(field)
-              ) in ^map["$in"] and ^query
-            )
-        else
-          query
-        end
+    dynamic(
+      [q, c],
+      field(
+        q,
+        ^FatHelper.string_to_atom(join_items["$on_field"])
+      ) ==
+        field(
+          c,
+          ^FatHelper.string_to_atom(join_items["$on_table_field"])
+        ) and ^dynamics
+    )
+  end
 
-      if Map.has_key?(map, "$between_equal") do
-        query =
-          dynamic(
-            [q],
-            field(q, ^FatHelper.string_to_existing_atom(field)) >= ^Enum.min(map["$between_equal"]) and
-              field(q, ^FatHelper.string_to_existing_atom(field)) <= ^Enum.max(map["$between_equal"]) and
-              ^query
+  def build_on_dynamic(_join_items, {field, map}, dynamics) do
+    Enum.reduce(map, [], fn {k, value}, opts ->
+      case k do
+        "$in" ->
+          FatDynamics.in_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$between_equal" ->
+          FatDynamics.between_equal_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$between" ->
+          FatDynamics.between_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$gt" ->
+          FatDynamics.gt_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$gte" ->
+          FatDynamics.gte_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$lt" ->
+          FatDynamics.lt_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$lte" ->
+          FatDynamics.lte_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$like" ->
+          FatDynamics.like_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$ilike" ->
+          FatDynamics.ilike_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$not_like" ->
+          FatNotDynamics.not_like_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$not_ilike" ->
+          FatNotDynamics.not_ilike_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$not_between" ->
+          FatNotDynamics.not_between_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$not_between_equal" ->
+          FatNotDynamics.not_between_equal_dynamic(
+            field,
+            value,
+            dynamics,
+            opts ++ [dynamic_type: :and]
           )
-      else
-        query
+
+        "$not_in" ->
+          FatNotDynamics.not_in_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        "$equal" ->
+          FatDynamics.eq_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+
+        _ ->
+          dynamics
       end
     end)
   end
