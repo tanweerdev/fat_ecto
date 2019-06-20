@@ -19,6 +19,7 @@ defmodule FatUtils.FatRecord do
         raise "please define encoder_library when using fat record utils"
       end
 
+      # TODO: write tests and docs
       def sanitize_map(records) when is_list(records) do
         Enum.reduce(records, [], fn rec, acc ->
           acc ++ [sanitize_map(rec)]
@@ -55,7 +56,8 @@ defmodule FatUtils.FatRecord do
 
               Map.put(acc, k, values)
 
-            (is_map(v) && Map.has_key?(v, :__struct__) && Ecto.assoc_loaded?(v)) || !is_map(v) ->
+            (is_map(v) && Map.has_key?(v, :__struct__) && Ecto.assoc_loaded?(v)) || !is_map(v) ||
+                (is_map(v) && !Map.has_key?(v, :__struct__)) ->
               Map.put(
                 acc,
                 k,
