@@ -337,7 +337,7 @@ defmodule FatEcto.FatQuery.FatJoin do
 
   def build_on_dynamic(join_items, nil) do
     dynamic(
-      [q, c],
+      [q, ..., c],
       field(
         q,
         ^FatHelper.string_to_atom(join_items["$on_field"])
@@ -356,7 +356,7 @@ defmodule FatEcto.FatQuery.FatJoin do
       end)
 
     dynamic(
-      [q, c],
+      [q, ..., c],
       field(
         q,
         ^FatHelper.string_to_atom(join_items["$on_field"])
