@@ -480,4 +480,44 @@ defmodule Query.JoinTest do
 
     assert inspect(result) == inspect(expected)
   end
+
+  test "returns the query with multiple inner joins and selected fields and outer where" do
+    opts = %{
+      "$right_join" => %{
+        "fat_rooms" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "hospital_id",
+          "$select" => ["beds", "capacity", "level"],
+          "$where" => %{"incharge" => "John"}
+        },
+        "fat_doctors" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "hospital_id",
+          "$select" => ["name", "phone", "address"],
+          "$where" => %{"rating" => 5}
+        }
+      },
+      "$where" => %{"rating" => 3}
+    }
+
+    expected =
+      from(
+        h in FatEcto.FatHospital,
+        where: h.rating == ^3 and ^true,
+        right_join: d in "fat_doctors",
+        on: h.id == d.hospital_id,
+        right_join: r in "fat_rooms",
+        on: h.id == r.hospital_id,
+        where: d.rating == ^5 and ^true,
+        where: r.incharge == ^"John" and ^true,
+        select:
+          merge(merge(h, %{^"fat_doctors" => map(d, [:name, :phone, :address])}), %{
+            ^"fat_rooms" => map(r, [:beds, :capacity, :level])
+          })
+      )
+
+    result = Query.build(FatEcto.FatHospital, opts)
+
+    assert inspect(result) == inspect(expected)
+  end
 end
