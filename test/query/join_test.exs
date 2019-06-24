@@ -332,6 +332,74 @@ defmodule Query.JoinTest do
     assert inspect(result) == inspect(expected)
   end
 
+  test "returns the query with inner join and selected fields and notlike/not_ilike additional on clauses on joining table" do
+    opts = %{
+      "$inner_join" => %{
+        "fat_rooms" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "hospital_id",
+          "$additional_on_clauses" => %{
+            "purpose" => %{"$not_like" => "%Treat%", "$binding" => "last"},
+            "location" => %{"$not_ilike" => "%Dev"}
+          },
+          "$select" => ["beds", "capacity", "level"],
+          "$where" => %{"incharge" => "John"}
+        }
+      },
+      "$where" => %{"rating" => 3}
+    }
+
+    expected =
+      from(
+        h in FatEcto.FatHospital,
+        where: h.rating == ^3 and ^true,
+        inner_join: r in "fat_rooms",
+        on:
+          h.id == r.hospital_id and
+            (not like(fragment("(?)::TEXT", r.purpose), ^"%Treat%") and
+               (not ilike(fragment("(?)::TEXT", h.location), ^"%Dev") and ^true)),
+        where: r.incharge == ^"John" and ^true,
+        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+      )
+
+    result = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(result) == inspect(expected)
+  end
+
+  test "returns the query with inner join and selected fields and notlike/not_ilike mutiple additional clauses on join table" do
+    opts = %{
+      "$inner_join" => %{
+        "fat_rooms" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "hospital_id",
+          "$additional_on_clauses" => %{
+            "purpose" => %{"$not_like" => "%Treat%", "$binding" => "last"},
+            "description" => %{"$not_ilike" => "%Dev", "$binding" => "last"}
+          },
+          "$select" => ["beds", "capacity", "level"],
+          "$where" => %{"incharge" => "John"}
+        }
+      },
+      "$where" => %{"rating" => 3}
+    }
+
+    expected =
+      from(
+        h in FatEcto.FatHospital,
+        where: h.rating == ^3 and ^true,
+        inner_join: r in "fat_rooms",
+        on:
+          h.id == r.hospital_id and
+            (not like(fragment("(?)::TEXT", r.purpose), ^"%Treat%") and
+               (not ilike(fragment("(?)::TEXT", r.description), ^"%Dev") and ^true)),
+        where: r.incharge == ^"John" and ^true,
+        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+      )
+
+    result = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(result) == inspect(expected)
+  end
+
   test "returns the query with inner join and selected fields and not_between/not_betweenequal additional on clauses" do
     opts = %{
       "$inner_join" => %{
