@@ -352,7 +352,8 @@ defmodule FatEcto.FatQuery.FatJoin do
   def build_on_dynamic(join_items, additional_join) do
     dynamics =
       Enum.reduce(additional_join, true, fn {field, map}, dynamics ->
-        build_on_dynamic(join_items, {field, map}, dynamics)
+        {binding, map} = Map.pop(map, "$binding")
+        build_on_dynamic(join_items, {field, map}, dynamics, binding)
       end)
 
     dynamic(
@@ -368,58 +369,144 @@ defmodule FatEcto.FatQuery.FatJoin do
     )
   end
 
-  def build_on_dynamic(_join_items, {field, map}, dynamics) do
+  def build_on_dynamic(_join_items, {field, map}, dynamics, binding) do
     Enum.reduce(map, [], fn {k, value}, opts ->
       case k do
         "$in" ->
           FatDynamics.in_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
 
         "$between_equal" ->
-          FatDynamics.between_equal_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          if binding do
+            FatDynamics.between_equal_dynamic(
+              field,
+              value,
+              dynamics,
+              opts ++ [dynamic_type: :and, binding: :last]
+            )
+          else
+            FatDynamics.between_equal_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          end
 
         "$between" ->
-          FatDynamics.between_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          if binding do
+            FatDynamics.between_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and, binding: :last])
+          else
+            FatDynamics.between_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          end
 
         "$gt" ->
-          FatDynamics.gt_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          if binding do
+            FatDynamics.gt_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and, binding: :last])
+          else
+            FatDynamics.gt_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          end
 
         "$gte" ->
-          FatDynamics.gte_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          if binding do
+            FatDynamics.gte_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and, binding: :last])
+          else
+            FatDynamics.gte_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          end
 
         "$lt" ->
-          FatDynamics.lt_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          if binding do
+            FatDynamics.lt_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and, binding: :last])
+          else
+            FatDynamics.lt_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          end
 
         "$lte" ->
-          FatDynamics.lte_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          if binding do
+            FatDynamics.lte_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and, binding: :last])
+          else
+            FatDynamics.lte_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          end
 
         "$like" ->
-          FatDynamics.like_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          if binding do
+            FatDynamics.like_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and, binding: :last])
+          else
+            FatDynamics.like_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          end
 
         "$ilike" ->
-          FatDynamics.ilike_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          if binding do
+            FatDynamics.ilike_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and, binding: :last])
+          else
+            FatDynamics.ilike_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          end
 
         "$not_like" ->
-          FatNotDynamics.not_like_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          if binding do
+            FatNotDynamics.not_like_dynamic(
+              field,
+              value,
+              dynamics,
+              opts ++ [dynamic_type: :and, binding: :last]
+            )
+          else
+            FatNotDynamics.not_like_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          end
 
         "$not_ilike" ->
-          FatNotDynamics.not_ilike_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          if binding do
+            FatNotDynamics.not_ilike_dynamic(
+              field,
+              value,
+              dynamics,
+              opts ++ [dynamic_type: :and, binding: :last]
+            )
+          else
+            FatNotDynamics.not_ilike_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          end
 
         "$not_between" ->
-          FatNotDynamics.not_between_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          if binding do
+            FatNotDynamics.not_between_dynamic(
+              field,
+              value,
+              dynamics,
+              opts ++ [dynamic_type: :and, binding: :last]
+            )
+          else
+            FatNotDynamics.not_between_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          end
 
         "$not_between_equal" ->
-          FatNotDynamics.not_between_equal_dynamic(
-            field,
-            value,
-            dynamics,
-            opts ++ [dynamic_type: :and]
-          )
+          if binding do
+            FatNotDynamics.not_between_equal_dynamic(
+              field,
+              value,
+              dynamics,
+              opts ++ [dynamic_type: :and, binding: :last]
+            )
+          else
+            FatNotDynamics.not_between_equal_dynamic(
+              field,
+              value,
+              dynamics,
+              opts ++ [dynamic_type: :and]
+            )
+          end
 
         "$not_in" ->
-          FatNotDynamics.not_in_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          if binding do
+            FatNotDynamics.not_in_dynamic(
+              field,
+              value,
+              dynamics,
+              opts ++ [dynamic_type: :and, binding: :last]
+            )
+          else
+            FatNotDynamics.not_in_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          end
 
         "$equal" ->
-          FatDynamics.eq_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          if binding do
+            FatDynamics.eq_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and, binding: :last])
+          else
+            FatDynamics.eq_dynamic(field, value, dynamics, opts ++ [dynamic_type: :and])
+          end
 
         _ ->
           dynamics
