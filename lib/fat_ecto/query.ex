@@ -138,6 +138,7 @@ defmodule FatEcto.FatQuery do
         |> FatEcto.FatQuery.FatJoin.build_join(opts["$inner_join"], "$inner_join")
         |> FatEcto.FatQuery.FatJoin.build_join(opts["$full_join"], "$full_join")
         |> FatEcto.FatQuery.FatInclude.build_include(opts["$include"], model, build_options)
+        |> FatEcto.FatQuery.FatDistinct.build_distinct(opts["$distinct"])
         |> FatEcto.FatQuery.FatOrderBy.build_order_by(opts["$order"])
         |> FatEcto.FatQuery.FatAggregate.build_aggregate(opts["$aggregate"])
         |> FatEcto.FatQuery.FatGroupBy.build_group_by(opts["$group"])
