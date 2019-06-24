@@ -119,7 +119,7 @@ defmodule FatEcto.FatQuery do
           if is_atom(queryable) || is_binary(queryable) do
             queryable
           else
-            {_table, model} = queryable.from
+            %{source: {_table, model}} = queryable.from
             model
           end
 
