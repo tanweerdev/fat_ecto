@@ -16,7 +16,6 @@ defmodule FatUtils.SeedHelper do
         raise "please define seed_base_path when using fat seed utils"
       end
 
-
       # TODO: Add docs and examples for ex_doc
       def import_from_csv(
             csv_path,
@@ -86,9 +85,7 @@ defmodule FatUtils.SeedHelper do
 
       # TODO: Add docs and examples for ex_doc
       def reset_id_seq(table, id \\ "id") do
-        Ecto.Migration.execute(
-          "SELECT setval('#{table}_#{id}_seq', (SELECT MAX(#{id}) from \"#{table}\"));"
-        )
+        Ecto.Migration.execute("SELECT setval('#{table}_#{id}_seq', (SELECT MAX(#{id}) from \"#{table}\"));")
       end
     end
   end
