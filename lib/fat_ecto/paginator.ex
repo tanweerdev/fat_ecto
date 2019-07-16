@@ -65,6 +65,7 @@ defmodule FatEcto.FatPaginator do
           |> exclude(:order_by)
           |> exclude(:preload)
           |> exclude(:select)
+          |> exclude(:distinct)
 
         from(q in queryable, select: fragment("count(*)"))
       end
