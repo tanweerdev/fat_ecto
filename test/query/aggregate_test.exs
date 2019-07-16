@@ -192,7 +192,7 @@ defmodule Query.AggregateTest do
       from(f in FatEcto.FatHospital,
         where: f.name == ^"Saint" and ^true,
         order_by: [desc: f.id],
-        limit: ^103,
+        limit: ^34,
         offset: ^0
       )
 

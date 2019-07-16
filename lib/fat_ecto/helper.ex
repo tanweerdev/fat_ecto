@@ -30,9 +30,16 @@ defmodule FatEcto.FatHelper do
     {max_limit, default_limit} = get_limit_bounds(options)
     {limit, params} = Keyword.pop(params, :limit, default_limit)
     limit = FatUtils.Integer.parse!(limit)
-    limit = if limit > @min_limit, do: limit, else: @min_limit
-    limit = if limit > max_limit, do: max_limit, else: limit
-    {limit, params}
+
+    if is_nil(limit) do
+      {default_limit, params}
+    else
+      limit = if limit > @min_limit, do: limit, else: @min_limit
+
+      limit = if limit > max_limit, do: max_limit, else: limit
+
+      {limit, params}
+    end
   end
 
   # TODO: Add docs and examples for ex_doc
