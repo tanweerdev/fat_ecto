@@ -132,6 +132,7 @@ defmodule FatEcto.FatQuery do
         queryable
         |> FatEcto.FatQuery.FatSelect.build_select(opts["$select"], model)
         |> FatEcto.FatQuery.FatWhere.build_where(opts["$where"])
+        |> FatEcto.FatQuery.FatWhere.build_where(opts["$or_where"], [or_where: true])
         |> FatEcto.FatQuery.FatJoin.build_join(opts["$join"], "$join")
         |> FatEcto.FatQuery.FatJoin.build_join(opts["$right_join"], "$right_join")
         |> FatEcto.FatQuery.FatJoin.build_join(opts["$left_join"], "$left_join")

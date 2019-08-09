@@ -436,4 +436,47 @@ defmodule Query.WhereTest do
              total_staff: 3
            }
   end
+
+  test "returns the query with or_where fields" do
+    insert(:hospital, name: "Belarus", location: "main bullevard")
+    insert(:hospital, name: "Johnson", location: "main bullevard")
+
+    opts = %{
+      "$where" => %{"name" => %{"$like" => "%Joh%"}},
+      "$or_where" => %{
+        "name" => %{"$like" => "%Bel%"}, "location" => %{"$like" => "%name%"}}
+
+    }
+
+     expected = from(h in FatEcto.FatHospital,  where: like(fragment("(?)::TEXT", h.name), ^"%Joh%") and ^true,
+ or_where: like(fragment("(?)::TEXT", h.location), ^"%name%") and ^true,
+ or_where: like(fragment("(?)::TEXT", h.name), ^"%Bel%") and ^true)
+    query = Query.build(FatEcto.FatHospital, opts)
+     assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.all(query)
+      |> sanitize_map()
+      |> Enum.map(fn record -> Map.drop(record, [:id])end)
+
+
+     assert result == [
+  %{
+    address: "123 street",
+    location: "main bullevard",
+    name: "Belarus",
+    phone: "12345",
+    rating: 5,
+    total_staff: 3
+  },
+  %{
+    address: "123 street",
+    location: "main bullevard",
+    name: "Johnson",
+    phone: "12345",
+    rating: 5,
+    total_staff: 3
+  }
+]
+  end
 end

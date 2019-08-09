@@ -759,6 +759,7 @@ defmodule FatEcto.FatQuery.FatWhere do
               case condition do
                 %{"$like" => value} ->
                   FatDynamics.like_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+                  |> IO.inspect()
 
                 %{"$ilike" => value} ->
                   FatDynamics.ilike_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
@@ -831,6 +832,9 @@ defmodule FatEcto.FatQuery.FatWhere do
         case key do
           "$like" ->
             FatDynamics.like_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
+            "$or_like" ->
+              FatDynamics.like_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
           "$ilike" ->
             FatDynamics.ilike_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
@@ -931,8 +935,12 @@ defmodule FatEcto.FatQuery.FatWhere do
             queryable
         end
       end)
+     if opts[:or_where] do
+    from(q in queryable, or_where: ^dynamics)
 
+     else
     from(q in queryable, where: ^dynamics)
+     end
   end
 
   # TODO: Add docs and examples of ex_doc for this case here
