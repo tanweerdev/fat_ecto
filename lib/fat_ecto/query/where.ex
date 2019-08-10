@@ -703,7 +703,7 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   """
 
-  alias FatEcto.FatQuery.{FatDynamics, FatNotDynamics}
+  alias FatEcto.FatQuery.{FatDynamics, FatNotDynamics, WhereOr}
   # TODO: Add docs and examples for ex_doc
 
   @doc """
@@ -744,9 +744,15 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   def build_where(queryable, where_params, opts) do
     # TODO: Add docs and examples of ex_doc for this case here
-    Enum.reduce(where_params, queryable, fn {k, v}, queryable ->
-      query_where(queryable, {k, v}, opts)
-    end)
+    {queryable, where_params} = WhereOr.or_condition(queryable, where_params)
+
+    if where_params == %{} do
+      queryable
+    else
+      Enum.reduce(where_params, queryable, fn {k, v}, queryable ->
+        query_where(queryable, {k, v}, opts)
+      end)
+    end
   end
 
   # TODO: Add docs and examples of ex_doc for this case here
@@ -759,7 +765,6 @@ defmodule FatEcto.FatQuery.FatWhere do
               case condition do
                 %{"$like" => value} ->
                   FatDynamics.like_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
-                  |> IO.inspect()
 
                 %{"$ilike" => value} ->
                   FatDynamics.ilike_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
@@ -788,7 +793,11 @@ defmodule FatEcto.FatQuery.FatWhere do
             end)
 
           # TODO: confirm its what should be used `where` or `or_where` below
-          from(q in queryable, where: ^dynamics)
+          if opts[:or_where] do
+            from(q in queryable, or_where: ^dynamics)
+          else
+            from(q in queryable, where: ^dynamics)
+          end
 
         "$not" ->
           dynamics =
@@ -821,7 +830,11 @@ defmodule FatEcto.FatQuery.FatWhere do
             end)
 
           # TODO: confirm its what should be used `where` or `or_where` below
-          from(q in queryable, where: ^dynamics)
+          if opts[:or_where] do
+            from(q in queryable, or_where: ^dynamics)
+          else
+            from(q in queryable, where: ^dynamics)
+          end
 
         _whatever ->
           queryable
@@ -832,9 +845,6 @@ defmodule FatEcto.FatQuery.FatWhere do
         case key do
           "$like" ->
             FatDynamics.like_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
-
-            "$or_like" ->
-              FatDynamics.like_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
           "$ilike" ->
             FatDynamics.ilike_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
@@ -935,12 +945,12 @@ defmodule FatEcto.FatQuery.FatWhere do
             queryable
         end
       end)
-     if opts[:or_where] do
-    from(q in queryable, or_where: ^dynamics)
 
-     else
-    from(q in queryable, where: ^dynamics)
-     end
+    if opts[:or_where] do
+      from(q in queryable, or_where: ^dynamics)
+    else
+      from(q in queryable, where: ^dynamics)
+    end
   end
 
   # TODO: Add docs and examples of ex_doc for this case here
