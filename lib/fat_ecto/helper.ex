@@ -115,18 +115,4 @@ defmodule FatEcto.FatHelper do
         }
     end
   end
-
-  def sanitize_or_params(where_params) do
-    Enum.reduce(where_params, %{}, fn {k, map_condition}, map ->
-      Enum.reduce(map_condition, %{}, fn {key, value}, _map ->
-        case String.contains?(key, "$or_") do
-          false ->
-            map = Map.put(map, k, %{key => value})
-
-          _ ->
-            map
-        end
-      end)
-    end)
-  end
 end
