@@ -9,8 +9,7 @@ defmodule FatEcto.FatQuery.WhereOr do
         map_condition(k, dynamics, map_cond)
       end)
 
-    queryable = from(q in queryable, where: ^dynamics)
-    queryable
+     from(q in queryable, where: ^dynamics)
   end
 
   def map_condition(k, dynamics, map_cond) when is_map(map_cond) do

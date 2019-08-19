@@ -790,11 +790,8 @@ defmodule FatEcto.FatQuery.FatWhere do
             end)
 
           # TODO: confirm its what should be used `where` or `or_where` below
-          if opts[:or_where] do
-            from(q in queryable, or_where: ^dynamics)
-          else
-            from(q in queryable, where: ^dynamics)
-          end
+
+          from(q in queryable, where: ^dynamics)
 
         "$not" ->
           dynamics =
@@ -827,11 +824,8 @@ defmodule FatEcto.FatQuery.FatWhere do
             end)
 
           # TODO: confirm its what should be used `where` or `or_where` below
-          if opts[:or_where] do
-            from(q in queryable, or_where: ^dynamics)
-          else
-            from(q in queryable, where: ^dynamics)
-          end
+
+          from(q in queryable, where: ^dynamics)
 
         _whatever ->
           queryable
@@ -943,11 +937,7 @@ defmodule FatEcto.FatQuery.FatWhere do
         end
       end)
 
-    if opts[:or_where] do
-      from(q in queryable, or_where: ^dynamics)
-    else
-      from(q in queryable, where: ^dynamics)
-    end
+    from(q in queryable, where: ^dynamics)
   end
 
   # TODO: Add docs and examples of ex_doc for this case here
