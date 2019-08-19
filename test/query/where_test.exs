@@ -436,4 +436,534 @@ defmodule Query.WhereTest do
              total_staff: 3
            }
   end
+
+  test "returns the query with or fields" do
+    insert(:hospital, name: "DJ", location: "main bullevard")
+    insert(:hospital, name: "Johnson", location: "main bullevard")
+
+    opts = %{
+      "$where" => %{
+        "name" => %{"$not_ilike" => "%DJ%"},
+        "$or" => %{
+          "location" => %{"$like" => "%main%"},
+          "address" => %{"$ilike" => "%123%"},
+          "rating" => %{"$lt" => 3},
+          "total_staff" => %{"$gt" => 2}
+        }
+      }
+    }
+
+    expected =
+      from(f0 in FatEcto.FatHospital,
+        where:
+          f0.total_staff > ^2 or
+            (f0.rating < ^3 or
+               (like(fragment("(?)::TEXT", f0.location), ^"%main%") or
+                  (ilike(fragment("(?)::TEXT", f0.address), ^"%123%") or ^true))),
+        where: not ilike(fragment("(?)::TEXT", f0.name), ^"%DJ%") and ^true
+      )
+
+    query = Query.build(FatEcto.FatHospital, opts)
+
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.all(query)
+      |> sanitize_map()
+      |> Enum.map(fn record -> Map.drop(record, [:id]) end)
+
+    assert result == [
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "st marry",
+               phone: "12345",
+               rating: 5,
+               total_staff: 3
+             },
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "Johnson",
+               phone: "12345",
+               rating: 5,
+               total_staff: 3
+             }
+           ]
+  end
+
+  test "returns the query with or/and fields" do
+    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
+    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
+
+    opts = %{
+      "$where" => %{
+        "name" => %{"$like" => "%Joh%"},
+        "rating" => %{"$in" => [2, 3]},
+        "$or" => %{
+          "total_staff" => %{"$gte" => 2}
+        }
+      }
+    }
+
+    expected =
+      from(f0 in FatEcto.FatHospital,
+        where: f0.total_staff >= ^2 or ^true,
+        where: like(fragment("(?)::TEXT", f0.name), ^"%Joh%") and ^true,
+        where: f0.rating in ^[2, 3] and ^true
+      )
+
+    query = Query.build(FatEcto.FatHospital, opts)
+
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.all(query)
+      |> sanitize_map()
+      |> Enum.map(fn record -> Map.drop(record, [:id]) end)
+
+    assert result == [
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "Johnson",
+               phone: "12345",
+               rating: 3,
+               total_staff: 3
+             }
+           ]
+  end
+
+  test "returns the query only with or fields" do
+    insert(:hospital, name: "Belarus", location: "main bullevard", total_staff: 6)
+    insert(:hospital, name: "Johnson", location: "main bullevard", total_staff: 6)
+
+    opts = %{
+      "$where" => %{
+        "$or" => %{
+          "name" => %{"$like" => "%Joh%"},
+          "total_staff" => %{"$between_equal" => [5, 7]}
+        }
+      }
+    }
+
+    expected =
+      from(f0 in FatEcto.FatHospital,
+        where:
+          (f0.total_staff >= ^5 and f0.total_staff <= ^7) or
+            (like(fragment("(?)::TEXT", f0.name), ^"%Joh%") or ^true)
+      )
+
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.all(query)
+      |> sanitize_map()
+      |> Enum.map(fn record -> Map.drop(record, [:id]) end)
+
+    assert result == [
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "st marry",
+               phone: "12345",
+               rating: 5,
+               total_staff: 3
+             },
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "Belarus",
+               phone: "12345",
+               rating: 5,
+               total_staff: 6
+             },
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "Johnson",
+               phone: "12345",
+               rating: 5,
+               total_staff: 6
+             }
+           ]
+  end
+
+  test "returns the query with and/ or not between fields" do
+    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 4)
+    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 5)
+
+    opts = %{
+      "$where" => %{
+        "name" => %{"$like" => "%Joh%"},
+        "location" => %{"$ilike" => "%main%"},
+        "$or" => %{
+          "rating" => %{"$not_between" => [2, 3]},
+          "total_staff" => %{"$not_between_equal" => [1, 4]}
+        }
+      }
+    }
+
+    expected =
+      from(f0 in FatEcto.FatHospital,
+        where: f0.total_staff <= ^1 or f0.total_staff >= ^4 or (f0.rating < ^2 or f0.rating > ^3 or ^true),
+        where: ilike(fragment("(?)::TEXT", f0.location), ^"%main%") and ^true,
+        where: like(fragment("(?)::TEXT", f0.name), ^"%Joh%") and ^true
+      )
+
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.all(query)
+      |> sanitize_map()
+      |> Enum.map(fn record -> Map.drop(record, [:id]) end)
+
+    assert result == [
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "Johnson",
+               phone: "12345",
+               rating: 5,
+               total_staff: 3
+             }
+           ]
+  end
+
+  test "returns the query with and/ or in fields" do
+    insert(:hospital, name: "Belarus", location: "main bullevard")
+    insert(:hospital, name: "Johnson", location: "main bullevard")
+
+    opts = %{
+      "$where" => %{
+        "location" => %{"$ilike" => "%main%"},
+        "$or" => %{
+          "name" => %{"$ilike" => "%Joh%"},
+          "rating" => %{"$in" => [2, 3]},
+          "total_staff" => %{"$not_in" => [1, 4]}
+        }
+      }
+    }
+
+    expected =
+      from(f0 in FatEcto.FatHospital,
+        where:
+          f0.total_staff not in ^[1, 4] or
+            (f0.rating in ^[2, 3] or (ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or ^true)),
+        where: ilike(fragment("(?)::TEXT", f0.location), ^"%main%") and ^true
+      )
+
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.all(query)
+      |> sanitize_map()
+      |> Enum.map(fn record -> Map.drop(record, [:id]) end)
+
+    assert result == [
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "st marry",
+               phone: "12345",
+               rating: 5,
+               total_staff: 3
+             },
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "Belarus",
+               phone: "12345",
+               rating: 5,
+               total_staff: 3
+             },
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "Johnson",
+               phone: "12345",
+               rating: 5,
+               total_staff: 3
+             }
+           ]
+  end
+
+  test "returns the query with and/ or not like/ilike/equal fields" do
+    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
+    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
+
+    opts = %{
+      "$where" => %{
+        "$or" => %{
+          "name" => %{"$not_ilike" => "%Joh%"},
+          "location" => %{"$not_like" => "%some%"},
+          "total_staff" => %{"$equal" => 2},
+          "rating" => %{"$in" => [2, 3]}
+        }
+      }
+    }
+
+    expected =
+      from(f0 in FatEcto.FatHospital,
+        where:
+          f0.total_staff == ^2 or
+            (f0.rating in ^[2, 3] or
+               (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true)))
+      )
+
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.all(query)
+      |> sanitize_map()
+      |> Enum.map(fn record -> Map.drop(record, [:id]) end)
+
+    assert result == [
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "st marry",
+               phone: "12345",
+               rating: 5,
+               total_staff: 3
+             },
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "Belarus",
+               phone: "12345",
+               rating: 2,
+               total_staff: 3
+             },
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "Johnson",
+               phone: "12345",
+               rating: 3,
+               total_staff: 3
+             }
+           ]
+  end
+
+  test "returns the query with two or not like/ilike/equal fields" do
+    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
+    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
+
+    opts = %{
+      "$where" => %{
+        "$or" => %{
+          "name" => %{"$not_ilike" => "%Joh%"},
+          "location" => %{"$not_like" => "%some%"},
+          "total_staff" => %{"$equal" => 2},
+          "rating" => %{"$in" => [2, 3]}
+        },
+        "$or_1" => %{
+          "name" => %{"$not_ilike" => "%Joh%"},
+          "location" => %{"$not_like" => "%some%"},
+          "total_staff" => %{"$equal" => 2},
+          "rating" => %{"$in" => [2, 3]}
+        }
+      }
+    }
+
+    expected =
+      from(f0 in FatEcto.FatHospital,
+        where:
+          f0.total_staff == ^2 or
+            (f0.rating in ^[2, 3] or
+               (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true))),
+        where:
+          f0.total_staff == ^2 or
+            (f0.rating in ^[2, 3] or
+               (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true)))
+      )
+
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.all(query)
+      |> sanitize_map()
+      |> Enum.map(fn record -> Map.drop(record, [:id]) end)
+
+    assert result == [
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "st marry",
+               phone: "12345",
+               rating: 5,
+               total_staff: 3
+             },
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "Belarus",
+               phone: "12345",
+               rating: 2,
+               total_staff: 3
+             },
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "Johnson",
+               phone: "12345",
+               rating: 3,
+               total_staff: 3
+             }
+           ]
+  end
+
+  test "returns the query with and/two or not like/ilike/equal fields" do
+    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
+    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
+
+    opts = %{
+      "$where" => %{
+        "name" => %{"$not_ilike" => "%Joh%"},
+        "location" => %{"$not_like" => "%some%"},
+        "$or" => %{
+          "name" => %{"$not_ilike" => "%Joh%"},
+          "location" => %{"$not_like" => "%some%"},
+          "total_staff" => %{"$equal" => 2},
+          "rating" => %{"$in" => [2, 3]}
+        },
+        "$or_1" => %{
+          "name" => %{"$not_ilike" => "%Joh%"},
+          "location" => %{"$not_like" => "%some%"},
+          "total_staff" => %{"$equal" => 2},
+          "rating" => %{"$in" => [2, 3]}
+        }
+      }
+    }
+
+    expected =
+      from(f0 in FatEcto.FatHospital,
+        where:
+          f0.total_staff == ^2 or
+            (f0.rating in ^[2, 3] or
+               (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true))),
+        where:
+          f0.total_staff == ^2 or
+            (f0.rating in ^[2, 3] or
+               (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true))),
+        where: not like(fragment("(?)::TEXT", f0.location), ^"%some%") and ^true,
+        where: not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") and ^true
+      )
+
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.all(query)
+      |> sanitize_map()
+      |> Enum.map(fn record -> Map.drop(record, [:id]) end)
+
+    assert result == [
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "st marry",
+               phone: "12345",
+               rating: 5,
+               total_staff: 3
+             },
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "Belarus",
+               phone: "12345",
+               rating: 2,
+               total_staff: 3
+             }
+           ]
+  end
+
+  test "returns the query with and/three or not like/ilike/equal fields" do
+    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
+    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
+
+    opts = %{
+      "$where" => %{
+        "name" => %{"$not_ilike" => "%Joh%"},
+        "location" => %{"$not_like" => "%some%"},
+        "$or" => %{
+          "name" => %{"$not_ilike" => "%Joh%"},
+          "location" => %{"$not_like" => "%some%"},
+          "total_staff" => %{"$equal" => 2},
+          "rating" => %{"$in" => [2, 3]}
+        },
+        "$or_1" => %{
+          "name" => %{"$not_ilike" => "%Joh%"},
+          "location" => %{"$not_like" => "%some%"},
+          "total_staff" => %{"$equal" => 2},
+          "rating" => %{"$in" => [2, 3]}
+        },
+        "$or_2" => %{
+          "name" => %{"$ilike" => "%Joh%"},
+          "location" => %{"$not_like" => "%some%"},
+          "total_staff" => %{"$between" => [2, 6]},
+          "rating" => %{"$not_in" => [2, 3]}
+        }
+      }
+    }
+
+    expected =
+      from(f0 in FatEcto.FatHospital,
+        where:
+          f0.total_staff == ^2 or
+            (f0.rating in ^[2, 3] or
+               (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true))),
+        where:
+          f0.total_staff == ^2 or
+            (f0.rating in ^[2, 3] or
+               (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true))),
+        where:
+          (f0.total_staff > ^2 and f0.total_staff < ^6) or
+            (f0.rating not in ^[2, 3] or
+               (ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true))),
+        where: not like(fragment("(?)::TEXT", f0.location), ^"%some%") and ^true,
+        where: not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") and ^true
+      )
+
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+
+    result =
+      Repo.all(query)
+      |> sanitize_map()
+      |> Enum.map(fn record -> Map.drop(record, [:id]) end)
+
+    assert result == [
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "st marry",
+               phone: "12345",
+               rating: 5,
+               total_staff: 3
+             },
+             %{
+               address: "123 street",
+               location: "main bullevard",
+               name: "Belarus",
+               phone: "12345",
+               rating: 2,
+               total_staff: 3
+             }
+           ]
+  end
 end

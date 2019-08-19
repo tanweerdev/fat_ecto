@@ -703,7 +703,7 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   """
 
-  alias FatEcto.FatQuery.{FatDynamics, FatNotDynamics}
+  alias FatEcto.FatQuery.{FatDynamics, FatNotDynamics, WhereOr}
   # TODO: Add docs and examples for ex_doc
 
   @doc """
@@ -744,6 +744,17 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   def build_where(queryable, where_params, opts) do
     # TODO: Add docs and examples of ex_doc for this case here
+    queryable = {%{}, queryable}
+
+    {where_params, queryable} =
+      Enum.reduce(where_params, queryable, fn {k, v}, {map, queryable} ->
+        if String.contains?(k, "$or") do
+          {map, WhereOr.or_condition(queryable, where_params[k])}
+        else
+          {Map.put(map, k, v), queryable}
+        end
+      end)
+
     Enum.reduce(where_params, queryable, fn {k, v}, queryable ->
       query_where(queryable, {k, v}, opts)
     end)
@@ -787,6 +798,7 @@ defmodule FatEcto.FatQuery.FatWhere do
             end)
 
           # TODO: confirm its what should be used `where` or `or_where` below
+
           from(q in queryable, where: ^dynamics)
 
         "$not" ->
@@ -820,6 +832,7 @@ defmodule FatEcto.FatQuery.FatWhere do
             end)
 
           # TODO: confirm its what should be used `where` or `or_where` below
+
           from(q in queryable, where: ^dynamics)
 
         _whatever ->
