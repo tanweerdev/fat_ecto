@@ -115,4 +115,16 @@ defmodule FatEcto.FatHelper do
         }
     end
   end
+
+  def restrict_params(select_params, app) do
+    blacklist_params_list = Application.get_env(app, :fat_ecto)[:blacklist_params]
+
+    case blacklist_params_list do
+      nil ->
+        select_params
+
+      _ ->
+        select_params -- blacklist_params_list
+    end
+  end
 end
