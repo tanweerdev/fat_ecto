@@ -57,13 +57,13 @@ defmodule FatEcto.FatQuery.FatJoin do
 
   """
 
-  def build_join(queryable, join_params, join_type \\ "$join")
+  def build_join(queryable, join_params, join_type \\ "$join", options)
 
-  def build_join(queryable, nil, _join_type) do
+  def build_join(queryable, nil, _join_type, _options) do
     queryable
   end
 
-  def build_join(queryable, join_params, join_type) do
+  def build_join(queryable, join_params, join_type, options) do
     # TODO: Add docs and examples of ex_doc for this case here
     Enum.reduce(join_params, queryable, fn {join_key, join_item}, queryable ->
       join_table = join_item["$on_table"] || join_key
@@ -197,12 +197,12 @@ defmodule FatEcto.FatQuery.FatJoin do
       queryable = FatEcto.FatQuery.FatWhere.build_where(queryable, join_item["$where"], binding: :last)
 
       queryable = order(queryable, join_item["$order"])
-      queryable = _select(queryable, join_item, join_key)
-      build_group_by(queryable, join_item["$group"])
+      queryable = _select(queryable, join_item, join_key, options[:otp_app])
+      build_group_by(queryable, join_item["$group"], options[:otp_app])
     end)
   end
 
-  defp _select(queryable, join_params, join_table) do
+  defp _select(queryable, join_params, join_table, app) do
     case join_params["$select"] do
       nil ->
         queryable
@@ -217,7 +217,9 @@ defmodule FatEcto.FatQuery.FatJoin do
         # dynamic = dynamic([q, ..., c], c.id == 1)
         # from query, where: ^dynamic
 
-        select_atoms = Enum.map(select, &FatHelper.string_to_atom/1)
+        select_atoms =
+          Enum.map(select, &FatHelper.string_to_atom/1)
+          |> FatHelper.restrict_params(app)
 
         from(
           [q, ..., c] in queryable,
@@ -253,15 +255,15 @@ defmodule FatEcto.FatQuery.FatJoin do
     end
   end
 
-  defp build_group_by(queryable, nil) do
+  defp build_group_by(queryable, nil, _app) do
     queryable
   end
 
-  defp build_group_by(queryable, group_by_params) do
+  defp build_group_by(queryable, group_by_params, app) do
     case group_by_params do
       group_by_params when is_list(group_by_params) ->
         Enum.reduce(group_by_params, queryable, fn group_by_field, queryable ->
-          _group_by(queryable, group_by_field)
+          _group_by(queryable, group_by_field, app)
         end)
 
       group_by_params when is_map(group_by_params) ->
@@ -271,20 +273,23 @@ defmodule FatEcto.FatQuery.FatJoin do
               # from u in User,
               # group_by: fragment("date_part('month', ?)", u.inserted_at),
               # select:   {fragment("date_part('month', ?)", u.inserted_at), count(u.id)}
+              field =
+                FatHelper.string_to_existing_atom(group_by_field)
+                |> FatHelper.restrict_params(app)
 
               from(
                 [first, ..., q] in queryable,
                 group_by:
                   fragment(
                     "date_part('month', ?)",
-                    field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+                    field(q, ^field)
                   ),
                 select_merge: %{
                   "$group" => %{
                     ^group_by_field =>
                       fragment(
                         "date_part('month', ?)",
-                        field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+                        field(q, ^field)
                       )
                   }
                 }
@@ -294,42 +299,49 @@ defmodule FatEcto.FatQuery.FatJoin do
               # from u in User,
               # group_by: fragment("date_part('year', ?)", u.inserted_at),
               # select:   {fragment("date_part('year', ?)", u.inserted_at), count(u.id)}
+              field =
+                FatHelper.string_to_existing_atom(group_by_field)
+                |> FatHelper.restrict_params(app)
 
               from(
                 [first, ..., q] in queryable,
                 group_by:
                   fragment(
                     "date_part('year', ?)",
-                    field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+                    field(q, ^field)
                   ),
                 select_merge: %{
                   "$group" => %{
                     ^group_by_field =>
                       fragment(
                         "date_part('year', ?)",
-                        field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+                        field(q, ^field)
                       )
                   }
                 }
               )
 
             "$field" ->
-              _group_by(queryable, group_by_field)
+              _group_by(queryable, group_by_field, app)
           end
         end)
 
       group_by_params when is_binary(group_by_params) ->
-        _group_by(queryable, group_by_params)
+        _group_by(queryable, group_by_params, app)
     end
   end
 
-  defp _group_by(queryable, group_by_param) do
+  defp _group_by(queryable, group_by_param, app) do
+    field =
+      FatHelper.string_to_existing_atom(group_by_param)
+      |> FatHelper.restrict_params(app)
+
     from(
       [first, ..., q] in queryable,
-      group_by: field(q, ^FatHelper.string_to_existing_atom(group_by_param)),
+      group_by: field(q, ^field),
       select_merge: %{
         "$group" => %{
-          ^group_by_param => field(q, ^FatHelper.string_to_existing_atom(group_by_param))
+          ^group_by_param => field(q, ^field)
         }
       }
     )

@@ -6,7 +6,7 @@ defmodule Query.SelectTest do
     insert(:hospital)
     room = insert(:room)
     insert(:bed, fat_room_id: room.id)
-    Application.put_env(:fat_ecto, :fat_ecto, blacklist_params: [:is_active, :purpose])
+    Application.delete_env(:fat_ecto, :fat_ecto, [:blacklist_params])
 
     :ok
   end
@@ -38,7 +38,7 @@ defmodule Query.SelectTest do
       from(
         f in FatEcto.FatRoom,
         where: f.id == ^room.id and ^true,
-        select: map(f, [:name, :description, {:fat_beds, [:description]}])
+        select: map(f, [:name, :purpose, :description, {:fat_beds, [:purpose, :description, :is_active]}])
       )
 
     query = Query.build(FatEcto.FatRoom, opts)
@@ -148,6 +148,7 @@ defmodule Query.SelectTest do
 
   test "returns the select query by removing the blacklist fields" do
     room = Repo.one(FatEcto.FatRoom)
+    Application.put_env(:fat_ecto, :fat_ecto, blacklist_params: [:purpose, :is_active])
 
     opts = %{
       "$select" => %{
@@ -169,6 +170,8 @@ defmodule Query.SelectTest do
   end
 
   test "returns the select query list by eliminating the blacklist fields" do
+    Application.put_env(:fat_ecto, :fat_ecto, blacklist_params: [:purpose])
+
     opts = %{
       "$select" => ["name", "purpose", "description"]
     }

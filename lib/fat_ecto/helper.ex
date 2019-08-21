@@ -116,6 +116,18 @@ defmodule FatEcto.FatHelper do
     end
   end
 
+  def restrict_params(select_params, app) when is_atom(select_params) do
+    params = restrict_params([select_params], app)
+
+    case Enum.count(params) do
+      0 ->
+        raise ArgumentError, message: "the field #{select_params} is not allowed in the query"
+
+      _ ->
+        hd(params)
+    end
+  end
+
   def restrict_params(select_params, app) do
     blacklist_params_list = Application.get_env(app, :fat_ecto)[:blacklist_params]
 

@@ -4,6 +4,8 @@ defmodule Query.JoinTest do
   setup do
     hospital = insert(:hospital)
     insert(:room, fat_hospital_id: hospital.id)
+    Application.delete_env(:fat_ecto, :fat_ecto, [:blacklist_params])
+
     :ok
   end
 
@@ -586,6 +588,35 @@ defmodule Query.JoinTest do
 
     result = Query.build(FatEcto.FatHospital, opts)
 
+    assert inspect(result) == inspect(expected)
+  end
+
+  test "returns the query with full join and selected fields with blacklist params" do
+    Application.put_env(:fat_ecto, :fat_ecto, blacklist_params: [:name, :prescription])
+
+    opts = %{
+      "$select" => %{"$fields" => ["name", "designation", "experience_years"]},
+      "$full_join" => %{
+        "fat_patients" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "doctor_id",
+          "$select" => ["name", "prescription", "symptoms"]
+        }
+      }
+    }
+
+    expected =
+      from(
+        d in FatEcto.FatDoctor,
+        full_join: p in "fat_patients",
+        on: d.id == p.doctor_id,
+        select:
+          merge(map(d, [:designation, :experience_years]), %{
+            ^"fat_patients" => map(p, [:symptoms])
+          })
+      )
+
+    result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 end
