@@ -704,6 +704,7 @@ defmodule FatEcto.FatQuery.FatWhere do
   """
 
   alias FatEcto.FatQuery.{FatDynamics, FatNotDynamics, WhereOr}
+  alias FatEcto.FatHelper
   # TODO: Add docs and examples for ex_doc
 
   @doc """
@@ -736,26 +737,29 @@ defmodule FatEcto.FatQuery.FatWhere do
     - `$order`- Sort the result based on the order attribute.
 
   """
-  def build_where(queryable, where_params, opts \\ [])
+  def build_where(queryable, where_params, build_options, opts \\ [])
 
-  def build_where(queryable, nil, _opts) do
+  def build_where(queryable, nil, _opts, _build_options) do
     queryable
   end
 
-  def build_where(queryable, where_params, opts) do
+  def build_where(queryable, where_params, build_options, opts) do
     # TODO: Add docs and examples of ex_doc for this case here
+    app = build_options[:otp_app]
     queryable = {%{}, queryable}
 
     {where_params, queryable} =
       Enum.reduce(where_params, queryable, fn {k, v}, {map, queryable} ->
         if String.contains?(k, "$or") do
-          {map, WhereOr.or_condition(queryable, where_params[k])}
+          {map, WhereOr.or_condition(queryable, where_params[k], app)}
         else
           {Map.put(map, k, v), queryable}
         end
       end)
 
     Enum.reduce(where_params, queryable, fn {k, v}, queryable ->
+      k = FatHelper.params_valid(queryable, k, app)
+
       query_where(queryable, {k, v}, opts)
     end)
   end

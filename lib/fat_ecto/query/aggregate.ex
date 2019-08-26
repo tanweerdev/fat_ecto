@@ -22,80 +22,80 @@ defmodule FatEcto.FatQuery.FatAggregate do
     app = options[:otp_app]
 
     Enum.reduce(aggregate_params, queryable, fn {aggregate_type, fields}, queryable ->
+      fields = FatHelper.params_valid(queryable, fields, app)
+
       case aggregate_type do
         "$max" ->
           case fields do
             fields when is_list(fields) ->
               Enum.reduce(fields, queryable, fn field, queryable ->
-                build_max(queryable, field, app)
+                build_max(queryable, field)
               end)
 
             field when is_binary(field) ->
-              build_max(queryable, field, app)
+              build_max(queryable, field)
           end
 
         "$min" ->
           case fields do
             fields when is_list(fields) ->
               Enum.reduce(fields, queryable, fn field, queryable ->
-                build_min(queryable, field, app)
+                build_min(queryable, field)
               end)
 
             field when is_binary(field) ->
-              build_min(queryable, field, app)
+              build_min(queryable, field)
           end
 
         "$avg" ->
           case fields do
             fields when is_list(fields) ->
               Enum.reduce(fields, queryable, fn field, queryable ->
-                build_avg(queryable, field, app)
+                build_avg(queryable, field)
               end)
 
             field when is_binary(field) ->
-              build_avg(queryable, field, app)
+              build_avg(queryable, field)
           end
 
         "$count" ->
           case fields do
             fields when is_list(fields) ->
               Enum.reduce(fields, queryable, fn field, queryable ->
-                build_count(queryable, field, app)
+                build_count(queryable, field)
               end)
 
             field when is_binary(field) ->
-              build_count(queryable, field, app)
+              build_count(queryable, field)
           end
 
         "$count_distinct" ->
           case fields do
             fields when is_list(fields) ->
               Enum.reduce(fields, queryable, fn field, queryable ->
-                build_count_distinct(queryable, field, app)
+                build_count_distinct(queryable, field)
               end)
 
             field when is_binary(field) ->
-              build_count_distinct(queryable, field, app)
+              build_count_distinct(queryable, field)
           end
 
         "$sum" ->
           case fields do
             fields when is_list(fields) ->
               Enum.reduce(fields, queryable, fn field, queryable ->
-                build_sum(queryable, field, app)
+                build_sum(queryable, field)
               end)
 
             field when is_binary(field) ->
-              build_sum(queryable, field, app)
+              build_sum(queryable, field)
           end
       end
     end)
   end
 
-  defp build_max(queryable, field, app) do
-    atom_field =
-      FatHelper.string_to_atom(field)
-      |> FatHelper.restrict_params(app)
+  defp build_max(queryable, field) do
+    atom_field = FatHelper.string_to_atom(field)
 
     from(
       q in queryable,
@@ -105,10 +105,8 @@ defmodule FatEcto.FatQuery.FatAggregate do
     )
   end
 
-  defp build_min(queryable, field, app) do
-    atom_field =
-      FatHelper.string_to_atom(field)
-      |> FatHelper.restrict_params(app)
+  defp build_min(queryable, field) do
+    atom_field = FatHelper.string_to_atom(field)
 
     from(
       q in queryable,
@@ -116,10 +114,8 @@ defmodule FatEcto.FatQuery.FatAggregate do
     )
   end
 
-  defp build_avg(queryable, field, app) do
-    atom_field =
-      FatHelper.string_to_atom(field)
-      |> FatHelper.restrict_params(app)
+  defp build_avg(queryable, field) do
+    atom_field = FatHelper.string_to_atom(field)
 
     from(
       q in queryable,
@@ -127,10 +123,8 @@ defmodule FatEcto.FatQuery.FatAggregate do
     )
   end
 
-  defp build_count(queryable, field, app) do
-    atom_field =
-      FatHelper.string_to_atom(field)
-      |> FatHelper.restrict_params(app)
+  defp build_count(queryable, field) do
+    atom_field = FatHelper.string_to_atom(field)
 
     from(
       q in queryable,
@@ -138,10 +132,8 @@ defmodule FatEcto.FatQuery.FatAggregate do
     )
   end
 
-  defp build_count_distinct(queryable, field, app) do
-    atom_field =
-      FatHelper.string_to_atom(field)
-      |> FatHelper.restrict_params(app)
+  defp build_count_distinct(queryable, field) do
+    atom_field = FatHelper.string_to_atom(field)
 
     from(
       q in queryable,
@@ -151,10 +143,8 @@ defmodule FatEcto.FatQuery.FatAggregate do
     )
   end
 
-  defp build_sum(queryable, field, app) do
-    atom_field =
-      FatHelper.string_to_atom(field)
-      |> FatHelper.restrict_params(app)
+  defp build_sum(queryable, field) do
+    atom_field = FatHelper.string_to_atom(field)
 
     from(
       q in queryable,

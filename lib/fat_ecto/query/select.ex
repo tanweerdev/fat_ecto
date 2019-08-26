@@ -53,43 +53,42 @@ defmodule FatEcto.FatQuery.FatSelect do
       # TODO: Add docs and examples of ex_doc for this case here
       select when is_map(select) ->
         # TODO: Add docs and examples of ex_doc for this case here
-        fields =
-          select_map_field(select, app)
-          |> FatHelper.restrict_params(app)
+        fields = select_map_field(queryable, select, app)
 
         from(q in queryable, select: map(q, ^Enum.uniq(fields)))
 
       select when is_list(select) ->
+        select = FatHelper.params_valid(queryable, select, app)
+
         from(
           q in queryable,
           select:
             map(
               q,
-              ^Enum.uniq(
-                Enum.map(select, &FatHelper.string_to_existing_atom/1)
-                |> FatHelper.restrict_params(app)
-              )
+              ^Enum.uniq(Enum.map(select, &FatHelper.string_to_existing_atom/1))
             )
         )
     end
   end
 
-  defp select_map_field(fields, app, fields \\ [])
+  defp select_map_field(queryable, fields, app, fields \\ [])
 
-  defp select_map_field(fields_map, app, fields) when is_map(fields_map) do
+  defp select_map_field(queryable, fields_map, app, fields) when is_map(fields_map) do
     Enum.reduce(fields_map, fields, fn {key, value}, fields ->
       cond do
         key == "$fields" and is_list(value) ->
+          value = FatHelper.params_valid(queryable, value, app)
           fields ++ Enum.map(value, &FatHelper.string_to_existing_atom/1)
 
         key != "$fields" and is_map(value) ->
-          fields ++ [{FatHelper.string_to_existing_atom(key), select_map_field(value, app)}]
+          fields ++ [{FatHelper.string_to_existing_atom(key), select_map_field(queryable, value, app)}]
 
         key != "$fields" and is_list(value) ->
+          value = FatHelper.params_valid(key, value, app)
+
           fields ++
             [
-              {FatHelper.string_to_existing_atom(key),
-               Enum.map(value, &FatHelper.string_to_existing_atom/1) |> FatHelper.restrict_params(app)}
+              {FatHelper.string_to_existing_atom(key), Enum.map(value, &FatHelper.string_to_existing_atom/1)}
             ]
       end
     end)

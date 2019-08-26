@@ -584,7 +584,9 @@ defmodule Query.AggregateTest do
   end
 
   test "returns the query with aggregate distinct count and a blacklist param" do
-    Application.put_env(:fat_ecto, :fat_ecto, blacklist_params: [:nurses])
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_rooms, ["nurses"]}, {:fat_beds, ["is_active"]}]
+    )
 
     opts = %{
       "$aggregate" => %{"$count_distinct" => "nurses"},
@@ -596,7 +598,9 @@ defmodule Query.AggregateTest do
   end
 
   test "returns the query with aggregate sum as a list and a blacklist param" do
-    Application.put_env(:fat_ecto, :fat_ecto, blacklist_params: [:level])
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_rooms, ["level", "nurses"]}, {:fat_beds, ["is_active"]}]
+    )
 
     opts = %{
       "$aggregate" => %{"$sum" => ["nurses", "level"]},

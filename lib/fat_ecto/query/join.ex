@@ -74,6 +74,9 @@ defmodule FatEcto.FatQuery.FatJoin do
         |> String.replace("$", "")
         |> FatHelper.string_to_atom()
 
+      FatHelper.params_valid(queryable, join_item["$on_field"], options[:otp_app])
+      FatHelper.params_valid(join_table, join_item["$on_table_field"], options[:otp_app])
+
       queryable =
         case join_item["$on_type"] do
           # TODO: Add docs and examples of ex_doc for this case here
@@ -182,7 +185,8 @@ defmodule FatEcto.FatQuery.FatJoin do
 
           # TODO: Add docs and examples of ex_doc for this case here
           _whatever ->
-            on_caluses = build_on_dynamic(join_item, join_item["$additional_on_clauses"])
+            on_caluses =
+              build_on_dynamic(join_table, join_item, join_item["$additional_on_clauses"], options[:otp_app])
 
             join(
               queryable,
@@ -194,9 +198,10 @@ defmodule FatEcto.FatQuery.FatJoin do
         end
 
       # TODO: Add docs and examples of ex_doc for this case here
-      queryable = FatEcto.FatQuery.FatWhere.build_where(queryable, join_item["$where"], binding: :last)
+      queryable =
+        FatEcto.FatQuery.FatWhere.build_where(queryable, join_item["$where"], options, binding: :last)
 
-      queryable = order(queryable, join_item["$order"])
+      queryable = order(queryable, join_item["$order"], options[:otp_app])
       queryable = _select(queryable, join_item, join_key, options[:otp_app])
       build_group_by(queryable, join_item["$group"], options[:otp_app])
     end)
@@ -216,10 +221,9 @@ defmodule FatEcto.FatQuery.FatJoin do
         # TODO: use dynamics to build queries whereever possible
         # dynamic = dynamic([q, ..., c], c.id == 1)
         # from query, where: ^dynamic
+        select = FatHelper.params_valid(queryable, select, app)
 
-        select_atoms =
-          Enum.map(select, &FatHelper.string_to_atom/1)
-          |> FatHelper.restrict_params(app)
+        select_atoms = Enum.map(select, &FatHelper.string_to_atom/1)
 
         from(
           [q, ..., c] in queryable,
@@ -231,11 +235,13 @@ defmodule FatEcto.FatQuery.FatJoin do
   end
 
   # TODO: Add docs and examples of ex_doc for this case here. try to use generic order
-  defp order(queryable, order_by_params) do
+  defp order(queryable, order_by_params, app) do
     if order_by_params == nil do
       queryable
     else
       Enum.reduce(order_by_params, queryable, fn {field, format}, queryable ->
+        field = FatHelper.params_valid(queryable, field, app)
+
         if format == "$desc" do
           from(
             [q, ..., c] in queryable,
@@ -263,19 +269,21 @@ defmodule FatEcto.FatQuery.FatJoin do
     case group_by_params do
       group_by_params when is_list(group_by_params) ->
         Enum.reduce(group_by_params, queryable, fn group_by_field, queryable ->
-          _group_by(queryable, group_by_field, app)
+          group_by_field = FatHelper.params_valid(queryable, group_by_field, app)
+
+          _group_by(queryable, group_by_field)
         end)
 
       group_by_params when is_map(group_by_params) ->
         Enum.reduce(group_by_params, queryable, fn {group_by_field, type}, queryable ->
+          group_by_field = FatHelper.params_valid(queryable, group_by_field, app)
+
           case type do
             "$date_part_month" ->
               # from u in User,
               # group_by: fragment("date_part('month', ?)", u.inserted_at),
               # select:   {fragment("date_part('month', ?)", u.inserted_at), count(u.id)}
-              field =
-                FatHelper.string_to_existing_atom(group_by_field)
-                |> FatHelper.restrict_params(app)
+              field = FatHelper.string_to_existing_atom(group_by_field)
 
               from(
                 [first, ..., q] in queryable,
@@ -299,9 +307,7 @@ defmodule FatEcto.FatQuery.FatJoin do
               # from u in User,
               # group_by: fragment("date_part('year', ?)", u.inserted_at),
               # select:   {fragment("date_part('year', ?)", u.inserted_at), count(u.id)}
-              field =
-                FatHelper.string_to_existing_atom(group_by_field)
-                |> FatHelper.restrict_params(app)
+              field = FatHelper.string_to_existing_atom(group_by_field)
 
               from(
                 [first, ..., q] in queryable,
@@ -322,19 +328,21 @@ defmodule FatEcto.FatQuery.FatJoin do
               )
 
             "$field" ->
-              _group_by(queryable, group_by_field, app)
+              group_by_field = FatHelper.params_valid(queryable, group_by_field, app)
+
+              _group_by(queryable, group_by_field)
           end
         end)
 
       group_by_params when is_binary(group_by_params) ->
-        _group_by(queryable, group_by_params, app)
+        group_by_field = FatHelper.params_valid(queryable, group_by_params, app)
+
+        _group_by(queryable, group_by_params)
     end
   end
 
-  defp _group_by(queryable, group_by_param, app) do
-    field =
-      FatHelper.string_to_existing_atom(group_by_param)
-      |> FatHelper.restrict_params(app)
+  defp _group_by(queryable, group_by_param) do
+    field = FatHelper.string_to_existing_atom(group_by_param)
 
     from(
       [first, ..., q] in queryable,
@@ -347,7 +355,7 @@ defmodule FatEcto.FatQuery.FatJoin do
     )
   end
 
-  def build_on_dynamic(join_items, nil) do
+  def build_on_dynamic(_join_table, join_items, nil, app) do
     dynamic(
       [q, ..., c],
       field(
@@ -361,11 +369,11 @@ defmodule FatEcto.FatQuery.FatJoin do
     )
   end
 
-  def build_on_dynamic(join_items, additional_join) do
+  def build_on_dynamic(join_table, join_items, additional_join, app) do
     dynamics =
       Enum.reduce(additional_join, true, fn {field, map}, dynamics ->
         {binding, map} = Map.pop(map, "$binding")
-        build_on_dynamic(join_items, {field, map}, dynamics, binding)
+        build_on_dynamic(join_table, join_items, {field, map}, dynamics, binding, app)
       end)
 
     dynamic(
@@ -381,7 +389,9 @@ defmodule FatEcto.FatQuery.FatJoin do
     )
   end
 
-  def build_on_dynamic(_join_items, {field, map}, dynamics, binding) do
+  def build_on_dynamic(join_table, _join_items, {field, map}, dynamics, binding, app) do
+    FatHelper.params_valid(join_table, field, app)
+
     Enum.reduce(map, [], fn {k, value}, opts ->
       case k do
         "$in" ->

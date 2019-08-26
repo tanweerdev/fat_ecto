@@ -61,8 +61,8 @@ defmodule FatEcto.FatQuery.FatInclude do
 
           include_kwery =
             related_model
-            |> FatEcto.FatQuery.FatWhere.build_where(value["$where"], binding: :last)
-            |> FatEcto.FatQuery.FatOrderBy.build_order_by(value["$order"])
+            |> FatEcto.FatQuery.FatWhere.build_where(value["$where"], build_options, binding: :last)
+            |> FatEcto.FatQuery.FatOrderBy.build_order_by(value["$order"], build_options)
             |> FatEcto.FatQuery.FatGroupBy.build_group_by(value["$group"], build_options)
             |> build_include(value["$include"], related_model, build_options)
             |> limit([q], ^limit)

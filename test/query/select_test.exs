@@ -148,7 +148,10 @@ defmodule Query.SelectTest do
 
   test "returns the select query by removing the blacklist fields" do
     room = Repo.one(FatEcto.FatRoom)
-    Application.put_env(:fat_ecto, :fat_ecto, blacklist_params: [:purpose, :is_active])
+
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_rooms, ["purpose"]}, {:fat_beds, ["purpose", "is_active"]}]
+    )
 
     opts = %{
       "$select" => %{
@@ -158,19 +161,13 @@ defmodule Query.SelectTest do
       "$where" => %{"id" => room.id}
     }
 
-    expected =
-      from(
-        f in FatEcto.FatRoom,
-        where: f.id == ^room.id and ^true,
-        select: map(f, [:name, :description, {:fat_beds, [:description]}])
-      )
-
-    query = Query.build(FatEcto.FatRoom, opts)
-    assert inspect(query) == inspect(expected)
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatRoom, opts) end
   end
 
   test "returns the select query list by eliminating the blacklist fields" do
-    Application.put_env(:fat_ecto, :fat_ecto, blacklist_params: [:purpose])
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_rooms, ["name"]}, {:fat_beds, ["is_active"]}]
+    )
 
     opts = %{
       "$select" => ["name", "purpose", "description"]
@@ -179,7 +176,7 @@ defmodule Query.SelectTest do
     expected =
       from(
         h in FatEcto.FatRoom,
-        select: map(h, [:name, :description])
+        select: map(h, [:purpose, :description])
       )
 
     query = Query.build(FatEcto.FatRoom, opts)

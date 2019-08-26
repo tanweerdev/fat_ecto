@@ -1,11 +1,14 @@
 defmodule FatEcto.FatQuery.WhereOr do
   alias FatEcto.FatQuery.{FatDynamics, FatNotDynamics}
+  alias FatEcto.FatHelper
   import Ecto.Query
-  def or_condition(queryable, nil), do: queryable
+  def or_condition(queryable, nil, _app), do: queryable
 
-  def or_condition(queryable, where_map) do
+  def or_condition(queryable, where_map, app) do
     dynamics =
       Enum.reduce(where_map, true, fn {k, map_cond}, dynamics ->
+        k = FatHelper.params_valid(queryable, k, app)
+
         map_condition(k, dynamics, map_cond)
       end)
 

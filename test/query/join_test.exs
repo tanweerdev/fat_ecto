@@ -592,7 +592,9 @@ defmodule Query.JoinTest do
   end
 
   test "returns the query with full join and selected fields with blacklist params" do
-    Application.put_env(:fat_ecto, :fat_ecto, blacklist_params: [:name, :prescription])
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_doctors, ["name", "prescription"]}, {:fat_beds, ["is_active"]}]
+    )
 
     opts = %{
       "$select" => %{"$fields" => ["name", "designation", "experience_years"]},
@@ -605,18 +607,6 @@ defmodule Query.JoinTest do
       }
     }
 
-    expected =
-      from(
-        d in FatEcto.FatDoctor,
-        full_join: p in "fat_patients",
-        on: d.id == p.doctor_id,
-        select:
-          merge(map(d, [:designation, :experience_years]), %{
-            ^"fat_patients" => map(p, [:symptoms])
-          })
-      )
-
-    result = Query.build(FatEcto.FatDoctor, opts)
-    assert inspect(result) == inspect(expected)
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
   end
 end

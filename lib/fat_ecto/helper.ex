@@ -116,8 +116,27 @@ defmodule FatEcto.FatHelper do
     end
   end
 
-  def restrict_params(select_params, app) when is_atom(select_params) do
-    params = restrict_params([select_params], app)
+  def params_valid(queryable, k, app) do
+    table =
+      if is_atom(queryable) do
+        [Ecto.Schema.Metadata, nil, nil, model_name, table_name, :built] =
+          Map.values(queryable.__struct__.__meta__)
+
+        table_name
+      else
+        if is_binary(queryable) do
+          queryable
+        else
+          %{source: {table, _model}} = queryable.from
+          table
+        end
+      end
+
+    restrict_params(string_to_atom(table), k, app)
+  end
+
+  def restrict_params(table, select_params, app) when is_binary(select_params) do
+    params = restrict_params(table, [select_params], app)
 
     case Enum.count(params) do
       0 ->
@@ -128,7 +147,7 @@ defmodule FatEcto.FatHelper do
     end
   end
 
-  def restrict_params(select_params, app) do
+  def restrict_params(table, select_params, app) do
     blacklist_params_list = Application.get_env(app, :fat_ecto)[:blacklist_params]
 
     case blacklist_params_list do
@@ -136,7 +155,24 @@ defmodule FatEcto.FatHelper do
         select_params
 
       _ ->
-        select_params -- blacklist_params_list
+        if Keyword.has_key?(blacklist_params_list, table) do
+          filtered_params =
+            Enum.reject(Keyword.fetch!(blacklist_params_list, table), fn el ->
+              Enum.member?(select_params, el)
+            end)
+
+          IO.inspect(filtered_params)
+
+          case Enum.count(filtered_params) do
+            0 ->
+              select_params
+
+            _ ->
+              raise ArgumentError, message: "the fields [#{filtered_params}] are not allowed in the query"
+          end
+        else
+          select_params
+        end
     end
   end
 end

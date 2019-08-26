@@ -50,8 +50,8 @@ defmodule FatEcto.FatQuery do
       alias FatEcto.FatQuery.FatGroupBy
       alias FatEcto.FatQuery.FatAggregate
 
-      defdelegate build_where(queryable, params), to: FatWhere
-      defdelegate build_order_by(queryable, params), to: FatOrderBy
+      defdelegate build_where(queryable, params, build_options), to: FatWhere
+      defdelegate build_order_by(queryable, params, build_options), to: FatOrderBy
       defdelegate build_include(queryable, params, model, build_options), to: FatInclude
       defdelegate build_select(queryable, params, model, build_options), to: FatSelect
       defdelegate build_join(queryable, params, build_options), to: FatJoin
@@ -131,15 +131,15 @@ defmodule FatEcto.FatQuery do
         # from(q in queryable, as: :base_table)
         queryable
         |> FatEcto.FatQuery.FatSelect.build_select(opts["$select"], model, build_options)
-        |> FatEcto.FatQuery.FatWhere.build_where(opts["$where"])
+        |> FatEcto.FatQuery.FatWhere.build_where(opts["$where"], build_options)
         |> FatEcto.FatQuery.FatJoin.build_join(opts["$join"], "$join", build_options)
         |> FatEcto.FatQuery.FatJoin.build_join(opts["$right_join"], "$right_join", build_options)
         |> FatEcto.FatQuery.FatJoin.build_join(opts["$left_join"], "$left_join", build_options)
         |> FatEcto.FatQuery.FatJoin.build_join(opts["$inner_join"], "$inner_join", build_options)
         |> FatEcto.FatQuery.FatJoin.build_join(opts["$full_join"], "$full_join", build_options)
         |> FatEcto.FatQuery.FatInclude.build_include(opts["$include"], model, build_options)
-        |> FatEcto.FatQuery.FatDistinct.build_distinct(opts["$distinct"])
-        |> FatEcto.FatQuery.FatOrderBy.build_order_by(opts["$order"])
+        |> FatEcto.FatQuery.FatDistinct.build_distinct(opts["$distinct"], build_options)
+        |> FatEcto.FatQuery.FatOrderBy.build_order_by(opts["$order"], build_options)
         |> FatEcto.FatQuery.FatAggregate.build_aggregate(opts["$aggregate"], build_options)
         |> FatEcto.FatQuery.FatGroupBy.build_group_by(opts["$group"], build_options)
       end

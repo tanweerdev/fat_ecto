@@ -7,6 +7,8 @@ defmodule Query.WhereTest do
     insert(:hospital)
     room = insert(:room)
     insert(:bed, fat_room_id: room.id)
+    Application.delete_env(:fat_ecto, :fat_ecto, [:blacklist_params])
+
     :ok
   end
 
@@ -435,6 +437,18 @@ defmodule Query.WhereTest do
              rating: 5,
              total_staff: 3
            }
+  end
+
+  test "returns the query where field is binary and blacklisted" do
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_hospitals, ["location"]}, {:fat_beds, ["is_active"]}]
+    )
+
+    opts = %{
+      "$where" => %{"location" => "main bullevard"}
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatHospital, opts) end
   end
 
   test "returns the query with or fields" do
@@ -965,5 +979,41 @@ defmodule Query.WhereTest do
                total_staff: 3
              }
            ]
+  end
+
+  test "returns the query with and/three or not like/ilike/equal fields with blacklist params" do
+    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
+    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
+
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_hospitals, ["name"]}, {:fat_beds, ["is_active"]}]
+    )
+
+    opts = %{
+      "$where" => %{
+        "name" => %{"$not_ilike" => "%Joh%"},
+        "location" => %{"$not_like" => "%some%"},
+        "$or" => %{
+          "name" => %{"$not_ilike" => "%Joh%"},
+          "location" => %{"$not_like" => "%some%"},
+          "total_staff" => %{"$equal" => 2},
+          "rating" => %{"$in" => [2, 3]}
+        },
+        "$or_1" => %{
+          "name" => %{"$not_ilike" => "%Joh%"},
+          "location" => %{"$not_like" => "%some%"},
+          "total_staff" => %{"$equal" => 2},
+          "rating" => %{"$in" => [2, 3]}
+        },
+        "$or_2" => %{
+          "name" => %{"$ilike" => "%Joh%"},
+          "location" => %{"$not_like" => "%some%"},
+          "total_staff" => %{"$between" => [2, 6]},
+          "rating" => %{"$not_in" => [2, 3]}
+        }
+      }
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatHospital, opts) end
   end
 end
