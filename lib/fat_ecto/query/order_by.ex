@@ -166,7 +166,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
     # TODO: Add docs and examples of ex_doc for this case here
     Enum.reduce(order_by_params, queryable, fn {field, format}, queryable ->
       # TODO: Add docs and examples of ex_doc for this case here
-      field = FatHelper.params_valid(queryable, field, app)
+      FatHelper.check_params_validity(options, queryable, field, app)
 
       if format == "$desc" do
         from(

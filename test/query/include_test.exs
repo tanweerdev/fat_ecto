@@ -1,6 +1,12 @@
 defmodule Query.IncludeTest do
   use FatEcto.ConnCase
 
+  setup do
+    Application.delete_env(:fat_ecto, :fat_ecto, [:blacklist_params])
+
+    :ok
+  end
+
   test "returns the query with include associated model" do
     opts = %{
       "$find" => "$all",

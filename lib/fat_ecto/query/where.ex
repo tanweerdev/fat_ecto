@@ -758,7 +758,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       end)
 
     Enum.reduce(where_params, queryable, fn {k, v}, queryable ->
-      k = FatHelper.params_valid(queryable, k, app)
+      FatHelper.check_params_validity(build_options, queryable, k, app)
 
       query_where(queryable, {k, v}, opts)
     end)

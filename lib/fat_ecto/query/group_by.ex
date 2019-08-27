@@ -43,14 +43,14 @@ defmodule FatEcto.FatQuery.FatGroupBy do
     case group_by_params do
       group_by_params when is_list(group_by_params) ->
         Enum.reduce(group_by_params, queryable, fn group_by_field, queryable ->
-          group_by_field = FatHelper.params_valid(queryable, group_by_field, app)
+          FatHelper.check_params_validity(options, queryable, group_by_field, app)
 
           _group_by(queryable, group_by_field)
         end)
 
       group_by_params when is_map(group_by_params) ->
         Enum.reduce(group_by_params, queryable, fn {group_by_field, type}, queryable ->
-          group_by_field = FatHelper.params_valid(queryable, group_by_field, app)
+          FatHelper.check_params_validity(options, queryable, group_by_field, app)
 
           case type do
             "$date_part_month" ->
@@ -120,14 +120,14 @@ defmodule FatEcto.FatQuery.FatGroupBy do
             #   )
 
             "$field" ->
-              group_by_field = FatHelper.params_valid(queryable, group_by_field, app)
+              FatHelper.check_params_validity(options, queryable, group_by_field, app)
 
               _group_by(queryable, group_by_field)
           end
         end)
 
       group_by_params when is_binary(group_by_params) ->
-        group_by_field = FatHelper.params_valid(queryable, group_by_params, app)
+        FatHelper.check_params_validity(options, queryable, group_by_params, app)
 
         _group_by(queryable, group_by_params)
     end

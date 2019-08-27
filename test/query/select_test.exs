@@ -173,13 +173,6 @@ defmodule Query.SelectTest do
       "$select" => ["name", "purpose", "description"]
     }
 
-    expected =
-      from(
-        h in FatEcto.FatRoom,
-        select: map(h, [:purpose, :description])
-      )
-
-    query = Query.build(FatEcto.FatRoom, opts)
-    assert inspect(query) == inspect(expected)
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatRoom, opts) end
   end
 end
