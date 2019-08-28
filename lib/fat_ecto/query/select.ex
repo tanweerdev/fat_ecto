@@ -58,7 +58,7 @@ defmodule FatEcto.FatQuery.FatSelect do
         from(q in queryable, select: map(q, ^Enum.uniq(fields)))
 
       select when is_list(select) ->
-        select = FatHelper.params_valid(queryable, select, app)
+        FatHelper.params_valid(queryable, select, app)
 
         from(
           q in queryable,
@@ -77,14 +77,14 @@ defmodule FatEcto.FatQuery.FatSelect do
     Enum.reduce(fields_map, fields, fn {key, value}, fields ->
       cond do
         key == "$fields" and is_list(value) ->
-          value = FatHelper.params_valid(queryable, value, app)
+          FatHelper.params_valid(queryable, value, app)
           fields ++ Enum.map(value, &FatHelper.string_to_existing_atom/1)
 
         key != "$fields" and is_map(value) ->
           fields ++ [{FatHelper.string_to_existing_atom(key), select_map_field(queryable, value, app)}]
 
         key != "$fields" and is_list(value) ->
-          value = FatHelper.params_valid(key, value, app)
+          FatHelper.params_valid(key, value, app)
 
           fields ++
             [

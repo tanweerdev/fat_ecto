@@ -199,11 +199,13 @@ defmodule FatEcto.FatQuery.FatJoin do
 
       # TODO: Add docs and examples of ex_doc for this case here
       queryable =
-        FatEcto.FatQuery.FatWhere.build_where(queryable, join_item["$where"], options, binding: :last)
+        FatEcto.FatQuery.FatWhere.build_where(queryable, join_item["$where"], options ++ [table: join_table],
+          binding: :last
+        )
 
-      queryable = order(queryable, join_item["$order"], options[:otp_app])
-      queryable = _select(queryable, join_item, join_key, options[:otp_app])
-      build_group_by(queryable, join_item["$group"], options[:otp_app])
+      queryable = order(queryable, join_item["$order"], join_table, options[:otp_app])
+      queryable = _select(queryable, join_item, join_table, options[:otp_app])
+      build_group_by(queryable, join_item["$group"], join_table, options[:otp_app])
     end)
   end
 
@@ -221,7 +223,7 @@ defmodule FatEcto.FatQuery.FatJoin do
         # TODO: use dynamics to build queries whereever possible
         # dynamic = dynamic([q, ..., c], c.id == 1)
         # from query, where: ^dynamic
-        select = FatHelper.params_valid(queryable, select, app)
+        FatHelper.params_valid(join_table, select, app)
 
         select_atoms = Enum.map(select, &FatHelper.string_to_atom/1)
 
@@ -235,12 +237,12 @@ defmodule FatEcto.FatQuery.FatJoin do
   end
 
   # TODO: Add docs and examples of ex_doc for this case here. try to use generic order
-  defp order(queryable, order_by_params, app) do
+  defp order(queryable, order_by_params, join_table, app) do
     if order_by_params == nil do
       queryable
     else
       Enum.reduce(order_by_params, queryable, fn {field, format}, queryable ->
-        field = FatHelper.params_valid(queryable, field, app)
+        FatHelper.params_valid(join_table, field, app)
 
         if format == "$desc" do
           from(
@@ -261,22 +263,22 @@ defmodule FatEcto.FatQuery.FatJoin do
     end
   end
 
-  defp build_group_by(queryable, nil, _app) do
+  defp build_group_by(queryable, nil, _join_table, _app) do
     queryable
   end
 
-  defp build_group_by(queryable, group_by_params, app) do
+  defp build_group_by(queryable, group_by_params, join_table, app) do
     case group_by_params do
       group_by_params when is_list(group_by_params) ->
         Enum.reduce(group_by_params, queryable, fn group_by_field, queryable ->
-          group_by_field = FatHelper.params_valid(queryable, group_by_field, app)
+          FatHelper.params_valid(join_table, group_by_field, app)
 
           _group_by(queryable, group_by_field)
         end)
 
       group_by_params when is_map(group_by_params) ->
         Enum.reduce(group_by_params, queryable, fn {group_by_field, type}, queryable ->
-          group_by_field = FatHelper.params_valid(queryable, group_by_field, app)
+          FatHelper.params_valid(join_table, group_by_field, app)
 
           case type do
             "$date_part_month" ->
@@ -328,14 +330,14 @@ defmodule FatEcto.FatQuery.FatJoin do
               )
 
             "$field" ->
-              group_by_field = FatHelper.params_valid(queryable, group_by_field, app)
+              FatHelper.params_valid(join_table, group_by_field, app)
 
               _group_by(queryable, group_by_field)
           end
         end)
 
       group_by_params when is_binary(group_by_params) ->
-        group_by_field = FatHelper.params_valid(queryable, group_by_params, app)
+        FatHelper.params_valid(join_table, group_by_params, app)
 
         _group_by(queryable, group_by_params)
     end
@@ -355,7 +357,7 @@ defmodule FatEcto.FatQuery.FatJoin do
     )
   end
 
-  def build_on_dynamic(_join_table, join_items, nil, app) do
+  def build_on_dynamic(_join_table, join_items, nil, _app) do
     dynamic(
       [q, ..., c],
       field(

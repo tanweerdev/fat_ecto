@@ -611,4 +611,19 @@ defmodule Query.AggregateTest do
 
     assert_raise ArgumentError, fn -> Query.build(FatEcto.FatRoom, opts) end
   end
+
+  test "returns the query with aggregate avg and a blacklist param" do
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_rooms, ["level", "nurses"]}, {:fat_beds, ["is_active"]}]
+    )
+
+    opts = %{
+      "$aggregate" => %{"$avg" => "level"},
+      "$where" => %{"capacity" => 5},
+      "$order" => %{"beds" => "$asc"},
+      "$group" => "capacity"
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatRoom, opts) end
+  end
 end

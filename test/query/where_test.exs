@@ -326,6 +326,18 @@ defmodule Query.WhereTest do
     assert Repo.one(query) == nil
   end
 
+  test "returns the query where field notbetween blacklisted" do
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_hospitals, ["some", "total_staff"]}, {:fat_patients, ["appointments_count"]}]
+    )
+
+    opts = %{
+      "$where" => %{"appointments_count" => %{"$not_between" => [10, 20]}}
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatPatient, opts) end
+  end
+
   test "returns the query where field notbetween equal" do
     opts = %{
       "$where" => %{"appointments_count" => %{"$not_between_equal" => [10, 20]}}
@@ -986,7 +998,7 @@ defmodule Query.WhereTest do
     insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
 
     Application.put_env(:fat_ecto, :fat_ecto,
-      blacklist_params: [{:fat_hospitals, ["name"]}, {:fat_beds, ["is_active"]}]
+      blacklist_params: [{:fat_hospitals, ["some", "total_staff"]}, {:fat_beds, ["is_active"]}]
     )
 
     opts = %{

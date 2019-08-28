@@ -7,7 +7,7 @@ defmodule FatEcto.FatQuery.WhereOr do
   def or_condition(queryable, where_map, app) do
     dynamics =
       Enum.reduce(where_map, true, fn {k, map_cond}, dynamics ->
-        k = FatHelper.params_valid(queryable, k, app)
+        FatHelper.params_valid(queryable, k, app)
 
         map_condition(k, dynamics, map_cond)
       end)

@@ -164,6 +164,24 @@ defmodule Query.SelectTest do
     assert_raise ArgumentError, fn -> Query.build(FatEcto.FatRoom, opts) end
   end
 
+  test "returns the select query by removing the blacklist fields from joining table" do
+    room = Repo.one(FatEcto.FatRoom)
+
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_rooms, ["example"]}, {:fat_beds, ["purpose", "is_active"]}]
+    )
+
+    opts = %{
+      "$select" => %{
+        "$fields" => ["name", "purpose", "description"],
+        "fat_beds" => ["purpose", "description", "is_active"]
+      },
+      "$where" => %{"id" => room.id}
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatRoom, opts) end
+  end
+
   test "returns the select query list by eliminating the blacklist fields" do
     Application.put_env(:fat_ecto, :fat_ecto,
       blacklist_params: [{:fat_rooms, ["name"]}, {:fat_beds, ["is_active"]}]

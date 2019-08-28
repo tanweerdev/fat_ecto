@@ -161,7 +161,7 @@ defmodule FatEcto.FatHelper do
 
             _ ->
               raise ArgumentError,
-                message: "the fields #{inspect(filtered_params)} are not allowed in the query"
+                message: "the fields #{inspect(filtered_params)} of #{table} are not allowed in the query"
           end
         else
           select_params
