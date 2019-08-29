@@ -74,8 +74,8 @@ defmodule FatEcto.FatQuery.FatJoin do
         |> String.replace("$", "")
         |> FatHelper.string_to_atom()
 
-      FatHelper.params_valid(queryable, join_item["$on_field"], options[:otp_app])
-      FatHelper.params_valid(join_table, join_item["$on_table_field"], options[:otp_app])
+      FatHelper.params_valid(queryable, join_item["$on_field"], options)
+      FatHelper.params_valid(join_table, join_item["$on_table_field"], options)
 
       queryable =
         case join_item["$on_type"] do
@@ -185,8 +185,7 @@ defmodule FatEcto.FatQuery.FatJoin do
 
           # TODO: Add docs and examples of ex_doc for this case here
           _whatever ->
-            on_caluses =
-              build_on_dynamic(join_table, join_item, join_item["$additional_on_clauses"], options[:otp_app])
+            on_caluses = build_on_dynamic(join_table, join_item, join_item["$additional_on_clauses"], options)
 
             join(
               queryable,
@@ -203,9 +202,9 @@ defmodule FatEcto.FatQuery.FatJoin do
           binding: :last
         )
 
-      queryable = order(queryable, join_item["$order"], join_table, options[:otp_app])
-      queryable = _select(queryable, join_item, join_table, options[:otp_app])
-      build_group_by(queryable, join_item["$group"], join_table, options[:otp_app])
+      queryable = order(queryable, join_item["$order"], join_table, options)
+      queryable = _select(queryable, join_item, join_table, options)
+      build_group_by(queryable, join_item["$group"], join_table, options)
     end)
   end
 

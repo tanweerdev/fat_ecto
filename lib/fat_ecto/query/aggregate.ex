@@ -19,10 +19,8 @@ defmodule FatEcto.FatQuery.FatAggregate do
   end
 
   def build_aggregate(queryable, aggregate_params, options) do
-    app = options[:otp_app]
-
     Enum.reduce(aggregate_params, queryable, fn {aggregate_type, fields}, queryable ->
-      FatHelper.params_valid(queryable, fields, app)
+      FatHelper.params_valid(queryable, fields, options)
 
       case aggregate_type do
         "$max" ->

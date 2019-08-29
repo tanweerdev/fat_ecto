@@ -29,11 +29,11 @@ defmodule Query.OrderTest do
     Repo.insert(%FatEcto.FatHospital{name: "Doe", phone: "1234", rating: 6})
 
     Application.put_env(:fat_ecto, :fat_ecto,
-      blacklist_params: [{:fat_doctors, ["id"]}, {:fat_beds, ["is_active"]}, {:fat_hospitals, ["rating"]}]
+      blacklist_params: [{:fat_doctors, ["id"]}, {:fat_beds, ["is_active"]}, {:fat_hospitals, ["phone"]}]
     )
 
     opts = %{
-      "$order" => %{"rating" => "$desc"}
+      "$order" => %{"phone" => "$desc"}
     }
 
     assert_raise ArgumentError, fn -> Query.build(FatEcto.FatHospital, opts) end
@@ -59,11 +59,15 @@ defmodule Query.OrderTest do
     Repo.insert(%FatEcto.FatPatient{name: "Doe", phone: "1234", appointments_count: 6})
 
     Application.put_env(:fat_ecto, :fat_ecto,
-      blacklist_params: [{:fat_doctors, ["id"]}, {:fat_beds, ["is_active"]}, {:fat_patients, ["rating"]}]
+      blacklist_params: [
+        {:fat_doctors, ["id"]},
+        {:fat_beds, ["is_active"]},
+        {:fat_patients, ["date_of_birth"]}
+      ]
     )
 
     opts = %{
-      "$order" => %{"rating" => "$asc"}
+      "$order" => %{"date_of_birth" => "$asc"}
     }
 
     assert_raise ArgumentError, fn -> Query.build(FatEcto.FatPatient, opts) end

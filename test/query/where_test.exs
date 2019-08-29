@@ -14,11 +14,11 @@ defmodule Query.WhereTest do
 
   test "returns the query where field like" do
     opts = %{
-      "$where" => %{"name" => %{"$like" => "%Joh%"}}
+      "$where" => %{"email" => %{"$like" => "%test%"}}
     }
 
-    # expected = from(d in FatEcto.FatDoctor, where: like(d.name, ^"%Joh %"))
-    expected = from(d in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", d.name), ^"%Joh%") and ^true)
+    # expected = from(d in FatEcto.FatDoctor, where: like(d.email, ^"%Joh %"))
+    expected = from(d in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", d.email), ^"%test%") and ^true)
 
     query = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(query) == inspect(expected)
@@ -332,7 +332,7 @@ defmodule Query.WhereTest do
     )
 
     opts = %{
-      "$where" => %{"appointments_count" => %{"$not_between" => [10, 20]}}
+      "$where" => %{"date_of_birth" => %{"$not_between" => [10, 20]}}
     }
 
     assert_raise ArgumentError, fn -> Query.build(FatEcto.FatPatient, opts) end
@@ -457,7 +457,7 @@ defmodule Query.WhereTest do
     )
 
     opts = %{
-      "$where" => %{"location" => "main bullevard"}
+      "$where" => %{"phone" => "1234567"}
     }
 
     assert_raise ArgumentError, fn -> Query.build(FatEcto.FatHospital, opts) end
@@ -1009,7 +1009,8 @@ defmodule Query.WhereTest do
           "name" => %{"$not_ilike" => "%Joh%"},
           "location" => %{"$not_like" => "%some%"},
           "total_staff" => %{"$equal" => 2},
-          "rating" => %{"$in" => [2, 3]}
+          "rating" => %{"$in" => [2, 3]},
+          "phone" => "0071566025410"
         },
         "$or_1" => %{
           "name" => %{"$not_ilike" => "%Joh%"},

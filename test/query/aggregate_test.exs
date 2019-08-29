@@ -585,11 +585,11 @@ defmodule Query.AggregateTest do
 
   test "returns the query with aggregate distinct count and a blacklist param" do
     Application.put_env(:fat_ecto, :fat_ecto,
-      blacklist_params: [{:fat_rooms, ["nurses"]}, {:fat_beds, ["is_active"]}]
+      blacklist_params: [{:fat_rooms, ["description"]}, {:fat_beds, ["is_active"]}]
     )
 
     opts = %{
-      "$aggregate" => %{"$count_distinct" => "nurses"},
+      "$aggregate" => %{"$count_distinct" => "description"},
       "$where" => %{"capacity" => 5},
       "$order" => %{"beds" => "$desc"}
     }
@@ -599,13 +599,13 @@ defmodule Query.AggregateTest do
 
   test "returns the query with aggregate sum as a list and a blacklist param" do
     Application.put_env(:fat_ecto, :fat_ecto,
-      blacklist_params: [{:fat_rooms, ["level", "nurses"]}, {:fat_beds, ["is_active"]}]
+      blacklist_params: [{:fat_rooms, ["description"]}, {:fat_beds, ["is_active"]}]
     )
 
     opts = %{
       "$aggregate" => %{"$sum" => ["nurses", "level"]},
       "$where" => %{"capacity" => 5},
-      "$order" => %{"beds" => "$asc"},
+      "$order" => %{"description" => "$asc"},
       "$group" => "capacity"
     }
 
@@ -614,14 +614,14 @@ defmodule Query.AggregateTest do
 
   test "returns the query with aggregate avg and a blacklist param" do
     Application.put_env(:fat_ecto, :fat_ecto,
-      blacklist_params: [{:fat_rooms, ["level", "nurses"]}, {:fat_beds, ["is_active"]}]
+      blacklist_params: [{:fat_rooms, ["some"]}, {:fat_beds, ["is_active"]}]
     )
 
     opts = %{
       "$aggregate" => %{"$avg" => "level"},
       "$where" => %{"capacity" => 5},
       "$order" => %{"beds" => "$asc"},
-      "$group" => "capacity"
+      "$group" => "description"
     }
 
     assert_raise ArgumentError, fn -> Query.build(FatEcto.FatRoom, opts) end

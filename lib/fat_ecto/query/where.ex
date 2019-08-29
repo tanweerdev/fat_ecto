@@ -745,20 +745,19 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   def build_where(queryable, where_params, build_options, opts) do
     # TODO: Add docs and examples of ex_doc for this case here
-    app = build_options[:otp_app]
     queryable = {%{}, queryable}
 
     {where_params, queryable} =
       Enum.reduce(where_params, queryable, fn {k, v}, {map, queryable} ->
         if String.contains?(k, "$or") do
-          {map, WhereOr.or_condition(queryable, where_params[k], app)}
+          {map, WhereOr.or_condition(queryable, where_params[k], build_options)}
         else
           {Map.put(map, k, v), queryable}
         end
       end)
 
     Enum.reduce(where_params, queryable, fn {k, v}, queryable ->
-      FatHelper.check_params_validity(build_options, queryable, k, app)
+      FatHelper.check_params_validity(build_options, queryable, k)
 
       query_where(queryable, {k, v}, opts)
     end)

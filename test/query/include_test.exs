@@ -115,7 +115,7 @@ defmodule Query.IncludeTest do
           "$where" => %{"name" => "Saint"}
         }
       },
-      "$where" => %{"name" => "John"}
+      "$where" => %{"email" => "John"}
     }
 
     query =
@@ -130,7 +130,7 @@ defmodule Query.IncludeTest do
     expected =
       from(
         d in FatEcto.FatDoctor,
-        where: d.name == ^"John" and ^true,
+        where: d.email == ^"John" and ^true,
         right_join: h in assoc(d, :fat_hospitals),
         preload: [fat_hospitals: ^query]
       )
@@ -148,7 +148,7 @@ defmodule Query.IncludeTest do
           "$where" => %{"name" => "Saint"}
         }
       },
-      "$where" => %{"name" => "John"},
+      "$where" => %{"email" => "John"},
       "$order" => %{"id" => "$asc"}
     }
 
@@ -164,7 +164,7 @@ defmodule Query.IncludeTest do
     expected =
       from(
         d in FatEcto.FatDoctor,
-        where: d.name == ^"John" and ^true,
+        where: d.email == ^"John" and ^true,
         order_by: [asc: d.id],
         join: h in assoc(d, :fat_hospitals),
         preload: [fat_hospitals: ^query]
@@ -183,7 +183,7 @@ defmodule Query.IncludeTest do
           "$where" => %{"name" => "Saint"}
         }
       },
-      "$where" => %{"name" => "John"}
+      "$where" => %{"email" => "John"}
     }
 
     query =
@@ -198,7 +198,7 @@ defmodule Query.IncludeTest do
     expected =
       from(
         d in FatEcto.FatDoctor,
-        where: d.name == ^"John" and ^true,
+        where: d.email == ^"John" and ^true,
         full_join: h in assoc(d, :fat_hospitals),
         preload: [fat_hospitals: ^query]
       )
@@ -312,7 +312,7 @@ defmodule Query.IncludeTest do
       "$include" => %{
         "fat_hospitals" => %{
           "$include" => ["fat_rooms"],
-          "$order" => %{"id" => "$desc"}
+          "$order" => %{"phone" => "$desc"}
         }
       }
     }
@@ -330,7 +330,7 @@ defmodule Query.IncludeTest do
         "fat_hospitals" => %{
           "$include" => ["fat_rooms"],
           "$order" => %{"id" => "$desc"},
-          "$group" => "name"
+          "$group" => "phone"
         }
       }
     }
@@ -399,7 +399,7 @@ defmodule Query.IncludeTest do
       "$include" => %{
         "fat_hospitals" => %{
           "$include" => ["fat_rooms", "fat_patients"],
-          "$where" => %{"name" => "ham"}
+          "$where" => %{"phone" => "ham"}
         }
       }
     }

@@ -47,18 +47,16 @@ defmodule FatEcto.FatQuery.FatSelect do
   end
 
   def build_select(queryable, select_params, _model, options) do
-    app = options[:otp_app]
-
     case select_params do
       # TODO: Add docs and examples of ex_doc for this case here
       select when is_map(select) ->
         # TODO: Add docs and examples of ex_doc for this case here
-        fields = select_map_field(queryable, select, app)
+        fields = select_map_field(queryable, select, options)
 
         from(q in queryable, select: map(q, ^Enum.uniq(fields)))
 
       select when is_list(select) ->
-        FatHelper.params_valid(queryable, select, app)
+        FatHelper.params_valid(queryable, select, options)
 
         from(
           q in queryable,
@@ -71,20 +69,20 @@ defmodule FatEcto.FatQuery.FatSelect do
     end
   end
 
-  defp select_map_field(queryable, fields, app, fields \\ [])
+  defp select_map_field(queryable, fields, options, fields \\ [])
 
-  defp select_map_field(queryable, fields_map, app, fields) when is_map(fields_map) do
+  defp select_map_field(queryable, fields_map, options, fields) when is_map(fields_map) do
     Enum.reduce(fields_map, fields, fn {key, value}, fields ->
       cond do
         key == "$fields" and is_list(value) ->
-          FatHelper.params_valid(queryable, value, app)
+          FatHelper.params_valid(queryable, value, options)
           fields ++ Enum.map(value, &FatHelper.string_to_existing_atom/1)
 
         key != "$fields" and is_map(value) ->
-          fields ++ [{FatHelper.string_to_existing_atom(key), select_map_field(queryable, value, app)}]
+          fields ++ [{FatHelper.string_to_existing_atom(key), select_map_field(queryable, value, options)}]
 
         key != "$fields" and is_list(value) ->
-          FatHelper.params_valid(key, value, app)
+          FatHelper.params_valid(key, value, options)
 
           fields ++
             [

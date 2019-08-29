@@ -13,14 +13,14 @@ defmodule Query.SelectTest do
 
   test "returns the select query fields" do
     opts = %{
-      "$select" => %{"$fields" => ["name", "designation", "experience_years"]}
+      "$select" => %{"$fields" => ["email", "designation", "experience_years"]}
     }
 
-    expected = from(d in FatEcto.FatDoctor, select: map(d, [:name, :designation, :experience_years]))
+    expected = from(d in FatEcto.FatDoctor, select: map(d, [:email, :designation, :experience_years]))
 
     query = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(query) == inspect(expected)
-    assert Repo.all(query) == [%{designation: "Surgeon", experience_years: 7, name: "John"}]
+    assert Repo.all(query) == [%{designation: "Surgeon", experience_years: 7, email: "test@test.com"}]
   end
 
   test "returns the select query with related fields " do
@@ -28,8 +28,8 @@ defmodule Query.SelectTest do
 
     opts = %{
       "$select" => %{
-        "$fields" => ["name", "purpose", "description"],
-        "fat_beds" => ["purpose", "description", "is_active"]
+        "$fields" => ["name", "purpose", "floor"],
+        "fat_beds" => ["purpose", "description", "name"]
       },
       "$where" => %{"id" => room.id}
     }
@@ -38,7 +38,7 @@ defmodule Query.SelectTest do
       from(
         f in FatEcto.FatRoom,
         where: f.id == ^room.id and ^true,
-        select: map(f, [:name, :purpose, :description, {:fat_beds, [:purpose, :description, :is_active]}])
+        select: map(f, [:name, :purpose, :floor, {:fat_beds, [:purpose, :description, :name]}])
       )
 
     query = Query.build(FatEcto.FatRoom, opts)
@@ -117,7 +117,7 @@ defmodule Query.SelectTest do
         "fat_doctors" => %{
           "$include" => ["fat_patients"],
           "$limit" => 200,
-          "$where" => %{"name" => "ham"},
+          "$where" => %{"email" => "ham"},
           "$order" => %{"id" => "$desc"}
         }
       }
@@ -126,7 +126,7 @@ defmodule Query.SelectTest do
     query =
       from(
         d in FatEcto.FatDoctor,
-        where: d.name == ^"ham" and ^true,
+        where: d.email == ^"ham" and ^true,
         order_by: [desc: d.id],
         limit: ^107,
         offset: ^0,

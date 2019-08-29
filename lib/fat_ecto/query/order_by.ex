@@ -161,12 +161,10 @@ defmodule FatEcto.FatQuery.FatOrderBy do
   end
 
   def build_order_by(queryable, order_by_params, options) do
-    app = options[:otp_app]
-
     # TODO: Add docs and examples of ex_doc for this case here
     Enum.reduce(order_by_params, queryable, fn {field, format}, queryable ->
       # TODO: Add docs and examples of ex_doc for this case here
-      FatHelper.check_params_validity(options, queryable, field, app)
+      FatHelper.check_params_validity(options, queryable, field)
 
       if format == "$desc" do
         from(

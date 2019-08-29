@@ -8,7 +8,7 @@ defmodule FatEcto.FatQuery.FatDistinct do
   end
 
   def build_distinct(queryable, field, options) when is_boolean(field) do
-    FatHelper.params_valid(queryable, field, options[:otp_app])
+    FatHelper.params_valid(queryable, field, options)
 
     from(q in queryable,
       distinct: ^field
@@ -16,7 +16,7 @@ defmodule FatEcto.FatQuery.FatDistinct do
   end
 
   def build_distinct(queryable, field, options) do
-    FatHelper.params_valid(queryable, field, options[:otp_app])
+    FatHelper.params_valid(queryable, field, options)
 
     from(q in queryable,
       distinct: ^FatHelper.string_to_atom(field)
