@@ -147,49 +147,35 @@ defmodule FatEcto.FatHelper do
 
   def restrict_params(table, select_params, options) do
     if options[:blacklist_params] do
-      if Keyword.has_key?(options[:blacklist_params], table) do
-        filtered_params =
-          Enum.reject(Keyword.fetch!(options[:blacklist_params], table), fn el ->
-            !Enum.member?(select_params, el)
-          end)
-
-        case Enum.count(filtered_params) do
-          0 ->
-            select_params
-
-          _ ->
-            raise ArgumentError,
-              message: "the fields #{inspect(filtered_params)} of #{table} are not allowed in the query"
-        end
-      else
-        select_params
-      end
+      check_blacklist_params(table, select_params, options)
     else
-      blacklist_params_list = Application.get_env(options[:otp_app], :fat_ecto)[:blacklist_params]
-
-      case blacklist_params_list do
+      case Application.get_env(options[:otp_app], :fat_ecto)[:blacklist_params] do
         nil ->
           select_params
 
         _ ->
-          if Keyword.has_key?(blacklist_params_list, table) do
-            filtered_params =
-              Enum.reject(Keyword.fetch!(blacklist_params_list, table), fn el ->
-                !Enum.member?(select_params, el)
-              end)
-
-            case Enum.count(filtered_params) do
-              0 ->
-                select_params
-
-              _ ->
-                raise ArgumentError,
-                  message: "the fields #{inspect(filtered_params)} of #{table} are not allowed in the query"
-            end
-          else
-            select_params
-          end
+          check_blacklist_params(table, select_params, options)
       end
+    end
+  end
+
+  def check_blacklist_params(table, select_params, options) do
+    if Keyword.has_key?(options[:blacklist_params], table) do
+      filtered_params =
+        Enum.reject(Keyword.fetch!(options[:blacklist_params], table), fn el ->
+          !Enum.member?(select_params, el)
+        end)
+
+      case Enum.count(filtered_params) do
+        0 ->
+          select_params
+
+        _ ->
+          raise ArgumentError,
+            message: "the fields #{inspect(filtered_params)} of #{table} are not allowed in the query"
+      end
+    else
+      select_params
     end
   end
 

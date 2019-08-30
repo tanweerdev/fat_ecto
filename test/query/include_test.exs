@@ -317,7 +317,7 @@ defmodule Query.IncludeTest do
       }
     }
 
-    assert_raise ArgumentError, fn -> Query.build(Query.build(FatEcto.FatDoctor, opts)) end
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
   end
 
   test "returns the query with nested include and group_by blacklisted" do
@@ -335,7 +335,7 @@ defmodule Query.IncludeTest do
       }
     }
 
-    assert_raise ArgumentError, fn -> Query.build(Query.build(FatEcto.FatDoctor, opts)) end
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
   end
 
   test "returns the query with nested include models" do
@@ -404,7 +404,7 @@ defmodule Query.IncludeTest do
       }
     }
 
-    assert_raise ArgumentError, fn -> Query.build(Query.build(FatEcto.FatDoctor, opts)) end
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
   end
 
   test "returns the query with nested include models with order" do
