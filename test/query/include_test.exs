@@ -1,6 +1,12 @@
 defmodule Query.IncludeTest do
   use FatEcto.ConnCase
 
+  setup do
+    Application.delete_env(:fat_ecto, :fat_ecto, [:blacklist_params])
+
+    :ok
+  end
+
   test "returns the query with include associated model" do
     opts = %{
       "$find" => "$all",
@@ -109,7 +115,7 @@ defmodule Query.IncludeTest do
           "$where" => %{"name" => "Saint"}
         }
       },
-      "$where" => %{"name" => "John"}
+      "$where" => %{"email" => "John"}
     }
 
     query =
@@ -124,7 +130,7 @@ defmodule Query.IncludeTest do
     expected =
       from(
         d in FatEcto.FatDoctor,
-        where: d.name == ^"John" and ^true,
+        where: d.email == ^"John" and ^true,
         right_join: h in assoc(d, :fat_hospitals),
         preload: [fat_hospitals: ^query]
       )
@@ -142,7 +148,7 @@ defmodule Query.IncludeTest do
           "$where" => %{"name" => "Saint"}
         }
       },
-      "$where" => %{"name" => "John"},
+      "$where" => %{"email" => "John"},
       "$order" => %{"id" => "$asc"}
     }
 
@@ -158,7 +164,7 @@ defmodule Query.IncludeTest do
     expected =
       from(
         d in FatEcto.FatDoctor,
-        where: d.name == ^"John" and ^true,
+        where: d.email == ^"John" and ^true,
         order_by: [asc: d.id],
         join: h in assoc(d, :fat_hospitals),
         preload: [fat_hospitals: ^query]
@@ -177,7 +183,7 @@ defmodule Query.IncludeTest do
           "$where" => %{"name" => "Saint"}
         }
       },
-      "$where" => %{"name" => "John"}
+      "$where" => %{"email" => "John"}
     }
 
     query =
@@ -192,7 +198,7 @@ defmodule Query.IncludeTest do
     expected =
       from(
         d in FatEcto.FatDoctor,
-        where: d.name == ^"John" and ^true,
+        where: d.email == ^"John" and ^true,
         full_join: h in assoc(d, :fat_hospitals),
         preload: [fat_hospitals: ^query]
       )
@@ -297,6 +303,41 @@ defmodule Query.IncludeTest do
     assert inspect(result) == inspect(expected)
   end
 
+  test "returns the query with nested include and order blacklisted" do
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_rooms, ["name", "nurses"]}, {:fat_hospitals, ["id"]}]
+    )
+
+    opts = %{
+      "$include" => %{
+        "fat_hospitals" => %{
+          "$include" => ["fat_rooms"],
+          "$order" => %{"phone" => "$desc"}
+        }
+      }
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+  end
+
+  test "returns the query with nested include and group_by blacklisted" do
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_rooms, ["name", "nurses"]}, {:fat_hospitals, ["name"]}]
+    )
+
+    opts = %{
+      "$include" => %{
+        "fat_hospitals" => %{
+          "$include" => ["fat_rooms"],
+          "$order" => %{"id" => "$desc"},
+          "$group" => "phone"
+        }
+      }
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+  end
+
   test "returns the query with nested include models" do
     opts = %{
       "$include" => %{"fat_hospitals" => %{"$include" => ["fat_rooms", "fat_patients"]}}
@@ -347,6 +388,23 @@ defmodule Query.IncludeTest do
 
     result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
+  end
+
+  test "returns the query with nested include models with where and blacklist attributes" do
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_rooms, ["name", "nurses"]}, {:fat_hospitals, ["name"]}]
+    )
+
+    opts = %{
+      "$include" => %{
+        "fat_hospitals" => %{
+          "$include" => ["fat_rooms", "fat_patients"],
+          "$where" => %{"phone" => "ham"}
+        }
+      }
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
   end
 
   test "returns the query with nested include models with order" do

@@ -57,13 +57,13 @@ defmodule FatEcto.FatQuery.FatJoin do
 
   """
 
-  def build_join(queryable, join_params, join_type \\ "$join")
+  def build_join(queryable, join_params, join_type \\ "$join", options)
 
-  def build_join(queryable, nil, _join_type) do
+  def build_join(queryable, nil, _join_type, _options) do
     queryable
   end
 
-  def build_join(queryable, join_params, join_type) do
+  def build_join(queryable, join_params, join_type, options) do
     # TODO: Add docs and examples of ex_doc for this case here
     Enum.reduce(join_params, queryable, fn {join_key, join_item}, queryable ->
       join_table = join_item["$on_table"] || join_key
@@ -73,6 +73,9 @@ defmodule FatEcto.FatQuery.FatJoin do
         |> String.replace("_join", "")
         |> String.replace("$", "")
         |> FatHelper.string_to_atom()
+
+      FatHelper.params_valid(queryable, join_item["$on_field"], options)
+      FatHelper.params_valid(join_table, join_item["$on_table_field"], options)
 
       queryable =
         case join_item["$on_type"] do
@@ -182,7 +185,7 @@ defmodule FatEcto.FatQuery.FatJoin do
 
           # TODO: Add docs and examples of ex_doc for this case here
           _whatever ->
-            on_caluses = build_on_dynamic(join_item, join_item["$additional_on_clauses"])
+            on_caluses = build_on_dynamic(join_table, join_item, join_item["$additional_on_clauses"], options)
 
             join(
               queryable,
@@ -194,15 +197,18 @@ defmodule FatEcto.FatQuery.FatJoin do
         end
 
       # TODO: Add docs and examples of ex_doc for this case here
-      queryable = FatEcto.FatQuery.FatWhere.build_where(queryable, join_item["$where"], binding: :last)
+      queryable =
+        FatEcto.FatQuery.FatWhere.build_where(queryable, join_item["$where"], options ++ [table: join_table],
+          binding: :last
+        )
 
-      queryable = order(queryable, join_item["$order"])
-      queryable = _select(queryable, join_item, join_key)
-      build_group_by(queryable, join_item["$group"])
+      queryable = order(queryable, join_item["$order"], join_table, options)
+      queryable = _select(queryable, join_item, join_table, options)
+      build_group_by(queryable, join_item["$group"], join_table, options)
     end)
   end
 
-  defp _select(queryable, join_params, join_table) do
+  defp _select(queryable, join_params, join_table, app) do
     case join_params["$select"] do
       nil ->
         queryable
@@ -216,6 +222,7 @@ defmodule FatEcto.FatQuery.FatJoin do
         # TODO: use dynamics to build queries whereever possible
         # dynamic = dynamic([q, ..., c], c.id == 1)
         # from query, where: ^dynamic
+        FatHelper.params_valid(join_table, select, app)
 
         select_atoms = Enum.map(select, &FatHelper.string_to_atom/1)
 
@@ -229,11 +236,13 @@ defmodule FatEcto.FatQuery.FatJoin do
   end
 
   # TODO: Add docs and examples of ex_doc for this case here. try to use generic order
-  defp order(queryable, order_by_params) do
+  defp order(queryable, order_by_params, join_table, app) do
     if order_by_params == nil do
       queryable
     else
       Enum.reduce(order_by_params, queryable, fn {field, format}, queryable ->
+        FatHelper.params_valid(join_table, field, app)
+
         if format == "$desc" do
           from(
             [q, ..., c] in queryable,
@@ -253,38 +262,43 @@ defmodule FatEcto.FatQuery.FatJoin do
     end
   end
 
-  defp build_group_by(queryable, nil) do
+  defp build_group_by(queryable, nil, _join_table, _app) do
     queryable
   end
 
-  defp build_group_by(queryable, group_by_params) do
+  defp build_group_by(queryable, group_by_params, join_table, app) do
     case group_by_params do
       group_by_params when is_list(group_by_params) ->
         Enum.reduce(group_by_params, queryable, fn group_by_field, queryable ->
+          FatHelper.params_valid(join_table, group_by_field, app)
+
           _group_by(queryable, group_by_field)
         end)
 
       group_by_params when is_map(group_by_params) ->
         Enum.reduce(group_by_params, queryable, fn {group_by_field, type}, queryable ->
+          FatHelper.params_valid(join_table, group_by_field, app)
+
           case type do
             "$date_part_month" ->
               # from u in User,
               # group_by: fragment("date_part('month', ?)", u.inserted_at),
               # select:   {fragment("date_part('month', ?)", u.inserted_at), count(u.id)}
+              field = FatHelper.string_to_existing_atom(group_by_field)
 
               from(
                 [first, ..., q] in queryable,
                 group_by:
                   fragment(
                     "date_part('month', ?)",
-                    field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+                    field(q, ^field)
                   ),
                 select_merge: %{
                   "$group" => %{
                     ^group_by_field =>
                       fragment(
                         "date_part('month', ?)",
-                        field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+                        field(q, ^field)
                       )
                   }
                 }
@@ -294,48 +308,55 @@ defmodule FatEcto.FatQuery.FatJoin do
               # from u in User,
               # group_by: fragment("date_part('year', ?)", u.inserted_at),
               # select:   {fragment("date_part('year', ?)", u.inserted_at), count(u.id)}
+              field = FatHelper.string_to_existing_atom(group_by_field)
 
               from(
                 [first, ..., q] in queryable,
                 group_by:
                   fragment(
                     "date_part('year', ?)",
-                    field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+                    field(q, ^field)
                   ),
                 select_merge: %{
                   "$group" => %{
                     ^group_by_field =>
                       fragment(
                         "date_part('year', ?)",
-                        field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+                        field(q, ^field)
                       )
                   }
                 }
               )
 
             "$field" ->
+              FatHelper.params_valid(join_table, group_by_field, app)
+
               _group_by(queryable, group_by_field)
           end
         end)
 
       group_by_params when is_binary(group_by_params) ->
+        FatHelper.params_valid(join_table, group_by_params, app)
+
         _group_by(queryable, group_by_params)
     end
   end
 
   defp _group_by(queryable, group_by_param) do
+    field = FatHelper.string_to_existing_atom(group_by_param)
+
     from(
       [first, ..., q] in queryable,
-      group_by: field(q, ^FatHelper.string_to_existing_atom(group_by_param)),
+      group_by: field(q, ^field),
       select_merge: %{
         "$group" => %{
-          ^group_by_param => field(q, ^FatHelper.string_to_existing_atom(group_by_param))
+          ^group_by_param => field(q, ^field)
         }
       }
     )
   end
 
-  def build_on_dynamic(join_items, nil) do
+  def build_on_dynamic(_join_table, join_items, nil, _app) do
     dynamic(
       [q, ..., c],
       field(
@@ -349,11 +370,11 @@ defmodule FatEcto.FatQuery.FatJoin do
     )
   end
 
-  def build_on_dynamic(join_items, additional_join) do
+  def build_on_dynamic(join_table, join_items, additional_join, app) do
     dynamics =
       Enum.reduce(additional_join, true, fn {field, map}, dynamics ->
         {binding, map} = Map.pop(map, "$binding")
-        build_on_dynamic(join_items, {field, map}, dynamics, binding)
+        build_on_dynamic(join_table, join_items, {field, map}, dynamics, binding, app)
       end)
 
     dynamic(
@@ -369,7 +390,9 @@ defmodule FatEcto.FatQuery.FatJoin do
     )
   end
 
-  def build_on_dynamic(_join_items, {field, map}, dynamics, binding) do
+  def build_on_dynamic(join_table, _join_items, {field, map}, dynamics, binding, app) do
+    FatHelper.params_valid(join_table, field, app)
+
     Enum.reduce(map, [], fn {k, value}, opts ->
       case k do
         "$in" ->

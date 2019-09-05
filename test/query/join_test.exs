@@ -4,18 +4,20 @@ defmodule Query.JoinTest do
   setup do
     hospital = insert(:hospital)
     insert(:room, fat_hospital_id: hospital.id)
+    Application.delete_env(:fat_ecto, :fat_ecto, [:blacklist_params])
+
     :ok
   end
 
   test "returns the query with right join and selected fields" do
     opts = %{
-      "$select" => ["name", "location", "phone"],
+      "$select" => ["name", "location"],
       "$right_join" => %{
-        "fat_roomz" => %{
+        "fat_rooms" => %{
           "$on_field" => "id",
           "$on_table_field" => "fat_hospital_id",
           "$on_table" => "fat_rooms",
-          "$select" => ["name", "purpose", "description"],
+          "$select" => ["name", "purpose"],
           "$where" => %{"name" => "room 1"}
         }
       }
@@ -27,8 +29,7 @@ defmodule Query.JoinTest do
         right_join: r in "fat_rooms",
         on: h.id == r.fat_hospital_id,
         where: r.name == ^"room 1" and ^true,
-        select:
-          merge(map(h, [:name, :location, :phone]), %{^"fat_roomz" => map(r, [:name, :purpose, :description])})
+        select: merge(map(h, [:name, :location]), %{^"fat_rooms" => map(r, [:name, :purpose])})
       )
 
     # opts = %{
@@ -87,7 +88,7 @@ defmodule Query.JoinTest do
 
   test "returns the query with full join and selected fields" do
     opts = %{
-      "$select" => %{"$fields" => ["name", "designation", "experience_years"]},
+      "$select" => %{"$fields" => ["designation", "experience_years"]},
       "$full_join" => %{
         "fat_patients" => %{
           "$on_field" => "id",
@@ -103,7 +104,7 @@ defmodule Query.JoinTest do
         full_join: p in "fat_patients",
         on: d.id == p.doctor_id,
         select:
-          merge(map(d, [:name, :designation, :experience_years]), %{
+          merge(map(d, [:designation, :experience_years]), %{
             ^"fat_patients" => map(p, [:name, :prescription, :symptoms])
           })
       )
@@ -374,7 +375,7 @@ defmodule Query.JoinTest do
           "$on_table_field" => "hospital_id",
           "$additional_on_clauses" => %{
             "purpose" => %{"$not_like" => "%Treat%", "$binding" => "last"},
-            "description" => %{"$not_ilike" => "%Dev", "$binding" => "last"}
+            "name" => %{"$not_ilike" => "%Dev", "$binding" => "last"}
           },
           "$select" => ["beds", "capacity", "level"],
           "$where" => %{"incharge" => "John"}
@@ -391,7 +392,7 @@ defmodule Query.JoinTest do
         on:
           h.id == r.hospital_id and
             (not like(fragment("(?)::TEXT", r.purpose), ^"%Treat%") and
-               (not ilike(fragment("(?)::TEXT", r.description), ^"%Dev") and ^true)),
+               (not ilike(fragment("(?)::TEXT", r.name), ^"%Dev") and ^true)),
         where: r.incharge == ^"John" and ^true,
         select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
       )
@@ -561,7 +562,7 @@ defmodule Query.JoinTest do
         "fat_doctors" => %{
           "$on_field" => "id",
           "$on_table_field" => "hospital_id",
-          "$select" => ["name", "phone", "address"],
+          "$select" => ["phone", "address"],
           "$where" => %{"rating" => 5}
         }
       },
@@ -579,7 +580,7 @@ defmodule Query.JoinTest do
         where: d.rating == ^5 and ^true,
         where: r.incharge == ^"John" and ^true,
         select:
-          merge(merge(h, %{^"fat_doctors" => map(d, [:name, :phone, :address])}), %{
+          merge(merge(h, %{^"fat_doctors" => map(d, [:phone, :address])}), %{
             ^"fat_rooms" => map(r, [:beds, :capacity, :level])
           })
       )
@@ -587,5 +588,167 @@ defmodule Query.JoinTest do
     result = Query.build(FatEcto.FatHospital, opts)
 
     assert inspect(result) == inspect(expected)
+  end
+
+  test "returns the query with full join and selected fields with blacklist params" do
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_doctors, ["name", "prescription"]}, {:fat_beds, ["is_active"]}]
+    )
+
+    opts = %{
+      "$select" => %{"$fields" => ["name", "designation", "experience_years"]},
+      "$full_join" => %{
+        "fat_patients" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "doctor_id",
+          "$select" => ["name", "prescription", "symptoms"]
+        }
+      }
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+  end
+
+  test "returns the query with full join with blacklist on_field" do
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_doctors, ["id"]}, {:fat_beds, ["is_active"]}]
+    )
+
+    opts = %{
+      "$select" => %{"$fields" => ["name", "designation", "experience_years"]},
+      "$full_join" => %{
+        "fat_patients" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "doctor_id",
+          "$select" => ["name", "prescription", "symptoms"]
+        }
+      }
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+  end
+
+  test "returns the query with full join with blacklist on_table_field" do
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_doctors, ["example"]}, {:fat_patients, ["doctor_id"]}]
+    )
+
+    opts = %{
+      "$select" => %{"$fields" => ["name", "designation", "experience_years"]},
+      "$full_join" => %{
+        "fat_patients" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "doctor_id",
+          "$select" => ["name", "prescription", "symptoms"]
+        }
+      }
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+  end
+
+  test "returns the query with full join with blacklist additional on clauses" do
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_doctors, ["example"]}, {:fat_patients, ["appointments_count"]}]
+    )
+
+    opts = %{
+      "$select" => %{"$fields" => ["name", "designation", "experience_years"]},
+      "$full_join" => %{
+        "fat_patients" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "doctor_id",
+          "$additional_on_clauses" => %{
+            "appointments_count" => %{"$in" => [1, 2, 3]}
+          },
+          "$select" => ["name", "prescription", "symptoms"]
+        }
+      }
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+  end
+
+  test "returns the query with full join with blacklist where inside join table" do
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_doctors, ["example"]}, {:fat_patients, ["location"]}]
+    )
+
+    opts = %{
+      "$select" => %{"$fields" => ["name", "designation", "experience_years"]},
+      "$full_join" => %{
+        "fat_patients" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "doctor_id",
+          "$where" => %{"location" => "bullavard"},
+          "$select" => ["name", "prescription", "symptoms"]
+        }
+      }
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+  end
+
+  test "returns the query with full join with blacklist select inside join table" do
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_doctors, ["example"]}, {:fat_patients, ["symptoms"]}]
+    )
+
+    opts = %{
+      "$select" => %{"$fields" => ["name", "designation", "experience_years"]},
+      "$full_join" => %{
+        "fat_patients" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "doctor_id",
+          "$where" => %{"location" => "bullavard"},
+          "$select" => ["name", "prescription", "symptoms"]
+        }
+      }
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+  end
+
+  test "returns the query with full join with blacklist order inside join table" do
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_doctors, ["example"]}, {:fat_patients, ["appointments_count"]}]
+    )
+
+    opts = %{
+      "$select" => %{"$fields" => ["name", "designation", "experience_years"]},
+      "$full_join" => %{
+        "fat_patients" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "doctor_id",
+          "$where" => %{"location" => "bullavard"},
+          "$select" => ["name", "prescription"],
+          "$order" => %{"appointments_count" => "$asc"}
+        }
+      }
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+  end
+
+  test "returns the query with full join with blacklist group inside join table" do
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_doctors, ["example"]}, {:fat_patients, ["date_of_birth", "some"]}]
+    )
+
+    opts = %{
+      "$select" => %{"$fields" => ["name", "designation", "experience_years"]},
+      "$full_join" => %{
+        "fat_patients" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "doctor_id",
+          "$where" => %{"location" => "bullavard"},
+          "$select" => ["name", "prescription"],
+          "$order" => %{"appointments_count" => "$asc"},
+          "$group" => "date_of_birth"
+        }
+      }
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
   end
 end

@@ -1,6 +1,7 @@
 defmodule FatEcto.FatQuery.FatOrderBy do
   # TODO: Add docs and examples for ex_doc
   import Ecto.Query
+  alias FatEcto.FatHelper
 
   @moduledoc """
   Order supports `asc` and `desc` query methods.
@@ -155,14 +156,16 @@ defmodule FatEcto.FatQuery.FatOrderBy do
     - `$order`- Sort the result based on the order attribute.
   """
 
-  def build_order_by(queryable, nil) do
+  def build_order_by(queryable, nil, _options) do
     queryable
   end
 
-  def build_order_by(queryable, order_by_params) do
+  def build_order_by(queryable, order_by_params, options) do
     # TODO: Add docs and examples of ex_doc for this case here
     Enum.reduce(order_by_params, queryable, fn {field, format}, queryable ->
       # TODO: Add docs and examples of ex_doc for this case here
+      FatHelper.check_params_validity(options, queryable, field)
+
       if format == "$desc" do
         from(
           queryable,

@@ -7,16 +7,18 @@ defmodule Query.WhereTest do
     insert(:hospital)
     room = insert(:room)
     insert(:bed, fat_room_id: room.id)
+    Application.delete_env(:fat_ecto, :fat_ecto, [:blacklist_params])
+
     :ok
   end
 
   test "returns the query where field like" do
     opts = %{
-      "$where" => %{"name" => %{"$like" => "%Joh%"}}
+      "$where" => %{"email" => %{"$like" => "%test%"}}
     }
 
-    # expected = from(d in FatEcto.FatDoctor, where: like(d.name, ^"%Joh %"))
-    expected = from(d in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", d.name), ^"%Joh%") and ^true)
+    # expected = from(d in FatEcto.FatDoctor, where: like(d.email, ^"%Joh %"))
+    expected = from(d in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", d.email), ^"%test%") and ^true)
 
     query = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(query) == inspect(expected)
@@ -324,6 +326,18 @@ defmodule Query.WhereTest do
     assert Repo.one(query) == nil
   end
 
+  test "returns the query where field notbetween blacklisted" do
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_hospitals, ["some", "total_staff"]}, {:fat_patients, ["appointments_count"]}]
+    )
+
+    opts = %{
+      "$where" => %{"date_of_birth" => %{"$not_between" => [10, 20]}}
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatPatient, opts) end
+  end
+
   test "returns the query where field notbetween equal" do
     opts = %{
       "$where" => %{"appointments_count" => %{"$not_between_equal" => [10, 20]}}
@@ -435,6 +449,18 @@ defmodule Query.WhereTest do
              rating: 5,
              total_staff: 3
            }
+  end
+
+  test "returns the query where field is binary and blacklisted" do
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_hospitals, ["location"]}, {:fat_beds, ["is_active"]}]
+    )
+
+    opts = %{
+      "$where" => %{"phone" => "1234567"}
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatHospital, opts) end
   end
 
   test "returns the query with or fields" do
@@ -965,5 +991,42 @@ defmodule Query.WhereTest do
                total_staff: 3
              }
            ]
+  end
+
+  test "returns the query with and/three or not like/ilike/equal fields with blacklist params" do
+    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
+    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
+
+    Application.put_env(:fat_ecto, :fat_ecto,
+      blacklist_params: [{:fat_hospitals, ["some", "total_staff"]}, {:fat_beds, ["is_active"]}]
+    )
+
+    opts = %{
+      "$where" => %{
+        "name" => %{"$not_ilike" => "%Joh%"},
+        "location" => %{"$not_like" => "%some%"},
+        "$or" => %{
+          "name" => %{"$not_ilike" => "%Joh%"},
+          "location" => %{"$not_like" => "%some%"},
+          "total_staff" => %{"$equal" => 2},
+          "rating" => %{"$in" => [2, 3]},
+          "phone" => "0071566025410"
+        },
+        "$or_1" => %{
+          "name" => %{"$not_ilike" => "%Joh%"},
+          "location" => %{"$not_like" => "%some%"},
+          "total_staff" => %{"$equal" => 2},
+          "rating" => %{"$in" => [2, 3]}
+        },
+        "$or_2" => %{
+          "name" => %{"$ilike" => "%Joh%"},
+          "location" => %{"$not_like" => "%some%"},
+          "total_staff" => %{"$between" => [2, 6]},
+          "rating" => %{"$not_in" => [2, 3]}
+        }
+      }
+    }
+
+    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatHospital, opts) end
   end
 end

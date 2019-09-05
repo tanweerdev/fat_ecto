@@ -6,6 +6,7 @@ defmodule Fat.ContextTest do
   setup do
     Repo.start_link()
     Repo.insert(%FatRoom{name: "John", purpose: "Testing", description: "descriptive", is_active: true})
+    Application.delete_env(:fat_ecto, :fat_ecto, [:blacklist_params])
 
     :ok
   end
@@ -229,7 +230,7 @@ defmodule Fat.ContextTest do
       })
 
     opts = %{
-      "$select" => ["name", "purpose", "description"],
+      "$select" => ["name", "purpose", "floor"],
       "$right_join" => %{
         "fat_beds" => %{
           "$on_field" => "id",
@@ -250,7 +251,7 @@ defmodule Fat.ContextTest do
         where: fr.id == ^room.id and ^true,
         where: fb.id == ^bed.id and ^true,
         select:
-          merge(map(fr, [:name, :purpose, :description]), %{
+          merge(map(fr, [:name, :purpose, :floor]), %{
             ^"fat_beds" => map(fb, [:name, :purpose, :description])
           })
       )

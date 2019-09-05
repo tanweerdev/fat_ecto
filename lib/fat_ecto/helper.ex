@@ -115,4 +115,73 @@ defmodule FatEcto.FatHelper do
         }
     end
   end
+
+  def params_valid(queryable, k, options) do
+    table =
+      case queryable do
+        queryable when is_atom(queryable) ->
+          [Ecto.Schema.Metadata, nil, nil, _model_name, table_name, :built] =
+            Map.values(queryable.__struct__.__meta__)
+
+          table_name
+
+        queryable when is_binary(queryable) ->
+          queryable
+
+        _ ->
+          %{source: {table, _model}} = queryable.from
+          table
+      end
+
+    restrict_params(string_to_atom(table), k, options)
+  end
+
+  def restrict_params(table, select_params, options) when is_binary(select_params) do
+    restrict_params(table, [select_params], options)
+    |> hd()
+  end
+
+  def restrict_params(_table, select_params, _options) when is_boolean(select_params) do
+    select_params
+  end
+
+  def restrict_params(table, select_params, options) do
+    if options[:blacklist_params] do
+      check_blacklist_params(table, select_params, options)
+    else
+      case Application.get_env(options[:otp_app], :fat_ecto)[:blacklist_params] do
+        nil ->
+          select_params
+
+        _ ->
+          check_blacklist_params(table, select_params, options)
+      end
+    end
+  end
+
+  def check_blacklist_params(table, select_params, options) do
+    if Keyword.has_key?(options[:blacklist_params], table) do
+      filtered_params =
+        Enum.reject(Keyword.fetch!(options[:blacklist_params], table), fn el ->
+          !Enum.member?(select_params, el)
+        end)
+
+      case Enum.count(filtered_params) do
+        0 ->
+          select_params
+
+        _ ->
+          raise ArgumentError,
+            message: "the fields #{inspect(filtered_params)} of #{table} are not allowed in the query"
+      end
+    else
+      select_params
+    end
+  end
+
+  def check_params_validity(build_options, queryable, k) do
+    if build_options[:table],
+      do: params_valid(build_options[:table], k, build_options),
+      else: params_valid(queryable, k, build_options)
+  end
 end

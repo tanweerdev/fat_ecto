@@ -33,38 +33,43 @@ defmodule FatEcto.FatQuery.FatGroupBy do
     - `$order`- Sort the result based on the order attribute.
   """
 
-  def build_group_by(queryable, nil) do
+  def build_group_by(queryable, nil, _options) do
     queryable
   end
 
-  def build_group_by(queryable, group_by_params) do
+  def build_group_by(queryable, group_by_params, options) do
     case group_by_params do
       group_by_params when is_list(group_by_params) ->
         Enum.reduce(group_by_params, queryable, fn group_by_field, queryable ->
+          FatHelper.check_params_validity(options, queryable, group_by_field)
+
           _group_by(queryable, group_by_field)
         end)
 
       group_by_params when is_map(group_by_params) ->
         Enum.reduce(group_by_params, queryable, fn {group_by_field, type}, queryable ->
+          FatHelper.check_params_validity(options, queryable, group_by_field)
+
           case type do
             "$date_part_month" ->
               # from u in User,
               # group_by: fragment("date_part('month', ?)", u.inserted_at),
               # select:   {fragment("date_part('month', ?)", u.inserted_at), count(u.id)}
+              field = FatHelper.string_to_existing_atom(group_by_field)
 
               from(
                 q in queryable,
                 group_by:
                   fragment(
                     "date_part('month', ?)",
-                    field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+                    field(q, ^field)
                   ),
                 select_merge: %{
                   "$group" => %{
                     ^group_by_field =>
                       fragment(
                         "date_part('month', ?)",
-                        field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+                        field(q, ^field)
                       )
                   }
                 }
@@ -74,20 +79,21 @@ defmodule FatEcto.FatQuery.FatGroupBy do
               # from u in User,
               # group_by: fragment("date_part('year', ?)", u.inserted_at),
               # select:   {fragment("date_part('year', ?)", u.inserted_at), count(u.id)}
+              field = FatHelper.string_to_existing_atom(group_by_field)
 
               from(
                 q in queryable,
                 group_by:
                   fragment(
                     "date_part('year', ?)",
-                    field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+                    field(q, ^field)
                   ),
                 select_merge: %{
                   "$group" => %{
                     ^group_by_field =>
                       fragment(
                         "date_part('year', ?)",
-                        field(q, ^FatHelper.string_to_existing_atom(group_by_field))
+                        field(q, ^field)
                       )
                   }
                 }
@@ -112,22 +118,28 @@ defmodule FatEcto.FatQuery.FatGroupBy do
             #   )
 
             "$field" ->
+              FatHelper.check_params_validity(options, queryable, group_by_field)
+
               _group_by(queryable, group_by_field)
           end
         end)
 
       group_by_params when is_binary(group_by_params) ->
+        FatHelper.check_params_validity(options, queryable, group_by_params)
+
         _group_by(queryable, group_by_params)
     end
   end
 
   defp _group_by(queryable, group_by_param) do
+    field = FatHelper.string_to_existing_atom(group_by_param)
+
     from(
       q in queryable,
-      group_by: field(q, ^FatHelper.string_to_existing_atom(group_by_param)),
+      group_by: field(q, ^field),
       select_merge: %{
         "$group" => %{
-          ^group_by_param => field(q, ^FatHelper.string_to_existing_atom(group_by_param))
+          ^group_by_param => field(q, ^field)
         }
       }
     )
