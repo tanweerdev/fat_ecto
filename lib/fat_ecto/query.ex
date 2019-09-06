@@ -176,53 +176,66 @@ defmodule FatEcto.FatQuery do
 
       def fetch(queryable, query_params, fetch_options \\ []) do
         query_params = FatUtils.Map.deep_merge(@query_param_defaults, query_params)
-        queryable = build(queryable, query_params, fetch_options)
 
-        fetch_options =
-          [paginate: true, timeout: 15000]
-          |> Keyword.merge(@options)
-          |> Keyword.merge(fetch_options)
+        queryable =
+          try do
+            build(queryable, query_params, fetch_options)
+          rescue
+            e in ArgumentError -> {:error, e}
+          end
 
-        case query_params["$find"] do
-          "$one" ->
-            {:ok, @repo.one(Ecto.Query.limit(queryable, 1))}
-
-          "$all" ->
-            if fetch_options[:paginate] == true do
-              %{
-                data_query: data_query,
-                skip: skip,
-                limit: limit,
-                count_query: count_query
-              } = paginate(queryable, skip: query_params["$skip"], limit: query_params["$limit"])
-
-              try do
-                {:ok,
-                 %{
-                   data: @repo.all(data_query, timeout: fetch_options[:timeout]),
-                   meta: %{
-                     skip: skip,
-                     limit: limit,
-                     count: @repo.one(count_query, timeout: fetch_options[:timeout])
-                   }
-                 }}
-              rescue
-                DBConnection.ConnectionError ->
-                  # IO.inspect("fat ecto fetch timeout error")
-                  {:error, :timeout}
-
-                other_error ->
-                  {:error, other_error}
-              end
-            else
-              {:ok, @repo.all(queryable)}
-            end
-
-          nil ->
-            {:error, "Method not found"}
+        case queryable do
+          {:error, message} ->
+            %{message: error_message} = message
+            {:error, error_message}
 
           _ ->
-            {:error, "Method not found"}
+            fetch_options =
+              [paginate: true, timeout: 15000]
+              |> Keyword.merge(@options)
+              |> Keyword.merge(fetch_options)
+
+            case query_params["$find"] do
+              "$one" ->
+                {:ok, @repo.one(Ecto.Query.limit(queryable, 1))}
+
+              "$all" ->
+                if fetch_options[:paginate] == true do
+                  %{
+                    data_query: data_query,
+                    skip: skip,
+                    limit: limit,
+                    count_query: count_query
+                  } = paginate(queryable, skip: query_params["$skip"], limit: query_params["$limit"])
+
+                  try do
+                    {:ok,
+                     %{
+                       data: @repo.all(data_query, timeout: fetch_options[:timeout]),
+                       meta: %{
+                         skip: skip,
+                         limit: limit,
+                         count: @repo.one(count_query, timeout: fetch_options[:timeout])
+                       }
+                     }}
+                  rescue
+                    DBConnection.ConnectionError ->
+                      # IO.inspect("fat ecto fetch timeout error")
+                      {:error, :timeout}
+
+                    other_error ->
+                      {:error, other_error}
+                  end
+                else
+                  {:ok, @repo.all(queryable)}
+                end
+
+              nil ->
+                {:error, "Method not found"}
+
+              _ ->
+                {:error, "Method not found"}
+            end
         end
       end
     end
