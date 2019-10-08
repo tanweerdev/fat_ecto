@@ -59,41 +59,56 @@ defmodule FatEcto.FatQuery.FatInclude do
 
           {limit, _} = FatHelper.get_limit_value([limit: value["$limit"]], build_options)
 
-          include_kwery =
-            related_model
-            |> FatEcto.FatQuery.FatWhere.build_where(value["$where"], build_options ++ [table: key],
-              binding: :last
-            )
-            |> FatEcto.FatQuery.FatOrderBy.build_order_by(value["$order"], build_options ++ [table: key])
-            |> FatEcto.FatQuery.FatGroupBy.build_group_by(value["$group"], build_options ++ [table: key])
-            |> build_include(value["$include"], related_model, build_options)
-            |> limit([q], ^limit)
-            |> offset([q], ^(value["$offset"] || 0))
-
           join =
             String.replace(value["$join"] || "", "$", "")
             |> FatHelper.string_to_atom()
 
-          if join != :"" do
-            queryable
-            |> join(join, [q], jn in assoc(q, ^relation_name))
-            |> preload([q, ..., jt], [{^relation_name, ^include_kwery}])
-          else
-            queryable
-            |> preload([q, ..., jt], [{^relation_name, ^include_kwery}])
-          end
+          query =
+            if join != :"" do
+              queryable
+              |> join(join, [q, ..., c], jn in assoc(q, ^relation_name))
+            else
+              queryable
+              |> join(:inner, [q, ..., c], jn in assoc(c, ^relation_name))
+            end
+
+          query
+          |> FatEcto.FatQuery.FatWhere.build_where(value["$where"], build_options ++ [table: key],
+            binding: :last
+          )
+          |> FatEcto.FatQuery.FatOrderBy.build_order_by(value["$order"], build_options ++ [table: key],
+            binding: :last
+          )
+          |> FatEcto.FatQuery.FatGroupBy.build_group_by(value["$group"], build_options ++ [table: key],
+            binding: :last
+          )
+          |> build_include(value["$include"], related_model, build_options ++ [relation: relation_name])
+          |> limit([q], ^limit)
+          |> offset([q], ^(value["$offset"] || 0))
         end)
 
       # TODO: Add docs and examples of ex_doc for this case here
       include when is_binary(include) ->
-        from(
-          q in queryable,
-          # left_join: a in assoc(q, ^FatHelper.string_to_existing_atom(include)),
-          preload: [^FatHelper.string_to_existing_atom(include)]
-        )
+        relation = build_options[:relation]
+
+        if !is_nil(relation) do
+          from(
+            queryable,
+            # left_join: a in assoc(q, ^FatHelper.string_to_existing_atom(include)),
+            preload: [{^relation, ^FatHelper.string_to_existing_atom(include)}]
+          )
+        else
+          from(
+            queryable,
+            # left_join: a in assoc(q, ^FatHelper.string_to_existing_atom(include)),
+            preload: [^FatHelper.string_to_existing_atom(include)]
+          )
+        end
 
       # TODO: Add docs and examples of ex_doc for this case here
       include when is_list(include) ->
+        relation = build_options[:relation]
+
         # TODO: implement logic for the
         Enum.reduce(include, queryable, fn model, queryable ->
           # case model do
@@ -102,13 +117,21 @@ defmodule FatEcto.FatQuery.FatInclude do
           #     queryable
 
           #   m when is_binary(m) ->
-          from(
-            q in queryable,
-            # left_join: a in assoc(q, ^FatHelper.string_to_existing_atom(model)),
-            preload: [^FatHelper.string_to_existing_atom(model)]
-          )
+          if !is_nil(relation) do
+            from(
+              queryable,
+              # left_join: a in assoc(q, ^FatHelper.string_to_existing_atom(model)),
+              preload: [{^relation, ^FatHelper.string_to_existing_atom(model)}]
+            )
+          else
+            from(
+              queryable,
+              # left_join: a in assoc(q, ^FatHelper.string_to_existing_atom(model)),
+              preload: [^FatHelper.string_to_existing_atom(model)]
+            )
 
-          # end
+            # end
+          end
         end)
     end
   end
