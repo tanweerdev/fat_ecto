@@ -66,7 +66,7 @@ defmodule FatEcto.FatQuery.FatInclude do
           query =
             if join != :"" do
               queryable
-              |> join(join, [q, ..., c], jn in assoc(q, ^relation_name))
+              |> join(join, [q, ..., c], jn in assoc(c, ^relation_name))
             else
               queryable
               |> join(:inner, [q, ..., c], jn in assoc(c, ^relation_name))
