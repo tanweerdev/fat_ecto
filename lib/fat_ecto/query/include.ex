@@ -64,12 +64,32 @@ defmodule FatEcto.FatQuery.FatInclude do
             |> FatHelper.string_to_atom()
 
           query =
-            if join != :"" do
-              queryable
-              |> join(join, [q, ..., c], jn in assoc(c, ^relation_name))
-            else
-              queryable
-              |> join(:inner, [q, ..., c], jn in assoc(c, ^relation_name))
+            case value["$binding"] do
+              :last ->
+                if join != :"" do
+                  queryable
+                  |> join(join, [q, ..., c], jn in assoc(c, ^relation_name))
+                else
+                  queryable
+                  |> join(:inner, [q, ..., c], jn in assoc(c, ^relation_name))
+                end
+
+              :first ->
+                if join != :"" do
+                  queryable
+                  |> join(join, [q, ..., c], jn in assoc(q, ^relation_name))
+                else
+                  queryable
+                  |> join(:inner, [q, ..., c], jn in assoc(q, ^relation_name))
+                end
+
+              nil ->
+                raise ArgumentError,
+                  message: "binding must be specified inside include tables"
+
+              _ ->
+                raise ArgumentError,
+                  message: "invalid binding value inside include. valid values are :first and :last"
             end
 
           query
