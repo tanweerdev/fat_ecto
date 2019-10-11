@@ -58,23 +58,43 @@ defmodule FatEcto.FatQuery.FatGroupBy do
               # select:   {fragment("date_part('month', ?)", u.inserted_at), count(u.id)}
               field = FatHelper.string_to_existing_atom(group_by_field)
 
-              from(
-                q in queryable,
-                group_by:
-                  fragment(
-                    "date_part('month', ?)",
-                    field(q, ^field)
-                  ),
-                select_merge: %{
-                  "$group" => %{
-                    ^group_by_field =>
-                      fragment(
-                        "date_part('month', ?)",
-                        field(q, ^field)
-                      )
+              if opts[:binding] do
+                from(
+                  [q, ..., c] in queryable,
+                  group_by:
+                    fragment(
+                      "date_part('month', ?)",
+                      field(c, ^field)
+                    ),
+                  select_merge: %{
+                    "$group" => %{
+                      ^group_by_field =>
+                        fragment(
+                          "date_part('month', ?)",
+                          field(c, ^field)
+                        )
+                    }
                   }
-                }
-              )
+                )
+              else
+                from(
+                  q in queryable,
+                  group_by:
+                    fragment(
+                      "date_part('month', ?)",
+                      field(q, ^field)
+                    ),
+                  select_merge: %{
+                    "$group" => %{
+                      ^group_by_field =>
+                        fragment(
+                          "date_part('month', ?)",
+                          field(q, ^field)
+                        )
+                    }
+                  }
+                )
+              end
 
             "$date_part_year" ->
               # from u in User,
@@ -82,23 +102,43 @@ defmodule FatEcto.FatQuery.FatGroupBy do
               # select:   {fragment("date_part('year', ?)", u.inserted_at), count(u.id)}
               field = FatHelper.string_to_existing_atom(group_by_field)
 
-              from(
-                q in queryable,
-                group_by:
-                  fragment(
-                    "date_part('year', ?)",
-                    field(q, ^field)
-                  ),
-                select_merge: %{
-                  "$group" => %{
-                    ^group_by_field =>
-                      fragment(
-                        "date_part('year', ?)",
-                        field(q, ^field)
-                      )
+              if opts[:binding] do
+                from(
+                  [q, ..., c] in queryable,
+                  group_by:
+                    fragment(
+                      "date_part('year', ?)",
+                      field(c, ^field)
+                    ),
+                  select_merge: %{
+                    "$group" => %{
+                      ^group_by_field =>
+                        fragment(
+                          "date_part('year', ?)",
+                          field(c, ^field)
+                        )
+                    }
                   }
-                }
-              )
+                )
+              else
+                from(
+                  q in queryable,
+                  group_by:
+                    fragment(
+                      "date_part('year', ?)",
+                      field(q, ^field)
+                    ),
+                  select_merge: %{
+                    "$group" => %{
+                      ^group_by_field =>
+                        fragment(
+                          "date_part('year', ?)",
+                          field(q, ^field)
+                        )
+                    }
+                  }
+                )
+              end
 
             # "$date_part_month_count" ->
             #   # from u in User,
