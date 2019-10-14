@@ -185,8 +185,7 @@ defmodule Query.AggregateTest do
         "fat_hospital" => %{
           "$join" => "$full",
           "$order" => %{"id" => "$desc"},
-          "$where" => %{"name" => "Saint"},
-          "$binding" => :first
+          "$where" => %{"name" => "Saint"}
         }
       }
     }

@@ -51,7 +51,8 @@ defmodule FatEcto.FatQuery.FatInclude do
     case include_params do
       # TODO: Add docs and examples for ex_doc
       include when is_map(include) ->
-        Enum.reduce(include, queryable, fn {key, value}, queryable ->
+        FatHelper.dynamic_binding(include)
+        |> Enum.reduce(queryable, fn {key, value}, queryable ->
           relation_name = FatHelper.string_to_existing_atom(key)
 
           %{owner: _o, owner_key: _ok, related: related_model, related_key: _rk} =
@@ -74,7 +75,7 @@ defmodule FatEcto.FatQuery.FatInclude do
                   |> join(:inner, [q, ..., c], jn in assoc(c, ^relation_name))
                 end
 
-              :first ->
+              _ ->
                 if join != :"" do
                   queryable
                   |> join(join, [q, ..., c], jn in assoc(q, ^relation_name))
@@ -82,14 +83,6 @@ defmodule FatEcto.FatQuery.FatInclude do
                   queryable
                   |> join(:inner, [q, ..., c], jn in assoc(q, ^relation_name))
                 end
-
-              nil ->
-                raise ArgumentError,
-                  message: "binding must be specified inside include tables"
-
-              _ ->
-                raise ArgumentError,
-                  message: "invalid binding value inside include. valid values are :first and :last"
             end
 
           query

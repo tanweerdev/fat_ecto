@@ -10,7 +10,7 @@ defmodule Query.IncludeTest do
   test "returns the query with include associated model" do
     opts = %{
       "$find" => "$all",
-      "$include" => %{"fat_hospitals" => %{"$limit" => 3, "$binding" => :first}}
+      "$include" => %{"fat_hospitals" => %{"$limit" => 3}}
     }
 
     expected =
@@ -28,7 +28,7 @@ defmodule Query.IncludeTest do
   test "returns the query with include associated model and where" do
     opts = %{
       "$find" => "$all",
-      "$include" => %{"fat_hospitals" => %{"$limit" => 3, "$binding" => :last}},
+      "$include" => %{"fat_hospitals" => %{"$limit" => 3}},
       "$where" => %{"id" => 10}
     }
 
@@ -51,8 +51,7 @@ defmodule Query.IncludeTest do
         "fat_hospitals" => %{
           "$limit" => 10,
           "$order" => %{"id" => "$asc"},
-          "$where" => %{"id" => 10},
-          "$binding" => :first
+          "$where" => %{"id" => 10}
         }
       }
     }
@@ -77,8 +76,7 @@ defmodule Query.IncludeTest do
         "fat_hospitals" => %{
           "$join" => "$left",
           "$order" => %{"id" => "$asc"},
-          "$where" => %{"id" => 10},
-          "$binding" => :last
+          "$where" => %{"id" => 10}
         }
       }
     }
@@ -103,8 +101,7 @@ defmodule Query.IncludeTest do
         "fat_hospitals" => %{
           "$join" => "$right",
           "$order" => %{"id" => "$desc"},
-          "$where" => %{"name" => "Saint"},
-          "$binding" => :last
+          "$where" => %{"name" => "Saint"}
         }
       },
       "$where" => %{"email" => "John"}
@@ -131,8 +128,7 @@ defmodule Query.IncludeTest do
         "fat_hospitals" => %{
           "$join" => "$inner",
           "$order" => %{"id" => "$desc"},
-          "$where" => %{"name" => "Saint"},
-          "$binding" => :first
+          "$where" => %{"name" => "Saint"}
         }
       },
       "$where" => %{"email" => "John"},
@@ -161,8 +157,7 @@ defmodule Query.IncludeTest do
         "fat_hospitals" => %{
           "$join" => "$full",
           "$order" => %{"id" => "$desc"},
-          "$where" => %{"name" => "Saint"},
-          "$binding" => :last
+          "$where" => %{"name" => "Saint"}
         }
       },
       "$where" => %{"email" => "John"}
@@ -200,7 +195,7 @@ defmodule Query.IncludeTest do
 
   test "returns the query with nested include" do
     opts = %{
-      "$include" => %{"fat_hospitals" => %{"$include" => ["fat_rooms"], "$binding" => :last}}
+      "$include" => %{"fat_hospitals" => %{"$include" => ["fat_rooms"]}}
     }
 
     preload = [fat_hospitals: :fat_rooms]
@@ -223,8 +218,7 @@ defmodule Query.IncludeTest do
       "$include" => %{
         "fat_hospitals" => %{
           "$include" => ["fat_rooms"],
-          "$where" => %{"name" => "ham"},
-          "$binding" => :last
+          "$where" => %{"name" => "ham"}
         }
       }
     }
@@ -250,8 +244,7 @@ defmodule Query.IncludeTest do
       "$include" => %{
         "fat_hospitals" => %{
           "$include" => ["fat_rooms"],
-          "$order" => %{"id" => "$desc"},
-          "$binding" => :last
+          "$order" => %{"id" => "$desc"}
         }
       }
     }
@@ -281,8 +274,7 @@ defmodule Query.IncludeTest do
       "$include" => %{
         "fat_hospitals" => %{
           "$include" => ["fat_rooms"],
-          "$order" => %{"phone" => "$desc"},
-          "$binding" => :last
+          "$order" => %{"phone" => "$desc"}
         }
       }
     }
@@ -300,8 +292,7 @@ defmodule Query.IncludeTest do
         "fat_hospitals" => %{
           "$include" => ["fat_rooms"],
           "$order" => %{"id" => "$desc"},
-          "$group" => "phone",
-          "$binding" => :last
+          "$group" => "phone"
         }
       }
     }
@@ -311,7 +302,7 @@ defmodule Query.IncludeTest do
 
   test "returns the query with nested include models" do
     opts = %{
-      "$include" => %{"fat_hospitals" => %{"$include" => ["fat_rooms"], "$binding" => :last}}
+      "$include" => %{"fat_hospitals" => %{"$include" => "fat_rooms"}}
     }
 
     preload = [fat_hospitals: :fat_rooms]
@@ -334,8 +325,7 @@ defmodule Query.IncludeTest do
       "$include" => %{
         "fat_hospitals" => %{
           "$include" => ["fat_patients"],
-          "$where" => %{"name" => "ham"},
-          "$binding" => :last
+          "$where" => %{"name" => "ham"}
         }
       }
     }
@@ -365,8 +355,7 @@ defmodule Query.IncludeTest do
       "$include" => %{
         "fat_hospitals" => %{
           "$include" => ["fat_rooms", "fat_patients"],
-          "$where" => %{"phone" => "ham"},
-          "$binding" => :last
+          "$where" => %{"phone" => "ham"}
         }
       }
     }
@@ -379,8 +368,7 @@ defmodule Query.IncludeTest do
       "$include" => %{
         "fat_hospitals" => %{
           "$include" => ["fat_rooms"],
-          "$order" => %{"id" => "$asc"},
-          "$binding" => :last
+          "$order" => %{"id" => "$asc"}
         }
       }
     }
@@ -414,25 +402,5 @@ defmodule Query.IncludeTest do
 
     result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
-  end
-
-  test "returns the query with include without binding" do
-    opts = %{
-      "$include" => %{"fat_patients" => %{}}
-    }
-
-    assert_raise ArgumentError, "binding must be specified inside include tables", fn ->
-      Query.build(FatEcto.FatDoctor, opts)
-    end
-  end
-
-  test "returns the query with include with incorrect binding" do
-    opts = %{
-      "$include" => %{"fat_patients" => %{"$binding" => :wrong}}
-    }
-
-    assert_raise ArgumentError,
-                 "invalid binding value inside include. valid values are :first and :last",
-                 fn -> Query.build(FatEcto.FatDoctor, opts) end
   end
 end

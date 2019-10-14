@@ -118,8 +118,7 @@ defmodule Query.SelectTest do
           "$include" => ["fat_patients"],
           "$limit" => 200,
           "$where" => %{"email" => "ham"},
-          "$order" => %{"id" => "$desc"},
-          "$binding" => :first
+          "$order" => %{"id" => "$desc"}
         }
       }
     }
