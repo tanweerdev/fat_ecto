@@ -123,8 +123,6 @@ defmodule Query.SelectTest do
       }
     }
 
-    preload = [fat_doctors: :fat_patients]
-
     expected =
       from(
         h in FatEcto.FatHospital,
@@ -136,7 +134,7 @@ defmodule Query.SelectTest do
         order_by: [desc: h.id],
         limit: ^107,
         offset: ^0,
-        preload: ^hd(preload)
+        preload: ^{:fat_doctors, :fat_patients}
       )
 
     query = Query.build(FatEcto.FatHospital, opts, max_limit: 107)
