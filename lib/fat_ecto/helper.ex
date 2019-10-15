@@ -195,6 +195,6 @@ defmodule FatEcto.FatHelper do
 
   defp map(map, nested), do: :maps.map(&do_binding(&1, &2, nested), map)
 
-  defp put_binding(map, false), do: Map.put_new(map, "binding", :first)
-  defp put_binding(map, true), do: Map.put_new(map, "binding", :last)
+  defp put_binding(map, false), do: Map.put_new(map, "$binding", :first)
+  defp put_binding(map, true), do: Map.put_new(map, "$binding", :last)
 end
