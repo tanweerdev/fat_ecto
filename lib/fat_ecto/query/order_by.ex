@@ -167,7 +167,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
       # TODO: Add docs and examples of ex_doc for this case here
       FatHelper.check_params_validity(build_options, queryable, field)
 
-      if opts[:binding] do
+      if opts[:binding] == :last do
         if format == "$desc" do
           from([q, ..., c] in queryable,
             order_by: [desc: field(c, ^FatHelper.string_to_existing_atom(field))]

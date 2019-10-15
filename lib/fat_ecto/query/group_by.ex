@@ -58,7 +58,7 @@ defmodule FatEcto.FatQuery.FatGroupBy do
               # select:   {fragment("date_part('month', ?)", u.inserted_at), count(u.id)}
               field = FatHelper.string_to_existing_atom(group_by_field)
 
-              if opts[:binding] do
+              if opts[:binding] == :last do
                 from(
                   [q, ..., c] in queryable,
                   group_by:
@@ -102,7 +102,7 @@ defmodule FatEcto.FatQuery.FatGroupBy do
               # select:   {fragment("date_part('year', ?)", u.inserted_at), count(u.id)}
               field = FatHelper.string_to_existing_atom(group_by_field)
 
-              if opts[:binding] do
+              if opts[:binding] == :last do
                 from(
                   [q, ..., c] in queryable,
                   group_by:
@@ -175,7 +175,7 @@ defmodule FatEcto.FatQuery.FatGroupBy do
   defp _group_by(queryable, group_by_param, opts) do
     field = FatHelper.string_to_existing_atom(group_by_param)
 
-    if opts[:binding] do
+    if opts[:binding] == :last do
       from(
         [q, ..., c] in queryable,
         group_by: field(c, ^field),
