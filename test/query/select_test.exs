@@ -123,23 +123,18 @@ defmodule Query.SelectTest do
       }
     }
 
-    query =
-      from(
-        d in FatEcto.FatDoctor,
-        where: d.email == ^"ham" and ^true,
-        order_by: [desc: d.id],
-        limit: ^107,
-        offset: ^0,
-        preload: [:fat_patients]
-      )
-
     expected =
       from(
         h in FatEcto.FatHospital,
         where: h.rating == ^4 and ^true,
-        order_by: [desc: h.id],
         select: map(h, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}]),
-        preload: [fat_doctors: ^query]
+        join: d in assoc(h, :fat_doctors),
+        where: d.email == ^"ham" and ^true,
+        order_by: [desc: d.id],
+        order_by: [desc: h.id],
+        limit: ^107,
+        offset: ^0,
+        preload: ^{:fat_doctors, :fat_patients}
       )
 
     query = Query.build(FatEcto.FatHospital, opts, max_limit: 107)

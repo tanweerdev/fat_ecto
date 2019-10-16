@@ -155,32 +155,46 @@ defmodule FatEcto.FatQuery.FatOrderBy do
     - `$where`- Added the where attribute in the query.
     - `$order`- Sort the result based on the order attribute.
   """
+  def build_order_by(queryable, group_params, build_options, opts \\ [])
 
-  def build_order_by(queryable, nil, _options) do
+  def build_order_by(queryable, nil, _build_options, _opts) do
     queryable
   end
 
-  def build_order_by(queryable, order_by_params, options) do
+  def build_order_by(queryable, order_by_params, build_options, opts) do
     # TODO: Add docs and examples of ex_doc for this case here
     Enum.reduce(order_by_params, queryable, fn {field, format}, queryable ->
       # TODO: Add docs and examples of ex_doc for this case here
-      FatHelper.check_params_validity(options, queryable, field)
+      FatHelper.check_params_validity(build_options, queryable, field)
 
-      if format == "$desc" do
-        from(
-          queryable,
-          order_by: [
-            desc: ^FatHelper.string_to_existing_atom(field)
-          ]
-        )
+      if opts[:binding] == :last do
+        if format == "$desc" do
+          from([q, ..., c] in queryable,
+            order_by: [desc: field(c, ^FatHelper.string_to_existing_atom(field))]
+          )
+        else
+          # TODO: Add docs and examples of ex_doc for this case here
+          from(
+            [q, ..., c] in queryable,
+            order_by: [
+              asc: field(c, ^FatHelper.string_to_existing_atom(field))
+            ]
+          )
+        end
       else
-        # TODO: Add docs and examples of ex_doc for this case here
-        from(
-          queryable,
-          order_by: [
-            asc: ^FatHelper.string_to_existing_atom(field)
-          ]
-        )
+        if format == "$desc" do
+          from(queryable,
+            order_by: [desc: ^FatHelper.string_to_existing_atom(field)]
+          )
+        else
+          # TODO: Add docs and examples of ex_doc for this case here
+          from(
+            queryable,
+            order_by: [
+              asc: ^FatHelper.string_to_existing_atom(field)
+            ]
+          )
+        end
       end
     end)
   end

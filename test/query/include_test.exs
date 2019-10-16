@@ -13,12 +13,12 @@ defmodule Query.IncludeTest do
       "$include" => %{"fat_hospitals" => %{"$limit" => 3}}
     }
 
-    query = from(h in FatEcto.FatHospital, limit: ^3, offset: ^0)
-
     expected =
       from(
         d in FatEcto.FatDoctor,
-        preload: [fat_hospitals: ^query]
+        join: f in assoc(d, :fat_hospitals),
+        limit: ^3,
+        offset: ^0
       )
 
     result = Query.build(FatEcto.FatDoctor, opts)
@@ -32,13 +32,13 @@ defmodule Query.IncludeTest do
       "$where" => %{"id" => 10}
     }
 
-    query = from(h in FatEcto.FatHospital, limit: ^3, offset: ^0)
-
     expected =
       from(
         d in FatEcto.FatDoctor,
         where: d.id == ^10 and ^true,
-        preload: [fat_hospitals: ^query]
+        join: f in assoc(d, :fat_hospitals),
+        limit: ^3,
+        offset: ^0
       )
 
     result = Query.build(FatEcto.FatDoctor, opts)
@@ -56,19 +56,14 @@ defmodule Query.IncludeTest do
       }
     }
 
-    query =
-      from(
-        h in FatEcto.FatHospital,
-        where: h.id == ^10 and ^true,
-        order_by: [asc: h.id],
-        limit: ^10,
-        offset: ^0
-      )
-
     expected =
       from(
         d in FatEcto.FatDoctor,
-        preload: [fat_hospitals: ^query]
+        join: f in assoc(d, :fat_hospitals),
+        where: f.id == ^10 and ^true,
+        order_by: [asc: f.id],
+        limit: ^10,
+        offset: ^0
       )
 
     result = Query.build(FatEcto.FatDoctor, opts)
@@ -86,20 +81,14 @@ defmodule Query.IncludeTest do
       }
     }
 
-    query =
-      from(
-        h in FatEcto.FatHospital,
-        where: h.id == ^10 and ^true,
-        order_by: [asc: h.id],
-        limit: ^34,
-        offset: ^0
-      )
-
     expected =
       from(
         d in FatEcto.FatDoctor,
-        left_join: h in assoc(d, :fat_hospitals),
-        preload: [fat_hospitals: ^query]
+        left_join: f in assoc(d, :fat_hospitals),
+        where: f.id == ^10 and ^true,
+        order_by: [asc: f.id],
+        limit: ^34,
+        offset: ^0
       )
 
     result = Query.build(FatEcto.FatDoctor, opts)
@@ -118,21 +107,15 @@ defmodule Query.IncludeTest do
       "$where" => %{"email" => "John"}
     }
 
-    query =
-      from(
-        h in FatEcto.FatHospital,
-        where: h.name == ^"Saint" and ^true,
-        order_by: [desc: h.id],
-        limit: ^34,
-        offset: ^0
-      )
-
     expected =
       from(
         d in FatEcto.FatDoctor,
         where: d.email == ^"John" and ^true,
         right_join: h in assoc(d, :fat_hospitals),
-        preload: [fat_hospitals: ^query]
+        where: h.name == ^"Saint" and ^true,
+        order_by: [desc: h.id],
+        limit: ^34,
+        offset: ^0
       )
 
     result = Query.build(FatEcto.FatDoctor, opts)
@@ -152,22 +135,16 @@ defmodule Query.IncludeTest do
       "$order" => %{"id" => "$asc"}
     }
 
-    query =
-      from(
-        h in FatEcto.FatHospital,
-        where: h.name == ^"Saint" and ^true,
-        order_by: [desc: h.id],
-        limit: ^34,
-        offset: ^0
-      )
-
     expected =
       from(
         d in FatEcto.FatDoctor,
         where: d.email == ^"John" and ^true,
-        order_by: [asc: d.id],
         join: h in assoc(d, :fat_hospitals),
-        preload: [fat_hospitals: ^query]
+        where: h.name == ^"Saint" and ^true,
+        order_by: [desc: h.id],
+        order_by: [asc: d.id],
+        limit: ^34,
+        offset: ^0
       )
 
     result = Query.build(FatEcto.FatDoctor, opts)
@@ -186,21 +163,15 @@ defmodule Query.IncludeTest do
       "$where" => %{"email" => "John"}
     }
 
-    query =
-      from(
-        h in FatEcto.FatHospital,
-        where: h.name == ^"Saint" and ^true,
-        order_by: [desc: h.id],
-        limit: ^34,
-        offset: ^0
-      )
-
     expected =
       from(
         d in FatEcto.FatDoctor,
         where: d.email == ^"John" and ^true,
         full_join: h in assoc(d, :fat_hospitals),
-        preload: [fat_hospitals: ^query]
+        where: h.name == ^"Saint" and ^true,
+        order_by: [desc: h.id],
+        limit: ^34,
+        offset: ^0
       )
 
     result = Query.build(FatEcto.FatDoctor, opts)
@@ -227,18 +198,13 @@ defmodule Query.IncludeTest do
       "$include" => %{"fat_hospitals" => %{"$include" => ["fat_rooms"]}}
     }
 
-    query =
-      from(
-        h in FatEcto.FatHospital,
-        limit: ^34,
-        offset: ^0,
-        preload: [:fat_rooms]
-      )
-
     expected =
       from(
         d in FatEcto.FatDoctor,
-        preload: [fat_hospitals: ^query]
+        join: h in assoc(d, :fat_hospitals),
+        limit: ^34,
+        offset: ^0,
+        preload: ^{:fat_hospitals, :fat_rooms}
       )
 
     result = Query.build(FatEcto.FatDoctor, opts)
@@ -255,19 +221,14 @@ defmodule Query.IncludeTest do
       }
     }
 
-    query =
-      from(
-        h in FatEcto.FatHospital,
-        where: h.name == ^"ham" and ^true,
-        limit: ^34,
-        offset: ^0,
-        preload: [:fat_rooms]
-      )
-
     expected =
       from(
         d in FatEcto.FatDoctor,
-        preload: [fat_hospitals: ^query]
+        join: h in assoc(d, :fat_hospitals),
+        where: h.name == ^"ham" and ^true,
+        preload: ^{:fat_hospitals, :fat_rooms},
+        limit: ^34,
+        offset: ^0
       )
 
     result = Query.build(FatEcto.FatDoctor, opts)
@@ -284,19 +245,14 @@ defmodule Query.IncludeTest do
       }
     }
 
-    query =
-      from(
-        h in FatEcto.FatHospital,
-        order_by: [desc: h.id],
-        limit: ^34,
-        offset: ^0,
-        preload: [:fat_rooms]
-      )
-
     expected =
       from(
         d in FatEcto.FatDoctor,
-        preload: [fat_hospitals: ^query]
+        join: h in assoc(d, :fat_hospitals),
+        order_by: [desc: h.id],
+        limit: ^34,
+        offset: ^0,
+        preload: ^{:fat_hospitals, :fat_rooms}
       )
 
     result = Query.build(FatEcto.FatDoctor, opts)
@@ -340,21 +296,16 @@ defmodule Query.IncludeTest do
 
   test "returns the query with nested include models" do
     opts = %{
-      "$include" => %{"fat_hospitals" => %{"$include" => ["fat_rooms", "fat_patients"]}}
+      "$include" => %{"fat_hospitals" => %{"$include" => "fat_rooms"}}
     }
-
-    query =
-      from(
-        h in FatEcto.FatHospital,
-        limit: ^34,
-        offset: ^0,
-        preload: [:fat_patients, :fat_rooms]
-      )
 
     expected =
       from(
         d in FatEcto.FatDoctor,
-        preload: [fat_hospitals: ^query]
+        join: h in assoc(d, :fat_hospitals),
+        limit: ^34,
+        offset: ^0,
+        preload: ^{:fat_hospitals, :fat_rooms}
       )
 
     result = Query.build(FatEcto.FatDoctor, opts)
@@ -365,25 +316,20 @@ defmodule Query.IncludeTest do
     opts = %{
       "$include" => %{
         "fat_hospitals" => %{
-          "$include" => ["fat_rooms", "fat_patients"],
+          "$include" => ["fat_patients"],
           "$where" => %{"name" => "ham"}
         }
       }
     }
 
-    query =
-      from(
-        h in FatEcto.FatHospital,
-        where: h.name == ^"ham" and ^true,
-        limit: ^34,
-        offset: ^0,
-        preload: [:fat_patients, :fat_rooms]
-      )
-
     expected =
       from(
         d in FatEcto.FatDoctor,
-        preload: [fat_hospitals: ^query]
+        join: h in assoc(d, :fat_hospitals),
+        where: h.name == ^"ham" and ^true,
+        limit: ^34,
+        offset: ^0,
+        preload: ^{:fat_hospitals, :fat_patients}
       )
 
     result = Query.build(FatEcto.FatDoctor, opts)
@@ -411,25 +357,20 @@ defmodule Query.IncludeTest do
     opts = %{
       "$include" => %{
         "fat_hospitals" => %{
-          "$include" => ["fat_rooms", "fat_patients"],
+          "$include" => ["fat_rooms"],
           "$order" => %{"id" => "$asc"}
         }
       }
     }
 
-    query =
-      from(
-        h in FatEcto.FatHospital,
-        order_by: [asc: h.id],
-        limit: ^34,
-        offset: ^0,
-        preload: [:fat_patients, :fat_rooms]
-      )
-
     expected =
       from(
         d in FatEcto.FatDoctor,
-        preload: [fat_hospitals: ^query]
+        join: h in assoc(d, :fat_hospitals),
+        order_by: [asc: h.id],
+        limit: ^34,
+        offset: ^0,
+        preload: ^{:fat_hospitals, :fat_rooms}
       )
 
     result = Query.build(FatEcto.FatDoctor, opts)

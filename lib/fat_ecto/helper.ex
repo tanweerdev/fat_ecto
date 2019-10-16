@@ -184,4 +184,17 @@ defmodule FatEcto.FatHelper do
       do: params_valid(build_options[:table], k, build_options),
       else: params_valid(queryable, k, build_options)
   end
+
+  def dynamic_binding(map) when is_map(map), do: map(map, false)
+
+  defp do_binding(_key, value, _nested) when not is_map(value), do: value
+
+  defp do_binding("$" <> _key, value, nested), do: map(value, nested)
+
+  defp do_binding(_key, value, nested), do: value |> map(true) |> put_binding(nested)
+
+  defp map(map, nested), do: :maps.map(&do_binding(&1, &2, nested), map)
+
+  defp put_binding(map, false), do: Map.put_new(map, "$binding", :first)
+  defp put_binding(map, true), do: Map.put_new(map, "$binding", :last)
 end

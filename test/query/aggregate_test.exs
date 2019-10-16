@@ -190,25 +190,20 @@ defmodule Query.AggregateTest do
       }
     }
 
-    hospital_query =
-      from(f in FatEcto.FatHospital,
-        where: f.name == ^"Saint" and ^true,
-        order_by: [desc: f.id],
-        limit: ^34,
-        offset: ^0
-      )
-
     expected =
       from(f0 in FatEcto.FatRoom,
         full_join: f1 in assoc(f0, :fat_hospital),
         where: f0.capacity == ^5 and ^true,
         group_by: [f0.capacity],
-        order_by: [asc: f0.beds],
         select:
           merge(merge(f0, %{"$aggregate" => %{"$avg": %{^"level" => avg(f0.level)}}}), %{
             "$group" => %{^"capacity" => f0.capacity}
           }),
-        preload: [fat_hospital: ^hospital_query]
+        where: f1.name == ^"Saint" and ^true,
+        order_by: [desc: f1.id],
+        order_by: [asc: f0.beds],
+        limit: ^34,
+        offset: ^0
       )
 
     result = Query.build(FatEcto.FatRoom, opts)
