@@ -64,10 +64,46 @@ defmodule FatEcto.FatPaginator do
           query
           |> exclude(:order_by)
           |> exclude(:preload)
-          |> exclude(:select)
-          |> exclude(:distinct)
+          |> aggregate()
 
-        from(q in queryable, select: fragment("count(*)"))
+        # |> exclude(:select)
+        # |> exclude(:distinct)
+
+        # from(q in queryable, select: fragment("count(*)"))
+      end
+
+      defp aggregate(%{distinct: %{expr: [_ | _]}} = query) do
+        query
+        |> exclude(:select)
+        |> count()
+      end
+
+      defp aggregate(
+             %{
+               group_bys: [
+                 %Ecto.Query.QueryExpr{
+                   expr: [{{:., [], [{:&, [], [source_index]}, field]}, [], []} | _]
+                 }
+                 | _
+               ]
+             } = query
+           ) do
+        query
+        |> exclude(:select)
+        |> select([{x, source_index}], struct(x, ^[field]))
+        |> count()
+      end
+
+      defp aggregate(query) do
+        query
+        |> exclude(:select)
+        |> select(count("*"))
+      end
+
+      defp count(query) do
+        query
+        |> subquery
+        |> select(count("*"))
       end
     end
   end
