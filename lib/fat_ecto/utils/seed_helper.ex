@@ -10,7 +10,7 @@ defmodule FatUtils.SeedHelper do
       end
 
       @options Keyword.merge(Application.get_env(@opt_app, :fat_ecto) || [], unquote(options))
-      @repo @options[:seed_base_path]
+      @seed_base_path @options[:seed_base_path]
 
       if !@seed_base_path do
         raise "please define seed_base_path when using fat seed utils"
