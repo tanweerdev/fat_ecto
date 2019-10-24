@@ -184,8 +184,6 @@ defmodule FatEcto.FatQuery do
             e in ArgumentError -> {:error, e}
           end
 
-        
-
         case queryable do
           {:error, message} ->
             %{message: error_message} = message
@@ -196,7 +194,6 @@ defmodule FatEcto.FatQuery do
               [paginate: true, timeout: 15000]
               |> Keyword.merge(@options)
               |> Keyword.merge(fetch_options)
-
 
             case query_params["$find"] do
               "$one" ->
@@ -243,12 +240,11 @@ defmodule FatEcto.FatQuery do
       end
 
       def count_records(%{select: nil} = records, fetch_opts) do
-         @repo.aggregate(records, :count, :id, timeout: fetch_opts[:timeout])
+        @repo.aggregate(records, :count, :id, timeout: fetch_opts[:timeout])
       end
 
       def count_records(records, fetch_opts) do
         @repo.one(records, timeout: fetch_opts[:timeout])
-
       end
     end
   end
