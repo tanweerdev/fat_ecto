@@ -184,6 +184,8 @@ defmodule FatEcto.FatQuery do
             e in ArgumentError -> {:error, e}
           end
 
+        
+
         case queryable do
           {:error, message} ->
             %{message: error_message} = message
@@ -194,6 +196,7 @@ defmodule FatEcto.FatQuery do
               [paginate: true, timeout: 15000]
               |> Keyword.merge(@options)
               |> Keyword.merge(fetch_options)
+
 
             case query_params["$find"] do
               "$one" ->
@@ -215,7 +218,7 @@ defmodule FatEcto.FatQuery do
                        meta: %{
                          skip: skip,
                          limit: limit,
-                         count: @repo.one(count_query, timeout: fetch_options[:timeout])
+                         count: count_records(count_query, fetch_options)
                        }
                      }}
                   rescue
@@ -237,6 +240,15 @@ defmodule FatEcto.FatQuery do
                 {:error, "Method not found"}
             end
         end
+      end
+
+      def count_records(%{select: nil} = records, fetch_opts) do
+         @repo.aggregate(records, :count, :id, timeout: fetch_opts[:timeout])
+      end
+
+      def count_records(records, fetch_opts) do
+        @repo.one(records, timeout: fetch_opts[:timeout])
+
       end
     end
   end
