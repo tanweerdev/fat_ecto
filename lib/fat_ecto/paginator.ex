@@ -44,14 +44,12 @@ defmodule FatEcto.FatPaginator do
       def paginate(query, params) do
         {skip, params} = FatEcto.FatHelper.get_skip_value(params)
         {limit, _params} = FatEcto.FatHelper.get_limit_value(params, @options)
-        
 
         %{
           data_query: data_query(query, skip, limit),
           skip: skip,
           limit: limit,
           count_query: count_query(query)
-
         }
       end
 
@@ -98,18 +96,16 @@ defmodule FatEcto.FatPaginator do
 
       defp aggregate(query) do
         %{source: {_table, model}} = query.from
-        primary_keys =  model.__schema__(:primary_key)
-      if Enum.count(primary_keys) == 1 && Enum.member?(primary_keys, :id) do
-        
+        primary_keys = model.__schema__(:primary_key)
 
-        query
-        |> exclude(:select)
-      else
-        query
-        |> exclude(:select)
-        |> select(count("*"))
+        if Enum.count(primary_keys) == 1 && Enum.member?(primary_keys, :id) do
+          query
+          |> exclude(:select)
+        else
+          query
+          |> exclude(:select)
+          |> select(count("*"))
         end
-
       end
 
       defp count(query) do

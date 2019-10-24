@@ -14,8 +14,7 @@ defmodule FatEcto.FatHospitalDoctor do
       :fat_doctor_id,
       :fat_hospital_id
     ])
-    |> validate_required([:fat_doctor_id,
-    :fat_hospital_id])
+    |> validate_required([:fat_doctor_id, :fat_hospital_id])
     |> foreign_key_constraint(:fat_doctor_id)
     |> foreign_key_constraint(:fat_hospital_id)
   end
