@@ -1029,4 +1029,50 @@ defmodule Query.WhereTest do
 
     assert_raise ArgumentError, fn -> Query.build(FatEcto.FatHospital, opts) end
   end
+
+  test "paginator with primary key id" do
+    opts = %{
+      "$where" => %{"appointments_count" => %{"$not_in" => [20, 50]}, "name" => "john"}
+    }
+    paginator = Query.build(FatEcto.FatPatient, opts)
+               |> Query.paginate(skip: 0, limit: 10)
+   %{count_query: count_query} =  paginator
+   expected = from p in FatEcto.FatPatient,
+   where: p.appointments_count not in ^[20, 50] and ^true,
+   where: p.name == ^"john" and ^true
+   assert inspect(expected) == inspect(count_query)
+
+   opts = %{
+    "$where" => %{"floor" => %{"$not_in" => [20, 50]}, "name" => "ICU"}
+  }
+  paginator = Query.build(FatEcto.FatRoom, opts)
+             |> Query.paginate(skip: 0, limit: 10)
+   %{count_query: count_query} =  paginator
+   expected = from r in FatEcto.FatRoom,
+   where: r.floor not in ^[20, 50] and ^true, where: r.name == ^"ICU" and ^true
+   assert inspect(expected) == inspect(count_query)
+
+  end
+
+  test "paginator with composite primary key" do
+    opts = %{
+      "$where" => %{"fat_doctor_id" => 1}
+    }
+    paginator = Query.build(FatEcto.FatHospitalDoctor, opts)
+               |> Query.paginate(skip: 0, limit: 10)
+   %{count_query: count_query} =  paginator
+   expected = from d in FatEcto.FatHospitalDoctor,
+   where: d.fat_doctor_id == ^1 and ^true, select: count("*")
+  assert inspect(expected) == inspect(count_query)
+
+  opts = %{
+    "$where" => %{"fat_patient_id" => 10}
+  }
+  paginator = Query.build(FatEcto.FatDoctorPatient, opts)
+             |> Query.paginate(skip: 0, limit: 10)
+             %{count_query: count_query} =  paginator
+             expected = from d in FatEcto.FatDoctorPatient,
+   where: d.fat_patient_id == ^10 and ^true, select: count("*")
+  assert inspect(expected) == inspect(count_query)
+  end
 end
