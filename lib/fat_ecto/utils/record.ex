@@ -44,11 +44,12 @@ defmodule FatUtils.FatRecord do
       """
       def sanitize_map(record) when is_map(record) do
         schema_keys = [:__struct__, :__meta__]
+        # not_loaded_keys = [:__field__, :__owner__, :__cardinality__]
 
         Enum.reduce(Map.drop(record, schema_keys), %{}, fn {k, v}, acc ->
           cond do
-            is_list(v) && List.first(v) && is_map(List.first(v)) &&
-                Enum.all?(schema_keys, &Map.has_key?(List.first(v), &1)) ->
+            is_list(v) ->
+
               values =
                 Enum.reduce(v, [], fn rec, acc ->
                   acc ++ [sanitize_map(rec)]
@@ -56,20 +57,26 @@ defmodule FatUtils.FatRecord do
 
               Map.put(acc, k, values)
 
-            (is_map(v) && Map.has_key?(v, :__struct__) && Ecto.assoc_loaded?(v)) || !is_map(v) ||
-                (is_map(v) && !Map.has_key?(v, :__struct__)) ->
-              Map.put(
-                acc,
-                k,
-                if(
-                  is_map(v) && Enum.all?(schema_keys, &Map.has_key?(v, &1)),
-                  do: sanitize_map(v),
-                  else: v
-                )
-              )
+            is_map(v) ->
+              case v do
+                %Ecto.Association.NotLoaded{} ->
+                  acc
+
+                %DateTime{} ->
+                  Map.put(acc, k, v)
+
+                %Time{} ->
+                  Map.put(acc, k, v)
+
+                _v ->
+                  Map.put(acc, k, sanitize_map(v))
+              end
+
+            is_tuple(v) ->
+              Map.put(acc, k, sanitize_map(v))
 
             true ->
-              acc
+              Map.put(acc, k, v)
           end
         end)
       end
