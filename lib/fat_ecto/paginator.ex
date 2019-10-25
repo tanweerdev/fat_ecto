@@ -4,6 +4,7 @@ defmodule FatEcto.FatPaginator do
   defmacro __using__(options) do
     quote location: :keep do
       import Ecto.Query
+
       # TODO: @repo.all and @repo.one nil warning
       @options unquote(options)
       # TODO: Add docs and examples for ex_doc
@@ -41,6 +42,7 @@ defmodule FatEcto.FatPaginator do
        If no limit is defined in the query. FAT uses the default limit specified in the fat_ecto config.
 
       """
+
       def paginate(query, params) do
         {skip, params} = FatEcto.FatHelper.get_skip_value(params)
         {limit, _params} = FatEcto.FatHelper.get_limit_value(params, @options)
@@ -95,10 +97,9 @@ defmodule FatEcto.FatPaginator do
       end
 
       defp aggregate(query) do
-        %{source: {_table, model}} = query.from
-        primary_keys = model.__schema__(:primary_key)
+        primary_keys = FatEcto.FatHelper.get_primary_keys(query, @options[:otp_app])
 
-        if Enum.count(primary_keys) == 1 && Enum.member?(primary_keys, :id) do
+        if Enum.count(primary_keys) == 1 do
           query
           |> exclude(:select)
         else
