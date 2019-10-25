@@ -1077,7 +1077,10 @@ defmodule Query.WhereTest do
     %{count_query: count_query} = paginator
 
     expected =
-      from(d in FatEcto.FatHospitalDoctor, where: d.fat_doctor_id == ^1 and ^true, select: count("*"))
+      from(d in FatEcto.FatHospitalDoctor,
+        where: d.fat_doctor_id == ^1 and ^true,
+        select: fragment("COUNT(DISTINCT ROW(?, ?))::int", d.fat_doctor_id, d.fat_hospital_id)
+      )
 
     assert inspect(expected) == inspect(count_query)
 
