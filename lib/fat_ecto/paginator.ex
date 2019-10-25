@@ -97,9 +97,9 @@ defmodule FatEcto.FatPaginator do
       end
 
       defp aggregate(query) do
-        primary_keys = FatEcto.FatHelper.get_primary_keys(query, @options[:otp_app])
+        primary_keys = FatEcto.FatHelper.get_primary_keys(query)
 
-        if Enum.count(primary_keys) == 1 do
+        if !is_nil(primary_keys) && Enum.count(primary_keys) == 1 do
           query
           |> exclude(:select)
         else

@@ -1095,4 +1095,25 @@ defmodule Query.WhereTest do
 
     assert inspect(expected) == inspect(count_query)
   end
+
+  test "paginator with table name and single primary key" do
+    opts = %{
+      "$where" => %{"appointments_count" => %{"$not_in" => [20, 50]}, "name" => "john"}
+    }
+
+    paginator =
+      Query.build("fat_patients", opts)
+      |> Query.paginate(skip: 0, limit: 10)
+
+    %{count_query: count_query} = paginator
+
+    expected =
+      from(p in "fat_patients",
+        where: p.appointments_count not in ^[20, 50] and ^true,
+        where: p.name == ^"john" and ^true,
+        select: count("*")
+      )
+
+    assert inspect(expected) == inspect(count_query)
+  end
 end
