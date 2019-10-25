@@ -98,10 +98,72 @@ defmodule FatEcto.FatPaginator do
 
       defp aggregate(query) do
         primary_keys = FatEcto.FatHelper.get_primary_keys(query)
+        # TODO: Make this part dynamic
+        if !is_nil(primary_keys) do
+          case Enum.count(primary_keys) do
+            1 ->
+              query
+              |> exclude(:select)
 
-        if !is_nil(primary_keys) && Enum.count(primary_keys) == 1 do
-          query
-          |> exclude(:select)
+            2 ->
+              query
+              |> exclude(:select)
+              |> select(
+                [q, ..., c],
+                fragment(
+                  "COUNT(DISTINCT ROW(?, ?))::int",
+                  field(q, ^Enum.at(primary_keys, 0)),
+                  field(q, ^Enum.at(primary_keys, 1))
+                )
+              )
+
+            3 ->
+              query
+              |> exclude(:select)
+              |> select(
+                [q, ..., c],
+                fragment(
+                  "COUNT(DISTINCT ROW(?, ?, ?))::int",
+                  field(q, ^Enum.at(primary_keys, 0)),
+                  field(q, ^Enum.at(primary_keys, 1)),
+                  field(q, ^Enum.at(primary_keys, 2))
+                )
+              )
+
+            4 ->
+              query
+              |> exclude(:select)
+              |> select(
+                [q, ..., c],
+                fragment(
+                  "COUNT(DISTINCT ROW(?, ?, ?, ?))::int",
+                  field(q, ^Enum.at(primary_keys, 0)),
+                  field(q, ^Enum.at(primary_keys, 1)),
+                  field(q, ^Enum.at(primary_keys, 2)),
+                  field(q, ^Enum.at(primary_keys, 3))
+                )
+              )
+
+            5 ->
+              query
+              |> exclude(:select)
+              |> select(
+                [q, ..., c],
+                fragment(
+                  "COUNT(DISTINCT ROW(?, ?, ?, ?, ?))::int",
+                  field(q, ^Enum.at(primary_keys, 0)),
+                  field(q, ^Enum.at(primary_keys, 1)),
+                  field(q, ^Enum.at(primary_keys, 2)),
+                  field(q, ^Enum.at(primary_keys, 3)),
+                  field(q, ^Enum.at(primary_keys, 4))
+                )
+              )
+
+            _ ->
+              query
+              |> exclude(:select)
+              |> select(count("*"))
+          end
         else
           query
           |> exclude(:select)
