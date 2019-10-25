@@ -29,7 +29,8 @@ defmodule FatEcto.FatQuery do
         # TODO: $group should be part of select
         "$group" => nil,
         "$skip" => 0,
-        "$limit" => @options[:default_limit] || 10
+        "$limit" => @options[:default_limit] || 10,
+        "$count_on" => nil
       }
 
       use FatEcto.FatPaginator, @options
@@ -215,7 +216,7 @@ defmodule FatEcto.FatQuery do
                        meta: %{
                          skip: skip,
                          limit: limit,
-                         count: count_records(count_query, fetch_options)
+                         count: count_records(count_query, fetch_options, query_params["$count_on"])
                        }
                      }}
                   rescue
@@ -239,16 +240,25 @@ defmodule FatEcto.FatQuery do
         end
       end
 
-      def count_records(%{select: nil} = records, fetch_opts) do
-        @repo.aggregate(
-          records,
-          :count,
-          FatEcto.FatHelper.get_primary_keys(records, @options[:otp_app]) |> hd(),
-          timeout: fetch_opts[:timeout]
-        )
+      def count_records(%{select: nil} = records, fetch_opts, count_on) do
+        if !is_nil(count_on) && is_binary(count_on) do
+          @repo.aggregate(
+            records,
+            :count,
+            String.to_atom(count_on),
+            timeout: fetch_opts[:timeout]
+          )
+        else
+          @repo.aggregate(
+            records,
+            :count,
+            FatEcto.FatHelper.get_primary_keys(records) |> hd(),
+            timeout: fetch_opts[:timeout]
+          )
+        end
       end
 
-      def count_records(records, fetch_opts) do
+      def count_records(records, fetch_opts, _count_on) do
         @repo.one(records, timeout: fetch_opts[:timeout])
       end
     end

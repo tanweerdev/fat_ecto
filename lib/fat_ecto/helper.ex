@@ -198,28 +198,15 @@ defmodule FatEcto.FatHelper do
   defp put_binding(map, false), do: Map.put_new(map, "$binding", :first)
   defp put_binding(map, true), do: Map.put_new(map, "$binding", :last)
 
-  def get_primary_keys(query, otp_app) do
-    %{source: {table, model}} = query.from
+  def get_primary_keys(query) do
+    %{source: {_table, model}} = query.from
 
-    model =
-      case model do
-        nil ->
-          with {:ok, mods} <- :application.get_key(otp_app, :modules) do
-            mods
-            |> Enum.filter(fn mod ->
-              try do
-                apply(mod, :__schema__, [:source]) == table
-              rescue
-                _e in UndefinedFunctionError -> false
-              end
-            end)
-            |> hd()
-          end
+    case model do
+      nil ->
+        nil
 
-        _ ->
-          model
-      end
-
-    model.__schema__(:primary_key)
+      _ ->
+        model.__schema__(:primary_key)
+    end
   end
 end
