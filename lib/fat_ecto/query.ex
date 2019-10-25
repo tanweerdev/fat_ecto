@@ -240,7 +240,12 @@ defmodule FatEcto.FatQuery do
       end
 
       def count_records(%{select: nil} = records, fetch_opts) do
-        @repo.aggregate(records, :count, :id, timeout: fetch_opts[:timeout])
+        @repo.aggregate(
+          records,
+          :count,
+          FatEcto.FatHelper.get_primary_keys(records, @options[:otp_app]) |> hd(),
+          timeout: fetch_opts[:timeout]
+        )
       end
 
       def count_records(records, fetch_opts) do

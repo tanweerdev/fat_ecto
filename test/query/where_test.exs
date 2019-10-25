@@ -1086,13 +1086,12 @@ defmodule Query.WhereTest do
     }
 
     paginator =
-      Query.build(FatEcto.FatDoctorPatient, opts)
+      Query.build("fat_doctors_patients", opts)
       |> Query.paginate(skip: 0, limit: 10)
 
     %{count_query: count_query} = paginator
 
-    expected =
-      from(d in FatEcto.FatDoctorPatient, where: d.fat_patient_id == ^10 and ^true, select: count("*"))
+    expected = from(d in "fat_doctors_patients", where: d.fat_patient_id == ^10 and ^true, select: count("*"))
 
     assert inspect(expected) == inspect(count_query)
   end
