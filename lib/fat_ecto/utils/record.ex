@@ -65,6 +65,9 @@ defmodule FatUtils.FatRecord do
                 %DateTime{} ->
                   Map.put(acc, k, v)
 
+                %Date{} ->
+                    Map.put(acc, k, v)
+
                 %Time{} ->
                   Map.put(acc, k, v)
 
