@@ -134,7 +134,7 @@ defmodule Query.SelectTest do
         order_by: [desc: h.id],
         limit: ^107,
         offset: ^0,
-        preload: ^{:fat_doctors, :fat_patients}
+        preload: ^[{:fat_doctors, [:fat_patients]}]
       )
 
     query = Query.build(FatEcto.FatHospital, opts, max_limit: 107)

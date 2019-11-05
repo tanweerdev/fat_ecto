@@ -209,4 +209,22 @@ defmodule FatEcto.FatHelper do
         model.__schema__(:primary_key)
     end
   end
+
+  def dynamic_preloading(map) when is_map(map), do: do_preloading(map)
+
+  defp do_preloading(map), do: Enum.reduce(map, [], &do_preloading/2)
+
+  defp do_preloading({key, %{"$include" => include}}, acc) when is_map(include),
+    do: [{String.to_atom(key), do_preloading(include)} | acc]
+
+  defp do_preloading({key, %{"$include" => include}}, acc) when is_bitstring(include),
+    do: [{String.to_atom(key), String.to_atom(include)} | acc]
+
+  defp do_preloading({key, %{"$include" => include}}, acc) when is_list(include),
+    do: [{String.to_atom(key), Enum.map(include, &String.to_atom/1)} | acc]
+
+  defp do_preloading({key, %{"$binding" => :last}}, acc), do: [String.to_atom(key) | acc]
+  defp do_preloading({key, %{"$binding" => :first}}, acc), do: [String.to_atom(key) | acc]
+
+  defp do_preloading({_key, _value}, acc), do: acc
 end

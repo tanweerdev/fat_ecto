@@ -105,11 +105,7 @@ defmodule FatEcto.FatQuery.FatInclude do
         relation = build_options[:relation]
 
         if !is_nil(relation) do
-          from(
-            queryable,
-            # left_join: a in assoc(q, ^FatHelper.string_to_existing_atom(include)),
-            preload: [{^relation, ^FatHelper.string_to_existing_atom(include)}]
-          )
+          queryable
         else
           from(
             queryable,
@@ -131,11 +127,8 @@ defmodule FatEcto.FatQuery.FatInclude do
 
           #   m when is_binary(m) ->
           if !is_nil(relation) do
-            from(
-              queryable,
-              # left_join: a in assoc(q, ^FatHelper.string_to_existing_atom(model)),
-              preload: [{^relation, ^FatHelper.string_to_existing_atom(model)}]
-            )
+            queryable
+            # left_join: a in assoc(q, ^FatHelper.string_to_existing_atom(model)),
           else
             from(
               queryable,
@@ -146,6 +139,26 @@ defmodule FatEcto.FatQuery.FatInclude do
             # end
           end
         end)
+    end
+  end
+
+  def build_include_preloads(queryable, nil) do
+    queryable
+  end
+
+  def build_include_preloads(queryable, include_params) do
+    case include_params do
+      include when is_map(include) ->
+        preloads =
+          FatHelper.dynamic_binding(include)
+          |> FatHelper.dynamic_preloading()
+
+        from(q in queryable,
+          preload: ^preloads
+        )
+
+      _ ->
+        queryable
     end
   end
 end

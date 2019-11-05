@@ -49,7 +49,6 @@ defmodule FatUtils.FatRecord do
         Enum.reduce(Map.drop(record, schema_keys), %{}, fn {k, v}, acc ->
           cond do
             is_list(v) ->
-
               values =
                 Enum.reduce(v, [], fn rec, acc ->
                   acc ++ [sanitize_map(rec)]
@@ -66,7 +65,7 @@ defmodule FatUtils.FatRecord do
                   Map.put(acc, k, v)
 
                 %Date{} ->
-                    Map.put(acc, k, v)
+                  Map.put(acc, k, v)
 
                 %Time{} ->
                   Map.put(acc, k, v)
