@@ -79,7 +79,7 @@ defmodule Query.JoinTest do
         right_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+        select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -133,7 +133,7 @@ defmodule Query.JoinTest do
         inner_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+        select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -163,7 +163,7 @@ defmodule Query.JoinTest do
         inner_join: r in "fat_rooms",
         on: h.id == r.hospital_id and (h.rating in ^[1, 2, 3] and ^true),
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+        select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -196,7 +196,7 @@ defmodule Query.JoinTest do
           h.id == r.hospital_id and
             (h.total_staff > ^1 and h.total_staff < ^3 and (h.rating in ^[1, 2, 3] and ^true)),
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+        select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -227,7 +227,7 @@ defmodule Query.JoinTest do
         inner_join: r in "fat_rooms",
         on: h.id == r.hospital_id and (h.total_staff >= ^1 and (h.rating < ^5 and ^true)),
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+        select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -258,7 +258,7 @@ defmodule Query.JoinTest do
         inner_join: r in "fat_rooms",
         on: h.id == r.hospital_id and (h.total_staff <= ^1 and (h.rating > ^3 and ^true)),
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+        select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -292,7 +292,7 @@ defmodule Query.JoinTest do
             (like(fragment("(?)::TEXT", h.name), ^"%Joh%") and
                (ilike(fragment("(?)::TEXT", h.location), ^"%Dev") and ^true)),
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+        select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -326,7 +326,7 @@ defmodule Query.JoinTest do
             (not like(fragment("(?)::TEXT", h.name), ^"%Joh%") and
                (not ilike(fragment("(?)::TEXT", h.location), ^"%Dev") and ^true)),
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+        select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -360,7 +360,7 @@ defmodule Query.JoinTest do
             (not like(fragment("(?)::TEXT", r.purpose), ^"%Treat%") and
                (not ilike(fragment("(?)::TEXT", h.location), ^"%Dev") and ^true)),
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+        select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -394,7 +394,7 @@ defmodule Query.JoinTest do
             (not like(fragment("(?)::TEXT", r.purpose), ^"%Treat%") and
                (not ilike(fragment("(?)::TEXT", r.name), ^"%Dev") and ^true)),
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+        select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -427,7 +427,7 @@ defmodule Query.JoinTest do
           h.id == r.hospital_id and
             ((h.total_staff <= ^4 or h.total_staff >= ^5) and ((h.rating < ^1 or h.rating > ^3) and ^true)),
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+        select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -458,7 +458,7 @@ defmodule Query.JoinTest do
         inner_join: r in "fat_rooms",
         on: h.id == r.hospital_id and (h.total_staff == ^3 and (h.rating not in ^[1, 3] and ^true)),
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+        select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -488,7 +488,7 @@ defmodule Query.JoinTest do
         inner_join: r in "fat_rooms",
         on: h.id == r.hospital_id and (h.rating >= ^1 and h.rating <= ^3 and ^true),
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+        select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -515,7 +515,7 @@ defmodule Query.JoinTest do
         inner_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+        select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -542,7 +542,7 @@ defmodule Query.JoinTest do
         right_join: r in "fat_rooms",
         on: h.id == r.hospital_id,
         where: r.incharge == ^"John" and ^true,
-        select: merge(h, %{^"fat_rooms" => map(r, [:beds, :capacity, :level])})
+        select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
     result = Query.build(FatEcto.FatHospital, opts)
@@ -580,7 +580,7 @@ defmodule Query.JoinTest do
         where: d.rating == ^5 and ^true,
         where: r.incharge == ^"John" and ^true,
         select:
-          merge(merge(h, %{^"fat_doctors" => map(d, [:phone, :address])}), %{
+          merge(%{^"fat_doctors" => map(d, [:phone, :address])}, %{
             ^"fat_rooms" => map(r, [:beds, :capacity, :level])
           })
       )

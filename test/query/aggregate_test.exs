@@ -237,7 +237,7 @@ defmodule Query.AggregateTest do
         order_by: [asc: f0.beds],
         select:
           merge(
-            merge(merge(f0, %{^"fat_hospital" => map(f1, [:name, :location, :phone])}), %{
+            merge(%{^"fat_hospital" => map(f1, [:name, :location, :phone])}, %{
               "$aggregate" => %{"$sum": %{^"level" => sum(f0.level)}}
             }),
             %{"$group" => %{^"capacity" => f0.capacity}}
