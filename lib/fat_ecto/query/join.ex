@@ -226,6 +226,8 @@ defmodule FatEcto.FatQuery.FatJoin do
 
         select_atoms = Enum.map(select, &FatHelper.string_to_atom/1)
 
+        queryable = select_exists(queryable)
+
         from(
           [q, ..., c] in queryable,
           select_merge: %{
@@ -536,4 +538,10 @@ defmodule FatEcto.FatQuery.FatJoin do
       end
     end)
   end
+
+  def select_exists(%{select: nil} = queryable) do
+    from([q, ..., c] in queryable, select: %{})
+  end
+
+  def select_exists(queryable), do: queryable
 end
