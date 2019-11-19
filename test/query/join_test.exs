@@ -751,4 +751,35 @@ defmodule Query.JoinTest do
 
     assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
   end
+
+  test "returns the query with full join and mutiple where conditions" do
+    opts = %{
+      "$select" => %{"$fields" => ["designation", "experience_years"]},
+      "$full_join" => %{
+        "fat_patients" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "doctor_id",
+          "$where" => %{"location" => "bullavard", "phone" => %{"$ilike" => "Joh"}, "symtoms" => "$not_null"},
+          "$select" => ["name", "prescription"],
+          "$order" => %{"appointments_count" => "$asc"}
+        }
+      }
+    }
+
+    expected =
+      from(f0 in FatEcto.FatDoctor,
+        full_join: f1 in "fat_patients",
+        on: f0.id == f1.doctor_id,
+        where:
+          not is_nil(f1.symtoms) and
+            (ilike(fragment("(?)::TEXT", f1.phone), ^"Joh") and (f1.location == ^"bullavard" and ^true)),
+        order_by: [asc: f1.appointments_count],
+        select:
+          merge(map(f0, [:designation, :experience_years]), %{
+            ^"fat_patients" => map(f1, [:name, :prescription])
+          })
+      )
+
+    assert inspect(Query.build(FatEcto.FatDoctor, opts)) == inspect(expected)
+  end
 end

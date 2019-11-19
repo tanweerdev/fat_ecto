@@ -478,4 +478,51 @@ defmodule Query.IncludeTest do
     result = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
+
+  test "returns the query with multiple where conditions" do
+    opts = %{
+      "$include" => %{
+        "fat_hospitals" => %{
+          "$where" => %{
+            "name" => "%Joh%",
+            "location" => nil,
+            "$not_null" => ["total_staff", "address", "phone"],
+            "rating" => "$not_null",
+            "total_staff" => %{"$between" => [1, 3]}
+          }
+        },
+        "fat_patients" => %{
+          "$where" => %{
+            "name" => "%Joh%",
+            "location" => nil,
+            "$not_null" => ["address", "phone"],
+            "prescription" => "$not_null",
+            "appointments_count" => %{"$between" => [1, 3]}
+          }
+        }
+      }
+    }
+
+    expected =
+      from(f0 in FatEcto.FatDoctor,
+        join: f1 in assoc(f0, :fat_hospitals),
+        join: f2 in assoc(f0, :fat_patients),
+        where:
+          not is_nil(f1.rating) and
+            (f1.name == ^"%Joh%" and
+               (is_nil(f1.location) and
+                  (not is_nil(f1.phone) and
+                     (not is_nil(f1.address) and (not is_nil(f1.total_staff) and ^true))))),
+        where:
+          not is_nil(f2.prescription) and
+            (f2.name == ^"%Joh%" and
+               (is_nil(f2.location) and (not is_nil(f2.phone) and (not is_nil(f2.address) and ^true)))),
+        limit: ^34,
+        offset: ^0,
+        preload: [^[:fat_patients, :fat_hospitals]]
+      )
+
+    result = Query.build(FatEcto.FatDoctor, opts)
+    assert inspect(result) == inspect(expected)
+  end
 end
