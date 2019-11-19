@@ -535,8 +535,7 @@ defmodule Query.WhereTest do
     expected =
       from(f0 in FatEcto.FatHospital,
         where: f0.total_staff >= ^2 or ^true,
-        where: like(fragment("(?)::TEXT", f0.name), ^"%Joh%") and ^true,
-        where: f0.rating in ^[2, 3] and ^true
+        where: f0.rating in ^[2, 3] and (like(fragment("(?)::TEXT", f0.name), ^"%Joh%") and ^true)
       )
 
     query = Query.build(FatEcto.FatHospital, opts)
@@ -634,8 +633,9 @@ defmodule Query.WhereTest do
     expected =
       from(f0 in FatEcto.FatHospital,
         where: f0.total_staff <= ^1 or f0.total_staff >= ^4 or (f0.rating < ^2 or f0.rating > ^3 or ^true),
-        where: ilike(fragment("(?)::TEXT", f0.location), ^"%main%") and ^true,
-        where: like(fragment("(?)::TEXT", f0.name), ^"%Joh%") and ^true
+        where:
+          like(fragment("(?)::TEXT", f0.name), ^"%Joh%") and
+            (ilike(fragment("(?)::TEXT", f0.location), ^"%main%") and ^true)
       )
 
     query = Query.build(FatEcto.FatHospital, opts)
@@ -883,8 +883,9 @@ defmodule Query.WhereTest do
             (f0.rating in ^[2, 3] or
                (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
                   (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true))),
-        where: not like(fragment("(?)::TEXT", f0.location), ^"%some%") and ^true,
-        where: not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") and ^true
+        where:
+          not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") and
+            (not like(fragment("(?)::TEXT", f0.location), ^"%some%") and ^true)
       )
 
     query = Query.build(FatEcto.FatHospital, opts)
@@ -961,8 +962,9 @@ defmodule Query.WhereTest do
             (f0.rating not in ^[2, 3] or
                (ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
                   (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true))),
-        where: not like(fragment("(?)::TEXT", f0.location), ^"%some%") and ^true,
-        where: not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") and ^true
+        where:
+          not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") and
+            (not like(fragment("(?)::TEXT", f0.location), ^"%some%") and ^true)
       )
 
     query = Query.build(FatEcto.FatHospital, opts)
@@ -1043,8 +1045,7 @@ defmodule Query.WhereTest do
 
     expected =
       from(p in FatEcto.FatPatient,
-        where: p.appointments_count not in ^[20, 50] and ^true,
-        where: p.name == ^"john" and ^true
+        where: p.name == ^"john" and (p.appointments_count not in ^[20, 50] and ^true)
       )
 
     assert inspect(expected) == inspect(count_query)
@@ -1059,8 +1060,7 @@ defmodule Query.WhereTest do
 
     %{count_query: count_query} = paginator
 
-    expected =
-      from(r in FatEcto.FatRoom, where: r.floor not in ^[20, 50] and ^true, where: r.name == ^"ICU" and ^true)
+    expected = from(r in FatEcto.FatRoom, where: r.name == ^"ICU" and (r.floor not in ^[20, 50] and ^true))
 
     assert inspect(expected) == inspect(count_query)
   end
@@ -1112,11 +1112,38 @@ defmodule Query.WhereTest do
 
     expected =
       from(p in "fat_patients",
-        where: p.appointments_count not in ^[20, 50] and ^true,
-        where: p.name == ^"john" and ^true,
+        where: p.name == ^"john" and (p.appointments_count not in ^[20, 50] and ^true),
         select: count("*")
       )
 
     assert inspect(expected) == inspect(count_query)
+  end
+
+  test "test dynamics with different data structures" do
+    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
+    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
+
+    opts = %{
+      "$where" => %{
+        "name" => "%Joh%",
+        "location" => nil,
+        "$not_null" => ["total_staff", "address", "phone"],
+        "rating" => "$not_null",
+        "total_staff" => %{"$between" => [1, 3]}
+      }
+    }
+
+    expected =
+      from(f0 in FatEcto.FatHospital,
+        where:
+          f0.total_staff > ^1 and f0.total_staff < ^3 and
+            (not is_nil(f0.rating) and
+               (f0.name == ^"%Joh%" and
+                  (is_nil(f0.location) and
+                     (not is_nil(f0.phone) and
+                        (not is_nil(f0.address) and (not is_nil(f0.total_staff) and ^true))))))
+      )
+
+    assert inspect(Query.build(FatEcto.FatHospital, opts)) == inspect(expected)
   end
 end
