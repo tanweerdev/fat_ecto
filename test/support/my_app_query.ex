@@ -9,7 +9,6 @@ defmodule MyApp.Query do
       {:fat_hospitals, ["phone"]},
       {:fat_doctors, ["name"]},
       {:fat_patients, ["date_of_birth"]}
-    ]
-
-  use FatEcto.FatPaginator
+    ],
+    repo: FatEcto.Repo
 end
