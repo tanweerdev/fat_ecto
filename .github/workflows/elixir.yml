@@ -9,41 +9,63 @@ on:
       - 'master'
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ${{ matrix.os }}
+    name: OTP ${{ matrix.otp }} | Elixir ${{ matrix.elixir }} | OS ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04]
+        otp: [22.x]
+        elixir: [1.9.x]
+        node: [12.x]
 
     services:
       db:
         image: postgres:11.5
-        ports: ["5432:5432"]
+        ports: ['5432:5432']
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
-    
-
     steps:
-    - uses: actions/checkout@v1.0.0
-    - uses: actions/setup-elixir@v1.0.0
-    - name: Set up elixir 1.9
-      with: 
-            otp-version: 22.x
-            elixir_version: 1.9.x
+      - uses: actions/checkout@v1.0.0
+      - uses: actions/setup-elixir@v1.0.0
+        with:
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
 
-    - name: Install PostgreSQL 11 client
-      run: |
-        sudo apt-get -yqq install libpq-dev
+      - name: Install dependencies
+        run: |
+          mix local.rebar --force
+          mix local.hex --force
+          mix deps.get
 
-    - name: Install Dependencies
-      run: |
-        mix local.rebar --force
-        mix local.hex --force
-        mix deps.get
-    - name: Run Tests
-    env:
-        PGHOST: localhost
-        PGUSER: postgres
-        Elixir_ENV: test
-    run: |
-          MIX_ENV=test mix ecto.create
-          MIX_ENV=test mix ecto.migrate
+      # - name: Install PostgreSQL 11 client
+      #   run: |
+      #     sudo apt-get -yqq install libpq-dev
+      - name: Run tests
+        run: |
+          mix compile --warnings-as-errors
+          mix format --check-formatted
+          mix ecto.create
+          mix ecto.migrate
           mix test
+        env:
+          MIX_ENV: test
+          PGHOST: localhost
+          PGUSER: postgres
+          # Elixir_ENV: test
+
+      # - name: Prepare release
+      #   run: |
+      #     mix compile
+      #     yarn --cwd assets deploy
+      #     mix phx.digest
+      #     mix release
+      #   env:
+      #     MIX_ENV: prod
+
+      # - name: Publish release
+      #   uses: moomerman/actions/bin/ghr@master
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     RELEASE_PATH: _build/prod/rel
+      #     APPLICATION: <<APP NAME>>
