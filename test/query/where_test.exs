@@ -1045,7 +1045,8 @@ defmodule Query.WhereTest do
 
     expected =
       from(p in FatEcto.FatPatient,
-        where: p.name == ^"john" and (p.appointments_count not in ^[20, 50] and ^true)
+        where: p.name == ^"john" and (p.appointments_count not in ^[20, 50] and ^true),
+        distinct: true
       )
 
     assert inspect(expected) == inspect(count_query)
@@ -1060,7 +1061,11 @@ defmodule Query.WhereTest do
 
     %{count_query: count_query} = paginator
 
-    expected = from(r in FatEcto.FatRoom, where: r.name == ^"ICU" and (r.floor not in ^[20, 50] and ^true))
+    expected =
+      from(r in FatEcto.FatRoom,
+        where: r.name == ^"ICU" and (r.floor not in ^[20, 50] and ^true),
+        distinct: true
+      )
 
     assert inspect(expected) == inspect(count_query)
   end
@@ -1079,7 +1084,8 @@ defmodule Query.WhereTest do
     expected =
       from(d in FatEcto.FatHospitalDoctor,
         where: d.fat_doctor_id == ^1 and ^true,
-        select: fragment("COUNT(DISTINCT ROW(?, ?))::int", d.fat_doctor_id, d.fat_hospital_id)
+        select: fragment("COUNT(DISTINCT ROW(?, ?))::int", d.fat_doctor_id, d.fat_hospital_id),
+        distinct: true
       )
 
     assert inspect(expected) == inspect(count_query)
@@ -1094,7 +1100,12 @@ defmodule Query.WhereTest do
 
     %{count_query: count_query} = paginator
 
-    expected = from(d in "fat_doctors_patients", where: d.fat_patient_id == ^10 and ^true, select: count("*"))
+    expected =
+      from(d in "fat_doctors_patients",
+        where: d.fat_patient_id == ^10 and ^true,
+        select: count("*"),
+        distinct: true
+      )
 
     assert inspect(expected) == inspect(count_query)
   end
@@ -1113,6 +1124,7 @@ defmodule Query.WhereTest do
     expected =
       from(p in "fat_patients",
         where: p.name == ^"john" and (p.appointments_count not in ^[20, 50] and ^true),
+        distinct: true,
         select: count("*")
       )
 
