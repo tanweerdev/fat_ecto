@@ -410,9 +410,9 @@ defmodule Query.IncludeTest do
     expected =
       from(f0 in FatEcto.FatDoctor,
         left_join: f1 in assoc(f0, :fat_hospitals),
-        join: f2 in assoc(f1, :fat_rooms),
+        left_join: f2 in assoc(f1, :fat_rooms),
         left_join: f3 in assoc(f0, :fat_patients),
-        join: f4 in assoc(f3, :fat_doctors),
+        left_join: f4 in assoc(f3, :fat_doctors),
         limit: ^34,
         offset: ^0,
         preload: [^[fat_patients: [:fat_doctors], fat_hospitals: [:fat_rooms]]]
@@ -439,10 +439,10 @@ defmodule Query.IncludeTest do
     expected =
       from(f0 in FatEcto.FatDoctor,
         left_join: f1 in assoc(f0, :fat_hospitals),
-        join: f2 in assoc(f1, :fat_rooms),
+        left_join: f2 in assoc(f1, :fat_rooms),
         left_join: f3 in assoc(f0, :fat_patients),
-        join: f4 in assoc(f3, :fat_doctors),
-        join: f5 in assoc(f4, :fat_hospitals),
+        left_join: f4 in assoc(f3, :fat_doctors),
+        left_join: f5 in assoc(f4, :fat_hospitals),
         where: f5.name == ^"Joh" and ^true,
         limit: ^34,
         offset: ^0,
