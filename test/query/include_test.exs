@@ -16,7 +16,7 @@ defmodule Query.IncludeTest do
     expected =
       from(
         d in FatEcto.FatDoctor,
-        join: f in assoc(d, :fat_hospitals),
+        left_join: f in assoc(d, :fat_hospitals),
         preload: [^[:fat_hospitals]],
         limit: ^3,
         offset: ^0
@@ -37,7 +37,7 @@ defmodule Query.IncludeTest do
       from(
         d in FatEcto.FatDoctor,
         where: d.id == ^10 and ^true,
-        join: f in assoc(d, :fat_hospitals),
+        left_join: f in assoc(d, :fat_hospitals),
         preload: [^[:fat_hospitals]],
         limit: ^3,
         offset: ^0
@@ -61,7 +61,7 @@ defmodule Query.IncludeTest do
     expected =
       from(
         d in FatEcto.FatDoctor,
-        join: f in assoc(d, :fat_hospitals),
+        left_join: f in assoc(d, :fat_hospitals),
         where: f.id == ^10 and ^true,
         order_by: [asc: f.id],
         preload: [^[:fat_hospitals]],
@@ -208,7 +208,7 @@ defmodule Query.IncludeTest do
     expected =
       from(
         d in FatEcto.FatDoctor,
-        join: h in assoc(d, :fat_hospitals),
+        left_join: h in assoc(d, :fat_hospitals),
         limit: ^34,
         offset: ^0,
         preload: ^[{:fat_hospitals, [:fat_rooms]}]
@@ -231,7 +231,7 @@ defmodule Query.IncludeTest do
     expected =
       from(
         d in FatEcto.FatDoctor,
-        join: h in assoc(d, :fat_hospitals),
+        left_join: h in assoc(d, :fat_hospitals),
         where: h.name == ^"ham" and ^true,
         preload: ^[{:fat_hospitals, [:fat_rooms]}],
         limit: ^34,
@@ -255,7 +255,7 @@ defmodule Query.IncludeTest do
     expected =
       from(
         d in FatEcto.FatDoctor,
-        join: h in assoc(d, :fat_hospitals),
+        left_join: h in assoc(d, :fat_hospitals),
         order_by: [desc: h.id],
         limit: ^34,
         offset: ^0,
@@ -309,7 +309,7 @@ defmodule Query.IncludeTest do
     expected =
       from(
         d in FatEcto.FatDoctor,
-        join: h in assoc(d, :fat_hospitals),
+        left_join: h in assoc(d, :fat_hospitals),
         limit: ^34,
         offset: ^0,
         preload: ^[{:fat_hospitals, :fat_rooms}]
@@ -332,7 +332,7 @@ defmodule Query.IncludeTest do
     expected =
       from(
         d in FatEcto.FatDoctor,
-        join: h in assoc(d, :fat_hospitals),
+        left_join: h in assoc(d, :fat_hospitals),
         where: h.name == ^"ham" and ^true,
         limit: ^34,
         offset: ^0,
@@ -373,7 +373,7 @@ defmodule Query.IncludeTest do
     expected =
       from(
         d in FatEcto.FatDoctor,
-        join: h in assoc(d, :fat_hospitals),
+        left_join: h in assoc(d, :fat_hospitals),
         order_by: [asc: h.id],
         limit: ^34,
         offset: ^0,
@@ -409,9 +409,9 @@ defmodule Query.IncludeTest do
 
     expected =
       from(f0 in FatEcto.FatDoctor,
-        join: f1 in assoc(f0, :fat_hospitals),
+      left_join: f1 in assoc(f0, :fat_hospitals),
         join: f2 in assoc(f1, :fat_rooms),
-        join: f3 in assoc(f0, :fat_patients),
+        left_join: f3 in assoc(f0, :fat_patients),
         join: f4 in assoc(f3, :fat_doctors),
         limit: ^34,
         offset: ^0,
@@ -438,9 +438,9 @@ defmodule Query.IncludeTest do
 
     expected =
       from(f0 in FatEcto.FatDoctor,
-        join: f1 in assoc(f0, :fat_hospitals),
+      left_join: f1 in assoc(f0, :fat_hospitals),
         join: f2 in assoc(f1, :fat_rooms),
-        join: f3 in assoc(f0, :fat_patients),
+        left_join: f3 in assoc(f0, :fat_patients),
         join: f4 in assoc(f3, :fat_doctors),
         join: f5 in assoc(f4, :fat_hospitals),
         where: f5.name == ^"Joh" and ^true,
@@ -468,8 +468,8 @@ defmodule Query.IncludeTest do
 
     expected =
       from(f0 in FatEcto.FatDoctor,
-        join: f1 in assoc(f0, :fat_hospitals),
-        join: f2 in assoc(f0, :fat_patients),
+      left_join: f1 in assoc(f0, :fat_hospitals),
+      left_join: f2 in assoc(f0, :fat_patients),
         limit: ^34,
         offset: ^0,
         preload: [^[:fat_patients, :fat_hospitals]]
@@ -505,8 +505,8 @@ defmodule Query.IncludeTest do
 
     expected =
       from(f0 in FatEcto.FatDoctor,
-        join: f1 in assoc(f0, :fat_hospitals),
-        join: f2 in assoc(f0, :fat_patients),
+      left_join: f1 in assoc(f0, :fat_hospitals),
+      left_join: f2 in assoc(f0, :fat_patients),
         where:
           not is_nil(f1.rating) and
             (f1.name == ^"%Joh%" and

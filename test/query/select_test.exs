@@ -128,7 +128,7 @@ defmodule Query.SelectTest do
         h in FatEcto.FatHospital,
         where: h.rating == ^4 and ^true,
         select: map(h, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}]),
-        join: d in assoc(h, :fat_doctors),
+        left_join: d in assoc(h, :fat_doctors),
         where: d.email == ^"ham" and ^true,
         order_by: [desc: d.id],
         order_by: [desc: h.id],
