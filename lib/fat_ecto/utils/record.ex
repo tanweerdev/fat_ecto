@@ -70,6 +70,9 @@ defmodule FatUtils.FatRecord do
                 %Time{} ->
                   Map.put(acc, k, v)
 
+                %NaiveDateTime{} ->
+                  Map.put(acc, k, v)
+
                 _v ->
                   Map.put(acc, k, sanitize_map(v))
               end
