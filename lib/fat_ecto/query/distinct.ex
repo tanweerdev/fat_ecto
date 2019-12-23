@@ -10,8 +10,21 @@ defmodule FatEcto.FatQuery.FatDistinct do
   def build_distinct(queryable, field, options) when is_boolean(field) do
     FatHelper.params_valid(queryable, field, options)
 
+    schema =
+      case queryable do
+        queryable when is_map(queryable) ->
+          %Ecto.Query.FromExpr{
+            source: {_table, schema}
+          } = queryable.from
+
+          schema
+
+        _ ->
+          queryable
+      end
+
     from(q in queryable,
-      distinct: ^field
+      distinct: ^schema.__schema__(:primary_key)
     )
   end
 
