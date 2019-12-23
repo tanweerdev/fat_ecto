@@ -45,7 +45,7 @@ defmodule Query.DistinctTest do
       "$distinct" => true
     }
 
-    expected = from(h in FatEcto.FatHospital, distinct: true)
+    expected = from(h in FatEcto.FatHospital, distinct: [asc: h.id])
 
     query = Query.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
