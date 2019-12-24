@@ -51,4 +51,36 @@ defmodule Query.DistinctTest do
     assert inspect(query) == inspect(expected)
     assert Repo.all(query) |> length() == 2
   end
+
+  test "returns the query where field is boolean and order_by asc clause" do
+    Repo.insert!(%FatEcto.FatHospital{name: "Doe", phone: "1234", rating: 10})
+    Repo.insert!(%FatEcto.FatHospital{name: "Doe", phone: "1234", rating: 6})
+
+    opts = %{
+      "$distinct" => true,
+      "$order" => %{"id" => "$asc"}
+    }
+
+    expected = from(h in FatEcto.FatHospital, order_by: [asc: h.id], distinct: [asc: h.id])
+
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+    assert Repo.all(query) |> length() == 2
+  end
+
+  test "returns the query where field is boolean and order_by desc clause" do
+    Repo.insert!(%FatEcto.FatHospital{name: "Doe", phone: "1234", rating: 10})
+    Repo.insert!(%FatEcto.FatHospital{name: "Doe", phone: "1234", rating: 6})
+
+    opts = %{
+      "$distinct" => true,
+      "$order" => %{"id" => "$desc"}
+    }
+
+    expected = from(h in FatEcto.FatHospital, order_by: [desc: h.id], distinct: [desc: h.id])
+
+    query = Query.build(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+    assert Repo.all(query) |> length() == 2
+  end
 end

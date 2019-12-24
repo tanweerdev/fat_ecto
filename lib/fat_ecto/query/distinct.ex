@@ -3,11 +3,12 @@ defmodule FatEcto.FatQuery.FatDistinct do
   alias FatEcto.FatHelper
   alias FatEcto.FatHelper
 
-  def build_distinct(queryable, nil, _options) do
+  def build_distinct(queryable, nil, _order_by,  _options) do
     queryable
   end
 
-  def build_distinct(queryable, field, options) when is_boolean(field) do
+  def build_distinct(queryable, field, order_by, options) when is_boolean(field) do
+    if order_by == nil do
     FatHelper.params_valid(queryable, field, options)
 
     schema =
@@ -26,9 +27,22 @@ defmodule FatEcto.FatQuery.FatDistinct do
     from(q in queryable,
       distinct: ^schema.__schema__(:primary_key)
     )
+  else
+    Enum.reduce(order_by, queryable, fn {k, v}, queryable ->
+      if v == "$asc" do
+        from(q in queryable,
+          distinct: [asc: field(q, ^FatHelper.string_to_existing_atom(k))]
+        )
+      else
+        from(q in queryable,
+          distinct: [desc: field(q, ^FatHelper.string_to_existing_atom(k))]
+        )
+      end
+    end)
+  end
   end
 
-  def build_distinct(queryable, field, options) do
+  def build_distinct(queryable, field, _order_by, options) do
     FatHelper.params_valid(queryable, field, options)
 
     from(q in queryable,
