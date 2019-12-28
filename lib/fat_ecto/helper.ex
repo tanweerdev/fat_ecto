@@ -227,4 +227,23 @@ defmodule FatEcto.FatHelper do
   defp do_preloading({key, %{"$binding" => :first}}, acc), do: [String.to_atom(key) | acc]
 
   defp do_preloading({_key, _value}, acc), do: acc
+
+  def remove_conflicting_order_by(queryable, nil), do: queryable
+
+  def remove_conflicting_order_by(queryable, _distinct) do
+    case queryable do
+      queryable when is_map(queryable) ->
+        %{order_bys: order} = queryable
+
+        if Enum.count(order) == 0 do
+          queryable
+        else
+          queryable
+          |> Ecto.Query.exclude(:order_by)
+        end
+
+      _ ->
+        queryable
+    end
+  end
 end

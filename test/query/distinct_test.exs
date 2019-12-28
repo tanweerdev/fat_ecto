@@ -12,7 +12,7 @@ defmodule Query.DistinctTest do
     Repo.insert!(%FatEcto.FatHospital{name: "Doe", phone: "1234", rating: 6})
 
     opts = %{
-      "$distinct" => "name"
+      "$distinct_nested" => "name"
     }
 
     expected = from(h in FatEcto.FatHospital, distinct: [asc: h.name])
@@ -31,7 +31,7 @@ defmodule Query.DistinctTest do
     )
 
     opts = %{
-      "$distinct" => "phone"
+      "$distinct_nested" => "phone"
     }
 
     assert_raise ArgumentError, fn -> Query.build(FatEcto.FatHospital, opts) end
@@ -42,7 +42,7 @@ defmodule Query.DistinctTest do
     Repo.insert!(%FatEcto.FatHospital{name: "Doe", phone: "1234", rating: 6})
 
     opts = %{
-      "$distinct" => true
+      "$distinct_nested" => true
     }
 
     expected = from(h in FatEcto.FatHospital, distinct: true)
@@ -50,5 +50,72 @@ defmodule Query.DistinctTest do
     query = Query.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     assert Repo.all(query) |> length() == 2
+  end
+
+  test "returns the query with nested order_by clause" do
+    opts = %{
+      "$select" => %{"$fields" => ["designation", "experience_years"]},
+      "$full_join" => %{
+        "fat_patients" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "doctor_id",
+          "$where" => %{"location" => "bullavard", "phone" => %{"$ilike" => "Joh"}, "symtoms" => "$not_null"},
+          "$select" => ["name", "prescription"],
+          "$order" => %{"appointments_count" => "$asc"}
+        }
+      },
+      "$distinct_nested" => true
+    }
+
+    expected =
+      from(f0 in FatEcto.FatDoctor,
+        full_join: f1 in "fat_patients",
+        on: f0.id == f1.doctor_id,
+        where:
+          not is_nil(f1.symtoms) and
+            (ilike(fragment("(?)::TEXT", f1.phone), ^"Joh") and (f1.location == ^"bullavard" and ^true)),
+        distinct: true,
+        select:
+          merge(map(f0, [:designation, :experience_years]), %{
+            ^"fat_patients" => map(f1, [:name, :prescription])
+          })
+      )
+
+    query = Query.build(FatEcto.FatDoctor, opts)
+    assert inspect(query) == inspect(expected)
+  end
+
+  test "returns the query with outer order_by clause" do
+    opts = %{
+      "$select" => %{"$fields" => ["designation", "experience_years"]},
+      "$full_join" => %{
+        "fat_patients" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "doctor_id",
+          "$where" => %{"location" => "bullavard", "phone" => %{"$ilike" => "Joh"}, "symtoms" => "$not_null"},
+          "$select" => ["name", "prescription"]
+        }
+      },
+      "$order" => %{"appointments_count" => "$asc"},
+      "$distinct_nested" => true
+    }
+
+    expected =
+      from(f0 in FatEcto.FatDoctor,
+        full_join: f1 in "fat_patients",
+        on: f0.id == f1.doctor_id,
+        where:
+          not is_nil(f1.symtoms) and
+            (ilike(fragment("(?)::TEXT", f1.phone), ^"Joh") and (f1.location == ^"bullavard" and ^true)),
+        order_by: [asc: f0.appointments_count],
+        distinct: true,
+        select:
+          merge(map(f0, [:designation, :experience_years]), %{
+            ^"fat_patients" => map(f1, [:name, :prescription])
+          })
+      )
+
+    query = Query.build(FatEcto.FatDoctor, opts)
+    assert inspect(query) == inspect(expected)
   end
 end
