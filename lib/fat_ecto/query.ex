@@ -140,7 +140,7 @@ defmodule FatEcto.FatQuery do
         |> FatEcto.FatHelper.remove_conflicting_order_by(opts["$distinct_nested"])
         |> FatEcto.FatQuery.FatInclude.build_include(opts["$include"], model, build_options)
         |> FatEcto.FatQuery.FatInclude.build_include_preloads(opts["$include"])
-        |> FatEcto.FatQuery.FatDistinct.build_distinct(opts["$distinct_nested"], build_options)
+        |> FatEcto.FatQuery.FatDistinct.build_distinct(opts["$distinct"], build_options)
         |> FatEcto.FatQuery.FatOrderBy.build_order_by(opts["$order"], build_options)
         |> FatEcto.FatQuery.FatAggregate.build_aggregate(opts["$aggregate"], build_options)
         |> FatEcto.FatQuery.FatGroupBy.build_group_by(opts["$group"], build_options)

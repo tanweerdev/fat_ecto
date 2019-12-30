@@ -12,7 +12,7 @@ defmodule Query.DistinctTest do
     Repo.insert!(%FatEcto.FatHospital{name: "Doe", phone: "1234", rating: 6})
 
     opts = %{
-      "$distinct_nested" => "name"
+      "$distinct" => "name"
     }
 
     expected = from(h in FatEcto.FatHospital, distinct: [asc: h.name])
@@ -31,7 +31,7 @@ defmodule Query.DistinctTest do
     )
 
     opts = %{
-      "$distinct_nested" => "phone"
+      "$distinct" => "phone"
     }
 
     assert_raise ArgumentError, fn -> Query.build(FatEcto.FatHospital, opts) end
@@ -42,7 +42,7 @@ defmodule Query.DistinctTest do
     Repo.insert!(%FatEcto.FatHospital{name: "Doe", phone: "1234", rating: 6})
 
     opts = %{
-      "$distinct_nested" => true
+      "$distinct" => true
     }
 
     expected = from(h in FatEcto.FatHospital, distinct: true)
@@ -64,7 +64,8 @@ defmodule Query.DistinctTest do
           "$order" => %{"appointments_count" => "$asc"}
         }
       },
-      "$distinct_nested" => true
+      "$distinct_nested" => true,
+      "$distinct" => true
     }
 
     expected =
@@ -97,7 +98,7 @@ defmodule Query.DistinctTest do
         }
       },
       "$order" => %{"appointments_count" => "$asc"},
-      "$distinct_nested" => true
+      "$distinct" => true
     }
 
     expected =
