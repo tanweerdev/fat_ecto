@@ -119,4 +119,52 @@ defmodule Query.DistinctTest do
     query = Query.build(FatEcto.FatDoctor, opts)
     assert inspect(query) == inspect(expected)
   end
+
+  test "returns the query with join, include and outer order_by" do
+    opts = %{
+      "$select" => %{"$fields" => ["designation", "experience_years"]},
+      "$full_join" => %{
+        "fat_patients" => %{
+          "$on_field" => "id",
+          "$on_table_field" => "doctor_id",
+          "$where" => %{"location" => "bullavard", "phone" => %{"$ilike" => "Joh"}, "symtoms" => "$not_null"},
+          "$select" => ["name", "prescription"],
+          "$order" => %{"appointments_count" => "$asc"}
+        }
+      },
+      "$include" => %{
+        "fat_hospitals" => %{
+          "$limit" => 10,
+          "$order" => %{"id" => "$asc"},
+          "$where" => %{"id" => 10}
+        }
+      },
+      "$order" => %{"experience_years" => "$asc"},
+      "$distinct" => true,
+      "$distinct_nested" => true
+    }
+
+    expected =
+      from(f0 in FatEcto.FatDoctor,
+        full_join: f1 in "fat_patients",
+        on: f0.id == f1.doctor_id,
+        left_join: f2 in assoc(f0, :fat_hospitals),
+        where:
+          not is_nil(f1.symtoms) and
+            (ilike(fragment("(?)::TEXT", f1.phone), ^"Joh") and (f1.location == ^"bullavard" and ^true)),
+        where: f2.id == ^10 and ^true,
+        order_by: [asc: f0.experience_years],
+        limit: ^10,
+        offset: ^0,
+        distinct: true,
+        select:
+          merge(map(f0, [:designation, :experience_years]), %{
+            ^"fat_patients" => map(f1, [:name, :prescription])
+          }),
+        preload: [^[:fat_hospitals]]
+      )
+
+    query = Query.build(FatEcto.FatDoctor, opts)
+    assert inspect(query) == inspect(expected)
+  end
 end
