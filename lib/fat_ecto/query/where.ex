@@ -429,7 +429,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>   }
       ...>  }
       iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, left_join: f1 in assoc(f0, :fat_doctors), where: (f0.rating < ^10 or f0.rating > ^20) and ^true, order_by: [asc: f1.experience_years], limit: ^34, offset: ^0, select: map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]), preload: [[fat_doctors: [:fat_patients]]]>
+      #Ecto.Query<from f0 in FatEcto.FatHospital, left_join: f1 in assoc(f0, :fat_doctors), where: (f0.rating < ^10 or f0.rating > ^20) and ^true, where: f1.rating > ^20 and f1.rating < ^30 and ^true, order_by: [asc: f1.experience_years], limit: ^34, offset: ^0, select: map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]), preload: [[fat_doctors: [:fat_patients]]]>
 
 
   ### Options
@@ -570,9 +570,9 @@ defmodule FatEcto.FatQuery.FatWhere do
       ...>   }
       ...>  }
       iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, left_join: f2 in assoc(f0, :fat_doctors), where: is_nil(f0.rating) and ^true, where: f1.floor in ^[5, 15] and ^true, order_by: [asc: f1.id], order_by: [desc: f2.experience_years], limit: ^34, offset: ^0, select: merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:floor, :name]}]), %{^"fat_rooms" => map(f1, [:name, :floor, :is_active])}), preload: [[fat_doctors: [:fat_patients]]]>
+      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in \"fat_rooms\", on: f0.id == f1.hospital_id, left_join: f2 in assoc(f0, :fat_doctors), where: is_nil(f0.rating) and ^true, where: f1.floor in ^[5, 15] and ^true, where: f2.rating > ^20 and f2.rating < ^30 and ^true, order_by: [asc: f1.id], order_by: [desc: f2.experience_years], limit: ^34, offset: ^0, select: merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:floor, :name]}]), %{^\"fat_rooms\" => map(f1, [:name, :floor, :is_active])}), preload: [[fat_doctors: [:fat_patients]]]>
 
-      
+
   ### Options
     - `$select`- Select the fields from `hospital` and `rooms`.
     - `$right_join: :$select`- Select the fields from  `rooms`.
@@ -736,6 +736,7 @@ defmodule FatEcto.FatQuery.FatWhere do
 
     {where_params, queryable} =
       Enum.reduce(where_params, queryable, fn {k, v}, {map, queryable} ->
+        # TODO: why contains
         if String.contains?(k, "$or") do
           {map, WhereOr.or_condition(queryable, where_params[k], build_options)}
         else
@@ -755,77 +756,79 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   # TODO: Add docs and examples of ex_doc for this case here
   defp query_where(dynamics, {k, map_cond}, opts) when is_map(map_cond) do
-    case k do
-      "$or" ->
-        Enum.reduce(map_cond, [], fn {key, condition}, _acc ->
-          case condition do
-            %{"$like" => value} ->
-              FatDynamics.like_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+    # TODO: dynamics not being assigned??
+    dynamics =
+      case k do
+        "$or" ->
+          Enum.reduce(map_cond, dynamics, fn {key, condition}, dynamics ->
+            case condition do
+              %{"$like" => value} ->
+                FatDynamics.like_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
-            %{"$ilike" => value} ->
-              FatDynamics.ilike_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+              %{"$ilike" => value} ->
+                FatDynamics.ilike_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
-            %{"$lt" => value} ->
-              FatDynamics.lt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+              %{"$lt" => value} ->
+                FatDynamics.lt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
-            %{"$not" => value} ->
-              FatNotDynamics.not_eq_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+              %{"$not" => value} ->
+                FatNotDynamics.not_eq_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
-            %{"$lte" => value} ->
-              FatDynamics.lte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+              %{"$lte" => value} ->
+                FatDynamics.lte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
-            %{"$gt" => value} ->
-              FatDynamics.gt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+              %{"$gt" => value} ->
+                FatDynamics.gt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
-            %{"$gte" => value} ->
-              FatDynamics.gte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+              %{"$gte" => value} ->
+                FatDynamics.gte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
-            condition when not is_list(condition) and not is_map(condition) ->
-              FatDynamics.eq_dynamic(key, condition, dynamics, opts ++ [dynamic_type: :or])
+              condition when not is_list(condition) and not is_map(condition) ->
+                FatDynamics.eq_dynamic(key, condition, dynamics, opts ++ [dynamic_type: :or])
 
-            _whatever ->
-              dynamics
-          end
-        end)
+              _whatever ->
+                dynamics
+            end
+          end)
 
-      # TODO: confirm its what should be used `where` or `or_where` below
+        # TODO: confirm its what should be used `where` or `or_where` below
 
-      "$not" ->
-        Enum.reduce(map_cond, [], fn {key, condition}, _acc ->
-          case condition do
-            %{"$like" => value} ->
-              FatNotDynamics.not_like_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+        "$not" ->
+          Enum.reduce(map_cond, dynamics, fn {key, condition}, dynamics ->
+            case condition do
+              %{"$like" => value} ->
+                FatNotDynamics.not_like_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
-            %{"$ilike" => value} ->
-              FatNotDynamics.not_ilike_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+              %{"$ilike" => value} ->
+                FatNotDynamics.not_ilike_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
-            %{"$lt" => value} ->
-              FatNotDynamics.not_lt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+              %{"$lt" => value} ->
+                FatNotDynamics.not_lt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
-            %{"$lte" => value} ->
-              FatNotDynamics.not_lte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+              %{"$lte" => value} ->
+                FatNotDynamics.not_lte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
-            %{"$gt" => value} ->
-              FatNotDynamics.not_gt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+              %{"$gt" => value} ->
+                FatNotDynamics.not_gt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
-            %{"$gte" => value} ->
-              FatNotDynamics.not_gte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+              %{"$gte" => value} ->
+                FatNotDynamics.not_gte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
-            condition when not is_list(condition) and not is_map(condition) ->
-              FatNotDynamics.not_eq_dynamic(key, condition, dynamics, opts ++ [dynamic_type: :or])
+              condition when not is_list(condition) and not is_map(condition) ->
+                FatNotDynamics.not_eq_dynamic(key, condition, dynamics, opts ++ [dynamic_type: :or])
 
-            _whatever ->
-              dynamics
-          end
-        end)
+              _whatever ->
+                dynamics
+            end
+          end)
 
-      # TODO: confirm its what should be used `where` or `or_where` below
+        # TODO: confirm its what should be used `where` or `or_where` below
 
-      _whatever ->
-        dynamics
-    end
+        _whatever ->
+          dynamics
+      end
 
-    Enum.reduce(map_cond, [], fn {key, value}, _acc ->
+    Enum.reduce(map_cond, dynamics, fn {key, value}, dynamics ->
       case key do
         "$like" ->
           FatDynamics.like_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])

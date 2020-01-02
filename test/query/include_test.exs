@@ -508,15 +508,18 @@ defmodule Query.IncludeTest do
         left_join: f1 in assoc(f0, :fat_hospitals),
         left_join: f2 in assoc(f0, :fat_patients),
         where:
-          not is_nil(f1.rating) and
-            (f1.name == ^"%Joh%" and
-               (is_nil(f1.location) and
-                  (not is_nil(f1.phone) and
-                     (not is_nil(f1.address) and (not is_nil(f1.total_staff) and ^true))))),
+          f1.total_staff > ^1 and f1.total_staff < ^3 and
+            (not is_nil(f1.rating) and
+               (f1.name == ^"%Joh%" and
+                  (is_nil(f1.location) and
+                     (not is_nil(f1.phone) and
+                        (not is_nil(f1.address) and (not is_nil(f1.total_staff) and ^true)))))),
         where:
           not is_nil(f2.prescription) and
             (f2.name == ^"%Joh%" and
-               (is_nil(f2.location) and (not is_nil(f2.phone) and (not is_nil(f2.address) and ^true)))),
+               (is_nil(f2.location) and
+                  (f2.appointments_count > ^1 and f2.appointments_count < ^3 and
+                     (not is_nil(f2.phone) and (not is_nil(f2.address) and ^true))))),
         limit: ^34,
         offset: ^0,
         preload: [^[:fat_patients, :fat_hospitals]]
