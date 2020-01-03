@@ -32,6 +32,7 @@ defmodule FatUtils.FatRecord do
             [key, value] = Tuple.to_list(record)
             %{key => sanitize_map(value)}
 
+          # TODO: fix this warning
           _size ->
             record
             |> Tuple.to_list()
