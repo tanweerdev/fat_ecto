@@ -23,7 +23,7 @@ defmodule FatEcto.DeleteRecord do
 
             case @repo.delete(data) do
               {:ok, _struct} ->
-                delete(conn)
+                FatEcto.Render.render_resp(conn, "Record Deleted", 204, put_content_type: "application/json")
 
               {:error, changeset} ->
                 changeset_errors(conn, changeset)
