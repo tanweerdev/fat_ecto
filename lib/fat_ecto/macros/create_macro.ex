@@ -29,7 +29,7 @@ defmodule FatEcto.CreateRecord do
         changeset = @schema.changeset(struct(@schema), params)
 
         with {:ok, record} <- @repo.insert(changeset) do
-          FatEcto.Render.render_record(conn, record, unquote(options) ++ [status_to_put: :created])
+          render_record(conn, record, unquote(options) ++ [status_to_put: :created])
         end
       end
     end

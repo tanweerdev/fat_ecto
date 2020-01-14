@@ -40,7 +40,7 @@ defmodule FatEcto.UpdateRecord do
             soft_delete(conn, record, changeset, params, soft_delete_key, soft_deleted_value)
           else
             with {:ok, record} <- @repo.update(changeset) do
-              FatEcto.Render.render_record(conn, record, unquote(options) ++ [status_to_put: :ok])
+              render_record(conn, record, unquote(options) ++ [status_to_put: :ok])
             end
           end
         end
@@ -86,7 +86,7 @@ defmodule FatEcto.UpdateRecord do
           end)
 
         with {:ok, record} <- @repo.update(changeset) do
-          FatEcto.Render.render_resp(conn, "Record soft deleted", 200, put_content_type: "application/json")
+          render_resp(conn, "Record soft deleted", 200, put_content_type: "application/json")
         end
       end
     end
