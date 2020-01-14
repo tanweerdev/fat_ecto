@@ -55,7 +55,7 @@ defmodule FatEcto.Factory do
       phone: "12345",
       address: "123 street",
       prescription: "doses",
-      symtoms: "fever",
+      symptoms: "fever",
       date_of_birth: "1-4-1994",
       appointments_count: 4
     }

@@ -1,12 +1,12 @@
 defmodule FatUtils.FatRecord do
+  @moduledoc """
+  Record related utils.
+
+  `import` or `alias` it inside your module.
+  #### Takes a map, list of maps, tuple and remove struct field, meta field and not loaded assocations.
+  """
   defmacro __using__(options) do
     quote location: :keep do
-      @moduledoc """
-      Record related utils.
-
-      `import` or `alias` it inside your module.
-      """
-
       @opt_app unquote(options)[:otp_app]
       if !@opt_app do
         raise "please define opt app when using fat query methods"
@@ -19,7 +19,6 @@ defmodule FatUtils.FatRecord do
         raise "please define encoder_library when using fat record utils"
       end
 
-      # TODO: write tests and docs
       def sanitize_map(records) when is_list(records) do
         Enum.reduce(records, [], fn rec, acc ->
           acc ++ [sanitize_map(rec)]
@@ -40,9 +39,6 @@ defmodule FatUtils.FatRecord do
         end
       end
 
-      @doc """
-       Takes a map, list of maps, tuple and remove struct field, meta field and not loaded assocations.
-      """
       def sanitize_map(record) when is_map(record) do
         schema_keys = [:__struct__, :__meta__]
         # not_loaded_keys = [:__field__, :__owner__, :__cardinality__]

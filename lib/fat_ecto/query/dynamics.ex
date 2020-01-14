@@ -1,7 +1,37 @@
 defmodule FatEcto.FatQuery.FatDynamics do
   import Ecto.Query
   alias FatEcto.FatHelper
-  # TODO: Add docs and examples for ex_doc
+
+  @moduledoc """
+  Builds a `where query` using dynamics.
+
+  ### Parameters
+
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Where query options as a map.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>    "$select" => %{
+      ...>     "$fields" => ["name", "location", "rating"]
+      ...>    },
+      ...>   "$where" => %{
+      ...>      "name" => "%John%",
+      ...>      "location" => nil,
+      ...>      "rating" => "$not_null",
+      ...>      "total_staff" => %{"$between" => [1, 3]}
+      ...>    }
+      ...>  }
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.total_staff > ^1 and f0.total_staff < ^3 and (not(is_nil(f0.rating)) and (f0.name == ^"%John%" and (is_nil(f0.location) and ^true))), select: map(f0, [:name, :location, :rating])>
+      
+  ### Options
+
+    - `$select` - Select the fields from `hospital` and `rooms`.
+    - `$where`  - Added the where attribute in the query.
+  """
+
   @spec is_nil_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
   def is_nil_dynamic(key, dynamics, opts \\ []) do
     if opts[:binding] == :last do

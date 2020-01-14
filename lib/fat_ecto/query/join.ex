@@ -1,18 +1,18 @@
 defmodule FatEcto.FatQuery.FatJoin do
-  # TODO: Add docs and examples for ex_doc
   alias FatEcto.FatHelper
   import Ecto.Query
   alias FatEcto.FatQuery.{FatDynamics, FatNotDynamics}
 
-  # TODO: Add docs and examples for ex_doc
+  @moduledoc """
+  Builds a `join` query with another table on the type of join passed in the params. It also supports additional `join_on` clauses.
+  ### $right_join
+  ### Parameters
 
-  @doc """
-  Build a  `join query` depending on the params.
-  ## Parameters
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Join query options as a map
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map
-  ## Examples
+  ### Examples
+
       iex> query_opts = %{
       ...>  "$select" => %{
       ...>    "$fields" => ["name", "location", "rating"],
@@ -23,11 +23,152 @@ defmodule FatEcto.FatQuery.FatJoin do
       ...>  "$include" => %{
       ...>    "fat_doctors" => %{
       ...>      "$include" => ["fat_patients"],
-      ...>      "$where" => %{"name" => "ham"},
+      ...>      "$where" => %{"experience_years" => 2},
       ...>      "$order" => %{"id" => "$desc"}
       ...>    }
       ...>  },
       ...>  "$right_join" => %{
+      ...>    "fat_rooms" => %{
+      ...>      "$on_field" => "id",
+      ...>      "$on_table_field" => "hospital_id",
+      ...>      "$on_type" => "$in_x",
+      ...>      "$select" => ["beds", "capacity", "level"],
+      ...>      "$where" => %{"incharge" => "John"}
+      ...>    }
+      ...>  }
+      ...> }
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id in f1.hospital_id, left_join: f2 in assoc(f0, :fat_doctors), where: f0.rating == ^4 and ^true, where: f1.incharge == ^"John" and ^true, where: f2.experience_years == ^2 and ^true, order_by: [desc: f2.id], order_by: [desc: f0.id], limit: ^34, offset: ^0, select: merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}]), %{^"fat_rooms" => map(f1, [:beds, :capacity, :level])}), preload: [[fat_doctors: [:fat_patients]]]>
+
+  ## Options
+
+    - `$include`               - Include the assoication `doctors`.
+    - `$include: :fat_patients`- Include the assoication `patients`. Which has association with `doctors`.
+    - `$select`                - Select the fields from `hospital` and `rooms`.
+    - `$where`                 - Added the where attribute in the query.
+    - `$order`                 - Sort the result based on the order attribute.
+    - `$right_join`            - Specify the type of join.  
+    - `$on_type`               -  Specify the type of condition on the join.
+    - `$on_field`              - Specify the field for join.
+    - `$on_table_field`        - Specify the field for join in the joining table.
+
+  ### $left_join
+  ### Parameters
+
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Join query options as a map
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>  "$select" => %{
+      ...>    "$fields" => ["name", "location", "rating"],
+      ...>    "fat_rooms" => ["beds", "capacity"]
+      ...>  },
+      ...>  "$order" => %{"id" => "$desc"},
+      ...>  "$where" => %{"rating" => 4},
+      ...>  "$include" => %{
+      ...>    "fat_doctors" => %{
+      ...>      "$include" => ["fat_patients"],
+      ...>      "$where" => %{"experience_years" => 2},
+      ...>      "$order" => %{"id" => "$desc"}
+      ...>    }
+      ...>  },
+      ...>  "$left_join" => %{
+      ...>    "fat_rooms" => %{
+      ...>      "$on_field" => "id",
+      ...>      "$on_table_field" => "hospital_id",
+      ...>      "$on_type" => "$not_eq",
+      ...>      "$select" => ["beds", "capacity", "level"],
+      ...>      "$where" => %{"incharge" => "John"}
+      ...>    }
+      ...>  }
+      ...> }
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, left_join: f1 in "fat_rooms", on: f0.id != f1.hospital_id, left_join: f2 in assoc(f0, :fat_doctors), where: f0.rating == ^4 and ^true, where: f1.incharge == ^"John" and ^true, where: f2.experience_years == ^2 and ^true, order_by: [desc: f2.id], order_by: [desc: f0.id], limit: ^34, offset: ^0, select: merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}]), %{^"fat_rooms" => map(f1, [:beds, :capacity, :level])}), preload: [[fat_doctors: [:fat_patients]]]>
+
+  ## Options
+
+    - `$include`               - Include the assoication `doctors`.
+    - `$include: :fat_patients`- Include the assoication `patients`. Which has association with `doctors`.
+    - `$select`                - Select the fields from `hospital` and `rooms`.
+    - `$where`                 - Added the where attribute in the query.
+    - `$order`                 - Sort the result based on the order attribute.
+    - `$right_join`            - Specify the type of join.
+    - `$on_type`               -  Specify the type of condition on the join.
+    - `$on_field`              - Specify the field for join.
+    - `$on_table_field`        - Specify the field for join in the joining table.
+
+  ### $inner_join
+  ### Parameters
+
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Join query options as a map
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>  "$select" => %{
+      ...>    "$fields" => ["name", "location", "rating"],
+      ...>    "fat_rooms" => ["beds", "capacity"]
+      ...>  },
+      ...>  "$order" => %{"id" => "$desc"},
+      ...>  "$where" => %{"rating" => 4},
+      ...>  "$include" => %{
+      ...>    "fat_doctors" => %{
+      ...>      "$include" => ["fat_patients"],
+      ...>      "$where" => %{"experience_years" => 2},
+      ...>      "$order" => %{"id" => "$desc"}
+      ...>    }
+      ...>  },
+      ...>  "$inner_join" => %{
+      ...>    "fat_rooms" => %{
+      ...>      "$on_field" => "id",
+      ...>      "$on_table_field" => "hospital_id",
+      ...>      "$on_type" => "$in",
+      ...>      "$select" => ["beds", "capacity", "level"],
+      ...>      "$where" => %{"incharge" => "John"}
+      ...>    }
+      ...>  }
+      ...> }
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in "fat_rooms", on: f1.hospital_id in f0.id, left_join: f2 in assoc(f0, :fat_doctors), where: f0.rating == ^4 and ^true, where: f1.incharge == ^"John" and ^true, where: f2.experience_years == ^2 and ^true, order_by: [desc: f2.id], order_by: [desc: f0.id], limit: ^34, offset: ^0, select: merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}]), %{^"fat_rooms" => map(f1, [:beds, :capacity, :level])}), preload: [[fat_doctors: [:fat_patients]]]>
+
+  ## Options
+
+    - `$include`               - Include the assoication `doctors`.
+    - `$include: :fat_patients`- Include the assoication `patients`. Which has association with `doctors`.
+    - `$select`                - Select the fields from `hospital` and `rooms`.
+    - `$where`                 - Added the where attribute in the query.
+    - `$order`                 - Sort the result based on the order attribute.
+    - `$right_join`            - Specify the type of join.
+    - `$on_type`               -  Specify the type of condition on the join.
+    - `$on_field`              - Specify the field for join.
+    - `$on_table_field`        - Specify the field for join in the joining table.
+
+  ### $full_join
+  ### Parameters
+
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Join query options as a map
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>  "$select" => %{
+      ...>    "$fields" => ["name", "location", "rating"],
+      ...>    "fat_rooms" => ["beds", "capacity"]
+      ...>  },
+      ...>  "$order" => %{"id" => "$desc"},
+      ...>  "$where" => %{"rating" => 4},
+      ...>  "$include" => %{
+      ...>    "fat_doctors" => %{
+      ...>      "$include" => ["fat_patients"],
+      ...>      "$where" => %{"experience_years" => 2},
+      ...>      "$order" => %{"id" => "$desc"}
+      ...>    }
+      ...>  },
+      ...>  "$full_join" => %{
       ...>    "fat_rooms" => %{
       ...>      "$on_field" => "id",
       ...>      "$on_table_field" => "hospital_id",
@@ -36,24 +177,20 @@ defmodule FatEcto.FatQuery.FatJoin do
       ...>    }
       ...>  }
       ...> }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, join: f2 in assoc(f0, :fat_doctors), where: f0.rating == ^4 and ^true, where: f1.incharge == ^"John" and ^true, order_by: [desc: f0.id], select: merge(map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), %{^:fat_rooms => map(f1, [:beds, :capacity, :level])}), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.name == ^"ham" and ^true, order_by: [desc: f.id], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
-
-
-
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, full_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, left_join: f2 in assoc(f0, :fat_doctors), where: f0.rating == ^4 and ^true, where: f1.incharge == ^"John" and ^true, where: f2.experience_years == ^2 and ^true, order_by: [desc: f2.id], order_by: [desc: f0.id], limit: ^34, offset: ^0, select: merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}]), %{^"fat_rooms" => map(f1, [:beds, :capacity, :level])}), preload: [[fat_doctors: [:fat_patients]]]>
 
 
   ## Options
 
-    - `$include`- Include the assoication `doctors`.
+    - `$include`               - Include the assoication `doctors`.
     - `$include: :fat_patients`- Include the assoication `patients`. Which has association with `doctors`.
-    - `$select`- Select the fields from `hospital` and `rooms`.
-    - `$where`- Added the where attribute in the query.
-    - `$order`- Sort the result based on the order attribute.
-    - `$right_join`- Specify the type of join.
-    - `$on_field`- Specify the field for join.
-    - `$on_table_field`- Specify the field for join in the joining table.
-
+    - `$select`                - Select the fields from `hospital` and `rooms`.
+    - `$where`                 - Added the where attribute in the query.
+    - `$order`                 - Sort the result based on the order attribute.
+    - `$right_join`            - Specify the type of join.
+    - `$on_field`              - Specify the field for join.
+    - `$on_table_field`        - Specify the field for join in the joining table.
 
   """
 
@@ -63,8 +200,48 @@ defmodule FatEcto.FatQuery.FatJoin do
     queryable
   end
 
+  @doc """
+   Builds a join query based on the join type passed in the params.
+
+
+  ### Parameters
+
+  - `queryable`   -  Ecto Queryable that represents your schema name, table name or query.
+  - `join_params` -  Join query options as a map.
+  - `join_type`   -  Type of join.
+  - `options`     -  Pass options related to otp_app.
+
+
+  ### Examples
+
+    iex> query_opts = %{
+    ...>  "$select" => %{
+    ...>    "$fields" => ["name", "location", "rating"],
+    ...>    "fat_rooms" => ["beds", "capacity"]
+    ...>  },
+    ...>  "$order" => %{"id" => "$desc"},
+    ...>  "$where" => %{"rating" => 4},
+    ...>  "$include" => %{
+    ...>    "fat_doctors" => %{
+    ...>      "$include" => ["fat_patients"],
+    ...>      "$where" => %{"experience_years" => 2},
+    ...>      "$order" => %{"id" => "$desc"}
+    ...>    }
+    ...>  },
+    ...>  "$right_join" => %{
+    ...>    "fat_rooms" => %{
+    ...>      "$on_field" => "id",
+    ...>      "$on_table_field" => "hospital_id",
+    ...>      "$select" => ["beds", "capacity", "level"],
+    ...>      "$where" => %{"incharge" => "John"}
+    ...>    }
+    ...>  }
+    ...> }
+    iex> #{__MODULE__}.build_join(FatEcto.FatHospital, query_opts["$right_join"], "$right_join", [])
+    #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, where: f1.incharge == ^"John" and ^true, select: %{^"fat_rooms" => map(f1, [:beds, :capacity, :level])}>
+  """
+
   def build_join(queryable, join_params, join_type, options) do
-    # TODO: Add docs and examples of ex_doc for this case here
     Enum.reduce(join_params, queryable, fn {join_key, join_item}, queryable ->
       join_table = join_item["$on_table"] || join_key
 
@@ -79,7 +256,6 @@ defmodule FatEcto.FatQuery.FatJoin do
 
       queryable =
         case join_item["$on_type"] do
-          # TODO: Add docs and examples of ex_doc for this case here
           "$not_eq" ->
             join(
               queryable,
@@ -152,7 +328,6 @@ defmodule FatEcto.FatQuery.FatJoin do
               )
             end
 
-          # TODO: Add docs and examples of ex_doc for this case here
           "$in_x" ->
             join(
               queryable,
@@ -166,7 +341,6 @@ defmodule FatEcto.FatQuery.FatJoin do
                 )
             )
 
-          # TODO: Add docs and examples of ex_doc for this case here
           "$in" ->
             join(
               queryable,
@@ -183,7 +357,6 @@ defmodule FatEcto.FatQuery.FatJoin do
                 )
             )
 
-          # TODO: Add docs and examples of ex_doc for this case here
           _whatever ->
             on_caluses = build_on_dynamic(join_table, join_item, join_item["$additional_on_clauses"], options)
 
@@ -196,7 +369,6 @@ defmodule FatEcto.FatQuery.FatJoin do
             )
         end
 
-      # TODO: Add docs and examples of ex_doc for this case here
       queryable =
         FatEcto.FatQuery.FatWhere.build_where(queryable, join_item["$where"], options ++ [table: join_table],
           binding: :last
@@ -358,7 +530,7 @@ defmodule FatEcto.FatQuery.FatJoin do
     )
   end
 
-  def build_on_dynamic(_join_table, join_items, nil, _app) do
+  defp build_on_dynamic(_join_table, join_items, nil, _app) do
     dynamic(
       [q, ..., c],
       field(
@@ -372,7 +544,7 @@ defmodule FatEcto.FatQuery.FatJoin do
     )
   end
 
-  def build_on_dynamic(join_table, join_items, additional_join, app) do
+  defp build_on_dynamic(join_table, join_items, additional_join, app) do
     dynamics =
       Enum.reduce(additional_join, true, fn {field, map}, dynamics ->
         {binding, map} = Map.pop(map, "$binding")
@@ -392,7 +564,7 @@ defmodule FatEcto.FatQuery.FatJoin do
     )
   end
 
-  def build_on_dynamic(join_table, _join_items, {field, map}, dynamics, binding, app) do
+  defp build_on_dynamic(join_table, _join_items, {field, map}, dynamics, binding, app) do
     FatHelper.params_valid(join_table, field, app)
 
     Enum.reduce(map, [], fn {k, value}, opts ->
@@ -539,9 +711,9 @@ defmodule FatEcto.FatQuery.FatJoin do
     end)
   end
 
-  def select_exists(%{select: nil} = queryable) do
+  defp select_exists(%{select: nil} = queryable) do
     from([q, ..., c] in queryable, select: %{})
   end
 
-  def select_exists(queryable), do: queryable
+  defp select_exists(queryable), do: queryable
 end

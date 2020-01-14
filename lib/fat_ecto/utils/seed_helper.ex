@@ -1,5 +1,6 @@
 defmodule FatUtils.SeedHelper do
-  # TODO: Add docs and examples for ex_doc
+  @moduledoc false
+
   defmacro __using__(options) do
     quote do
       use Ecto.Migration
@@ -16,7 +17,6 @@ defmodule FatUtils.SeedHelper do
         raise "please define seed_base_path when using fat seed utils"
       end
 
-      # TODO: Add docs and examples for ex_doc
       def import_from_csv(
             csv_path,
             callback,
@@ -40,7 +40,6 @@ defmodule FatUtils.SeedHelper do
         |> Stream.run()
       end
 
-      # TODO: Add docs and examples for ex_doc
       def map_escap_sql(map, should_coonvert_empty_to_nil) do
         for {key, value} <- map, into: %{} do
           case value do
@@ -68,7 +67,6 @@ defmodule FatUtils.SeedHelper do
         end
       end
 
-      # TODO: Add docs and examples for ex_doc
       def map_to_table(map, table) do
         keys =
           map
@@ -83,7 +81,6 @@ defmodule FatUtils.SeedHelper do
         Ecto.Migration.execute("INSERT INTO #{table} (\"#{keys}\") values (#{values})")
       end
 
-      # TODO: Add docs and examples for ex_doc
       def reset_id_seq(table, id \\ "id") do
         Ecto.Migration.execute("SELECT setval('#{table}_#{id}_seq', (SELECT MAX(#{id}) from \"#{table}\"));")
       end

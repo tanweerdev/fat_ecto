@@ -1,4 +1,34 @@
 defmodule FatEcto.DeleteRecord do
+  @moduledoc """
+
+  ### Delete
+
+  #### Note: Either use `use FatEcto.Render` or write your own views.
+
+  ### Parameters
+
+  - `repo`- repository name.
+  - `schema` - schema name.
+
+  ```elixir
+  use FatEcto.DeleteRecord, repo: repo_name,  schema: schema_name
+  ```
+  you just need to pass `repo_name` and `schema_name`.
+
+  #### Example:
+
+  ```elixir
+  defmodule DemoWeb.MemberController do
+
+    use DemoWeb, :controller
+    use FatEcto.DeleteRecord, repo: Demo.Repo,  schema: Demo.Member
+
+  end
+  ```
+  ##### Note
+  It also check the associations with other modules before deletion and generates proper error.
+  """
+
   defmacro __using__(options) do
     quote do
       alias FatEcto.MacrosHelper

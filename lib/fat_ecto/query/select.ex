@@ -1,15 +1,17 @@
 defmodule FatEcto.FatQuery.FatSelect do
-  # TODO: Add docs and examples for ex_doc
   alias FatEcto.FatHelper
   import Ecto.Query
-  # TODO: Add docs and examples for ex_doc
-  @doc """
-  Build a  `select query` depending on the params.
-  ## Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map
-  ## Examples
+  @moduledoc """
+  Builds a `select` query based on the params passed.
+
+  ### Parameters
+
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
+
+  ### Examples
+
       iex> query_opts = %{
       ...>  "$select" => %{
       ...>    "$fields" => ["name", "location", "rating"],
@@ -28,17 +30,13 @@ defmodule FatEcto.FatQuery.FatSelect do
       iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f0 in FatEcto.FatHospital, join: f1 in assoc(f0, :fat_doctors), where: f0.rating == ^4 and ^true, order_by: [desc: f0.id], select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.name == ^"ham" and ^true, order_by: [desc: f.id], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
 
-
-
-
   ## Options
 
-    - `$include`- Include the assoication `doctors`.
+    - `$include`               - Include the assoication `doctors`.
     - `$include: :fat_patients`- Include the assoication `patients`. Which has association with `doctors`.
-    - `$select`- Select the fields from `hospital` and `rooms`.
-    - `$where`- Added the where attribute in the query.
-    - `$order`- Sort the result based on the order attribute.
-
+    - `$select`                - Select the fields from `hospital` and `rooms`.
+    - `$where`                 - Added the where attribute in the query.
+    - `$order`                 - Sort the result based on the order attribute.
 
   """
 
