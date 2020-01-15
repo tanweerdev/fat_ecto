@@ -16,7 +16,21 @@ defmodule FatEcto.DeleteRecord do
       def delete(conn, %{"id" => id}) do
         case MacrosHelper.get_record(id, @repo, @schema) do
           {:error, :not_found} ->
-            not_found(conn, "Record not found")
+            error_view_module = unquote(options)[:error_view_module]
+            error_view = unquote(options)[:error_view_404]
+            data_to_view_as = unquote(options)[:error_data_to_view_as]
+
+            render_record(
+              conn,
+              "Record not found",
+              unquote(options) ++
+                [
+                  status_to_put: 404,
+                  put_view_module: error_view_module,
+                  view_to_render: error_view,
+                  data_to_view_as: data_to_view_as
+                ]
+            )
 
           {:ok, record} ->
             data = add_assoc_constraint(record, id)
@@ -26,7 +40,8 @@ defmodule FatEcto.DeleteRecord do
                 render_resp(conn, "Record Deleted", 204, put_content_type: "application/json")
 
               {:error, changeset} ->
-                changeset_errors(conn, changeset)
+                error_view = unquote(options)[:error_view]
+                errors_changeset(conn, changeset, status_to_put: 422, put_view_module: error_view)
             end
         end
       end
