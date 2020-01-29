@@ -1,7 +1,4 @@
 defmodule FatEcto.FatQuery.FatDynamics do
-  import Ecto.Query
-  alias FatEcto.FatHelper
-
   @moduledoc """
   Builds a `where query` using dynamics.
 
@@ -25,12 +22,300 @@ defmodule FatEcto.FatQuery.FatDynamics do
       ...>  }
       iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.total_staff > ^1 and f0.total_staff < ^3 and (not(is_nil(f0.rating)) and (f0.name == ^"%John%" and (is_nil(f0.location) and ^true))), select: map(f0, [:name, :location, :rating])>
-      
+
   ### Options
 
     - `$select` - Select the fields from `hospital` and `rooms`.
     - `$where`  - Added the where attribute in the query.
   """
+
+  import Ecto.Query
+  alias FatEcto.FatHelper
+
+  @doc """
+  ## => nil
+  ### Parameters
+
+    - `key`       - Pass a key that is an field name of the schema.
+    - `dynamics`  - Pass dynamics to add queries dynamically.
+    - `opts`      - Pass options related to query bindings.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>    "$select" => %{
+      ...>     "$fields" => ["name", "location"]
+      ...>    },
+      ...>   "$where" => %{
+      ...>      "location" => nil
+      ...>    }
+      ...>  }
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, where: is_nil(f0.location) and ^true, select: map(f0, [:name, :location])>
+
+
+  ## => $gt
+  ### Parameters
+
+    - `key`       - Pass a key that is an field name of the schema.
+    - `value`     - Pass a value of the field.
+    - `dynamics`  - Pass dynamics to add queries dynamically.
+    - `opts`      - Pass options related to query bindings.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>    "$select" => %{
+      ...>     "$fields" => ["name", "location"]
+      ...>    },
+      ...>   "$where" => %{
+      ...>      "floor" => %{"$gt" => 3}
+      ...>    }
+      ...>  }
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.floor > ^3 and ^true, select: map(f0, [:name, :location])>
+
+
+  ## => $gte
+  ### Parameters
+
+    - `key`       - Pass a key that is an field name of the schema.
+    - `value`     - Pass a value of the field.
+    - `dynamics`  - Pass dynamics to add queries dynamically.
+    - `opts`      - Pass options related to query bindings.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>    "$select" => %{
+      ...>     "$fields" => ["name", "rating"]
+      ...>    },
+      ...>   "$where" => %{
+      ...>      "rating" => %{"$gte" => 4}
+      ...>    }
+      ...>  }
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating >= ^4 and ^true, select: map(f0, [:name, :rating])>
+
+  ## => $lte
+  ### Parameters
+
+    - `key`       - Pass a key that is an field name of the schema.
+    - `value`     - Pass a value of the field.
+    - `dynamics`  - Pass dynamics to add queries dynamically.
+    - `opts`      - Pass options related to query bindings.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>    "$select" => %{
+      ...>     "$fields" => ["name", "rating"]
+      ...>    },
+      ...>   "$where" => %{
+      ...>      "rating" => %{"$lte" => 2}
+      ...>    }
+      ...>  }
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating <= ^2 and ^true, select: map(f0, [:name, :rating])>
+
+  ## => $lt
+  ### Parameters
+
+    - `key`       - Pass a key that is an field name of the schema.
+    - `value`     - Pass a value of the field.
+    - `dynamics`  - Pass dynamics to add queries dynamically.
+    - `opts`      - Pass options related to query bindings.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>    "$select" => %{
+      ...>     "$fields" => ["name", "rating"]
+      ...>    },
+      ...>   "$where" => %{
+      ...>      "rating" => %{"$lt" => 3}
+      ...>    }
+      ...>  }
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating < ^3 and ^true, select: map(f0, [:name, :rating])>
+
+  ## => $ilike
+  ### Parameters
+
+    - `key`       - Pass a key that is an field name of the schema.
+    - `value`     - Pass a value of the field.
+    - `dynamics`  - Pass dynamics to add queries dynamically.
+    - `opts`      - Pass options related to query bindings.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>    "$select" => %{
+      ...>     "$fields" => ["email", "rating"]
+      ...>    },
+      ...>   "$where" => %{
+      ...>      "designation" => %{"$ilike" => "%Surge%"}
+      ...>    }
+      ...>  }
+      iex> #{MyApp.Query}.build(FatEcto.FatDoctor, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatDoctor, where: ilike(fragment("(?)::TEXT", f0.designation), ^"%Surge%") and ^true, select: map(f0, [:email, :rating])>
+
+  ## => $like
+  ### Parameters
+
+    - `key`       - Pass a key that is an field name of the schema.
+    - `value`     - Pass a value of the field.
+    - `dynamics`  - Pass dynamics to add queries dynamically.
+    - `opts`      - Pass options related to query bindings.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>    "$select" => %{
+      ...>     "$fields" => ["email", "rating"]
+      ...>    },
+      ...>   "$where" => %{
+      ...>      "email" => %{"$like" => "%test%"}
+      ...>    }
+      ...>  }
+      iex> #{MyApp.Query}.build(FatEcto.FatDoctor, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", f0.email), ^"%test%") and ^true, select: map(f0, [:email, :rating])>
+
+  ## => $equal
+  ### Parameters
+
+    - `key`       - Pass a key that is an field name of the schema.
+    - `value`     - Pass a value of the field.
+    - `dynamics`  - Pass dynamics to add queries dynamically.
+    - `opts`      - Pass options related to query bindings.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>    "$select" => %{
+      ...>     "$fields" => ["name", "rating"]
+      ...>    },
+      ...>   "$where" => %{
+      ...>      "$or" => %{
+      ...>        "rating" => %{"$equal" => 2}
+      ...>      }
+      ...>    }
+      ...>  }
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating == ^2 or ^true, select: map(f0, [:name, :rating])>
+
+  ## => $between
+  ### Parameters
+
+    - `key`       - Pass a key that is an field name of the schema.
+    - `values`    - Pass a list of values of the field for minimum and maximum range.
+    - `dynamics`  - Pass dynamics to add queries dynamically.
+    - `opts`      - Pass options related to query bindings.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>    "$select" => %{
+      ...>     "$fields" => ["name", "rating"]
+      ...>    },
+      ...>   "$where" => %{
+      ...>     "total_staff" => %{"$between" => [13, 19]}
+      ...>    }
+      ...>  }
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.total_staff > ^13 and f0.total_staff < ^19 and ^true, select: map(f0, [:name, :rating])>
+
+
+  ## => $between_equal
+  ### Parameters
+
+    - `key`       - Pass a key that is an field name of the schema.
+    - `values`    - Pass a list of values of the field for minimum and maximum range.
+    - `dynamics`  - Pass dynamics to add queries dynamically.
+    - `opts`      - Pass options related to query bindings.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>    "$select" => %{
+      ...>     "$fields" => ["name", "rating"]
+      ...>    },
+      ...>   "$where" => %{
+      ...>     "total_staff" => %{"$between_equal" => [13, 19]}
+      ...>    }
+      ...>  }
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.total_staff >= ^13 and f0.total_staff <= ^19 and ^true, select: map(f0, [:name, :rating])>
+
+  ## => $in
+  ### Parameters
+
+    - `key`       - Pass a key that is an field name of the schema.
+    - `values`    - Pass a list of values of the field that represent range.
+    - `dynamics`  - Pass dynamics to add queries dynamically.
+    - `opts`      - Pass options related to query bindings.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>    "$select" => %{
+      ...>     "$fields" => ["name", "rating"]
+      ...>    },
+      ...>   "$where" => %{
+      ...>     "total_staff" => %{"$in" => [3, 9]}
+      ...>    }
+      ...>  }
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.total_staff in ^[3, 9] and ^true, select: map(f0, [:name, :rating])>
+
+  ## => $contains
+  ### Parameters
+
+    - `key`       - Pass a key that is an field name of the schema.
+    - `values`    - Pass a list of values of the field.
+    - `dynamics`  - Pass dynamics to add queries dynamically.
+    - `opts`      - Pass options related to query bindings.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>    "$select" => %{
+      ...>     "$fields" => ["email", "rating"]
+      ...>    },
+      ...>   "$where" => %{
+      ...>      "email" => %{"$contains" => "%test%"}
+      ...>    }
+      ...>  }
+      iex> #{MyApp.Query}.build(FatEcto.FatDoctor, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatDoctor, where: fragment("? @> ?", f0.email, ^"%test%") and ^true, select: map(f0, [:email, :rating])>
+
+
+
+  ## => $contains_any
+  ### Parameters
+
+    - `key`       - Pass a key that is an field name of the schema.
+    - `values`    - Pass a list of values of the field.
+    - `dynamics`  - Pass dynamics to add queries dynamically.
+    - `opts`      - Pass options related to query bindings.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>    "$select" => %{
+      ...>     "$fields" => ["email", "rating"]
+      ...>    },
+      ...>   "$where" => %{
+      ...>      "email" => %{"$contains_any" => "%test%"}
+      ...>    }
+      ...>  }
+      iex> #{MyApp.Query}.build(FatEcto.FatDoctor, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatDoctor, where: fragment("? && ?", f0.email, ^"%test%") and ^true, select: map(f0, [:email, :rating])>
+
+  """
+
+
+
 
   @spec is_nil_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
   def is_nil_dynamic(key, dynamics, opts \\ []) do
@@ -587,4 +872,5 @@ defmodule FatEcto.FatQuery.FatDynamics do
       end
     end
   end
+
 end
