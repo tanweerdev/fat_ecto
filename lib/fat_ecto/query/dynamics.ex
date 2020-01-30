@@ -515,9 +515,9 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
   ### Examples
 
-     iex> result = #{__MODULE__}.eq_dynamic("experience_years", 2, true, [dynamic_type: :and])
-     iex> inspect(result)
-     "dynamic([q], q.experience_years == ^2 and ^true)"
+       iex> result = #{__MODULE__}.eq_dynamic("experience_years", 2, true, [dynamic_type: :and])
+       iex> inspect(result)
+       "dynamic([q], q.experience_years == ^2 and ^true)"
   """
 
   @spec eq_dynamic(any(), any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()

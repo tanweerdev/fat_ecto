@@ -214,31 +214,31 @@ defmodule FatEcto.FatQuery.FatJoin do
 
   ### Examples
 
-    iex> query_opts = %{
-    ...>  "$select" => %{
-    ...>    "$fields" => ["name", "location", "rating"],
-    ...>    "fat_rooms" => ["beds", "capacity"]
-    ...>  },
-    ...>  "$order" => %{"id" => "$desc"},
-    ...>  "$where" => %{"rating" => 4},
-    ...>  "$include" => %{
-    ...>    "fat_doctors" => %{
-    ...>      "$include" => ["fat_patients"],
-    ...>      "$where" => %{"experience_years" => 2},
-    ...>      "$order" => %{"id" => "$desc"}
-    ...>    }
-    ...>  },
-    ...>  "$right_join" => %{
-    ...>    "fat_rooms" => %{
-    ...>      "$on_field" => "id",
-    ...>      "$on_table_field" => "hospital_id",
-    ...>      "$select" => ["beds", "capacity", "level"],
-    ...>      "$where" => %{"incharge" => "John"}
-    ...>    }
-    ...>  }
-    ...> }
-    iex> #{__MODULE__}.build_join(FatEcto.FatHospital, query_opts["$right_join"], "$right_join", [])
-    #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, where: f1.incharge == ^"John" and ^true, select: %{^"fat_rooms" => map(f1, [:beds, :capacity, :level])}>
+      iex> query_opts = %{
+      ...>  "$select" => %{
+      ...>    "$fields" => ["name", "location", "rating"],
+      ...>    "fat_rooms" => ["beds", "capacity"]
+      ...>  },
+      ...>  "$order" => %{"id" => "$desc"},
+      ...>  "$where" => %{"rating" => 4},
+      ...>  "$include" => %{
+      ...>    "fat_doctors" => %{
+      ...>      "$include" => ["fat_patients"],
+      ...>      "$where" => %{"experience_years" => 2},
+      ...>      "$order" => %{"id" => "$desc"}
+      ...>    }
+      ...>  },
+      ...>  "$right_join" => %{
+      ...>    "fat_rooms" => %{
+      ...>      "$on_field" => "id",
+      ...>      "$on_table_field" => "hospital_id",
+      ...>      "$select" => ["beds", "capacity", "level"],
+      ...>      "$where" => %{"incharge" => "John"}
+      ...>    }
+      ...>  }
+      ...> }
+      iex> #{__MODULE__}.build_join(FatEcto.FatHospital, query_opts["$right_join"], "$right_join", [])
+      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in "fat_rooms", on: f0.id == f1.hospital_id, where: f1.incharge == ^"John" and ^true, select: %{^"fat_rooms" => map(f1, [:beds, :capacity, :level])}>
   """
 
   def build_join(queryable, join_params, join_type, options) do

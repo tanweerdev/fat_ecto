@@ -20,6 +20,23 @@ defmodule FatUtils.FatRecord do
 
         - `record/records`   - List of maps, tuple or a map.
 
+      ### Example
+
+          iex> record = FatEcto.Repo.insert!(%FatEcto.FatDoctor{name: "test", designation: "doctor", phone: "12345", address: "123 Hampton Road"})
+          iex> sanitize_map = #{__MODULE__}.sanitize_map(record)
+          iex> Map.drop(sanitize_map, [:id])
+          %{
+              address: "123 Hampton Road",
+              designation: "doctor",
+              email: nil,
+              end_date: nil,
+              experience_years: nil,
+              name: "test",
+              phone: "12345",
+              rating: nil,
+              start_date: nil
+            }
+
       """
       def sanitize_map(records) when is_list(records) do
         Enum.reduce(records, [], fn rec, acc ->
