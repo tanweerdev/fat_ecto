@@ -1,30 +1,5 @@
 defmodule FatEcto.CreateRecord do
-  @moduledoc """
-  ### Create
-
-  #### Note: Either use `use FatEcto.Render` or write your own views.
-
-  ### Parameters
-
-  - `repo`- repository name.
-  - `schema` - schema name.
-
-  ```elixir
-  use FatEcto.CreateRecord, repo: repo_name,  schema: schema_name
-  ```
-  you just need to pass `repo_name` and `schema_name`.
-
-  #### Example
-
-  ```elixir
-  defmodule DemoWeb.MemberController do
-
-    use DemoWeb, :controller
-    use FatEcto.CreateRecord, repo: Demo.Repo,  schema: Demo.Member
-
-  end
-  ```
-  """
+  @moduledoc false
 
   defmacro __using__(options) do
     quote do
