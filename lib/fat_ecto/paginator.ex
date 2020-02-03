@@ -1,46 +1,44 @@
 defmodule FatEcto.FatPaginator do
+  @moduledoc false
   # TODO: make paginator optional via global config and via options passed
-  # TODO: Add docs and examples for ex_doc
+
   defmacro __using__(options) do
     quote location: :keep do
       import Ecto.Query
 
       # TODO: @repo.all and @repo.one nil warning
       @options unquote(options)
-      # TODO: Add docs and examples for ex_doc
       @doc """
-         Apply limit and offset to the query if not provided and return meta.
+        Paginate the records.
+      ### Parameters
 
-      ## Parameters
+         - `query`   - Ecto Queryable that represents your schema name, table name or query.
+         - `params`  - limit and skip values.
 
-        - `queryable`- Schema name that represents your database model.
-        - `query_opts` - include query options as a map
+      ### Examples
 
-      ## Examples
-          iex> query_opts = %{
-          ...>  "$find" => "$all",
-          ...>  "$select" => %{"$fields" => ["name", "rating"], "fat_rooms" => ["beds"]},
-          ...>  "$where" => %{"id" => 10},
-          ...>  "$limit" => 15,
-          ...>  "$skip" => 0
-          ...> }
-          iex> build(FatEcto.FatHospital, query_opts)
-          #Result
-
-
-
-
-      ## Options
-
-        - `$find => $all`- To fetch all the results from database.
-        - `$find => $one`- To fetch single record from database.
-        - `$select`- Select the fields from `hospital` and `rooms`.
-        - `$where`- Added the where attribute in the query.
-        - `$limit`- Limit the number of records returned from the repo.
-        - `$skip`- Used an an offset.
-
-       If no limit is defined in the query. FAT uses the default limit specified in the fat_ecto config.
-
+              iex> query_opts = %{
+              ...>    "$select" => %{
+              ...>     "$fields" => ["name", "location", "rating"]
+              ...>    },
+              ...>   "$where" => %{
+              ...>      "name" => "%John%",
+              ...>      "location" => nil,
+              ...>      "rating" => "$not_null",
+              ...>      "total_staff" => %{"$between" => [1, 3]}
+              ...>    }
+              ...>  }
+              iex> query = #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+              iex> result = #{__MODULE__}.paginate(query, [limit: 10, skip: 0])
+              iex>  %{count_query: count_query, data_query: data_query, limit: limit, skip: skip} = result
+              iex> limit
+              10
+              iex> skip
+              0
+              iex> count_query
+              #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.total_staff > ^1 and f0.total_staff < ^3 and (not(is_nil(f0.rating)) and (f0.name == ^"%John%" and (is_nil(f0.location) and ^true))), distinct: true>
+              iex> data_query
+              #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.total_staff > ^1 and f0.total_staff < ^3 and (not(is_nil(f0.rating)) and (f0.name == ^\"%John%\" and (is_nil(f0.location) and ^true))), limit: ^10, offset: ^0, select: map(f0, [:name, :location, :rating])>
       """
 
       def paginate(query, params) do

@@ -1,4 +1,6 @@
 defmodule FatEcto.UpdateRecord do
+  @moduledoc false
+
   defmacro __using__(options) do
     quote do
       alias FatEcto.MacrosHelper
@@ -40,7 +42,7 @@ defmodule FatEcto.UpdateRecord do
             soft_delete(conn, record, changeset, params, soft_delete_key, soft_deleted_value)
           else
             with {:ok, record} <- @repo.update(changeset) do
-              render(conn, "show.json", data: record)
+              render_record(conn, record, unquote(options) ++ [status_to_put: :ok])
             end
           end
         end
@@ -86,7 +88,7 @@ defmodule FatEcto.UpdateRecord do
           end)
 
         with {:ok, record} <- @repo.update(changeset) do
-          ok_status(conn, "Record soft deleted")
+          render_resp(conn, "Record soft deleted", 200, put_content_type: "application/json")
         end
       end
     end

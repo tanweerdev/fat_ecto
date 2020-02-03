@@ -41,8 +41,9 @@ defmodule FatEcto.MixProject do
       {:ecto, "~> 3.2"},
       {:ecto_sql, "~> 3.3", only: :test},
       {:postgrex, "~> 0.15.3", only: :test},
-      {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:earmark, "~> 1.4.3", only: :dev},
+      {:ex_doc, "~> 0.19", only: :dev, runtime: false},
+      {:csv, "~> 2.3"},
       {:ex_machina, "~> 2.3", only: :test},
       {:jason, "~> 1.1.2"}
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},

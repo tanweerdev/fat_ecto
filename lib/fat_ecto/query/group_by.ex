@@ -1,36 +1,62 @@
 defmodule FatEcto.FatQuery.FatGroupBy do
-  # TODO: Add docs and examples for ex_doc
   alias FatEcto.FatHelper
   import Ecto.Query
-  # TODO: Add docs and examples for ex_doc
 
-  @doc """
-  Build a  `group_by query` depending on the params.
-  ## Parameters
+  @moduledoc """
+  Build a `group_by` query according to the group_by field/fields passed in the params.
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map
-  ## Examples
+  ### Parameters
+
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Group_By query options as a map.
+
+  ### Examples
+
       iex> query_opts = %{
       ...>  "$select" => %{
       ...>    "$fields" => ["name", "location", "rating"],
-      ...>    "fat_rooms" => ["beds", "capacity"]
+      ...>    "fat_rooms" => ["name", "floor"]
       ...>  },
       ...>  "$order" => %{"id" => "$desc"},
       ...>  "$where" => %{"rating" => 4},
       ...>  "$group" => "total_staff"
       ...> }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f in FatEcto.FatHospital, where: f.rating == ^4 and ^true, group_by: [f.total_staff], order_by: [desc: f.id], select: map(f, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}])>
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating == ^4 and ^true, group_by: [f0.total_staff], order_by: [desc: f0.id], select: merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]), %{\"$group\" => %{^\"total_staff\" => map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]).total_staff}})>
 
 
-
-  ## Options
+  ### Options
 
     - `$select`- Select the fields from `hospital` and `rooms`.
-    - `$where`- Added the where attribute in the query.
-    - `$group`- Added the group_by attribute in the query.
-    - `$order`- Sort the result based on the order attribute.
+    - `$where` - Added the where attribute in the query.
+    - `$group` - Added the group_by attribute in the query.
+    - `$order` - Sort the result based on the order attribute.
+
+  ### Parameters
+
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Group_By query options as a map.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>  "$select" => %{
+      ...>    "$fields" => ["name", "location", "rating"],
+      ...>    "fat_rooms" => ["name", "floor"]
+      ...>  },
+      ...>  "$order" => %{"id" => "$desc"},
+      ...>  "$where" => %{"rating" => 4},
+      ...>  "$group" => ["total_staff", "rating"]
+      ...> }
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating == ^4 and ^true, group_by: [f0.total_staff], group_by: [f0.rating], order_by: [desc: f0.id], select: merge(merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]), %{"$group" => %{^"total_staff" => map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]).total_staff}}), %{"$group" => %{^"rating" => map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]).rating}})>
+
+  ### Options
+
+    - `$select`- Select the fields from `hospital` and `rooms`.
+    - `$where` - Added the where attribute in the query.
+    - `$group` - Added the group_by attributes in the query.
+    - `$order` - Sort the result based on the order attribute.   
   """
   def build_group_by(queryable, group_params, build_options, opts \\ [])
 
@@ -38,6 +64,29 @@ defmodule FatEcto.FatQuery.FatGroupBy do
     queryable
   end
 
+  @doc """
+    Builds a `group_by` query.
+  ### Parameters
+
+    - `queryable`     - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`    - Group_By query options as a map.
+    - `opts`          - Pass options related to query bindings.
+    - `build_options` - Pass options related to otp_app.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>  "$select" => %{
+      ...>    "$fields" => ["name", "location", "rating"],
+      ...>    "fat_rooms" => ["name", "floor"]
+      ...>  },
+      ...>  "$order" => %{"id" => "$desc"},
+      ...>  "$where" => %{"rating" => 4},
+      ...>  "$group" => ["total_staff", "rating"]
+      ...> }
+      iex> #{__MODULE__}.build_group_by(FatEcto.FatHospital, query_opts["$group"], [], [])
+      #Ecto.Query<from f0 in FatEcto.FatHospital, group_by: [f0.total_staff], group_by: [f0.rating], select: merge(merge(f0, %{"$group" => %{^"total_staff" => f0.total_staff}}), %{"$group" => %{^"rating" => f0.rating}})>
+  """
   def build_group_by(queryable, group_by_params, build_options, opts) do
     case group_by_params do
       group_by_params when is_list(group_by_params) ->

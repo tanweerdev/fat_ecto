@@ -6,7 +6,7 @@ defmodule FatUtils.Changeset do
   @doc """
     Takes changeset and check if xor keys are present and return changeset error and also checks if xor keys are empty in the record and return error.
   """
-  def require_xor(changeset, record, xor_keys, _options \\ []) do
+  def validate_xor(changeset, record, xor_keys, _options \\ []) do
     changeset =
       if FatUtils.Map.has_all_keys?(changeset.changes, xor_keys) do
         error_msg = Enum.join(xor_keys, " XOR ")
@@ -31,6 +31,27 @@ defmodule FatUtils.Changeset do
       end)
     else
       changeset
+    end
+  end
+
+  @doc """
+   Takes changeset and check if one of the key is present and return changeset error.
+  """
+  def require_only_one_of(changeset, _record, single_keys, _options \\ []) do
+    if FatUtils.Map.get_keys_count(changeset.changes, single_keys) == 1 do
+      changeset
+    else
+      first_keys = Enum.drop(single_keys, -2)
+      first_keys = Enum.join(first_keys, ",")
+      last_two_elements = Enum.slice(single_keys, -2, 2)
+      last_two_elements = Enum.join(last_two_elements, " or ")
+
+      error_msg = first_keys <> ", " <> last_two_elements
+      error_msg = String.trim_leading(error_msg, ", ")
+
+      Enum.reduce(single_keys, changeset, fn single_key, acc ->
+        Ecto.Changeset.add_error(acc, single_key, "only one of " <> error_msg <> " is required")
+      end)
     end
   end
 

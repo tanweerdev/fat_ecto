@@ -1,20 +1,15 @@
 defmodule FatEcto.FatQuery.FatWhere do
-  # TODO: Add docs and examples for ex_doc
   import Ecto.Query
 
   @moduledoc """
   Where supports multiple query methods.
 
-
-
-
   ## => like
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
-
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map.
 
   ### Example
 
@@ -29,15 +24,12 @@ defmodule FatEcto.FatQuery.FatWhere do
     - `$select`- Select the fields from `doctor`.
     - `$like`- Added the like attribute in the where query.
 
-
-
   ## => iLike
-
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -62,8 +54,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -91,8 +83,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -120,8 +112,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -148,8 +140,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -177,8 +169,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -204,8 +196,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -233,8 +225,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -265,8 +257,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -301,8 +293,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -338,8 +330,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -373,8 +365,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -408,8 +400,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -446,8 +438,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -493,8 +485,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -540,8 +532,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -590,8 +582,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -643,8 +635,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map.
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
 
 
   ### Example
@@ -697,11 +689,13 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   @doc """
   Build a  `where query` depending on the params.
-  ## Parameters
+  ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map
-  ## Examples
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
+
+  ### Examples
+
       iex> query_opts = %{
       ...>  "$select" => %{
       ...>    "$fields" => ["name", "location", "rating"],

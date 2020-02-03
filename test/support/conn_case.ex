@@ -18,5 +18,7 @@ defmodule FatEcto.ConnCase do
   setup do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(FatEcto.Repo)
     Ecto.Adapters.SQL.Sandbox.mode(FatEcto.Repo, {:shared, self()})
+    FatEcto.Repo.delete_all(FatEcto.FatPatient)
+    :ok
   end
 end

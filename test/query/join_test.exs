@@ -759,7 +759,7 @@ defmodule Query.JoinTest do
         "fat_patients" => %{
           "$on_field" => "id",
           "$on_table_field" => "doctor_id",
-          "$where" => %{"location" => "bullavard", "phone" => %{"$ilike" => "Joh"}, "symtoms" => "$not_null"},
+          "$where" => %{"location" => "bullavard", "phone" => %{"$ilike" => "Joh"}, "symptoms" => "$not_null"},
           "$select" => ["name", "prescription"],
           "$order" => %{"appointments_count" => "$asc"}
         }
@@ -771,7 +771,7 @@ defmodule Query.JoinTest do
         full_join: f1 in "fat_patients",
         on: f0.id == f1.doctor_id,
         where:
-          not is_nil(f1.symtoms) and
+          not is_nil(f1.symptoms) and
             (ilike(fragment("(?)::TEXT", f1.phone), ^"Joh") and (f1.location == ^"bullavard" and ^true)),
         order_by: [asc: f1.appointments_count],
         select:

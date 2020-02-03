@@ -26,6 +26,14 @@ defmodule FatUtils.Map do
   end
 
   @doc """
+    Count the number of given keys in a given map.
+  """
+
+  def get_keys_count(map, keys) do
+    Enum.count(keys, fn key -> Map.has_key?(map, key) end)
+  end
+
+  @doc """
    Deep merge two maps.
   """
 

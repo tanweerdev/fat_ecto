@@ -9,7 +9,7 @@ defmodule FatEcto.FatPatient do
     field(:phone, :string)
     field(:address, :string)
     field(:prescription, :string)
-    field(:symtoms, :string)
+    field(:symptoms, :string)
     field(:date_of_birth, :string)
     field(:appointments_count, :integer)
     many_to_many(:fat_doctors, FatEcto.FatDoctor, join_through: FatEcto.FatDoctorPatient)
@@ -23,7 +23,7 @@ defmodule FatEcto.FatPatient do
       :phone,
       :address,
       :prescription,
-      :symtoms,
+      :symptoms,
       :date_of_birth,
       :appointments_count
     ])

@@ -1,55 +1,79 @@
 defmodule FatEcto.FatQuery.FatInclude do
-  # TODO: Add docs and examples for ex_doc
-  import Ecto.Query
   alias FatEcto.FatHelper
-  # TODO: Add docs and examples for ex_doc
+  import Ecto.Query
 
-  @doc """
-  Build a  `include query` depending on the params.
-  ## Parameters
+  @moduledoc """
+  Preload associated schemas based on the conditions passed in the query params. 
+  ### Parameters
 
-    - `queryable`- Schema name that represents your database model.
-    - `query_opts` - include query options as a map
-  ## Examples
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
+
+  ### Examples
+
       iex> query_opts = %{
       ...>  "$select" => %{
-      ...>    "$fields" => ["name", "location", "rating"],
-      ...>    "fat_rooms" => ["beds", "capacity"]
+      ...>    "$fields" => ["location", "rating"],
+      ...>    "fat_rooms" => ["name", "floor"]
       ...>  },
       ...>  "$order" => %{"id" => "$desc"},
       ...>  "$where" => %{"rating" => 4},
       ...>  "$include" => %{
       ...>    "fat_doctors" => %{
-      ...>      "$include" => ["fat_patients"],
-      ...>      "$where" => %{"name" => "ham"},
+      ...>      "$include" => %{"fat_patients" => %{}},
       ...>      "$order" => %{"id" => "$desc"},
+      ...>      "$where" => %{"experience_years" => 3},
       ...>      "$join" => "$right"
       ...>    }
       ...>  }
       ...> }
-      iex> #{FatEcto.FatQuery}.build(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in assoc(f0, :fat_doctors), where: f0.rating == ^4 and ^true, order_by: [desc: f0.id], select: map(f0, [:name, :location, :rating, :id, {:fat_rooms, [:beds, :capacity]}]), preload: [fat_doctors: #Ecto.Query<from f in FatEcto.FatDoctor, where: f.name == ^"ham" and ^true, order_by: [desc: f.id], limit: ^10, offset: ^0, preload: [:fat_patients]>]>
-
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in assoc(f0, :fat_doctors), left_join: f2 in assoc(f1, :fat_patients), where: f0.rating == ^4 and ^true, where: f1.experience_years == ^3 and ^true, order_by: [desc: f1.id], order_by: [desc: f0.id], limit: ^34, offset: ^0, select: map(f0, [:location, :rating, {:fat_rooms, [:name, :floor]}]), preload: [[fat_doctors: [:fat_patients]]]>
 
 
   ## Options
 
-    - `$include`- Include the assoication `doctors`.
+    - `$include`               - Include the assoication `doctors`.
     - `$include: :fat_patients`- Include the assoication `patients` which has association with `doctors`.
-    - `$select`- Select the fields from `hospital` and `rooms`.
-    - `$where`- Added the where attribute in the query.
-    - `$order`- Sort the result based on the order attribute.
-    - `$join`- Join the `doctors` table with `hospital` .
+    - `$select`                - Select the fields from `hospital` and `rooms`.
+    - `$where`                 - Added the where attribute in the query.
+    - `$order`                 - Sort the result based on the order attribute.
+    - `$join`                  - Join the `doctors` table with `hospital` .
 
   """
 
+  @spec build_include(any, nil | binary | maybe_improper_list | map, any, any) :: any
   def build_include(queryable, nil, _model, _build_options) do
     queryable
   end
 
+  @doc """
+  Preload associated schemas.
+  ### Parameters
+
+    - `queryable`      -  Ecto Queryable that represents your schema name, table name or query.
+    - `include_params` -  Include query options as a map.
+    - `model`          - `schema` name of the table.
+    - `build_options`  -  Pass options related to otp_app.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>  "$include" => %{
+      ...>    "fat_doctors" => %{
+      ...>      "$include" => %{"fat_patients" => %{}},
+      ...>      "$order" => %{"id" => "$desc"},
+      ...>      "$where" => %{"experience_years" => 3},
+      ...>      "$join" => "$right"
+      ...>    }
+      ...>  }
+      ...> }
+      iex> #{__MODULE__}.build_include(FatEcto.FatHospital, query_opts["$include"], FatEcto.FatHospital, [])
+      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in assoc(f0, :fat_doctors), left_join: f2 in assoc(f1, :fat_patients), where: f1.experience_years == ^3 and ^true, order_by: [desc: f1.id], limit: ^10, offset: ^0>
+  """
+
   def build_include(queryable, include_params, model, build_options) do
     case include_params do
-      # TODO: Add docs and examples for ex_doc
       include when is_map(include) ->
         FatHelper.dynamic_binding(include)
         |> Enum.reduce(queryable, fn {key, value}, queryable ->
@@ -100,7 +124,6 @@ defmodule FatEcto.FatQuery.FatInclude do
           |> offset([q], ^(value["$offset"] || 0))
         end)
 
-      # TODO: Add docs and examples of ex_doc for this case here
       include when is_binary(include) ->
         relation = build_options[:relation]
 
@@ -142,9 +165,13 @@ defmodule FatEcto.FatQuery.FatInclude do
     end
   end
 
+  @doc false
+
   def build_include_preloads(queryable, nil) do
     queryable
   end
+
+  @doc false
 
   def build_include_preloads(queryable, include_params) do
     case include_params do

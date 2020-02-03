@@ -1,4 +1,6 @@
 defmodule FatEcto.CreateRecord do
+  @moduledoc false
+
   defmacro __using__(options) do
     quote do
       @repo unquote(options)[:repo]
@@ -29,9 +31,7 @@ defmodule FatEcto.CreateRecord do
         changeset = @schema.changeset(struct(@schema), params)
 
         with {:ok, record} <- @repo.insert(changeset) do
-          conn
-          |> put_status(:created)
-          |> render("show.json", data: record)
+          render_record(conn, record, unquote(options) ++ [status_to_put: :created])
         end
       end
     end
