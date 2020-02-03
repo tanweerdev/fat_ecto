@@ -1,4 +1,5 @@
 defmodule FatEcto.View do
+  @moduledoc false
   defmacro __using__(options) do
     quote do
       @gettext_module unquote(options)[:gettext_module]

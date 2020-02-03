@@ -1,4 +1,6 @@
 defmodule FatEcto.CreateRecord do
+  @moduledoc false
+
   defmacro __using__(options) do
     quote do
       @repo unquote(options)[:repo]

@@ -1,12 +1,7 @@
 defmodule FatUtils.FatRecord do
+  @moduledoc false
   defmacro __using__(options) do
     quote location: :keep do
-      @moduledoc """
-      Record related utils.
-
-      `import` or `alias` it inside your module.
-      """
-
       @opt_app unquote(options)[:otp_app]
       if !@opt_app do
         raise "please define opt app when using fat query methods"
@@ -19,7 +14,30 @@ defmodule FatUtils.FatRecord do
         raise "please define encoder_library when using fat record utils"
       end
 
-      # TODO: write tests and docs
+      @doc """
+        Sanitize the records.
+      ### Parameters
+
+        - `record/records`   - List of maps, tuple or a map.
+
+      ### Example
+
+          iex> record = FatEcto.Repo.insert!(%FatEcto.FatDoctor{name: "test", designation: "doctor", phone: "12345", address: "123 Hampton Road"})
+          iex> sanitize_map = #{__MODULE__}.sanitize_map(record)
+          iex> Map.drop(sanitize_map, [:id])
+          %{
+              address: "123 Hampton Road",
+              designation: "doctor",
+              email: nil,
+              end_date: nil,
+              experience_years: nil,
+              name: "test",
+              phone: "12345",
+              rating: nil,
+              start_date: nil
+            }
+
+      """
       def sanitize_map(records) when is_list(records) do
         Enum.reduce(records, [], fn rec, acc ->
           acc ++ [sanitize_map(rec)]
@@ -40,9 +58,6 @@ defmodule FatUtils.FatRecord do
         end
       end
 
-      @doc """
-       Takes a map, list of maps, tuple and remove struct field, meta field and not loaded assocations.
-      """
       def sanitize_map(record) when is_map(record) do
         schema_keys = [:__struct__, :__meta__]
         # not_loaded_keys = [:__field__, :__owner__, :__cardinality__]

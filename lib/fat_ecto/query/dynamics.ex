@@ -1,7 +1,50 @@
 defmodule FatEcto.FatQuery.FatDynamics do
+  @moduledoc """
+  Builds a `where query` using dynamics.
+
+  ### Parameters
+
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Where query options as a map.
+
+  ### Examples
+
+      iex> query_opts = %{
+      ...>    "$select" => %{
+      ...>     "$fields" => ["name", "location", "rating"]
+      ...>    },
+      ...>   "$where" => %{
+      ...>      "name" => "%John%",
+      ...>      "location" => nil,
+      ...>      "rating" => "$not_null",
+      ...>      "total_staff" => %{"$between" => [1, 3]}
+      ...>    }
+      ...>  }
+      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.total_staff > ^1 and f0.total_staff < ^3 and (not(is_nil(f0.rating)) and (f0.name == ^"%John%" and (is_nil(f0.location) and ^true))), select: map(f0, [:name, :location, :rating])>
+
+  ### Options
+
+    - `$select` - Select the fields from `hospital` and `rooms`.
+    - `$where`  - Added the where attribute in the query.
+  """
   import Ecto.Query
   alias FatEcto.FatHelper
-  # TODO: Add docs and examples for ex_doc
+
+  @doc """
+   Builds a dynamic query where field is nil.
+  ### Parameters
+
+    - `key`       - Field name .
+    - `dynamics`  - Default or previous dynamic to append to the query.
+    - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+
+  ### Examples
+      iex> result = #{__MODULE__}.is_nil_dynamic("location", true, [dynamic_type: :and])
+      iex> inspect(result)
+      "dynamic([c], is_nil(c.location) and ^true)"
+  """
+
   @spec is_nil_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
   def is_nil_dynamic(key, dynamics, opts \\ []) do
     if opts[:binding] == :last do
@@ -31,11 +74,28 @@ defmodule FatEcto.FatQuery.FatDynamics do
     end
   end
 
+  @doc """
+  Builds a dynamic query where field is greater than the value.
+  ### Parameters
+
+     - `key`       - Field name.
+     - `value`     - Value of the field.
+     - `dynamics`  - Default or previous dynamic to append to the query.
+     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.gt_dynamic("experience_years", 2, true, [dynamic_type: :or, binding: :last])
+      iex> inspect(result)
+      "dynamic([..., c], c.experience_years > ^2 or ^true)"
+  """
+
   @spec gt_dynamic(any(), any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
   def gt_dynamic(key, value, dynamics, opts \\ []) do
     if opts[:binding] == :last do
       if FatHelper.is_fat_ecto_field?(value) do
         value = String.replace(value, "$", "", global: false)
+        IO.inspect(value)
 
         if opts[:dynamic_type] == :and do
           dynamic(
@@ -95,6 +155,22 @@ defmodule FatEcto.FatQuery.FatDynamics do
       end
     end
   end
+
+  @doc """
+  Builds a dynamic query where field is greater than and equal to given value.
+  ### Parameters
+
+     - `key`       - Field name.
+     - `value`     - Value of the field.
+     - `dynamics`  - Default or previous dynamic to append to the query.
+     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.gte_dynamic("experience_years", 2, true, [dynamic_type: :and, binding: :last])
+      iex> inspect(result)
+      "dynamic([..., c], c.experience_years >= ^2 and ^true)"
+  """
 
   @spec gte_dynamic(any(), any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
   def gte_dynamic(key, value, dynamics, opts \\ []) do
@@ -161,6 +237,23 @@ defmodule FatEcto.FatQuery.FatDynamics do
     end
   end
 
+  @doc """
+  Builds a dynamic query where field is less than and equal to the value.
+  ### Parameters
+
+     - `key`       - Field name.
+     - `value`     - Value of the field.
+     - `dynamics`  - Default or previous dynamic to append to the query.
+     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.lte_dynamic("experience_years", 2, true, [dynamic_type: :or])
+      iex> inspect(result)
+      "dynamic([q], q.experience_years <= ^2 or ^true)"
+
+  """
+
   @spec lte_dynamic(any(), any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
   def lte_dynamic(key, value, dynamics, opts \\ []) do
     if opts[:binding] == :last do
@@ -225,6 +318,22 @@ defmodule FatEcto.FatQuery.FatDynamics do
       end
     end
   end
+
+  @doc """
+  Builds a dynamic query where field is less than the value.
+  ### Parameters
+
+     - `key`       - Field name.
+     - `value`     - Value of the field.
+     - `dynamics`  - Default or previous dynamic to append to the query.
+     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.lt_dynamic("experience_years", 2, true, [dynamic_type: :and, binding: :last])
+      iex> inspect(result)
+      "dynamic([..., c], c.experience_years < ^2 and ^true)"
+  """
 
   @spec lt_dynamic(any(), any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
   def lt_dynamic(key, value, dynamics, opts \\ []) do
@@ -291,6 +400,17 @@ defmodule FatEcto.FatQuery.FatDynamics do
     end
   end
 
+  @doc """
+   Builds a dynamic query where field matches the value substring.
+  ### Parameters
+
+     - `key`       - Field name.
+     - `value`     - Value of the field.
+     - `dynamics`  - Default or previous dynamic to append to the query.
+     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+
+  """
+
   @spec ilike_dynamic(any(), any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
   def ilike_dynamic(key, value, dynamics, opts \\ []) do
     if opts[:binding] == :last do
@@ -331,6 +451,17 @@ defmodule FatEcto.FatQuery.FatDynamics do
       end
     end
   end
+
+  @doc """
+  Builds a dynamic query where field matches matches the value substring.
+  ### Parameters
+
+     - `key`       - Field name.
+     - `value`     - Value of the field.
+     - `dynamics`  - Default or previous dynamic to append to the query.
+     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+
+  """
 
   @spec like_dynamic(any(), any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
   def like_dynamic(key, value, dynamics, opts \\ []) do
@@ -373,6 +504,22 @@ defmodule FatEcto.FatQuery.FatDynamics do
     end
   end
 
+  @doc """
+  Builds a dynamic query where field is equal to value.
+  ### Parameters
+
+     - `key`       - Field name.
+     - `value`     - Value of the field.
+     - `dynamics`  - Default or previous dynamic to append to the query.
+     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+
+  ### Examples
+
+       iex> result = #{__MODULE__}.eq_dynamic("experience_years", 2, true, [dynamic_type: :and])
+       iex> inspect(result)
+       "dynamic([q], q.experience_years == ^2 and ^true)"
+  """
+
   @spec eq_dynamic(any(), any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
   def eq_dynamic(key, value, dynamics, opts \\ []) do
     if opts[:binding] == :last do
@@ -401,6 +548,22 @@ defmodule FatEcto.FatQuery.FatDynamics do
       end
     end
   end
+
+  @doc """
+  Builds a dynamic query where value is between the provided attributes.
+  ### Parameters
+
+     - `key`       - Field name.
+     - `value`     - Values of the field as a list.
+     - `dynamics`  - Default or previous dynamic to append to the query.
+     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.between_dynamic("experience_years", [2, 5], true, [dynamic_type: :and])
+      iex> inspect(result)
+      "dynamic([q], q.experience_years > ^2 and q.experience_years < ^5 and ^true)"
+  """
 
   @spec between_dynamic(any(), any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
   def between_dynamic(key, values, dynamics, opts \\ []) do
@@ -435,6 +598,23 @@ defmodule FatEcto.FatQuery.FatDynamics do
     end
   end
 
+  @doc """
+  Builds a dynamic query where value equal and between the provided attributes.
+  ### Parameters
+
+     - `key`       - Field name.
+     - `value`     - Values of the field as a list.
+     - `dynamics`  - Default or previous dynamic to append to the query.
+     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.between_equal_dynamic("experience_years", [2, 5], true, [dynamic_type: :and])
+      iex> inspect(result)
+      "dynamic([q], q.experience_years >= ^2 and q.experience_years <= ^5 and ^true)"
+
+  """
+
   @spec between_equal_dynamic(any(), any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
   def between_equal_dynamic(key, values, dynamics, opts \\ []) do
     if opts[:binding] == :last do
@@ -468,6 +648,24 @@ defmodule FatEcto.FatQuery.FatDynamics do
     end
   end
 
+  @doc """
+  Builds a dynamic query where value is in the the provided list attributes.
+  ### Parameters
+
+     - `key`       - Field name.
+     - `values`    - Pass a list of values of the field that represent range.
+     - `dynamics`  - Default or previous dynamic to append to the query.
+     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.in_dynamic("experience_years", [2, 5], true, [dynamic_type: :and])
+      iex> inspect(result)
+      "dynamic([q], q.experience_years in ^[2, 5] and ^true)"
+
+  """
+
   @spec in_dynamic(any(), any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
   def in_dynamic(key, values, dynamics, opts \\ []) do
     if opts[:binding] == :last do
@@ -496,6 +694,17 @@ defmodule FatEcto.FatQuery.FatDynamics do
       end
     end
   end
+
+  @doc """
+  Builds a dynamic query when value of jsonb field is in the list.
+  ### Parameters
+
+     - `key`       - Field name.
+     - `values`    - values of jsonb field.
+     - `dynamics`  - Default or previous dynamic to append to the query.
+     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+
+  """
 
   @spec contains_dynamic(any(), any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
   def contains_dynamic(key, values, dynamics, opts \\ []) do
@@ -528,6 +737,17 @@ defmodule FatEcto.FatQuery.FatDynamics do
       end
     end
   end
+
+  @doc """
+  Builds a dynamic query when value of jsonb matches with any list attribute.
+  ### Parameters
+
+     - `key`       - Field name.
+     - `values`    - values of jsonb field.
+     - `dynamics`  - Default or previous dynamic to append to the query.
+     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+
+  """
 
   @spec contains_any_dynamic(any(), any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
   def contains_any_dynamic(key, values, dynamics, opts \\ []) do

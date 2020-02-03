@@ -59,7 +59,7 @@ defmodule Query.DistinctTest do
         "fat_patients" => %{
           "$on_field" => "id",
           "$on_table_field" => "doctor_id",
-          "$where" => %{"location" => "bullavard", "phone" => %{"$ilike" => "Joh"}, "symtoms" => "$not_null"},
+          "$where" => %{"location" => "bullavard", "phone" => %{"$ilike" => "Joh"}, "symptoms" => "$not_null"},
           "$select" => ["name", "prescription"],
           "$order" => %{"appointments_count" => "$asc"}
         }
@@ -73,7 +73,7 @@ defmodule Query.DistinctTest do
         full_join: f1 in "fat_patients",
         on: f0.id == f1.doctor_id,
         where:
-          not is_nil(f1.symtoms) and
+          not is_nil(f1.symptoms) and
             (ilike(fragment("(?)::TEXT", f1.phone), ^"Joh") and (f1.location == ^"bullavard" and ^true)),
         distinct: true,
         select:
@@ -93,7 +93,7 @@ defmodule Query.DistinctTest do
         "fat_patients" => %{
           "$on_field" => "id",
           "$on_table_field" => "doctor_id",
-          "$where" => %{"location" => "bullavard", "phone" => %{"$ilike" => "Joh"}, "symtoms" => "$not_null"},
+          "$where" => %{"location" => "bullavard", "phone" => %{"$ilike" => "Joh"}, "symptoms" => "$not_null"},
           "$select" => ["name", "prescription"]
         }
       },
@@ -106,7 +106,7 @@ defmodule Query.DistinctTest do
         full_join: f1 in "fat_patients",
         on: f0.id == f1.doctor_id,
         where:
-          not is_nil(f1.symtoms) and
+          not is_nil(f1.symptoms) and
             (ilike(fragment("(?)::TEXT", f1.phone), ^"Joh") and (f1.location == ^"bullavard" and ^true)),
         order_by: [asc: f0.appointments_count],
         distinct: true,
@@ -127,7 +127,7 @@ defmodule Query.DistinctTest do
         "fat_patients" => %{
           "$on_field" => "id",
           "$on_table_field" => "doctor_id",
-          "$where" => %{"location" => "bullavard", "phone" => %{"$ilike" => "Joh"}, "symtoms" => "$not_null"},
+          "$where" => %{"location" => "bullavard", "phone" => %{"$ilike" => "Joh"}, "symptoms" => "$not_null"},
           "$select" => ["name", "prescription"],
           "$order" => %{"appointments_count" => "$asc"}
         }
@@ -150,7 +150,7 @@ defmodule Query.DistinctTest do
         on: f0.id == f1.doctor_id,
         left_join: f2 in assoc(f0, :fat_hospitals),
         where:
-          not is_nil(f1.symtoms) and
+          not is_nil(f1.symptoms) and
             (ilike(fragment("(?)::TEXT", f1.phone), ^"Joh") and (f1.location == ^"bullavard" and ^true)),
         where: f2.id == ^10 and ^true,
         order_by: [asc: f0.experience_years],

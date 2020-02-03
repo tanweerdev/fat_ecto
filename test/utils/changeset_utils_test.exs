@@ -2,20 +2,20 @@ defmodule Utils.ChangesetTest do
   use FatEcto.ConnCase
   alias FatUtils.Changeset, as: Change
 
-  test "require_xor changeset" do
+  test "validate_xor changeset" do
     changeset = FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "testing"})
     {:ok, struct} = Repo.insert(changeset)
 
-    changeset = Change.require_xor(changeset, struct, [:name, :designation])
+    changeset = Change.validate_xor(changeset, struct, [:name, :designation])
     assert changeset.errors == [designation: {"name XOR designation", []}, name: {"name XOR designation", []}]
 
     changeset = FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "testing"})
 
-    changeset = Change.require_xor(changeset, struct, [:name])
+    changeset = Change.validate_xor(changeset, struct, [:name])
     assert changeset.errors == [name: {"name", []}]
 
     changeset = FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "testing"})
-    changeset = Change.require_xor(changeset, struct, [:phone])
+    changeset = Change.validate_xor(changeset, struct, [:phone])
 
     assert changeset.errors == [
              phone: {"phone fields can not be empty at the same time", [validation: :required]}
@@ -131,5 +131,50 @@ defmodule Utils.ChangesetTest do
     assert changeset.errors == [phone: {"must be present", []}]
     changeset = Change.add_error(orgnl_changeset, :name)
     assert changeset.errors == [name: {"is invalid", []}]
+  end
+
+  test "require_only_one_of changeset" do
+    changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{name: "12345", description: "testing"})
+    changeset = Change.require_only_one_of(changeset, %FatEcto.FatBed{}, [:name])
+    assert changeset.errors == []
+
+    changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{name: "12345", description: "testing"})
+    changeset = Change.require_only_one_of(changeset, %FatEcto.FatBed{}, [:description])
+    assert changeset.errors == []
+
+    changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{name: "12345", description: "testing"})
+    changeset = Change.require_only_one_of(changeset, %FatEcto.FatBed{}, [:name, :test])
+    assert changeset.errors == []
+
+    changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{name: "12345", description: "testing"})
+    changeset = Change.require_only_one_of(changeset, %FatEcto.FatBed{}, [:name, :description])
+
+    assert changeset.errors == [
+             description: {"only one of name or description is required", []},
+             name: {"only one of name or description is required", []}
+           ]
+
+    changeset =
+      FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{
+        name: "12345",
+        description: "testing",
+        purpose: "emergency"
+      })
+
+    changeset = Change.require_only_one_of(changeset, %FatEcto.FatBed{}, [:name, :description, :purpose])
+
+    assert changeset.errors == [
+             purpose: {"only one of name, description or purpose is required", []},
+             description: {"only one of name, description or purpose is required", []},
+             name: {"only one of name, description or purpose is required", []}
+           ]
+
+    changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{})
+    changeset = Change.require_only_one_of(changeset, %FatEcto.FatBed{}, [:name, :description])
+
+    assert changeset.errors == [
+             description: {"only one of name or description is required", []},
+             name: {"only one of name or description is required", []}
+           ]
   end
 end

@@ -1,4 +1,6 @@
 defmodule FatEcto.UpdateRecord do
+  @moduledoc false
+
   defmacro __using__(options) do
     quote do
       alias FatEcto.MacrosHelper
