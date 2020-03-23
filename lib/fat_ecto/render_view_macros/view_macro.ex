@@ -4,6 +4,8 @@ defmodule FatEcto.View do
     quote do
       @gettext_module unquote(options)[:gettext_module]
       @wrapper unquote(options)[:wrapper]
+      @preloads unquote(options)[:preloads]
+
       if !@gettext_module do
         raise "please define gettext_module when using view macro"
       end

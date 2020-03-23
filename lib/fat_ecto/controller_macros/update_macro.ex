@@ -5,6 +5,7 @@ defmodule FatEcto.UpdateRecord do
     quote do
       alias FatEcto.MacrosHelper
       @repo unquote(options)[:repo]
+      @preloads unquote(options)[:preloads]
 
       if !@repo do
         raise "please define repo when using create record"
@@ -42,6 +43,7 @@ defmodule FatEcto.UpdateRecord do
             soft_delete(conn, record, changeset, params, soft_delete_key, soft_deleted_value)
           else
             with {:ok, record} <- @repo.update(changeset) do
+              record = MacrosHelper.preload_record(record, @repo, @preloads)
               render_record(conn, record, unquote(options) ++ [status_to_put: :ok])
             end
           end
@@ -88,6 +90,7 @@ defmodule FatEcto.UpdateRecord do
           end)
 
         with {:ok, record} <- @repo.update(changeset) do
+          record = MacrosHelper.preload_record(record, @repo, @preloads)
           render_resp(conn, "Record soft deleted", 200, put_content_type: "application/json")
         end
       end

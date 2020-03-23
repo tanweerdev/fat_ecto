@@ -3,7 +3,9 @@ defmodule FatEcto.CreateRecord do
 
   defmacro __using__(options) do
     quote do
+      alias FatEcto.MacrosHelper
       @repo unquote(options)[:repo]
+      @preloads unquote(options)[:preloads]
 
       if !@repo do
         raise "please define repo when using create record"
@@ -31,6 +33,7 @@ defmodule FatEcto.CreateRecord do
         changeset = @schema.changeset(struct(@schema), params)
 
         with {:ok, record} <- @repo.insert(changeset) do
+          record = MacrosHelper.preload_record(record, @repo, @preloads)
           render_record(conn, record, unquote(options) ++ [status_to_put: :created])
         end
       end
