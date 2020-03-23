@@ -18,6 +18,38 @@ defmodule FatEcto.View do
         end
       end
 
+      def render("index.json", %{data: records}) do
+        if @wrapper in [nil, ""] do
+          FatEcto.RecordUtils.sanitize_map(records)
+        else
+          %{@wrapper => FatEcto.RecordUtils.sanitize_map(records)}
+        end
+      end
+
+      def render("index.json", %{records: records, meta: meta, options: options}) do
+        records_wrapper = if options[:data_to_view_as] in [nil, ""] do
+          :records
+        else
+          options[:data_to_view_as]
+        end
+
+        meta_wrapper = if options[:meta_to_put_as] in [nil, ""] do
+          :meta
+        else
+          options[:meta_to_put_as]
+        end
+
+          %{records_wrapper => FatEcto.RecordUtils.sanitize_map(records), meta_wrapper => meta}
+      end
+
+      def render("index.json", %{records: records, options: options}) do
+        if options[:data_to_view_as] in [nil, ""] do
+          FatEcto.RecordUtils.sanitize_map(records)
+        else
+          %{options[:data_to_view_as] => FatEcto.RecordUtils.sanitize_map(records)}
+        end
+      end
+
       def render("errors.json", %{code: code, message: message, changeset: changeset}) do
         %{error: %{code: code, message: message, errors: _translate_errors(changeset)}}
       end
