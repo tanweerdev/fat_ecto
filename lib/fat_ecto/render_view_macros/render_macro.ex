@@ -27,10 +27,10 @@ defmodule FatEcto.Render do
             render(conn, "index.json", data: records)
 
           {nil, data_to_view_as, nil} ->
-            render(conn, "index.json", %{records: records, options: unquote(options)})
+            render(conn, "index.json", %{records: records, options: opts})
 
           {nil, data_to_view_as, meta_to_put_as} ->
-            render(conn, "index.json", %{records: records, meta: meta, options: unquote(options)})
+            render(conn, "index.json", %{records: records, meta: meta, options: opts})
 
           {view_to_render, nil} ->
             render(conn, view_to_render, data: records)
