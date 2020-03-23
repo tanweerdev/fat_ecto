@@ -27,19 +27,21 @@ defmodule FatEcto.View do
       end
 
       def render("index.json", %{records: records, meta: meta, options: options}) do
-        records_wrapper = if options[:data_to_view_as] in [nil, ""] do
-          :records
-        else
-          options[:data_to_view_as]
-        end
+        records_wrapper =
+          if options[:data_to_view_as] in [nil, ""] do
+            :records
+          else
+            options[:data_to_view_as]
+          end
 
-        meta_wrapper = if options[:meta_to_put_as] in [nil, ""] do
-          :meta
-        else
-          options[:meta_to_put_as]
-        end
+        meta_wrapper =
+          if options[:meta_to_put_as] in [nil, ""] do
+            :meta
+          else
+            options[:meta_to_put_as]
+          end
 
-          %{records_wrapper => FatEcto.RecordUtils.sanitize_map(records), meta_wrapper => meta}
+        %{records_wrapper => FatEcto.RecordUtils.sanitize_map(records), meta_wrapper => meta}
       end
 
       def render("index.json", %{records: records, options: options}) do

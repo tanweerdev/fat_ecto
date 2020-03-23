@@ -23,11 +23,20 @@ defmodule FatEcto.Render do
           end
 
         case {view_to_render, data_to_view_as, meta_to_put_as} do
-          {nil, nil, nil} -> render(conn, "show.json", data: records)
-          {nil, data_to_view_as, nil} -> render(conn, "show.json", %{data_to_view_as => records})
-          {nil, data_to_view_as, meta_to_put_as} -> render(conn, "show.json", %{data_to_view_as => records, meta_to_put_as => meta})
-          {view_to_render, nil} -> render(conn, view_to_render, data: records)
-          {view_to_render, data_to_view_as} -> render(conn, view_to_render, %{data_to_view_as => records})
+          {nil, nil, nil} ->
+            render(conn, "index.json", data: records)
+
+          {nil, data_to_view_as, nil} ->
+            render(conn, "index.json", %{records: records, options: unquote(options)})
+
+          {nil, data_to_view_as, meta_to_put_as} ->
+            render(conn, "index.json", %{records: records, meta: meta, options: unquote(options)})
+
+          {view_to_render, nil} ->
+            render(conn, view_to_render, data: records)
+
+          {view_to_render, data_to_view_as} ->
+            render(conn, view_to_render, %{data_to_view_as => records})
         end
       end
 
