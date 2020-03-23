@@ -6,5 +6,5 @@ defmodule SeedHelper do
    ```
 
   """
-  use FatUtils.SeedHelper, otp_app: :fat_ecto, seed_base_path: "priv/csvs"
+  # use FatUtils.SeedHelper, otp_app: :fat_ecto, seed_base_path: "priv/csvs"
 end
