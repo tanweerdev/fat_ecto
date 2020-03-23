@@ -3,12 +3,17 @@ defmodule FatEcto.View do
   defmacro __using__(options) do
     quote do
       @gettext_module unquote(options)[:gettext_module]
+      @wrapper unquote(options)[:wrapper]
       if !@gettext_module do
         raise "please define gettext_module when using view macro"
       end
 
       def render("show.json", %{data: record}) do
-        %{data: FatEcto.RecordUtils.sanitize_map(record)}
+        if @wrapper in [nil, ""] do
+          FatEcto.RecordUtils.sanitize_map(record)
+        else
+          %{@wrapper => FatEcto.RecordUtils.sanitize_map(record)}
+        end
       end
 
       def render("errors.json", %{code: code, message: message, changeset: changeset}) do
