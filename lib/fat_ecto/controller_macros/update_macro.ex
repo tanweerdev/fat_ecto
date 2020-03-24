@@ -31,6 +31,7 @@ defmodule FatEcto.UpdateRecord do
 
       defp _update(conn, id, params) do
         with {:ok, record} <- MacrosHelper.get_record(id, @repo, @schema) do
+          record = MacrosHelper.preload_record(record, @repo, @preloads)
           changeset = @schema.changeset(record, params)
           # && record.is_active != false if want to disable multiple soft deletion
 
