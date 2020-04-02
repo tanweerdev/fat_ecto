@@ -6,6 +6,8 @@ defmodule FatEcto.DeleteRecord do
       alias FatEcto.MacrosHelper
 
       @repo unquote(options)[:repo]
+      @add_assoc_constraint unquote(options)[:add_assoc_constraint]
+
       if !@repo do
         raise "please define repo when using delete record"
       end
@@ -35,9 +37,14 @@ defmodule FatEcto.DeleteRecord do
             )
 
           {:ok, record} ->
-            data = add_assoc_constraint(record, id)
+            record =
+              if @add_assoc_constraint do
+                add_assoc_constraint(record, id)
+              else
+                record
+              end
 
-            case @repo.delete(data) do
+            case @repo.delete(record) do
               {:ok, _struct} ->
                 render_resp(conn, "Record Deleted", 204, put_content_type: "application/json")
 
