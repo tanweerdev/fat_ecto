@@ -38,7 +38,7 @@ defmodule FatEcto.ShowRecord do
 
           {:ok, record} ->
             record = MacrosHelper.preload_record(record, @repo, @preloads)
-            render_record(conn, record, unquote(options) ++ [status_to_put: :created])
+            render_record(conn, record, unquote(options) ++ [status_to_put: :ok])
         end
       end
     end
