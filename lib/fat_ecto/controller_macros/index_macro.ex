@@ -29,12 +29,18 @@ defmodule FatEcto.IndexRecord do
 
         # TODO: add docs that paginator_function shoud return records and meta
         # eg {records, meta} = @paginator_function.(query, params)
-        if is_function(@paginator_function, 2) do
-          {records, meta} = @paginator_function.(query, params)
-          render_records(conn, records, meta, unquote(options))
-        else
-          records = @repo.all(query)
-          render_records(conn, records, nil, unquote(options))
+        cond do
+          is_function(@paginator_function, 3) ->
+            {records, meta} = @paginator_function.(query, params, @repo)
+            render_records(conn, records, meta, unquote(options))
+
+          is_function(@paginator_function, 2) ->
+            {records, meta} = @paginator_function.(query, params)
+            render_records(conn, records, meta, unquote(options))
+
+          true ->
+            records = @repo.all(query)
+            render_records(conn, records, nil, unquote(options))
         end
       end
     end
