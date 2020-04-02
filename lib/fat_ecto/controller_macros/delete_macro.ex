@@ -44,10 +44,10 @@ defmodule FatEcto.DeleteRecord do
 
           {:ok, record} ->
             record =
-              if @add_assoc_constraint do
-                add_assoc_constraint(record, id)
-              else
+              if @add_assoc_constraint == false do
                 record
+              else
+                add_assoc_constraint(record, id)
               end
 
             case @repo.delete(record) do
