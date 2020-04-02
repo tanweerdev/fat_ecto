@@ -2,6 +2,7 @@ defmodule FatEcto.DeleteRecord do
   @moduledoc false
 
   defmacro __using__(options) do
+    # quote location: :keep do
     quote do
       alias FatEcto.MacrosHelper
 
@@ -18,8 +19,12 @@ defmodule FatEcto.DeleteRecord do
         raise "please define schema when using delete record"
       end
 
+      # TODO: Lets implement with in these macros and add sample fallback controller
+      # then we will be independent of few options eg we dont have to render error
       def delete(conn, %{"id" => id}) do
-        case MacrosHelper.get_record(id, @repo, @schema) do
+        query = process_query_before_fetch_record_for_delete(@schema, conn)
+
+        case MacrosHelper.get_record_by_query(:id, id, @repo, query) do
           {:error, :not_found} ->
             error_view_module = unquote(options)[:error_view_module]
             error_view = unquote(options)[:error_view_404]
@@ -56,6 +61,11 @@ defmodule FatEcto.DeleteRecord do
         end
       end
 
+      # You can use process_query_before_fetch_record_for_delete to override query before fetching record for delete
+      def process_query_before_fetch_record_for_delete(query, _conn) do
+        query
+      end
+
       def add_assoc_constraint(record, id) do
         foreign_keys = unquote(options)[:foreign_keys]
         associations = FatEcto.AssocModel.has_and_many_to_many(@schema)
@@ -83,6 +93,8 @@ defmodule FatEcto.DeleteRecord do
           end
         end)
       end
+
+      defoverridable process_query_before_fetch_record_for_delete: 2
     end
   end
 end

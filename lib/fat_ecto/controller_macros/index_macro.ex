@@ -2,6 +2,7 @@ defmodule FatEcto.IndexRecord do
   @moduledoc false
 
   defmacro __using__(options) do
+    # quote location: :keep do
     quote do
       alias FatEcto.MacrosHelper
       require Ecto.Query
@@ -27,6 +28,7 @@ defmodule FatEcto.IndexRecord do
             @schema
           end
 
+        query = process_query_before_fetch_records_for_index(@schema, conn)
         # TODO: add docs that paginator_function shoud return records and meta
         # eg {records, meta} = @paginator_function.(query, params)
         _get_and_render(conn, query, params, @paginator_function, @repo)
@@ -49,6 +51,13 @@ defmodule FatEcto.IndexRecord do
         records = repo.all(query)
         render_records(conn, records, nil, unquote(options))
       end
+
+      # You can use process_query_before_fetch_records_for_index to override query before fetching records for index
+      def process_query_before_fetch_records_for_index(query, _conn) do
+        query
+      end
+
+      defoverridable process_query_before_fetch_records_for_index: 2
     end
   end
 end

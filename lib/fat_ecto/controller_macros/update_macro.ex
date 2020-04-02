@@ -2,6 +2,7 @@ defmodule FatEcto.UpdateRecord do
   @moduledoc false
 
   defmacro __using__(options) do
+    # quote location: :keep do
     quote do
       alias FatEcto.MacrosHelper
       @repo unquote(options)[:repo]
@@ -30,7 +31,9 @@ defmodule FatEcto.UpdateRecord do
       end
 
       defp _update(conn, id, params) do
-        with {:ok, record} <- MacrosHelper.get_record(id, @repo, @schema) do
+        query = process_query_before_fetch_record_for_update(@schema, conn)
+
+        with {:ok, record} <- MacrosHelper.get_record_by_query(:id, id, @repo, query) do
           record = MacrosHelper.preload_record(record, @repo, @preloads)
           params = process_params_before_in_update(params, conn)
           changeset = @schema.changeset(record, params)
@@ -63,7 +66,14 @@ defmodule FatEcto.UpdateRecord do
         changeset
       end
 
-      defoverridable process_params_before_in_update: 2, process_changeset_before_update: 2
+      # You can use process_query_before_fetch_record_for_update to override query before fetching record for update
+      def process_query_before_fetch_record_for_update(query, _conn) do
+        query
+      end
+
+      defoverridable process_params_before_in_update: 2,
+                     process_changeset_before_update: 2,
+                     process_query_before_fetch_record_for_update: 2
 
       # TODO: util functions
       # TODO: it only soft delete one level

@@ -2,6 +2,7 @@ defmodule FatEcto.ShowRecord do
   @moduledoc false
 
   defmacro __using__(options) do
+    # quote location: :keep do
     quote do
       alias FatEcto.MacrosHelper
 
@@ -18,7 +19,9 @@ defmodule FatEcto.ShowRecord do
       @preloads unquote(options)[:preloads]
 
       def show(conn, %{"id" => id}) do
-        case MacrosHelper.get_record(id, @repo, @schema) do
+        query = process_query_before_fetch_record_for_show(@schema, conn)
+
+        case MacrosHelper.get_record_by_query(:id, id, @repo, query) do
           {:error, :not_found} ->
             error_view_module = unquote(options)[:error_view_module]
             error_view = unquote(options)[:error_view_404]
@@ -41,6 +44,13 @@ defmodule FatEcto.ShowRecord do
             render_record(conn, record, unquote(options) ++ [status_to_put: :ok])
         end
       end
+
+      # You can use process_query_before_fetch_record_for_show to override query before fetching record for show
+      def process_query_before_fetch_record_for_show(query, _conn) do
+        query
+      end
+
+      defoverridable process_query_before_fetch_record_for_show: 2
     end
   end
 end
