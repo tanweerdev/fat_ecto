@@ -17,7 +17,7 @@ defmodule FatEcto.IndexRecord do
       end
 
       @preloads unquote(options)[:preloads]
-      @paginator unquote(options)[:paginator]
+      @paginator_function unquote(options)[:paginator_function]
 
       def index(conn, params) do
         query =
@@ -27,8 +27,10 @@ defmodule FatEcto.IndexRecord do
             @schema
           end
 
-        if @paginator do
-          {records, meta} = @paginator.paginate_get_records(query, params)
+        # TODO: add docs that paginator_function shoud return records and meta
+        # eg {records, meta} = @paginator_function.(query, params)
+        if is_function(@paginator_function, 2) do
+          {records, meta} = @paginator_function.(query, params)
           render_records(conn, records, meta, unquote(options))
         else
           records = @repo.all(query)

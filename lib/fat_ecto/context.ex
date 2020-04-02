@@ -169,7 +169,7 @@ defmodule FatEcto.FatContext do
       @doc """
         Create a record by passing schema, struct and attributes to a changeset. It will return the record created.
       """
-      def create_by(struct, changeset_fn, attrs, opts \\ []) do
+      def create_by(struct, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn, 2) do
         struct
         |> changeset_fn.(attrs)
         |> @repo.insert(opts)
@@ -189,7 +189,7 @@ defmodule FatEcto.FatContext do
       @doc """
         Create a record by passing schema and attributes to a changeset. It will return the record created.
       """
-      def create_by!(struct, changeset_fn, attrs, opts \\ []) do
+      def create_by!(struct, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn, 2) do
         struct
         |> changeset_fn.(attrs)
         |> @repo.insert!(opts)
@@ -200,7 +200,7 @@ defmodule FatEcto.FatContext do
         Update a record by passing record, changeset_fn and attributes. It will return the record updated.
 
       """
-      def update_by(item, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn) do
+      def update_by(item, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn, 2) do
         item
         |> changeset_fn.(attrs)
         |> @repo.update(opts)
@@ -222,7 +222,7 @@ defmodule FatEcto.FatContext do
         Update a record by passing record, changeset_fn and attributes. It will return the record updated or raises.
 
       """
-      def update_by!(item, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn) do
+      def update_by!(item, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn, 2) do
         item
         |> changeset_fn.(attrs)
         |> @repo.update!(opts)
