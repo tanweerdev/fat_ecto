@@ -6,6 +6,7 @@ defmodule FatEcto.DeleteRecord do
       alias FatEcto.MacrosHelper
 
       @repo unquote(options)[:repo]
+      # You can disable add_assoc_constraint by passing add_assoc_constraint value false
       @add_assoc_constraint unquote(options)[:add_assoc_constraint]
 
       if !@repo do

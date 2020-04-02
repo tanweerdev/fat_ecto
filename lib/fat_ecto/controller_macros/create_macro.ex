@@ -30,9 +30,9 @@ defmodule FatEcto.CreateRecord do
       end
 
       defp _craete(conn, params) do
-        params = process_params_before_in_create(params)
+        params = process_params_before_in_create(params, conn)
         changeset = @schema.changeset(struct(@schema), params)
-        changeset = process_changeset_before_insert(changeset)
+        changeset = process_changeset_before_insert(changeset, conn)
 
         with {:ok, record} <- @repo.insert(changeset) do
           record = MacrosHelper.preload_record(record, @repo, @preloads)
@@ -40,15 +40,17 @@ defmodule FatEcto.CreateRecord do
         end
       end
 
-      def process_params_before_in_create(params) do
+      # You can use process_params_before_in_create to override params before calling changeset
+      def process_params_before_in_create(params, _conn) do
         params
       end
 
-      def process_changeset_before_insert(changeset) do
+      # You can use process_changeset_before_insert to add/update/validate changeset before calling insert
+      def process_changeset_before_insert(changeset, _conn) do
         changeset
       end
 
-      defoverridable process_params_before_in_create: 1, process_changeset_before_insert: 1
+      defoverridable process_params_before_in_create: 2, process_changeset_before_insert: 2
     end
   end
 end

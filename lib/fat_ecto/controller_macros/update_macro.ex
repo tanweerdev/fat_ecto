@@ -32,9 +32,9 @@ defmodule FatEcto.UpdateRecord do
       defp _update(conn, id, params) do
         with {:ok, record} <- MacrosHelper.get_record(id, @repo, @schema) do
           record = MacrosHelper.preload_record(record, @repo, @preloads)
-          params = process_params_before_in_update(params)
+          params = process_params_before_in_update(params, conn)
           changeset = @schema.changeset(record, params)
-          changeset = process_changeset_before_update(changeset)
+          changeset = process_changeset_before_update(changeset, conn)
           # && record.is_active != false if want to disable multiple soft deletion
 
           soft_delete_key = unquote(options)[:soft_delete_key]
@@ -53,15 +53,17 @@ defmodule FatEcto.UpdateRecord do
         end
       end
 
-      def process_params_before_in_update(params) do
+      # You can use process_params_before_in_update to override params before calling changeset
+      def process_params_before_in_update(params, _conn) do
         params
       end
 
-      def process_changeset_before_update(changeset) do
+      # You can use process_changeset_before_update to add/update/validate changeset before calling update
+      def process_changeset_before_update(changeset, _conn) do
         changeset
       end
 
-      defoverridable process_params_before_in_update: 1, process_changeset_before_update: 1
+      defoverridable process_params_before_in_update: 2, process_changeset_before_update: 2
 
       # TODO: util functions
       # TODO: it only soft delete one level
