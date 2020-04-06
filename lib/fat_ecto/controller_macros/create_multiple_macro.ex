@@ -37,7 +37,7 @@ defmodule FatEcto.CreateMultipleRecord do
         # TODO: Support partial insert via options passed
         with {:ok, records} <- insert_records(changesets) do
           records = MacrosHelper.preload_record(records, @repo, @preloads)
-          after_create_hook_for_create(records, conn)
+          after_create_hook_for_multiple_create(records, conn)
           render_record(conn, records, unquote(options) ++ [status_to_put: :created])
         end
       end
@@ -87,15 +87,15 @@ defmodule FatEcto.CreateMultipleRecord do
         changesets
       end
 
-      # You can use after_create_hook_for_create to log etc
-      def after_create_hook_for_create(_record, _conn) do
+      # You can use after_create_hook_for_multiple_create to log etc
+      def after_create_hook_for_multiple_create(_record, _conn) do
         "Override if needed"
       end
 
       defoverridable process_params_before_in_multiple_create: 2,
                      process_changesets_before_multiple_inserts: 2,
                      insert_records: 1,
-                     after_create_hook_for_create: 2,
+                     after_create_hook_for_multiple_create: 2,
                      multiple_changesets: 2
     end
   end
