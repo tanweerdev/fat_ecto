@@ -63,7 +63,7 @@ defmodule FatEcto.IndexRecord do
       end
 
       # You can use after_get_hook_for_index to log etc
-      def after_get_hook_for_index(_records, _meta(_conn)) do
+      def after_get_hook_for_index(_records, _meta, _conn) do
         "Override if needed"
       end
 
