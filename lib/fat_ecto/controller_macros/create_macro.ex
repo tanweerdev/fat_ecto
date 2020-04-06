@@ -5,7 +5,7 @@ defmodule FatEcto.CreateRecord do
     quote do
       alias FatEcto.MacrosHelper
       @repo unquote(options)[:repo]
-      @preloads unquote(options)[:preloads]
+      @preloads unquote(options)[:preloads] || []
 
       if !@repo do
         raise "please define repo when using create record"

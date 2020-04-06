@@ -5,7 +5,7 @@ defmodule FatEcto.CreateMultipleRecord do
     quote do
       alias FatEcto.MacrosHelper
       @repo unquote(options)[:repo]
-      @preloads unquote(options)[:preloads]
+      @preloads unquote(options)[:preloads] || []
 
       if !@repo do
         raise "please define repo when using create record"
@@ -88,7 +88,7 @@ defmodule FatEcto.CreateMultipleRecord do
       end
 
       # You can use after_create_hook_for_multiple_create to log etc
-      def after_create_hook_for_multiple_create(_record, _conn) do
+      def after_create_hook_for_multiple_create(_records, _conn) do
         "Override if needed"
       end
 

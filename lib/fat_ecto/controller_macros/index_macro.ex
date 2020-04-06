@@ -17,7 +17,7 @@ defmodule FatEcto.IndexRecord do
         raise "please define schema when using delete record"
       end
 
-      @preloads unquote(options)[:preloads]
+      @preloads unquote(options)[:preloads] || []
       @paginator_function unquote(options)[:paginator_function]
 
       def index(conn, params) do

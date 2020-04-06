@@ -16,7 +16,7 @@ defmodule FatEcto.ShowRecord do
         raise "please define schema when using delete record"
       end
 
-      @preloads unquote(options)[:preloads]
+      @preloads unquote(options)[:preloads] || []
 
       def show(conn, %{"id" => id}) do
         query = process_query_before_fetch_record_for_show(@schema, conn)
