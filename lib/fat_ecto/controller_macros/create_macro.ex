@@ -36,6 +36,7 @@ defmodule FatEcto.CreateRecord do
 
         with {:ok, record} <- insert_record(changeset, @repo) do
           record = MacrosHelper.preload_record(record, @repo, @preloads)
+          after_create_hook_for_create(record, conn)
           render_record(conn, record, unquote(options) ++ [status_to_put: :created])
         end
       end
@@ -54,7 +55,15 @@ defmodule FatEcto.CreateRecord do
         changeset
       end
 
-      defoverridable process_params_before_in_create: 2, process_changeset_before_insert: 2, insert_record: 2
+      # You can use after_create_hook_for_create to log etc
+      def after_create_hook_for_create(_record, _conn) do
+        "Override if needed"
+      end
+
+      defoverridable process_params_before_in_create: 2,
+                     process_changeset_before_insert: 2,
+                     insert_record: 2,
+                     after_create_hook_for_create: 2
     end
   end
 end

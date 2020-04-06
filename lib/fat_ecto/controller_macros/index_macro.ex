@@ -38,12 +38,14 @@ defmodule FatEcto.IndexRecord do
       defp _get_and_render(conn, query, params, paginator_function, repo)
            when is_function(paginator_function, 3) do
         {records, meta} = paginator_function.(query, params, repo)
+        after_get_hook_for_index(records, meta, conn)
         render_records(conn, records, meta, unquote(options))
       end
 
       defp _get_and_render(conn, query, params, paginator_function, repo)
            when is_function(paginator_function, 2) do
         {records, meta} = paginator_function.(query, params)
+        after_get_hook_for_index(records, meta, conn)
         render_records(conn, records, meta, unquote(options))
       end
 
@@ -51,6 +53,7 @@ defmodule FatEcto.IndexRecord do
            when not is_function(paginator_function) do
         records = repo.all(query)
         records = repo.preload(records, @preloads)
+        after_get_hook_for_index(records, nil, conn)
         render_records(conn, records, nil, unquote(options))
       end
 
@@ -59,7 +62,12 @@ defmodule FatEcto.IndexRecord do
         query
       end
 
-      defoverridable process_query_before_fetch_records_for_index: 2
+      # You can use after_get_hook_for_index to log etc
+      def after_get_hook_for_index(_records, _meta(_conn)) do
+        "Override if needed"
+      end
+
+      defoverridable process_query_before_fetch_records_for_index: 2, after_get_hook_for_index: 3
     end
   end
 end

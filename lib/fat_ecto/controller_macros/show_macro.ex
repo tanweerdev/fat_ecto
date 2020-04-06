@@ -41,6 +41,7 @@ defmodule FatEcto.ShowRecord do
 
           {:ok, record} ->
             record = MacrosHelper.preload_record(record, @repo, @preloads)
+            after_get_hook_for_show(record, conn)
             render_record(conn, record, unquote(options) ++ [status_to_put: :ok])
         end
       end
@@ -50,7 +51,12 @@ defmodule FatEcto.ShowRecord do
         query
       end
 
-      defoverridable process_query_before_fetch_record_for_show: 2
+      # You can use after_get_hook_for_show to log etc
+      def after_get_hook_for_show(_record, _conn) do
+        "Override if needed"
+      end
+
+      defoverridable process_query_before_fetch_record_for_show: 2, after_get_hook_for_show: 2
     end
   end
 end

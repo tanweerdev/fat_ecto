@@ -52,6 +52,7 @@ defmodule FatEcto.DeleteRecord do
 
             case @repo.delete(record) do
               {:ok, _struct} ->
+                after_delete_hook_for_delete(record, conn)
                 render_resp(conn, "Record Deleted", 204, put_content_type: "application/json")
 
               {:error, changeset} ->
@@ -64,6 +65,11 @@ defmodule FatEcto.DeleteRecord do
       # You can use process_query_before_fetch_record_for_delete to override query before fetching record for delete
       def process_query_before_fetch_record_for_delete(query, _conn) do
         query
+      end
+
+      # You can use after_delete_hook_for_delete to log etc
+      def after_delete_hook_for_delete(_record, _conn) do
+        "Override if needed"
       end
 
       def add_assoc_constraint(record, id) do
@@ -94,7 +100,7 @@ defmodule FatEcto.DeleteRecord do
         end)
       end
 
-      defoverridable process_query_before_fetch_record_for_delete: 2
+      defoverridable process_query_before_fetch_record_for_delete: 2, after_delete_hook_for_delete: 2
     end
   end
 end

@@ -50,6 +50,7 @@ defmodule FatEcto.UpdateRecord do
           else
             with {:ok, record} <- @repo.update(changeset) do
               record = MacrosHelper.preload_record(record, @repo, @preloads)
+              after_update_hook_for_update(record, conn)
               render_record(conn, record, unquote(options) ++ [status_to_put: :ok])
             end
           end
@@ -71,8 +72,20 @@ defmodule FatEcto.UpdateRecord do
         query
       end
 
+      # You can use after_update_hook_for_update to log etc
+      def after_update_hook_for_update(_record, _conn) do
+        "Override if needed"
+      end
+
+      # You can use after_update_hook_for_soft_delete to log etc
+      def after_update_hook_for_soft_delete(_record, _conn) do
+        "Override if needed"
+      end
+
       defoverridable process_params_before_in_update: 2,
                      process_changeset_before_update: 2,
+                     after_update_hook_for_update: 2,
+                     after_update_hook_for_soft_delete: 2,
                      process_query_before_fetch_record_for_update: 2
 
       # TODO: util functions
@@ -116,6 +129,7 @@ defmodule FatEcto.UpdateRecord do
 
         with {:ok, record} <- @repo.update(changeset) do
           record = MacrosHelper.preload_record(record, @repo, @preloads)
+          after_update_hook_for_soft_delete(record, conn)
           render_resp(conn, "Record soft deleted", 200, put_content_type: "application/json")
         end
       end
