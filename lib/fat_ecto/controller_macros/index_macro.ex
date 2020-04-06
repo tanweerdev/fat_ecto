@@ -21,12 +21,13 @@ defmodule FatEcto.IndexRecord do
       @paginator_function unquote(options)[:paginator_function]
 
       def index(conn, params) do
-        query =
-          if @preloads do
-            Ecto.Query.preload(@schema, ^@preloads)
-          else
-            @schema
-          end
+        # TODO: below doesnt work so added condition for repo.all. Please fix preloads for paginator
+        # query =
+        #   if @preloads do
+        #     Ecto.Query.preload(@schema, ^@preloads)
+        #   else
+        #     @schema
+        #   end
 
         query = process_query_before_fetch_records_for_index(@schema, conn)
         # TODO: add docs that paginator_function shoud return records and meta
@@ -49,6 +50,7 @@ defmodule FatEcto.IndexRecord do
       defp _get_and_render(conn, query, params, paginator_function, repo)
            when not is_function(paginator_function) do
         records = repo.all(query)
+        records = repo.preload(records, @preloads)
         render_records(conn, records, nil, unquote(options))
       end
 
