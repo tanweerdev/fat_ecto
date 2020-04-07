@@ -78,16 +78,16 @@ defmodule FatUtils.FatRecord do
                   acc
 
                 %DateTime{} ->
-                  render_date_time(acc, k, v)
+                  put_value(acc, k, v)
 
                 %Date{} ->
-                  render_date_time(acc, k, v)
+                  put_value(acc, k, v)
 
                 %Time{} ->
-                  render_date_time(acc, k, v)
+                  put_value(acc, k, v)
 
                 %NaiveDateTime{} ->
-                  render_date_time(acc, k, v)
+                  put_value(acc, k, v)
 
                 _v ->
                   Map.put(acc, k, sanitize_map(v))
@@ -97,7 +97,8 @@ defmodule FatUtils.FatRecord do
               Map.put(acc, k, sanitize_map(v))
 
             true ->
-              Map.put(acc, k, v)
+              # Map.put(acc, k, v)
+              put_value(acc, k, v)
           end
         end)
       end
@@ -106,11 +107,11 @@ defmodule FatUtils.FatRecord do
         record
       end
 
-      def render_date_time(data_map, field, value) do
+      def put_value(data_map, field, value) do
         Map.put(data_map, field, value)
       end
 
-      defoverridable render_date_time: 3
+      defoverridable put_value: 3
     end
   end
 end
