@@ -75,29 +75,39 @@ defmodule FatUtils.FatRecord do
       end
 
       def sanitize_map(record) when is_map(record) do
-        schema_keys = [:__struct__, :__meta__]
-        # not_loaded_keys = [:__field__, :__owner__, :__cardinality__]
+        {rec, condition} = custom_map?(record)
 
-        Enum.reduce(Map.drop(record, schema_keys), %{}, fn {k, v}, acc ->
-          cond do
-            is_list(v) ->
-              values =
-                Enum.reduce(v, [], fn rec, acc ->
-                  acc ++ [sanitize(rec)]
-                end)
+        if condition do
+          rec
+        else
+          schema_keys = [:__struct__, :__meta__]
+          # not_loaded_keys = [:__field__, :__owner__, :__cardinality__]
 
-              Map.put(acc, k, values)
+          Enum.reduce(Map.drop(record, schema_keys), %{}, fn {k, v}, acc ->
+            cond do
+              is_list(v) ->
+                values =
+                  Enum.reduce(v, [], fn rec, acc ->
+                    acc ++ [sanitize(rec)]
+                  end)
 
-            is_map(v) ->
-              put_map_value_conditionally(acc, k, v)
+                Map.put(acc, k, values)
 
-            is_tuple(v) ->
-              Map.put(acc, k, sanitize(v))
+              is_map(v) ->
+                put_map_value_conditionally(acc, k, v)
 
-            true ->
-              put_value(acc, k, v)
-          end
-        end)
+              is_tuple(v) ->
+                Map.put(acc, k, sanitize(v))
+
+              true ->
+                put_value(acc, k, v)
+            end
+          end)
+        end
+      end
+
+      def custom_map?(record) do
+        {record, false}
       end
 
       def put_map_value_conditionally(data_map, field, value) do
@@ -130,7 +140,8 @@ defmodule FatUtils.FatRecord do
                      put_map_value_conditionally: 3,
                      sanitize_map: 1,
                      sanitize_tuple: 1,
-                     sanitize_list: 1
+                     sanitize_list: 1,
+                     custom_map?: 1
     end
   end
 end
