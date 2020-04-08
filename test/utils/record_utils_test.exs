@@ -2,7 +2,7 @@ defmodule Utils.RecordUtils do
   use FatEcto.ConnCase
   import FatEcto.TestRecordUtils
 
-  test "sanitize_map" do
+  test "sanitize" do
     record =
       FatEcto.FatHospital.changeset(%FatEcto.FatHospital{}, %{
         name: "saint marry",
@@ -12,7 +12,7 @@ defmodule Utils.RecordUtils do
 
     {:ok, record} = Repo.insert(record)
 
-    assert sanitize_map(record) == %{
+    assert sanitize(record) == %{
              address: nil,
              id: record.id,
              location: "brazil",
@@ -23,7 +23,7 @@ defmodule Utils.RecordUtils do
            }
   end
 
-  test "sanitize_map as a list" do
+  test "sanitize as a list" do
     record =
       FatEcto.FatHospital.changeset(%FatEcto.FatHospital{}, %{
         name: "saint marry",
@@ -33,7 +33,7 @@ defmodule Utils.RecordUtils do
 
     {:ok, record} = Repo.insert(record)
 
-    assert sanitize_map([record]) == [
+    assert sanitize([record]) == [
              %{
                address: nil,
                id: record.id,

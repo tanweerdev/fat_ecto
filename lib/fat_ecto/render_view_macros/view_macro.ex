@@ -12,17 +12,17 @@ defmodule FatEcto.View do
 
       def render("show.json", %{data: record}) do
         if @wrapper in [nil, ""] do
-          FatEcto.RecordUtils.sanitize_map(record)
+          FatEcto.RecordUtils.sanitize(record)
         else
-          %{@wrapper => FatEcto.RecordUtils.sanitize_map(record)}
+          %{@wrapper => FatEcto.RecordUtils.sanitize(record)}
         end
       end
 
       def render("index.json", %{data: records}) do
         if @wrapper in [nil, ""] do
-          FatEcto.RecordUtils.sanitize_map(records)
+          FatEcto.RecordUtils.sanitize(records)
         else
-          %{@wrapper => FatEcto.RecordUtils.sanitize_map(records)}
+          %{@wrapper => FatEcto.RecordUtils.sanitize(records)}
         end
       end
 
@@ -41,14 +41,14 @@ defmodule FatEcto.View do
             options[:meta_to_put_as]
           end
 
-        %{records_wrapper => FatEcto.RecordUtils.sanitize_map(records), meta_wrapper => meta}
+        %{records_wrapper => FatEcto.RecordUtils.sanitize(records), meta_wrapper => meta}
       end
 
       def render("index.json", %{records: records, options: options}) do
         if options[:data_to_view_as] in [nil, ""] do
-          FatEcto.RecordUtils.sanitize_map(records)
+          FatEcto.RecordUtils.sanitize(records)
         else
-          %{options[:data_to_view_as] => FatEcto.RecordUtils.sanitize_map(records)}
+          %{options[:data_to_view_as] => FatEcto.RecordUtils.sanitize(records)}
         end
       end
 

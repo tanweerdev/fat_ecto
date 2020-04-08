@@ -25,7 +25,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.one(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Map.drop([:start_date, :end_date, :id])
 
     assert result == %{
@@ -57,7 +57,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.one(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Map.drop([:start_date, :end_date, :id])
 
     assert result == %{
@@ -88,7 +88,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.one(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Map.drop([:start_date, :end_date, :id])
 
     assert result == %{
@@ -119,7 +119,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.one(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Map.drop([:start_date, :end_date, :id])
 
     assert result == %{
@@ -155,7 +155,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.one(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Map.drop([:id])
 
     assert result == %{
@@ -179,7 +179,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.one(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Map.drop([:id])
 
     assert result == %{
@@ -225,7 +225,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.one(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Map.drop([:id])
 
     assert result == %{
@@ -249,7 +249,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.one(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Map.drop([:id])
 
     assert result == %{
@@ -273,7 +273,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.one(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Map.drop([:id])
 
     assert result == %{
@@ -389,7 +389,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.one(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Map.drop([:id])
 
     assert result == %{
@@ -414,7 +414,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.one(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Map.drop([:id])
 
     assert result == %{
@@ -438,7 +438,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.one(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Map.drop([:id])
 
     assert result == %{
@@ -495,7 +495,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.all(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
     assert result == [
@@ -544,7 +544,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.all(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
     assert result == [
@@ -584,7 +584,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.all(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
     assert result == [
@@ -643,7 +643,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.all(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
     assert result == [
@@ -686,7 +686,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.all(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
     assert result == [
@@ -746,7 +746,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.all(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
     assert result == [
@@ -817,7 +817,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.all(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
     assert result == [
@@ -893,7 +893,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.all(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
     assert result == [
@@ -972,7 +972,7 @@ defmodule Query.WhereTest do
 
     result =
       Repo.all(query)
-      |> sanitize_map()
+      |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
     assert result == [

@@ -23,8 +23,8 @@ defmodule FatUtils.FatRecord do
       ### Example
 
           iex> record = FatEcto.Repo.insert!(%FatEcto.FatDoctor{name: "test", designation: "doctor", phone: "12345", address: "123 Hampton Road"})
-          iex> sanitize_map = #{__MODULE__}.sanitize_map(record)
-          iex> Map.drop(sanitize_map, [:id])
+          iex> sanitized = #{__MODULE__}.sanitize(record)
+          iex> Map.drop(sanitized, [:id])
           %{
               address: "123 Hampton Road",
               designation: "doctor",
@@ -38,17 +38,33 @@ defmodule FatUtils.FatRecord do
             }
 
       """
-      def sanitize_map(records) when is_list(records) do
+      def sanitize(records) when is_list(records) do
+        sanitize_list(records)
+      end
+
+      def sanitize(record) when is_tuple(record) do
+        sanitize_tuple(record)
+      end
+
+      def sanitize(record) when is_map(record) do
+        sanitize_map(record)
+      end
+
+      def sanitize(record) do
+        record
+      end
+
+      def sanitize_list(records) when is_list(records) do
         Enum.reduce(records, [], fn rec, acc ->
-          acc ++ [sanitize_map(rec)]
+          acc ++ [sanitize(rec)]
         end)
       end
 
-      def sanitize_map(record) when is_tuple(record) do
+      def sanitize_tuple(record) when is_tuple(record) do
         case tuple_size(record) do
           2 ->
             [key, value] = Tuple.to_list(record)
-            %{key => sanitize_map(value)}
+            %{key => sanitize(value)}
 
           # TODO: fix this warning
           _size ->
@@ -67,51 +83,54 @@ defmodule FatUtils.FatRecord do
             is_list(v) ->
               values =
                 Enum.reduce(v, [], fn rec, acc ->
-                  acc ++ [sanitize_map(rec)]
+                  acc ++ [sanitize(rec)]
                 end)
 
               Map.put(acc, k, values)
 
             is_map(v) ->
-              case v do
-                %Ecto.Association.NotLoaded{} ->
-                  acc
-
-                %DateTime{} ->
-                  put_value(acc, k, v)
-
-                %Date{} ->
-                  put_value(acc, k, v)
-
-                %Time{} ->
-                  put_value(acc, k, v)
-
-                %NaiveDateTime{} ->
-                  put_value(acc, k, v)
-
-                _v ->
-                  Map.put(acc, k, sanitize_map(v))
-              end
+              put_map_value_conditionally(acc, k, v)
 
             is_tuple(v) ->
-              Map.put(acc, k, sanitize_map(v))
+              Map.put(acc, k, sanitize(v))
 
             true ->
-              # Map.put(acc, k, v)
               put_value(acc, k, v)
           end
         end)
       end
 
-      def sanitize_map(record) do
-        record
+      def put_map_value_conditionally(data_map, field, value) do
+        case value do
+          %Ecto.Association.NotLoaded{} ->
+            data_map
+
+          %DateTime{} ->
+            put_value(data_map, field, value)
+
+          %Date{} ->
+            put_value(data_map, field, value)
+
+          %Time{} ->
+            put_value(data_map, field, value)
+
+          %NaiveDateTime{} ->
+            put_value(data_map, field, value)
+
+          _v ->
+            Map.put(data_map, field, sanitize(value))
+        end
       end
 
       def put_value(data_map, field, value) do
         Map.put(data_map, field, value)
       end
 
-      defoverridable put_value: 3
+      defoverridable put_value: 3,
+                     put_map_value_conditionally: 3,
+                     sanitize_map: 1,
+                     sanitize_tuple: 1,
+                     sanitize_list: 1
     end
   end
 end
