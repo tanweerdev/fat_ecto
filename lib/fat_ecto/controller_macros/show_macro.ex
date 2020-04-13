@@ -18,10 +18,22 @@ defmodule FatEcto.ShowRecord do
 
       @preloads unquote(options)[:preloads] || []
 
-      def show(conn, %{"id" => id}) do
+      @get_by_unqiue_field unquote(options)[:get_by_unqiue_field]
+
+      if @get_by_unqiue_field in [nil, ""] do
+        def show(conn, %{"id" => id}) do
+          _show(conn, %{"key" => :id, "value" => id})
+        end
+      else
+        def show(conn, %{@get_by_unqiue_field => value}) do
+          _show(conn, %{"key" => @get_by_unqiue_field, "value" => value})
+        end
+      end
+
+      defp _show(conn, %{"key" => key, "value" => value}) do
         query = process_query_before_fetch_record_for_show(@schema, conn)
 
-        case MacrosHelper.get_record_by_query(:id, id, @repo, query) do
+        case MacrosHelper.get_record_by_query(key, value, @repo, query) do
           {:error, :not_found} ->
             error_view_module = unquote(options)[:error_view_module]
             error_view = unquote(options)[:error_view_404]
