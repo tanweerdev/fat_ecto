@@ -51,7 +51,7 @@ defmodule FatEcto.UpdateRecord do
             with {:ok, record} <- @repo.update(changeset) do
               record = MacrosHelper.preload_record(record, @repo, @preloads)
               after_update_hook_for_update(record, conn)
-              render_record(conn, record, unquote(options) ++ [status_to_put: :ok])
+              render_record(conn, record, [status_to_put: :ok] ++ unquote(options))
             end
           end
         end

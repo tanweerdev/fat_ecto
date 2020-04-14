@@ -42,19 +42,18 @@ defmodule FatEcto.ShowRecord do
             render_record(
               conn,
               "Record not found",
-              unquote(options) ++
-                [
-                  status_to_put: 404,
-                  put_view_module: error_view_module,
-                  view_to_render: error_view,
-                  data_to_view_as: data_to_view_as
-                ]
+              [
+                status_to_put: 404,
+                put_view_module: error_view_module,
+                view_to_render: error_view,
+                data_to_view_as: data_to_view_as
+              ] ++ unquote(options)
             )
 
           {:ok, record} ->
             record = MacrosHelper.preload_record(record, @repo, @preloads)
             after_get_hook_for_show(record, conn)
-            render_record(conn, record, unquote(options) ++ [status_to_put: :ok])
+            render_record(conn, record, [status_to_put: :ok] ++ unquote(options))
         end
       end
 

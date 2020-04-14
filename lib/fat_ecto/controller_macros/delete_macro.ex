@@ -34,13 +34,12 @@ defmodule FatEcto.DeleteRecord do
             render_record(
               conn,
               "Record not found",
-              unquote(options) ++
-                [
-                  status_to_put: 404,
-                  put_view_module: error_view_module,
-                  view_to_render: error_view,
-                  data_to_view_as: data_to_view_as
-                ]
+              [
+                status_to_put: 404,
+                put_view_module: error_view_module,
+                view_to_render: error_view,
+                data_to_view_as: data_to_view_as
+              ] ++ unquote(options)
             )
 
           {:ok, record} ->

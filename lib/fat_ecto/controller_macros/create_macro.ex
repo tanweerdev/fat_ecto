@@ -37,7 +37,7 @@ defmodule FatEcto.CreateRecord do
         with {:ok, record} <- insert_record(changeset, @repo) do
           record = MacrosHelper.preload_record(record, @repo, @preloads)
           after_create_hook_for_create(record, conn)
-          render_record(conn, record, unquote(options) ++ [status_to_put: :created])
+          render_record(conn, record, [status_to_put: :created] ++ unquote(options))
         end
       end
 
