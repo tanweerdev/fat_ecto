@@ -7,6 +7,7 @@ defmodule FatEcto.DeleteRecord do
       alias FatEcto.MacrosHelper
 
       @repo unquote(options)[:repo]
+      @status_to_put unquote(options)[:status_to_put]
       # You can disable add_assoc_constraint by passing add_assoc_constraint value false
       @add_assoc_constraint unquote(options)[:add_assoc_constraint]
 
@@ -53,7 +54,12 @@ defmodule FatEcto.DeleteRecord do
             case @repo.delete(record) do
               {:ok, _struct} ->
                 after_delete_hook_for_delete(record, conn)
-                render_resp(conn, "Record Deleted", 204, put_content_type: "application/json")
+
+                if @status_to_put do
+                  render_resp(conn, "Record Deleted", @status_to_put, put_content_type: "application/json")
+                else
+                  render_resp(conn, "Record Deleted", 200, put_content_type: "application/json")
+                end
 
               {:error, changeset} ->
                 error_view = unquote(options)[:error_view]
