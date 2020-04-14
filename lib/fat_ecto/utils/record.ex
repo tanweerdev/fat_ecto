@@ -80,30 +80,34 @@ defmodule FatUtils.FatRecord do
         if condition do
           rec
         else
-          schema_keys = [:__struct__, :__meta__]
-          # not_loaded_keys = [:__field__, :__owner__, :__cardinality__]
-
-          Enum.reduce(Map.drop(record, schema_keys), %{}, fn {k, v}, acc ->
-            cond do
-              is_list(v) ->
-                values =
-                  Enum.reduce(v, [], fn rec, acc ->
-                    acc ++ [sanitize(rec)]
-                  end)
-
-                Map.put(acc, k, values)
-
-              is_map(v) ->
-                put_map_value_conditionally(acc, k, v)
-
-              is_tuple(v) ->
-                Map.put(acc, k, sanitize(v))
-
-              true ->
-                put_value(acc, k, v)
-            end
-          end)
+          sanitize_map_iteratively(record)
         end
+      end
+
+      def sanitize_map_iteratively(record) when is_map(record) do
+        schema_keys = [:__struct__, :__meta__]
+        # not_loaded_keys = [:__field__, :__owner__, :__cardinality__]
+
+        Enum.reduce(Map.drop(record, schema_keys), %{}, fn {k, v}, acc ->
+          cond do
+            is_list(v) ->
+              values =
+                Enum.reduce(v, [], fn rec, acc ->
+                  acc ++ [sanitize(rec)]
+                end)
+
+              Map.put(acc, k, values)
+
+            is_map(v) ->
+              put_map_value_conditionally(acc, k, v)
+
+            is_tuple(v) ->
+              Map.put(acc, k, sanitize(v))
+
+            true ->
+              put_value(acc, k, v)
+          end
+        end)
       end
 
       def custom_map?(record) do
@@ -139,6 +143,7 @@ defmodule FatUtils.FatRecord do
       defoverridable put_value: 3,
                      put_map_value_conditionally: 3,
                      sanitize_map: 1,
+                     sanitize_map_iteratively: 1,
                      sanitize_tuple: 1,
                      sanitize_list: 1,
                      custom_map?: 1
