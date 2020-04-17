@@ -2,8 +2,8 @@ defmodule FatEcto.IndexRecord do
   @moduledoc false
 
   defmacro __using__(options) do
-    # quote location: :keep do
-    quote do
+    quote location: :keep do
+      # quote do
       alias FatEcto.MacrosHelper
       require Ecto.Query
 

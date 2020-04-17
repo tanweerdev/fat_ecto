@@ -2,8 +2,8 @@ defmodule FatEcto.UpdateRecord do
   @moduledoc false
 
   defmacro __using__(options) do
-    # quote location: :keep do
-    quote do
+    quote location: :keep do
+      # quote do
       alias FatEcto.MacrosHelper
       @repo unquote(options)[:repo]
       @preloads unquote(options)[:preloads] || []
@@ -13,6 +13,7 @@ defmodule FatEcto.UpdateRecord do
       end
 
       @schema unquote(options)[:schema]
+      @get_by_unqiue_field unquote(options)[:get_by_unqiue_field]
 
       if !@schema do
         raise "please define schema when using create record"
@@ -20,20 +21,32 @@ defmodule FatEcto.UpdateRecord do
 
       @wrapper unquote(options)[:wrapper]
 
-      if @wrapper in [nil, ""] do
-        def update(conn, %{"id" => id} = params) do
-          _update(conn, id, params)
-        end
-      else
-        def update(conn, %{"id" => id, "params" => params}) do
-          _update(conn, id, params)
-        end
+      case {@wrapper in [nil, ""], @get_by_unqiue_field in [nil, ""]} do
+        {true, true} ->
+          def update(conn, %{"id" => id} = params) do
+            _update(conn, %{"key" => :id, "value" => id}, params)
+          end
+
+        {true, false} ->
+          def update(conn, %{@get_by_unqiue_field => value} = params) do
+            _update(conn, %{"key" => @get_by_unqiue_field, "value" => value}, params)
+          end
+
+        {false, true} ->
+          def update(conn, %{"id" => id, @wrapper => params}) do
+            _update(conn, %{"key" => :id, "value" => id}, params)
+          end
+
+        {false, false} ->
+          def update(conn, %{@get_by_unqiue_field => value, @wrapper => params}) do
+            _update(conn, %{"key" => @get_by_unqiue_field, "value" => value}, params)
+          end
       end
 
-      defp _update(conn, id, params) do
+      defp _update(conn, %{"key" => key, "value" => value}, params) do
         query = process_query_before_fetch_record_for_update(@schema, conn)
 
-        with {:ok, record} <- MacrosHelper.get_record_by_query(:id, id, @repo, query) do
+        with {:ok, record} <- MacrosHelper.get_record_by_query(key, value, @repo, query) do
           record = MacrosHelper.preload_record(record, @repo, @preloads)
           params = process_params_before_in_update(params, conn)
           changeset = @schema.changeset(record, params)

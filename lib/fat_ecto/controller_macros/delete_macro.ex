@@ -2,14 +2,15 @@ defmodule FatEcto.DeleteRecord do
   @moduledoc false
 
   defmacro __using__(options) do
-    # quote location: :keep do
-    quote do
+    quote location: :keep do
+      # quote do
       alias FatEcto.MacrosHelper
 
       @repo unquote(options)[:repo]
       @status_to_put unquote(options)[:status_to_put]
       # You can disable add_assoc_constraint by passing add_assoc_constraint value false
       @add_assoc_constraint unquote(options)[:add_assoc_constraint]
+      @get_by_unqiue_field unquote(options)[:get_by_unqiue_field]
 
       if !@repo do
         raise "please define repo when using delete record"
@@ -20,12 +21,22 @@ defmodule FatEcto.DeleteRecord do
         raise "please define schema when using delete record"
       end
 
+      if @get_by_unqiue_field in [nil, ""] do
+        def delete(conn, %{"id" => id}) do
+          _delete(conn, %{"key" => :id, "value" => id})
+        end
+      else
+        def delete(conn, %{@get_by_unqiue_field => value}) do
+          _delete(conn, %{"key" => @get_by_unqiue_field, "value" => value})
+        end
+      end
+
       # TODO: Lets implement with in these macros and add sample fallback controller
       # then we will be independent of few options eg we dont have to render error
-      def delete(conn, %{"id" => id}) do
+      defp _delete(conn, %{"key" => key, "value" => value}) do
         query = process_query_before_fetch_record_for_delete(@schema, conn)
 
-        case MacrosHelper.get_record_by_query(:id, id, @repo, query) do
+        case MacrosHelper.get_record_by_query(key, value, @repo, query) do
           {:error, :not_found} ->
             error_view_module = unquote(options)[:error_view_module]
             error_view = unquote(options)[:error_view_404]
@@ -47,7 +58,7 @@ defmodule FatEcto.DeleteRecord do
               if @add_assoc_constraint == false do
                 record
               else
-                add_assoc_constraint(record, id)
+                add_assoc_constraint(record, value)
               end
 
             case @repo.delete(record) do

@@ -2,7 +2,7 @@ defmodule FatEcto.CreateRecord do
   @moduledoc false
 
   defmacro __using__(options) do
-    quote do
+    quote location: :keep do
       alias FatEcto.MacrosHelper
       @repo unquote(options)[:repo]
       @preloads unquote(options)[:preloads] || []
