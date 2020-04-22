@@ -48,27 +48,55 @@ defmodule FatEcto.UpdateRecord do
         query = process_query_before_fetch_record_for_update(@schema, conn)
 
         with {:ok, record} <- MacrosHelper.get_record_by_query(key, value, @repo, query) do
-          record = MacrosHelper.preload_record(record, @repo, @preloads)
-          params = process_params_before_in_update(params, conn)
-          changeset = build_update_changeset(@custom_changeset, record, params)
-
-          changeset = process_changeset_before_update(changeset, params, conn)
-          # && record.is_active != false if want to disable multiple soft deletion
-
           soft_delete_key = unquote(options)[:soft_delete_key]
           soft_deleted_value = unquote(options)[:soft_deleted_value]
-          # can be used to later undo soft delete
-          # not_soft_deleted_value = unquote(options)[:not_soft_deleted_value]
 
           if soft_delete_key && params[to_string(soft_delete_key)] == soft_deleted_value do
-            soft_delete(conn, record, changeset, params, soft_delete_key, soft_deleted_value)
+            soft_delete(
+              conn,
+              record,
+              @schema.changeset(record, %{soft_delete_key => soft_deleted_value}),
+              params,
+              soft_delete_key,
+              soft_deleted_value
+            )
           else
-            with {:ok, record} <- @repo.update(changeset) do
-              record = MacrosHelper.preload_record(record, @repo, @preloads)
-              after_update_hook_for_update(record, conn)
-              render_record(conn, record, [status_to_put: :ok] ++ unquote(options))
+            case check_if_record_soft_deleted?(record, soft_delete_key, soft_deleted_value) do
+              true ->
+                error_view_module = unquote(options)[:error_view_module]
+                error_view = unquote(options)[:error_view_403]
+                data_to_view_as = unquote(options)[:error_data_to_view_as]
+
+                render_record(
+                  conn,
+                  "Update on soft deleted record is not allowed",
+                  [
+                    status_to_put: 403,
+                    put_view_module: error_view_module,
+                    view_to_render: error_view,
+                    data_to_view_as: data_to_view_as
+                  ] ++ unquote(options)
+                )
+
+              false ->
+                record = MacrosHelper.preload_record(record, @repo, @preloads)
+                params = process_params_before_in_update(params, conn)
+                changeset = build_update_changeset(@custom_changeset, record, params)
+
+                changeset = process_changeset_before_update(changeset, params, conn)
+
+                with {:ok, record} <- @repo.update(changeset) do
+                  record = MacrosHelper.preload_record(record, @repo, @preloads)
+                  after_update_hook_for_update(record, conn)
+                  render_record(conn, record, [status_to_put: :ok] ++ unquote(options))
+                end
             end
           end
+
+          # && record.is_active != false if want to disable multiple soft deletion
+
+          # can be used to later undo soft delete
+          # not_soft_deleted_value = unquote(options)[:not_soft_deleted_value]
         end
       end
 
@@ -104,6 +132,18 @@ defmodule FatEcto.UpdateRecord do
       end
 
       defp build_update_changeset(cs, _record, _params), do: cs
+
+      def check_if_record_soft_deleted?(_record, soft_delete_key, _soft_deleted_value)
+          when is_nil(soft_delete_key),
+          do: false
+
+      def check_if_record_soft_deleted?(record, soft_delete_key, soft_deleted_value) do
+        if Map.has_key?(record, soft_delete_key) && Map.get(record, soft_delete_key) == soft_deleted_value do
+          true
+        else
+          false
+        end
+      end
 
       defoverridable process_params_before_in_update: 2,
                      process_changeset_before_update: 3,
