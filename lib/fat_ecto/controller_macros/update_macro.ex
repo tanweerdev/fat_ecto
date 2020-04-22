@@ -19,6 +19,7 @@ defmodule FatEcto.UpdateRecord do
         raise "please define schema when using create record"
       end
 
+      @custom_changeset unquote(options)[:custom_changeset]
       @wrapper unquote(options)[:wrapper]
 
       case {@wrapper in [nil, ""], @get_by_unqiue_field in [nil, ""]} do
@@ -49,8 +50,9 @@ defmodule FatEcto.UpdateRecord do
         with {:ok, record} <- MacrosHelper.get_record_by_query(key, value, @repo, query) do
           record = MacrosHelper.preload_record(record, @repo, @preloads)
           params = process_params_before_in_update(params, conn)
-          changeset = @schema.changeset(record, params)
-          changeset = process_changeset_before_update(changeset, conn)
+          changeset = build_update_changeset(@custom_changeset, record, params)
+
+          changeset = process_changeset_before_update(changeset, params, conn)
           # && record.is_active != false if want to disable multiple soft deletion
 
           soft_delete_key = unquote(options)[:soft_delete_key]
@@ -76,7 +78,7 @@ defmodule FatEcto.UpdateRecord do
       end
 
       # You can use process_changeset_before_update to add/update/validate changeset before calling update
-      def process_changeset_before_update(changeset, _conn) do
+      def process_changeset_before_update(changeset, _params, _conn) do
         changeset
       end
 
@@ -95,8 +97,16 @@ defmodule FatEcto.UpdateRecord do
         "Override if needed"
       end
 
+      defp build_update_changeset(cs, record, params) when is_nil(cs), do: @schema.changeset(record, params)
+
+      defp build_update_changeset(cs, record, params) when is_function(cs, 2) do
+        cs.(record, params)
+      end
+
+      defp build_update_changeset(cs, _record, _params), do: cs
+
       defoverridable process_params_before_in_update: 2,
-                     process_changeset_before_update: 2,
+                     process_changeset_before_update: 3,
                      after_update_hook_for_update: 2,
                      after_update_hook_for_soft_delete: 2,
                      process_query_before_fetch_record_for_update: 2

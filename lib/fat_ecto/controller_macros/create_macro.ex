@@ -18,7 +18,7 @@ defmodule FatEcto.CreateRecord do
       end
 
       @wrapper unquote(options)[:wrapper]
-
+      @custom_changeset unquote(options)[:custom_changeset]
       if @wrapper in [nil, ""] do
         def create(conn, %{} = params) do
           _craete(conn, params)
@@ -31,8 +31,8 @@ defmodule FatEcto.CreateRecord do
 
       defp _craete(conn, params) do
         params = process_params_before_in_create(params, conn)
-        changeset = @schema.changeset(struct(@schema), params)
-        changeset = process_changeset_before_insert(changeset, conn)
+        changeset = build_insert_changeset(@custom_changeset, params)
+        changeset = process_changeset_before_insert(changeset, params, conn)
 
         with {:ok, record} <- insert_record(changeset, @repo) do
           record = MacrosHelper.preload_record(record, @repo, @preloads)
@@ -51,7 +51,7 @@ defmodule FatEcto.CreateRecord do
       end
 
       # You can use process_changeset_before_insert to add/update/validate changeset before calling insert
-      def process_changeset_before_insert(changeset, _conn) do
+      def process_changeset_before_insert(changeset, _params, _conn) do
         changeset
       end
 
@@ -60,8 +60,16 @@ defmodule FatEcto.CreateRecord do
         "Override if needed"
       end
 
+      defp build_insert_changeset(cs, params) when is_nil(cs), do: @schema.changeset(struct(@schema), params)
+
+      defp build_insert_changeset(cs, params) when is_function(cs, 2) do
+        cs.(struct(@schema), params)
+      end
+
+      defp build_insert_changeset(cs, _params), do: cs
+
       defoverridable process_params_before_in_create: 2,
-                     process_changeset_before_insert: 2,
+                     process_changeset_before_insert: 3,
                      insert_record: 2,
                      after_create_hook_for_create: 2
     end
