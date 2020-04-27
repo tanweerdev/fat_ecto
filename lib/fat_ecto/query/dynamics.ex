@@ -95,7 +95,6 @@ defmodule FatEcto.FatQuery.FatDynamics do
     if opts[:binding] == :last do
       if FatHelper.is_fat_ecto_field?(value) do
         value = String.replace(value, "$", "", global: false)
-        IO.inspect(value)
 
         if opts[:dynamic_type] == :and do
           dynamic(
@@ -445,6 +444,50 @@ defmodule FatEcto.FatQuery.FatDynamics do
           [q],
           ilike(
             fragment("(?)::TEXT", field(q, ^FatHelper.string_to_existing_atom(key))),
+            ^value
+          ) or ^dynamics
+        )
+      end
+    end
+  end
+
+  def array_ilike_dynamic(key, value, dynamics, opts \\ []) do
+    if opts[:binding] == :last do
+      if opts[:dynamic_type] == :and do
+        dynamic(
+          [..., c],
+          fragment(
+            "exists (SELECT 1 FROM unnest(?) as value WHERE value ILIKE ?)",
+            field(c, ^FatHelper.string_to_existing_atom(key)),
+            ^value
+          ) and ^dynamics
+        )
+      else
+        dynamic(
+          [..., c],
+          fragment(
+            "exists (SELECT 1 FROM unnest(?) as value WHERE value ILIKE ?)",
+            field(c, ^FatHelper.string_to_existing_atom(key)),
+            ^value
+          ) or ^dynamics
+        )
+      end
+    else
+      if opts[:dynamic_type] == :and do
+        dynamic(
+          [q],
+          fragment(
+            "exists (SELECT 1 FROM unnest(?) as value WHERE value ILIKE ?)",
+            field(q, ^FatHelper.string_to_existing_atom(key)),
+            ^value
+          ) and ^dynamics
+        )
+      else
+        dynamic(
+          [q],
+          fragment(
+            "exists (SELECT 1 FROM unnest(?) as value WHERE value ILIKE ?)",
+            field(q, ^FatHelper.string_to_existing_atom(key)),
             ^value
           ) or ^dynamics
         )

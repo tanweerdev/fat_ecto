@@ -830,6 +830,9 @@ defmodule FatEcto.FatQuery.FatWhere do
         "$ilike" ->
           FatDynamics.ilike_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
+        "$array_ilike" ->
+          FatDynamics.array_ilike_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
+
         "$not_like" ->
           FatNotDynamics.not_like_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
@@ -956,5 +959,10 @@ defmodule FatEcto.FatQuery.FatWhere do
     Enum.reduce(map_cond, dynamics, fn key, dynamics ->
       FatNotDynamics.not_is_nil_dynamic(key, dynamics, opts ++ [dynamic_type: :and])
     end)
+  end
+
+  defp query_where(dynamics, {k, map_cond}, opts)
+       when is_list(map_cond) do
+    FatDynamics.eq_dynamic(k, map_cond, dynamics, opts ++ [dynamic_type: :and])
   end
 end
