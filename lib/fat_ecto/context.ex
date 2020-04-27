@@ -239,6 +239,23 @@ defmodule FatEcto.FatContext do
         |> @repo.update!(opts)
       end
 
+      # TODO: add docs and test cases
+      def upsert(
+            schema,
+            [get_by_clauses: get_by_clauses, update_params: update_params, create_params: create_params],
+            opts \\ []
+          ) do
+        case get_by(schema, get_by_clauses, opts[:preloads] || []) do
+          {:ok, record} ->
+            # Record is found, now update
+            update(record, schema, update_params, opts)
+
+          {:error, :not_found} ->
+            # Record not found, so create one
+            create(schema, create_params, opts)
+        end
+      end
+
       # Context.delete(%User{name: "name", id: 1})
       @doc """
         Delete the record.
