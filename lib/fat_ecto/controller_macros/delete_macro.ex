@@ -1,10 +1,17 @@
 defmodule FatEcto.DeleteRecord do
   @moduledoc false
+  @doc "Update a query before sending it in the fetch method. By default the query is name of your schema"
+  @callback pre_process_fetch_query_for_delete_method(query :: Ecto.Query.t(), conn :: Plug.Conn.t()) ::
+              Ecto.Query.t()
+
+  @doc "Perform any action after deletion"
+  @callback after_delete_hook_for_delete_method(record :: struct(), conn :: Plug.Conn.t()) :: term()
 
   defmacro __using__(options) do
     quote location: :keep do
       # quote do
       alias FatEcto.MacrosHelper
+      @behaviour FatEcto.DeleteRecord
 
       @repo unquote(options)[:repo]
       @status_to_put unquote(options)[:status_to_put]
@@ -34,7 +41,7 @@ defmodule FatEcto.DeleteRecord do
       # TODO: Lets implement with in these macros and add sample fallback controller
       # then we will be independent of few options eg we dont have to render error
       defp _delete(conn, %{"key" => key, "value" => value}) do
-        query = process_query_before_fetch_record_for_delete(@schema, conn)
+        query = pre_process_fetch_query_for_delete_method(@schema, conn)
 
         case MacrosHelper.get_record_by_query(key, value, @repo, query) do
           {:error, :not_found} ->
@@ -63,7 +70,7 @@ defmodule FatEcto.DeleteRecord do
 
             case @repo.delete(record) do
               {:ok, _struct} ->
-                after_delete_hook_for_delete(record, conn)
+                after_delete_hook_for_delete_method(record, conn)
 
                 if @status_to_put do
                   render_resp(conn, "Record Deleted", @status_to_put, put_content_type: "application/json")
@@ -78,13 +85,11 @@ defmodule FatEcto.DeleteRecord do
         end
       end
 
-      # You can use process_query_before_fetch_record_for_delete to override query before fetching record for delete
-      def process_query_before_fetch_record_for_delete(query, _conn) do
+      def pre_process_fetch_query_for_delete_method(query, _conn) do
         query
       end
 
-      # You can use after_delete_hook_for_delete to log etc
-      def after_delete_hook_for_delete(_record, _conn) do
+      def after_delete_hook_for_delete_method(_record, _conn) do
         "Override if needed"
       end
 
@@ -116,7 +121,7 @@ defmodule FatEcto.DeleteRecord do
         end)
       end
 
-      defoverridable process_query_before_fetch_record_for_delete: 2, after_delete_hook_for_delete: 2
+      defoverridable FatEcto.DeleteRecord
     end
   end
 end

@@ -1,11 +1,19 @@
 defmodule FatEcto.IndexRecord do
   @moduledoc false
+  @doc "Update a query before sending it in the fetch method. By default the query is name of your schema"
+  @callback pre_process_fetch_query_for_index_method(query :: Ecto.Query.t(), conn :: Plug.Conn.t()) ::
+              Ecto.Query.t()
+
+  @doc "Perform any action after index"
+  @callback after_fetch_hook_for_index_method(records :: list(), meta :: map(), conn :: Plug.Conn.t()) ::
+              term()
 
   defmacro __using__(options) do
     quote location: :keep do
       # quote do
       alias FatEcto.MacrosHelper
       require Ecto.Query
+      @behaviour FatEcto.IndexRecord
 
       @repo unquote(options)[:repo]
       if !@repo do
@@ -29,7 +37,7 @@ defmodule FatEcto.IndexRecord do
         #     @schema
         #   end
 
-        query = process_query_before_fetch_records_for_index(@schema, conn)
+        query = pre_process_fetch_query_for_index_method(@schema, conn)
         # TODO: add docs that paginator_function shoud return records and meta
         # eg {records, meta} = @paginator_function.(query, params)
         _get_and_render(conn, query, params, @paginator_function, @repo)
@@ -38,14 +46,14 @@ defmodule FatEcto.IndexRecord do
       defp _get_and_render(conn, query, params, paginator_function, repo)
            when is_function(paginator_function, 3) do
         {records, meta} = paginator_function.(query, params, repo)
-        after_get_hook_for_index(records, meta, conn)
+        after_fetch_hook_for_index_method(records, meta, conn)
         render_records(conn, records, meta, unquote(options))
       end
 
       defp _get_and_render(conn, query, params, paginator_function, repo)
            when is_function(paginator_function, 2) do
         {records, meta} = paginator_function.(query, params)
-        after_get_hook_for_index(records, meta, conn)
+        after_fetch_hook_for_index_method(records, meta, conn)
         render_records(conn, records, meta, unquote(options))
       end
 
@@ -53,21 +61,19 @@ defmodule FatEcto.IndexRecord do
            when not is_function(paginator_function) do
         records = repo.all(query)
         records = repo.preload(records, @preloads)
-        after_get_hook_for_index(records, nil, conn)
+        after_fetch_hook_for_index_method(records, nil, conn)
         render_records(conn, records, nil, unquote(options))
       end
 
-      # You can use process_query_before_fetch_records_for_index to override query before fetching records for index
-      def process_query_before_fetch_records_for_index(query, _conn) do
+      def pre_process_fetch_query_for_index_method(query, _conn) do
         query
       end
 
-      # You can use after_get_hook_for_index to log etc
-      def after_get_hook_for_index(_records, _meta, _conn) do
+      def after_fetch_hook_for_index_method(_records, _meta, _conn) do
         "Override if needed"
       end
 
-      defoverridable process_query_before_fetch_records_for_index: 2, after_get_hook_for_index: 3
+      defoverridable FatEcto.IndexRecord
     end
   end
 end

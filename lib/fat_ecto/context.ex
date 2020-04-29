@@ -239,7 +239,9 @@ defmodule FatEcto.FatContext do
         |> @repo.update!(opts)
       end
 
-      # TODO: add docs and test cases
+      # TODO: add docs and test cases.
+      # TODO: also accept limit and order_by options
+      # TODO: add find_and_update method, {:error, :not_found} if record not found, also accept limit and order_by options
       def upsert(
             schema,
             [get_by_clauses: get_by_clauses, update_params: update_params, create_params: create_params],

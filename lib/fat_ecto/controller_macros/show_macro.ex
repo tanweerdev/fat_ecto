@@ -1,10 +1,18 @@
 defmodule FatEcto.ShowRecord do
   @moduledoc false
 
+  @doc "Update a query before sending it in the fetch method. By default the query is name of your schema"
+  @callback pre_process_fetch_query_for_show_method(query :: Ecto.Query.t(), conn :: Plug.Conn.t()) ::
+              Ecto.Query.t()
+
+  @doc "Perform any action after show"
+  @callback post_fetch_hook_for_show_method(record :: struct(), conn :: Plug.Conn.t()) :: term()
+
   defmacro __using__(options) do
     quote location: :keep do
       # quote do
       alias FatEcto.MacrosHelper
+      @behaviour FatEcto.ShowRecord
 
       @repo unquote(options)[:repo]
       if !@repo do
@@ -31,7 +39,7 @@ defmodule FatEcto.ShowRecord do
       end
 
       defp _show(conn, %{"key" => key, "value" => value}) do
-        query = process_query_before_fetch_record_for_show(@schema, conn)
+        query = pre_process_fetch_query_for_show_method(@schema, conn)
 
         case MacrosHelper.get_record_by_query(key, value, @repo, query) do
           {:error, :not_found} ->
@@ -52,22 +60,20 @@ defmodule FatEcto.ShowRecord do
 
           {:ok, record} ->
             record = MacrosHelper.preload_record(record, @repo, @preloads)
-            after_get_hook_for_show(record, conn)
+            post_fetch_hook_for_show_method(record, conn)
             render_record(conn, record, [status_to_put: :ok] ++ unquote(options))
         end
       end
 
-      # You can use process_query_before_fetch_record_for_show to override query before fetching record for show
-      def process_query_before_fetch_record_for_show(query, _conn) do
+      def pre_process_fetch_query_for_show_method(query, _conn) do
         query
       end
 
-      # You can use after_get_hook_for_show to log etc
-      def after_get_hook_for_show(_record, _conn) do
+      def post_fetch_hook_for_show_method(_record, _conn) do
         "Override if needed"
       end
 
-      defoverridable process_query_before_fetch_record_for_show: 2, after_get_hook_for_show: 2
+      defoverridable ShowRecord
     end
   end
 end

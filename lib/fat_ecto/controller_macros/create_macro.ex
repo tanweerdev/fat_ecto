@@ -1,11 +1,28 @@
 defmodule FatEcto.CreateRecord do
   @moduledoc false
+  @doc "Preprocess params before passing them to changeset"
+  @callback pre_process_params_for_create_method(params :: map(), conn :: Plug.Conn.t()) :: map()
 
+  @doc "Preprocess changeset before inserting record"
+  @callback pre_process_changeset_for_create_method(
+              changeset :: Ecto.Changeset.t(),
+              params :: map(),
+              conn :: Plug.Conn.t()
+            ) :: Ecto.Changeset.t()
+
+  @doc "Perform any action on new record after record is created"
+  @callback post_create_hook_for_create_method(record :: struct(), params :: map(), conn :: Plug.Conn.t()) ::
+              term()
+
+  @doc "Insert record and it takes changeset and repo name as an argument"
+  @callback insert_record_for_create_method(changeset :: Ecto.Changeset.t(), repo :: module()) ::
+              {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
   defmacro __using__(options) do
     quote location: :keep do
       alias FatEcto.MacrosHelper
       @repo unquote(options)[:repo]
       @preloads unquote(options)[:preloads] || []
+      @behaviour FatEcto.CreateRecord
 
       if !@repo do
         raise "please define repo when using create record"
@@ -30,33 +47,30 @@ defmodule FatEcto.CreateRecord do
       end
 
       defp _craete(conn, params) do
-        params = process_params_before_in_create(params, conn)
+        params = pre_process_params_for_create_method(params, conn)
         changeset = build_insert_changeset(@custom_changeset, params)
-        changeset = process_changeset_before_insert(changeset, params, conn)
+        changeset = pre_process_changeset_for_create_method(changeset, params, conn)
 
-        with {:ok, record} <- insert_record(changeset, @repo) do
+        with {:ok, record} <- insert_record_for_create_method(changeset, @repo) do
           record = MacrosHelper.preload_record(record, @repo, @preloads)
-          after_create_hook_for_create(record, params, conn)
+          post_create_hook_for_create_method(record, params, conn)
           render_record(conn, record, [status_to_put: :created] ++ unquote(options))
         end
       end
 
-      def insert_record(changeset, repo) do
+      def insert_record_for_create_method(changeset, repo) do
         repo.insert(changeset)
       end
 
-      # You can use process_params_before_in_create to override params before calling changeset
-      def process_params_before_in_create(params, _conn) do
+      def pre_process_params_for_create_method(params, _conn) do
         params
       end
 
-      # You can use process_changeset_before_insert to add/update/validate changeset before calling insert
-      def process_changeset_before_insert(changeset, _params, _conn) do
+      def pre_process_changeset_for_create_method(changeset, _params, _conn) do
         changeset
       end
 
-      # You can use after_create_hook_for_create to log etc
-      def after_create_hook_for_create(_record, _params, _conn) do
+      def post_create_hook_for_create_method(_record, _params, _conn) do
         "Override if needed"
       end
 
@@ -68,10 +82,7 @@ defmodule FatEcto.CreateRecord do
 
       defp build_insert_changeset(cs, _params), do: cs
 
-      defoverridable process_params_before_in_create: 2,
-                     process_changeset_before_insert: 3,
-                     insert_record: 2,
-                     after_create_hook_for_create: 3
+      defoverridable FatEcto.CreateRecord
     end
   end
 end

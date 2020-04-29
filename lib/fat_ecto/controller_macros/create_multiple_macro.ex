@@ -1,11 +1,35 @@
 defmodule FatEcto.CreateMultipleRecord do
   @moduledoc false
 
+  @doc "Preprocess params before passing them to changesets"
+  @callback pre_process_params_for_multiple_create_method(params :: map(), conn :: Plug.Conn.t()) :: map()
+
+  @doc "Preprocess changesets before inserting records"
+  @callback pre_process_changesets_for_multiple_create_method(
+              changeset :: Ecto.Changeset.t(),
+              conn :: Plug.Conn.t()
+            ) ::
+              Ecto.Changeset.t()
+
+  @doc "Perform any action on new records after records are created"
+  @callback post_create_hook_for_multiple_create_method(records :: list(), conn :: Plug.Conn.t()) :: term()
+
+  @doc "Build multiple changesets"
+  @callback build_changesets_for_multiple_create_method(
+              params_array_for_records :: list(),
+              conn :: Plug.Conn.t()
+            ) :: list()
+
+  @doc "Insert multiple changesets"
+  @callback insert_records_for_multiple_create_method(changesets :: list) ::
+              {:ok, list()} | {:error, term(), Ecto.Changeset.t(), term()}
+
   defmacro __using__(options) do
     quote location: :keep do
       alias FatEcto.MacrosHelper
       @repo unquote(options)[:repo]
       @preloads unquote(options)[:preloads] || []
+      @behaviour FatEcto.CreateMultipleRecord
 
       if !@repo do
         raise "please define repo when using create record"
@@ -30,25 +54,25 @@ defmodule FatEcto.CreateMultipleRecord do
       end
 
       defp _create(conn, params) do
-        params = process_params_before_in_multiple_create(params, conn)
-        changesets = multiple_changesets(params, conn)
-        changesets = process_changesets_before_multiple_inserts(changesets, conn)
+        params = pre_process_params_for_multiple_create_method(params, conn)
+        changesets = build_changesets_for_multiple_create_method(params, conn)
+        changesets = pre_process_changesets_for_multiple_create_method(changesets, conn)
 
         # TODO: Support partial insert via options passed
-        with {:ok, records} <- insert_records(changesets) do
+        with {:ok, records} <- insert_records_for_multiple_create_method(changesets) do
           records = MacrosHelper.preload_record(records, @repo, @preloads)
-          after_create_hook_for_multiple_create(records, conn)
+          post_create_hook_for_multiple_create_method(records, conn)
           render_record(conn, records, [status_to_put: :created] ++ unquote(options))
         end
       end
 
-      def multiple_changesets(params_array_for_records, _conn) do
+      def build_changesets_for_multiple_create_method(params_array_for_records, _conn) do
         Enum.reduce(params_array_for_records, [], fn params_for_a_record, acc ->
           acc ++ [@schema.changeset(struct(@schema), params_for_a_record)]
         end)
       end
 
-      def insert_records(changesets) when is_list(changesets) do
+      def insert_records_for_multiple_create_method(changesets) when is_list(changesets) do
         multi =
           Enum.with_index(changesets)
           |> Enum.reduce(Ecto.Multi.new(), fn {cset, index}, multi ->
@@ -77,26 +101,19 @@ defmodule FatEcto.CreateMultipleRecord do
         end
       end
 
-      # You can use process_params_before_in_multiple_create to override params before calling changeset
-      def process_params_before_in_multiple_create(params, _conn) do
+      def pre_process_params_for_multiple_create_method(params, _conn) do
         params
       end
 
-      # You can use process_changesets_before_multiple_inserts to add/update/validate changeset before calling insert
-      def process_changesets_before_multiple_inserts(changesets, _conn) do
+      def pre_process_changesets_for_multiple_create_method(changesets, _conn) do
         changesets
       end
 
-      # You can use after_create_hook_for_multiple_create to log etc
-      def after_create_hook_for_multiple_create(_records, _conn) do
+      def post_create_hook_for_multiple_create_method(_records, _conn) do
         "Override if needed"
       end
 
-      defoverridable process_params_before_in_multiple_create: 2,
-                     process_changesets_before_multiple_inserts: 2,
-                     insert_records: 1,
-                     after_create_hook_for_multiple_create: 2,
-                     multiple_changesets: 2
+      defoverridable FatEcto.CreateMultipleRecord
     end
   end
 end
