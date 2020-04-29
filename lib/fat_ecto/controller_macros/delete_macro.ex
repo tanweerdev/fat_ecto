@@ -5,7 +5,7 @@ defmodule FatEcto.DeleteRecord do
               Ecto.Query.t()
 
   @doc "Perform any action after deletion"
-  @callback after_delete_hook_for_delete_method(record :: struct(), conn :: Plug.Conn.t()) :: term()
+  @callback post_delete_hook_for_delete_method(record :: struct(), conn :: Plug.Conn.t()) :: term()
 
   defmacro __using__(options) do
     quote location: :keep do
@@ -70,7 +70,7 @@ defmodule FatEcto.DeleteRecord do
 
             case @repo.delete(record) do
               {:ok, _struct} ->
-                after_delete_hook_for_delete_method(record, conn)
+                post_delete_hook_for_delete_method(record, conn)
 
                 if @status_to_put do
                   render_resp(conn, "Record Deleted", @status_to_put, put_content_type: "application/json")
@@ -89,7 +89,7 @@ defmodule FatEcto.DeleteRecord do
         query
       end
 
-      def after_delete_hook_for_delete_method(_record, _conn) do
+      def post_delete_hook_for_delete_method(_record, _conn) do
         "Override if needed"
       end
 
