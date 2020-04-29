@@ -73,7 +73,7 @@ defmodule FatEcto.ShowRecord do
         "Override if needed"
       end
 
-      defoverridable ShowRecord
+      defoverridable FatEcto.ShowRecord
     end
   end
 end
