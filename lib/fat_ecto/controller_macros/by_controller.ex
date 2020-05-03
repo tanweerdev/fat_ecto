@@ -23,17 +23,10 @@ defmodule FatEcto.ByQuery do
         query_params = process_params_before_for_query_by(@schema, conn, query_params)
         queryable = process_query_before_for_query_by(@schema, conn, query_params)
 
-        with {:ok, data_meta} <- FatEcto.Query.fetch(queryable, query_params) do
+        with {:ok, data_meta} <- FatEcto.Query.fetch(queryable, query_params, timeout: 15000) do
           {recordz, meta} =
             case data_meta do
-              %{data: records, meta: nil} ->
-                # means pagination was false
-                {records, nil}
-
-              %{data: records, meta: meta} ->
-                {records, meta}
-
-              %{data: record, type: :object} ->
+              %{data: record, meta: nil, type: :object} ->
                 count = if record == nil, do: 0, else: 1
                 meta = %{limit: 1, count: count, offset: 0}
 
@@ -42,14 +35,22 @@ defmodule FatEcto.ByQuery do
                 else
                   {[record], meta}
                 end
+
+              %{data: records, meta: nil} ->
+                # means pagination was false
+
+                {records, nil}
+
+              %{data: records, meta: meta} ->
+                {records, meta}
             end
 
           after_get_hook_for_query_by(recordz, meta, conn)
-          render_record_with_meta(conn, @model, recordz, meta)
+          render_record_with_meta(conn, @schema, recordz, meta)
         end
       end
 
-      def render_record_with_meta(conn, _model, records, meta) do
+      def render_record_with_meta(conn, _schema, records, meta) do
         render_records(conn, records, meta, unquote(options))
       end
 
@@ -59,8 +60,8 @@ defmodule FatEcto.ByQuery do
       end
 
       # You can use process_params_before_for_query_by to override query params before processing
-      def process_params_before_for_query_by(query, _conn, _params) do
-        query
+      def process_params_before_for_query_by(_query, _conn, params) do
+        params
       end
 
       # You can use after_get_hook_for_query_by to log etc
