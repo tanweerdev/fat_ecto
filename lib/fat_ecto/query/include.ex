@@ -27,7 +27,7 @@ defmodule FatEcto.FatQuery.FatInclude do
       ...>    }
       ...>  }
       ...> }
-      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in assoc(f0, :fat_doctors), left_join: f2 in assoc(f1, :fat_patients), where: f0.rating == ^4 and ^true, where: f1.experience_years == ^3 and ^true, order_by: [desc: f1.id], order_by: [desc: f0.id], limit: ^34, offset: ^0, select: map(f0, [:location, :rating, {:fat_rooms, [:name, :floor]}]), preload: [[fat_doctors: [:fat_patients]]]>
 
 

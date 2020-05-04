@@ -21,7 +21,7 @@ defmodule FatEcto.FatQuery.FatGroupBy do
       ...>  "$where" => %{"rating" => 4},
       ...>  "$group" => "total_staff"
       ...> }
-      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating == ^4 and ^true, group_by: [f0.total_staff], order_by: [desc: f0.id], select: merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]), %{\"$group\" => %{^\"total_staff\" => map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]).total_staff}})>
 
 
@@ -48,7 +48,7 @@ defmodule FatEcto.FatQuery.FatGroupBy do
       ...>  "$where" => %{"rating" => 4},
       ...>  "$group" => ["total_staff", "rating"]
       ...> }
-      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating == ^4 and ^true, group_by: [f0.total_staff], group_by: [f0.rating], order_by: [desc: f0.id], select: merge(merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]), %{"$group" => %{^"total_staff" => map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]).total_staff}}), %{"$group" => %{^"rating" => map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]).rating}})>
 
   ### Options

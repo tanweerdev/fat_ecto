@@ -408,7 +408,7 @@ defmodule FatEcto do
       },
       "$where" => %{"id" => room.id}
     }
-  iex> Query.build(FatEcto.FatRoom, query_opts)
+  iex> Query.build!(FatEcto.FatRoom, query_opts)
   iex>  ** (ArgumentError) the fields ["description"] of fat_rooms are not allowed in the query
   ```
                                

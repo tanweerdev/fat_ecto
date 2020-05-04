@@ -238,6 +238,8 @@ defmodule FatEcto.FatQuery do
       end
 
       def fetch(queryable, query_params, fetch_options \\ []) do
+        fetch_options = if fetch_options[:timeout], do: fetch_options, else: fetch_options ++ [timeout: 15000]
+
         with {:ok, query_data} <- build_by(queryable, query_params, fetch_options) do
           case query_data do
             %{query: queryable, type: :object} ->

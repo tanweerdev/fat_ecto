@@ -17,7 +17,7 @@ defmodule FatEcto.FatQuery.FatDistinct do
       ...>  "$group" => "id", 
       ...>  "$distinct" => true
       ...> }   
-      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating == ^5 and ^true, group_by: [f0.id], distinct: true, select: merge(merge(merge(f0, %{"$aggregate" => %{"$avg": %{^"rating" => avg(f0.rating)}}}), %{"$aggregate" => %{"$sum": %{^"total_staff" => sum(f0.total_staff)}}}), %{"$group" => %{^"id" => f0.id}})>
 
   ## Options
@@ -40,7 +40,7 @@ defmodule FatEcto.FatQuery.FatDistinct do
       ...>  "$group" => "id", 
       ...>  "$distinct" => "id"
       ...> }   
-      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating == ^5 and ^true, group_by: [f0.id], distinct: [asc: f0.id], select: merge(merge(merge(f0, %{"$aggregate" => %{"$avg": %{^"rating" => avg(f0.rating)}}}), %{"$aggregate" => %{"$sum": %{^"total_staff" => sum(f0.total_staff)}}}), %{"$group" => %{^"id" => f0.id}})>
 
   ## Options
@@ -71,7 +71,7 @@ defmodule FatEcto.FatQuery.FatDistinct do
       ...>  "$distinct" => true,
       ...>  "$distinct_nested" => true
       ...> }   
-      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f0 in FatEcto.FatHospital, left_join: f1 in assoc(f0, :fat_doctors), where: f0.rating == ^5 and ^true, group_by: [f0.id], limit: ^34, offset: ^0, distinct: true, select: merge(merge(merge(f0, %{"$aggregate" => %{"$avg": %{^"rating" => avg(f0.rating)}}}), %{"$aggregate" => %{"$sum": %{^"total_staff" => sum(f0.total_staff)}}}), %{"$group" => %{^"id" => f0.id}}), preload: [[:fat_doctors]]>
 
   ## Options

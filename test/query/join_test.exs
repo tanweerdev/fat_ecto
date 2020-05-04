@@ -52,7 +52,7 @@ defmodule Query.JoinTest do
     #     select: merge(h, %{^:fat_rooms => map(r, [:name, :purpose, :description])})
     #   )
 
-    query = Query.build("fat_hospitals", opts)
+    query = Query.build!("fat_hospitals", opts)
 
     assert inspect(query) == inspect(expected)
     # TODO: match on results returned
@@ -82,7 +82,7 @@ defmodule Query.JoinTest do
         select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    result = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -109,7 +109,7 @@ defmodule Query.JoinTest do
           })
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -136,7 +136,7 @@ defmodule Query.JoinTest do
         select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    result = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -166,7 +166,7 @@ defmodule Query.JoinTest do
         select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    result = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -199,7 +199,7 @@ defmodule Query.JoinTest do
         select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    result = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -230,7 +230,7 @@ defmodule Query.JoinTest do
         select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    result = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -261,7 +261,7 @@ defmodule Query.JoinTest do
         select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    result = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -295,7 +295,7 @@ defmodule Query.JoinTest do
         select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    result = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -329,7 +329,7 @@ defmodule Query.JoinTest do
         select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    result = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -363,7 +363,7 @@ defmodule Query.JoinTest do
         select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    result = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -397,7 +397,7 @@ defmodule Query.JoinTest do
         select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    result = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -430,7 +430,7 @@ defmodule Query.JoinTest do
         select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    result = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -461,7 +461,7 @@ defmodule Query.JoinTest do
         select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    result = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -491,7 +491,7 @@ defmodule Query.JoinTest do
         select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    result = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -518,7 +518,7 @@ defmodule Query.JoinTest do
         select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    result = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -545,7 +545,7 @@ defmodule Query.JoinTest do
         select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    result = Query.build!(FatEcto.FatHospital, opts)
 
     assert inspect(result) == inspect(expected)
   end
@@ -585,7 +585,7 @@ defmodule Query.JoinTest do
           })
       )
 
-    result = Query.build(FatEcto.FatHospital, opts)
+    result = Query.build!(FatEcto.FatHospital, opts)
 
     assert inspect(result) == inspect(expected)
   end
@@ -606,7 +606,7 @@ defmodule Query.JoinTest do
       }
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatDoctor, opts) end
   end
 
   test "returns the query with full join with blacklist on_field" do
@@ -625,7 +625,7 @@ defmodule Query.JoinTest do
       }
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatDoctor, opts) end
   end
 
   test "returns the query with full join with blacklist on_table_field" do
@@ -644,7 +644,7 @@ defmodule Query.JoinTest do
       }
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatDoctor, opts) end
   end
 
   test "returns the query with full join with blacklist additional on clauses" do
@@ -666,7 +666,7 @@ defmodule Query.JoinTest do
       }
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatDoctor, opts) end
   end
 
   test "returns the query with full join with blacklist where inside join table" do
@@ -686,7 +686,7 @@ defmodule Query.JoinTest do
       }
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatDoctor, opts) end
   end
 
   test "returns the query with full join with blacklist select inside join table" do
@@ -706,7 +706,7 @@ defmodule Query.JoinTest do
       }
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatDoctor, opts) end
   end
 
   test "returns the query with full join with blacklist order inside join table" do
@@ -727,7 +727,7 @@ defmodule Query.JoinTest do
       }
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatDoctor, opts) end
   end
 
   test "returns the query with full join with blacklist group inside join table" do
@@ -749,7 +749,7 @@ defmodule Query.JoinTest do
       }
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatDoctor, opts) end
   end
 
   test "returns the query with full join and mutiple where conditions" do
@@ -780,6 +780,6 @@ defmodule Query.JoinTest do
           })
       )
 
-    assert inspect(Query.build(FatEcto.FatDoctor, opts)) == inspect(expected)
+    assert inspect(Query.build!(FatEcto.FatDoctor, opts)) == inspect(expected)
   end
 end

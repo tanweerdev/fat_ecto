@@ -1,5 +1,6 @@
 defmodule FatEcto.ByQuery do
   @moduledoc false
+
   defmacro __using__(options) do
     quote location: :keep do
       # quote do
@@ -23,7 +24,7 @@ defmodule FatEcto.ByQuery do
         query_params = process_params_before_for_query_by(@schema, conn, query_params)
         queryable = process_query_before_for_query_by(@schema, conn, query_params)
 
-        with {:ok, data_meta} <- FatEcto.Query.fetch(queryable, query_params, timeout: 15000) do
+        with {:ok, data_meta} <- FatEcto.Query.fetch(queryable, query_params) do
           {recordz, meta} =
             case data_meta do
               %{data: record, meta: nil, type: :object} ->

@@ -17,7 +17,7 @@ defmodule Query.DistinctTest do
 
     expected = from(h in FatEcto.FatHospital, distinct: [asc: h.name])
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     assert Repo.all(query) |> length() == 1
   end
@@ -34,7 +34,7 @@ defmodule Query.DistinctTest do
       "$distinct" => "phone"
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatHospital, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatHospital, opts) end
   end
 
   test "returns the query where field is boolean" do
@@ -47,7 +47,7 @@ defmodule Query.DistinctTest do
 
     expected = from(h in FatEcto.FatHospital, distinct: true)
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     assert Repo.all(query) |> length() == 2
   end
@@ -82,7 +82,7 @@ defmodule Query.DistinctTest do
           })
       )
 
-    query = Query.build(FatEcto.FatDoctor, opts)
+    query = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(query) == inspect(expected)
   end
 
@@ -116,7 +116,7 @@ defmodule Query.DistinctTest do
           })
       )
 
-    query = Query.build(FatEcto.FatDoctor, opts)
+    query = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(query) == inspect(expected)
   end
 
@@ -164,7 +164,7 @@ defmodule Query.DistinctTest do
         preload: [^[:fat_hospitals]]
       )
 
-    query = Query.build(FatEcto.FatDoctor, opts)
+    query = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(query) == inspect(expected)
   end
 end

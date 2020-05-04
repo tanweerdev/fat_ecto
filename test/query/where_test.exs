@@ -20,7 +20,7 @@ defmodule Query.WhereTest do
     # expected = from(d in FatEcto.FatDoctor, where: like(d.email, ^"%Joh %"))
     expected = from(d in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", d.email), ^"%test%") and ^true)
 
-    query = Query.build(FatEcto.FatDoctor, opts)
+    query = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(query) == inspect(expected)
 
     result =
@@ -51,7 +51,7 @@ defmodule Query.WhereTest do
         where: ilike(fragment("(?)::TEXT", d.designation), ^"%Surge%") and ^true
       )
 
-    query = Query.build(FatEcto.FatDoctor, opts)
+    query = Query.build!(FatEcto.FatDoctor, opts)
 
     assert inspect(query) == inspect(expected)
 
@@ -83,7 +83,7 @@ defmodule Query.WhereTest do
         where: not like(fragment("(?)::TEXT", d.email), ^"%john@%") and ^true
       )
 
-    query = Query.build(FatEcto.FatDoctor, opts)
+    query = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(query) == inspect(expected)
 
     result =
@@ -114,7 +114,7 @@ defmodule Query.WhereTest do
         where: not ilike(fragment("(?)::TEXT", d.address), ^"%street2%") and ^true
       )
 
-    query = Query.build(FatEcto.FatDoctor, opts)
+    query = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(query) == inspect(expected)
 
     result =
@@ -139,7 +139,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: h.rating < ^3 and ^true)
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     assert Repo.one(query) == nil
   end
@@ -150,7 +150,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: h.total_staff < h.rating and ^true)
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
 
     result =
@@ -174,7 +174,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: h.total_staff <= ^3 and ^true)
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
 
     result =
@@ -198,7 +198,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: h.rating <= h.total_staff and ^true)
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     assert Repo.one(query) == nil
   end
@@ -209,7 +209,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(r in FatEcto.FatRoom, where: r.floor > ^3 and ^true)
-    query = Query.build(FatEcto.FatRoom, opts)
+    query = Query.build!(FatEcto.FatRoom, opts)
     assert inspect(query) == inspect(expected)
     assert Repo.one(query) == nil
   end
@@ -220,7 +220,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(r in FatEcto.FatHospital, where: r.rating > r.total_staff and ^true)
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
 
     result =
@@ -244,7 +244,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(r in FatEcto.FatRoom, where: r.floor >= ^3 and ^true)
-    query = Query.build(FatEcto.FatRoom, opts)
+    query = Query.build!(FatEcto.FatRoom, opts)
     assert inspect(query) == inspect(expected)
 
     result =
@@ -268,7 +268,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(r in FatEcto.FatHospital, where: r.rating >= r.total_staff and ^true)
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
 
     result =
@@ -293,7 +293,7 @@ defmodule Query.WhereTest do
 
     expected = from(r in FatEcto.FatHospital, where: r.total_staff > ^10 and r.total_staff < ^20 and ^true)
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     assert Repo.one(query) == nil
   end
@@ -305,7 +305,7 @@ defmodule Query.WhereTest do
 
     expected = from(r in FatEcto.FatHospital, where: r.total_staff >= ^10 and r.total_staff <= ^20 and ^true)
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     assert Repo.one(query) == nil
   end
@@ -321,7 +321,7 @@ defmodule Query.WhereTest do
         where: (p.appointments_count < ^10 or p.appointments_count > ^20) and ^true
       )
 
-    query = Query.build(FatEcto.FatPatient, opts)
+    query = Query.build!(FatEcto.FatPatient, opts)
     assert inspect(query) == inspect(expected)
     assert Repo.one(query) == nil
   end
@@ -335,7 +335,7 @@ defmodule Query.WhereTest do
       "$where" => %{"date_of_birth" => %{"$not_between" => [10, 20]}}
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatPatient, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatPatient, opts) end
   end
 
   test "returns the query where field notbetween equal" do
@@ -349,7 +349,7 @@ defmodule Query.WhereTest do
         where: (p.appointments_count <= ^10 or p.appointments_count >= ^20) and ^true
       )
 
-    query = Query.build(FatEcto.FatPatient, opts)
+    query = Query.build!(FatEcto.FatPatient, opts)
     assert inspect(query) == inspect(expected)
     assert Repo.one(query) == nil
   end
@@ -360,7 +360,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(p in FatEcto.FatPatient, where: p.appointments_count in ^[4] and ^true)
-    query = Query.build(FatEcto.FatPatient, opts)
+    query = Query.build!(FatEcto.FatPatient, opts)
     assert inspect(query) == inspect(expected)
     assert Repo.one(query) == nil
   end
@@ -371,7 +371,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(p in FatEcto.FatPatient, where: p.appointments_count not in ^[20, 50] and ^true)
-    query = Query.build(FatEcto.FatPatient, opts)
+    query = Query.build!(FatEcto.FatPatient, opts)
     assert inspect(query) == inspect(expected)
     assert Repo.one(query) == nil
   end
@@ -384,7 +384,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: is_nil(h.rating) and ^true)
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
 
     result =
@@ -408,7 +408,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: not is_nil(h.rating) and ^true)
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     assert inspect(query) == inspect(expected)
 
@@ -433,7 +433,7 @@ defmodule Query.WhereTest do
     }
 
     expected = from(h in FatEcto.FatHospital, where: h.location == ^"main bullevard" and ^true)
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
 
     result =
@@ -460,7 +460,7 @@ defmodule Query.WhereTest do
       "$where" => %{"phone" => "1234567"}
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatHospital, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatHospital, opts) end
   end
 
   test "returns the query with or fields" do
@@ -489,7 +489,7 @@ defmodule Query.WhereTest do
         where: not ilike(fragment("(?)::TEXT", f0.name), ^"%DJ%") and ^true
       )
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
 
     assert inspect(query) == inspect(expected)
 
@@ -538,7 +538,7 @@ defmodule Query.WhereTest do
         where: f0.rating in ^[2, 3] and (like(fragment("(?)::TEXT", f0.name), ^"%Joh%") and ^true)
       )
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
 
     assert inspect(query) == inspect(expected)
 
@@ -579,7 +579,7 @@ defmodule Query.WhereTest do
             (like(fragment("(?)::TEXT", f0.name), ^"%Joh%") or ^true)
       )
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
 
     result =
@@ -638,7 +638,7 @@ defmodule Query.WhereTest do
             (ilike(fragment("(?)::TEXT", f0.location), ^"%main%") and ^true)
       )
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
 
     result =
@@ -681,7 +681,7 @@ defmodule Query.WhereTest do
         where: ilike(fragment("(?)::TEXT", f0.location), ^"%main%") and ^true
       )
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
 
     result =
@@ -741,7 +741,7 @@ defmodule Query.WhereTest do
                   (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true)))
       )
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
 
     result =
@@ -812,7 +812,7 @@ defmodule Query.WhereTest do
                   (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true)))
       )
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
 
     result =
@@ -888,7 +888,7 @@ defmodule Query.WhereTest do
             (not like(fragment("(?)::TEXT", f0.location), ^"%some%") and ^true)
       )
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
 
     result =
@@ -967,7 +967,7 @@ defmodule Query.WhereTest do
             (not like(fragment("(?)::TEXT", f0.location), ^"%some%") and ^true)
       )
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
 
     result =
@@ -1029,7 +1029,7 @@ defmodule Query.WhereTest do
       }
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatHospital, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatHospital, opts) end
   end
 
   test "paginator with primary key id" do
@@ -1038,7 +1038,7 @@ defmodule Query.WhereTest do
     }
 
     paginator =
-      Query.build(FatEcto.FatPatient, opts)
+      Query.build!(FatEcto.FatPatient, opts)
       |> Query.paginate(skip: 0, limit: 10)
 
     %{count_query: count_query} = paginator
@@ -1056,7 +1056,7 @@ defmodule Query.WhereTest do
     }
 
     paginator =
-      Query.build(FatEcto.FatRoom, opts)
+      Query.build!(FatEcto.FatRoom, opts)
       |> Query.paginate(skip: 0, limit: 10)
 
     %{count_query: count_query} = paginator
@@ -1076,7 +1076,7 @@ defmodule Query.WhereTest do
     }
 
     paginator =
-      Query.build(FatEcto.FatHospitalDoctor, opts)
+      Query.build!(FatEcto.FatHospitalDoctor, opts)
       |> Query.paginate(skip: 0, limit: 10)
 
     %{count_query: count_query} = paginator
@@ -1095,7 +1095,7 @@ defmodule Query.WhereTest do
     }
 
     paginator =
-      Query.build("fat_doctors_patients", opts)
+      Query.build!("fat_doctors_patients", opts)
       |> Query.paginate(skip: 0, limit: 10)
 
     %{count_query: count_query} = paginator
@@ -1116,7 +1116,7 @@ defmodule Query.WhereTest do
     }
 
     paginator =
-      Query.build("fat_patients", opts)
+      Query.build!("fat_patients", opts)
       |> Query.paginate(skip: 0, limit: 10)
 
     %{count_query: count_query} = paginator
@@ -1156,6 +1156,6 @@ defmodule Query.WhereTest do
                         (not is_nil(f0.address) and (not is_nil(f0.total_staff) and ^true))))))
       )
 
-    assert inspect(Query.build(FatEcto.FatHospital, opts)) == inspect(expected)
+    assert inspect(Query.build!(FatEcto.FatHospital, opts)) == inspect(expected)
   end
 end

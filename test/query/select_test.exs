@@ -18,7 +18,7 @@ defmodule Query.SelectTest do
 
     expected = from(d in FatEcto.FatDoctor, select: map(d, [:email, :designation, :experience_years]))
 
-    query = Query.build(FatEcto.FatDoctor, opts)
+    query = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(query) == inspect(expected)
     assert Repo.all(query) == [%{designation: "Surgeon", experience_years: 7, email: "test@test.com"}]
   end
@@ -41,7 +41,7 @@ defmodule Query.SelectTest do
         select: map(f, [:name, :purpose, :floor, {:fat_beds, [:purpose, :description, :name]}])
       )
 
-    query = Query.build(FatEcto.FatRoom, opts)
+    query = Query.build!(FatEcto.FatRoom, opts)
     assert inspect(query) == inspect(expected)
 
     # TODO: match on results returned
@@ -64,7 +64,7 @@ defmodule Query.SelectTest do
         select: map(h, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}])
       )
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
   end
 
@@ -79,7 +79,7 @@ defmodule Query.SelectTest do
         select: map(h, [:name, :location, :rating])
       )
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
   end
 
@@ -101,7 +101,7 @@ defmodule Query.SelectTest do
         select: map(h, [:name, :location, :rating, {:fat_rooms, [:beds, :capacity]}])
       )
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
   end
 
@@ -137,7 +137,7 @@ defmodule Query.SelectTest do
         preload: ^[{:fat_doctors, [:fat_patients]}]
       )
 
-    query = Query.build(FatEcto.FatHospital, opts, max_limit: 107)
+    query = Query.build!(FatEcto.FatHospital, opts, max_limit: 107)
     assert inspect(query) == inspect(expected)
   end
 
@@ -156,7 +156,7 @@ defmodule Query.SelectTest do
       "$where" => %{"id" => room.id}
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatRoom, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatRoom, opts) end
   end
 
   test "returns the select query by removing the blacklist fields from joining table" do
@@ -174,7 +174,7 @@ defmodule Query.SelectTest do
       "$where" => %{"id" => room.id}
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatRoom, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatRoom, opts) end
   end
 
   test "returns the select query list by eliminating the blacklist fields" do
@@ -186,6 +186,6 @@ defmodule Query.SelectTest do
       "$select" => ["name", "purpose", "description"]
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatRoom, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatRoom, opts) end
   end
 end
