@@ -28,7 +28,7 @@ defmodule FatEcto.FatPaginator do
               ...>      "total_staff" => %{"$between" => [1, 3]}
               ...>    }
               ...>  }
-              iex> query = #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+              iex> query = #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
               iex> result = #{__MODULE__}.paginate(query, [limit: 10, skip: 0])
               iex>  %{count_query: count_query, data_query: data_query, limit: limit, skip: skip} = result
               iex> limit

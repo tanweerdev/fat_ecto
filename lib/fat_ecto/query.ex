@@ -15,7 +15,11 @@ defmodule FatEcto.FatQuery do
       end
 
       @options Keyword.merge(Application.get_env(@opt_app, :fat_ecto) || [], unquote(options))
+
       @repo @options[:repo]
+      if !@repo do
+        raise "please define repo when using fat query methods"
+      end
 
       @query_param_defaults %{
         "$find" => "$all",
@@ -92,7 +96,7 @@ defmodule FatEcto.FatQuery do
           ...>       }
           ...>     }
           ...>  }
-          iex> build(FatEcto.FatHospital, query_opts, paginate: false)
+          iex> build!(FatEcto.FatHospital, query_opts, paginate: false)
           #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in \"fat_rooms\", on: f0.id == f1.hospital_id, right_join: f2 in assoc(f0, :fat_doctors), where: f0.rating == ^4 and ^true, where: f1.name == ^\"John\" and ^true, where: f2.designation == ^\"ham\" and ^true, group_by: [f0.rating], order_by: [desc: f2.id], order_by: [desc: f0.id], limit: ^34, offset: ^0, select: merge(merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:floor, :name]}]), %{^\"fat_rooms\" => map(f1, [:name, :floor, :is_active])}), %{\"$group\" => %{^\"rating\" => map(f0, [:name, :location, :rating, {:fat_rooms, [:floor, :name]}]).rating}}), preload: [[fat_doctors: [:fat_patients]]]>
 
 
@@ -111,7 +115,7 @@ defmodule FatEcto.FatQuery do
       """
 
       # TODO: Add docs and examples for ex_doc
-      def build(queryable, query_opts, build_options \\ []) do
+      def build!(queryable, query_opts, build_options \\ []) do
         build_options = Keyword.merge(@options, build_options)
         query_opts = FatUtils.Map.deep_merge(@query_param_defaults, query_opts)
 
@@ -161,7 +165,7 @@ defmodule FatEcto.FatQuery do
           ...>  "$select" => %{"$fields" => ["name", "rating"], "fat_rooms" => ["name"]},
           ...>  "$where" => %{"id" => 10}
           ...> }
-          iex> build(FatEcto.FatHospital, query_opts, paginate: false)
+          iex> build!(FatEcto.FatHospital, query_opts, paginate: false)
           #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.id == ^10 and ^true, select: map(f0, [:name, :rating, {:fat_rooms, [:name]}])>
 
 
@@ -175,33 +179,38 @@ defmodule FatEcto.FatQuery do
 
       """
 
-      def fetch(queryable, query_params, fetch_options \\ []) do
-        query_params = FatUtils.Map.deep_merge(@query_param_defaults, query_params)
+      # You can get two types of error from this fetch method.
+      # fat_ecto_query_error and fat_ecto_query_db_error
+      # TODO: update docs
+
+      def build_by(queryable, query_params, options \\ []) do
+        query_param_defaults = options[:defaults] || @query_param_defaults
+        query_params = FatUtils.Map.deep_merge(query_param_defaults, query_params)
 
         queryable =
           try do
-            build(queryable, query_params, fetch_options)
+            build!(queryable, query_params, options)
           rescue
             e in ArgumentError -> {:error, e}
           end
 
         case queryable do
-          {:error, message} ->
-            %{message: error_message} = message
-            {:error, error_message}
+          {:error, info} ->
+            %{message: error_message} = info
+            {:fat_ecto_query_error, error_message}
 
           _ ->
-            fetch_options =
+            options =
               [paginate: true, timeout: 15000]
               |> Keyword.merge(@options)
-              |> Keyword.merge(fetch_options)
+              |> Keyword.merge(options)
 
             case query_params["$find"] do
               "$one" ->
-                {:ok, @repo.one(Ecto.Query.limit(queryable, 1))}
+                {:ok, %{query: queryable, type: :object}}
 
               "$all" ->
-                if fetch_options[:paginate] == true do
+                if options[:paginate] == true do
                   %{
                     data_query: data_query,
                     skip: skip,
@@ -209,34 +218,75 @@ defmodule FatEcto.FatQuery do
                     count_query: count_query
                   } = paginate(queryable, skip: query_params["$skip"], limit: query_params["$limit"])
 
-                  try do
-                    {:ok,
-                     %{
-                       data: @repo.all(data_query, timeout: fetch_options[:timeout]),
-                       meta: %{
-                         skip: skip,
-                         limit: limit,
-                         count: count_records(count_query, fetch_options, query_params["$count_on"])
-                       }
-                     }}
-                  rescue
-                    DBConnection.ConnectionError ->
-                      # IO.inspect("fat ecto fetch timeout error")
-                      {:error, :timeout}
-
-                    other_error ->
-                      {:error, other_error}
-                  end
+                  {:ok,
+                   %{
+                     query: data_query,
+                     type: :array,
+                     meta: %{skip: skip, limit: limit, count_query: count_query}
+                   }}
                 else
-                  {:ok, @repo.all(queryable)}
+                  {:ok, %{query: queryable, type: :array, meta: nil}}
                 end
 
               nil ->
-                {:error, "Method not found"}
+                {:fat_ecto_query_error, :find_method_not_found}
 
               _ ->
-                {:error, "Method not found"}
+                {:fat_ecto_query_error, :find_method_not_found}
             end
+        end
+      end
+
+      def fetch(queryable, query_params, fetch_options \\ []) do
+        fetch_options = if fetch_options[:timeout], do: fetch_options, else: fetch_options ++ [timeout: 15000]
+
+        with {:ok, query_data} <- build_by(queryable, query_params, fetch_options) do
+          case query_data do
+            %{query: queryable, type: :object} ->
+              {:ok,
+               %{
+                 data: @repo.one(Ecto.Query.limit(queryable, 1)),
+                 type: :object,
+                 meta: nil
+               }}
+
+            #  when pagination is set to false
+            %{query: queryable, type: :array, meta: nil} ->
+              try do
+                {:ok,
+                 %{
+                   data: @repo.all(queryable, timeout: fetch_options[:timeout]),
+                   type: :array,
+                   meta: nil
+                 }}
+              rescue
+                DBConnection.ConnectionError ->
+                  {:fat_ecto_query_db_error, :timeout}
+
+                other_error ->
+                  {:fat_ecto_query_db_error, other_error}
+              end
+
+            %{query: data_query, type: :array, meta: %{skip: skip, limit: limit, count_query: count_query}} ->
+              try do
+                {:ok,
+                 %{
+                   data: @repo.all(data_query, timeout: fetch_options[:timeout]),
+                   type: :array,
+                   meta: %{
+                     skip: skip,
+                     limit: limit,
+                     count: count_records(count_query, fetch_options, query_params["$count_on"])
+                   }
+                 }}
+              rescue
+                DBConnection.ConnectionError ->
+                  {:fat_ecto_query_db_error, :timeout}
+
+                other_error ->
+                  {:fat_ecto_query_db_error, other_error}
+              end
+          end
         end
       end
 

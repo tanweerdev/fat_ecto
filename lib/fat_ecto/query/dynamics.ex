@@ -20,7 +20,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       ...>      "total_staff" => %{"$between" => [1, 3]}
       ...>    }
       ...>  }
-      iex> #{MyApp.Query}.build(FatEcto.FatHospital, query_opts)
+      iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.total_staff > ^1 and f0.total_staff < ^3 and (not(is_nil(f0.rating)) and (f0.name == ^"%John%" and (is_nil(f0.location) and ^true))), select: map(f0, [:name, :location, :rating])>
 
   ### Options

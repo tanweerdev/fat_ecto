@@ -22,7 +22,7 @@ defmodule Query.IncludeTest do
         offset: ^0
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -43,7 +43,7 @@ defmodule Query.IncludeTest do
         offset: ^0
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -69,7 +69,7 @@ defmodule Query.IncludeTest do
         offset: ^0
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -95,7 +95,7 @@ defmodule Query.IncludeTest do
         offset: ^0
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -123,7 +123,7 @@ defmodule Query.IncludeTest do
         offset: ^0
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -153,7 +153,7 @@ defmodule Query.IncludeTest do
         offset: ^0
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -181,7 +181,7 @@ defmodule Query.IncludeTest do
         offset: ^0
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -196,7 +196,7 @@ defmodule Query.IncludeTest do
         preload: [:fat_hospitals]
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -214,7 +214,7 @@ defmodule Query.IncludeTest do
         preload: ^[{:fat_hospitals, [:fat_rooms]}]
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -238,7 +238,7 @@ defmodule Query.IncludeTest do
         offset: ^0
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -262,7 +262,7 @@ defmodule Query.IncludeTest do
         preload: ^[{:fat_hospitals, [:fat_rooms]}]
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -280,7 +280,7 @@ defmodule Query.IncludeTest do
       }
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatDoctor, opts) end
   end
 
   test "returns the query with nested include and group_by blacklisted" do
@@ -298,7 +298,7 @@ defmodule Query.IncludeTest do
       }
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatDoctor, opts) end
   end
 
   test "returns the query with nested include models" do
@@ -315,7 +315,7 @@ defmodule Query.IncludeTest do
         preload: ^[{:fat_hospitals, :fat_rooms}]
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -339,7 +339,7 @@ defmodule Query.IncludeTest do
         preload: ^[{:fat_hospitals, [:fat_patients]}]
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -357,7 +357,7 @@ defmodule Query.IncludeTest do
       }
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatDoctor, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatDoctor, opts) end
   end
 
   test "returns the query with nested include models with order" do
@@ -380,7 +380,7 @@ defmodule Query.IncludeTest do
         preload: ^[{:fat_hospitals, [:fat_rooms]}]
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -395,7 +395,7 @@ defmodule Query.IncludeTest do
         preload: [:fat_patients, :fat_hospitals]
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -418,7 +418,7 @@ defmodule Query.IncludeTest do
         preload: [^[fat_patients: [:fat_doctors], fat_hospitals: [:fat_rooms]]]
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -454,7 +454,7 @@ defmodule Query.IncludeTest do
         ]
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -475,7 +475,7 @@ defmodule Query.IncludeTest do
         preload: [^[:fat_patients, :fat_hospitals]]
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 
@@ -525,7 +525,7 @@ defmodule Query.IncludeTest do
         preload: [^[:fat_patients, :fat_hospitals]]
       )
 
-    result = Query.build(FatEcto.FatDoctor, opts)
+    result = Query.build!(FatEcto.FatDoctor, opts)
     assert inspect(result) == inspect(expected)
   end
 end

@@ -19,7 +19,7 @@ defmodule Query.OrderTest do
 
     expected = from(h in FatEcto.FatHospital, order_by: [desc: h.rating])
 
-    query = Query.build(FatEcto.FatHospital, opts)
+    query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     assert Repo.all(query) |> Enum.map(fn map -> map.rating end) == [10, 6, 5]
   end
@@ -36,7 +36,7 @@ defmodule Query.OrderTest do
       "$order" => %{"phone" => "$desc"}
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatHospital, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatHospital, opts) end
   end
 
   test "returns the query where field is asc " do
@@ -49,7 +49,7 @@ defmodule Query.OrderTest do
 
     expected = from(p in FatEcto.FatPatient, order_by: [asc: p.appointments_count])
 
-    query = Query.build(FatEcto.FatPatient, opts)
+    query = Query.build!(FatEcto.FatPatient, opts)
     assert inspect(query) == inspect(expected)
     assert Repo.all(query) |> Enum.map(fn map -> map.appointments_count end) == [4, 6]
   end
@@ -70,6 +70,6 @@ defmodule Query.OrderTest do
       "$order" => %{"date_of_birth" => "$asc"}
     }
 
-    assert_raise ArgumentError, fn -> Query.build(FatEcto.FatPatient, opts) end
+    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatPatient, opts) end
   end
 end

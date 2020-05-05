@@ -242,7 +242,7 @@ defmodule Fat.ContextTest do
       "$where" => %{"id" => room.id}
     }
 
-    query = Query.build(FatEcto.FatRoom, opts)
+    query = Query.build!(FatEcto.FatRoom, opts)
 
     expected =
       from(fr in FatEcto.FatRoom,
