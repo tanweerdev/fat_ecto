@@ -27,27 +27,31 @@ defmodule FatEcto.Render do
             render(conn, "index.json", data: records)
 
           {nil, nil, meta_to_put_as} when not is_nil(meta_to_put_as) ->
-            render(conn, "index.json", %{records: records, meta: meta, options: opts})
+            render(conn, "index.json", %{:records => records, meta_to_put_as => meta, :options => opts})
 
           {nil, data_to_view_as, nil} when not is_nil(data_to_view_as) ->
-            render(conn, "index.json", %{records: records, meta: meta, options: opts})
-
-          {nil, data_to_view_as, meta_to_put_as} ->
             render(conn, "index.json", %{data_to_view_as => records, :meta => meta, :options => opts})
 
-          {view_to_render, nil, nil} when not is_nil(view_to_render) ->
+          {nil, data_to_view_as, meta_to_put_as} ->
+            render(conn, "index.json", %{data_to_view_as => records, meta_to_put_as => meta, :options => opts})
+
+          {view_to_render, nil, nil} ->
             render(conn, view_to_render, data: records)
 
           {view_to_render, nil, meta_to_put_as}
           when not is_nil(meta_to_put_as) and not is_nil(view_to_render) ->
-            render(conn, view_to_render, %{records: records, options: opts, meta: meta})
+            render(conn, view_to_render, %{:records => records, :options => opts, meta_to_put_as => meta})
 
           {view_to_render, data_to_view_as, nil}
           when not is_nil(data_to_view_as) and not is_nil(view_to_render) ->
-            render(conn, view_to_render, %{records: records, meta: meta, options: opts})
+            render(conn, view_to_render, %{data_to_view_as => records, :meta => meta, :options => opts})
 
           {view_to_render, data_to_view_as, meta_to_put_as} ->
-            render(conn, view_to_render, %{data_to_view_as => records, :meta => meta, :options => opts})
+            render(conn, view_to_render, %{
+              data_to_view_as => records,
+              meta_to_put_as => meta,
+              :options => opts
+            })
         end
       end
 
