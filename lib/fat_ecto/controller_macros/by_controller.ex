@@ -47,12 +47,12 @@ defmodule FatEcto.ByQuery do
             end
 
           after_get_hook_for_query_by(recordz, meta, conn)
-          render_record_with_meta(conn, @schema, recordz, meta)
+          render_record_with_meta(conn, @schema, recordz, meta, unquote(options))
         end
       end
 
-      def render_record_with_meta(conn, _schema, records, meta) do
-        render_records(conn, records, meta, unquote(options))
+      def render_record_with_meta(conn, _schema, records, meta, options) do
+        render_records(conn, records, meta, options)
       end
 
       # You can use process_query_before_for_query_by to override query before fetching records for query by
@@ -73,7 +73,7 @@ defmodule FatEcto.ByQuery do
       defoverridable process_query_before_for_query_by: 3,
                      process_params_before_for_query_by: 3,
                      after_get_hook_for_query_by: 3,
-                     render_record_with_meta: 4
+                     render_record_with_meta: 5
     end
   end
 end
