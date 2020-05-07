@@ -22,8 +22,7 @@ defmodule FatEcto.FatQuery.FatGroupBy do
       ...>  "$group" => "total_staff"
       ...> }
       iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating == ^4 and ^true, group_by: [f0.total_staff], order_by: [desc: f0.id], select: merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]), %{\"$group\" => %{^\"total_staff\" => map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]).total_staff}})>
-
+      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating == ^4 and ^true, group_by: [f0.total_staff], order_by: [desc: f0.id], select: map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}])>
 
   ### Options
 
@@ -49,7 +48,8 @@ defmodule FatEcto.FatQuery.FatGroupBy do
       ...>  "$group" => ["total_staff", "rating"]
       ...> }
       iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating == ^4 and ^true, group_by: [f0.total_staff], group_by: [f0.rating], order_by: [desc: f0.id], select: merge(merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]), %{"$group" => %{^"total_staff" => map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]).total_staff}}), %{"$group" => %{^"rating" => map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]).rating}})>
+      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating == ^4 and ^true, group_by: [f0.total_staff], group_by: [f0.rating], order_by: [desc: f0.id], select: map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}])>
+
 
   ### Options
 
@@ -85,7 +85,7 @@ defmodule FatEcto.FatQuery.FatGroupBy do
       ...>  "$group" => ["total_staff", "rating"]
       ...> }
       iex> #{__MODULE__}.build_group_by(FatEcto.FatHospital, query_opts["$group"], [], [])
-      #Ecto.Query<from f0 in FatEcto.FatHospital, group_by: [f0.total_staff], group_by: [f0.rating], select: merge(merge(f0, %{"$group" => %{^"total_staff" => f0.total_staff}}), %{"$group" => %{^"rating" => f0.rating}})>
+      #Ecto.Query<from f0 in FatEcto.FatHospital, group_by: [f0.total_staff], group_by: [f0.rating]>
   """
   def build_group_by(queryable, group_by_params, build_options, opts) do
     case group_by_params do
@@ -114,16 +114,7 @@ defmodule FatEcto.FatQuery.FatGroupBy do
                     fragment(
                       "date_part('month', ?)",
                       field(c, ^field)
-                    ),
-                  select_merge: %{
-                    "$group" => %{
-                      ^group_by_field =>
-                        fragment(
-                          "date_part('month', ?)",
-                          field(c, ^field)
-                        )
-                    }
-                  }
+                    )
                 )
               else
                 from(
@@ -132,16 +123,7 @@ defmodule FatEcto.FatQuery.FatGroupBy do
                     fragment(
                       "date_part('month', ?)",
                       field(q, ^field)
-                    ),
-                  select_merge: %{
-                    "$group" => %{
-                      ^group_by_field =>
-                        fragment(
-                          "date_part('month', ?)",
-                          field(q, ^field)
-                        )
-                    }
-                  }
+                    )
                 )
               end
 
@@ -158,16 +140,7 @@ defmodule FatEcto.FatQuery.FatGroupBy do
                     fragment(
                       "date_part('year', ?)",
                       field(c, ^field)
-                    ),
-                  select_merge: %{
-                    "$group" => %{
-                      ^group_by_field =>
-                        fragment(
-                          "date_part('year', ?)",
-                          field(c, ^field)
-                        )
-                    }
-                  }
+                    )
                 )
               else
                 from(
@@ -176,16 +149,7 @@ defmodule FatEcto.FatQuery.FatGroupBy do
                     fragment(
                       "date_part('year', ?)",
                       field(q, ^field)
-                    ),
-                  select_merge: %{
-                    "$group" => %{
-                      ^group_by_field =>
-                        fragment(
-                          "date_part('year', ?)",
-                          field(q, ^field)
-                        )
-                    }
-                  }
+                    )
                 )
               end
 
@@ -227,22 +191,12 @@ defmodule FatEcto.FatQuery.FatGroupBy do
     if opts[:binding] == :last do
       from(
         [q, ..., c] in queryable,
-        group_by: field(c, ^field),
-        select_merge: %{
-          "$group" => %{
-            ^group_by_param => field(c, ^field)
-          }
-        }
+        group_by: field(c, ^field)
       )
     else
       from(
         q in queryable,
-        group_by: field(q, ^field),
-        select_merge: %{
-          "$group" => %{
-            ^group_by_param => field(q, ^field)
-          }
-        }
+        group_by: field(q, ^field)
       )
     end
   end

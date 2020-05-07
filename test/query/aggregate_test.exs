@@ -21,13 +21,7 @@ defmodule Query.AggregateTest do
       from(fr in FatEcto.FatRoom,
         where: fr.floor > ^2 and ^true,
         group_by: [fr.id],
-        select:
-          merge(
-            merge(map(fr, [:name, :purpose]), %{"$aggregate" => %{"$count": %{^"id" => count(fr.id)}}}),
-            %{
-              "$group" => %{^"id" => fr.id}
-            }
-          )
+        select: merge(map(fr, [:name, :purpose]), %{"$aggregate" => %{"$count": %{^"id" => count(fr.id)}}})
       )
 
     result = Query.build!(FatEcto.FatRoom, opts)
@@ -47,13 +41,8 @@ defmodule Query.AggregateTest do
         group_by: [fr.id],
         select:
           merge(
-            merge(
-              fr,
-              %{"$aggregate" => %{"$count": %{^"id" => count(fr.id)}}}
-            ),
-            %{
-              "$group" => %{^"id" => fr.id}
-            }
+            fr,
+            %{"$aggregate" => %{"$count": %{^"id" => count(fr.id)}}}
           )
       )
 
@@ -98,10 +87,7 @@ defmodule Query.AggregateTest do
         where: f0.capacity == ^5 and ^true,
         group_by: [f0.capacity],
         order_by: [desc: f0.beds],
-        select:
-          merge(merge(f0, %{"$aggregate" => %{"$min": %{^"nurses" => min(f0.nurses)}}}), %{
-            "$group" => %{^"capacity" => f0.capacity}
-          })
+        select: merge(f0, %{"$aggregate" => %{"$min": %{^"nurses" => min(f0.nurses)}}})
       )
 
     result = Query.build!(FatEcto.FatRoom, opts)
@@ -119,10 +105,7 @@ defmodule Query.AggregateTest do
       from(f0 in FatEcto.FatRoom,
         where: f0.capacity == ^5 and ^true,
         group_by: [f0.capacity],
-        select:
-          merge(merge(f0, %{"$aggregate" => %{"$max": %{^"nurses" => max(f0.nurses)}}}), %{
-            "$group" => %{^"capacity" => f0.capacity}
-          })
+        select: merge(f0, %{"$aggregate" => %{"$max": %{^"nurses" => max(f0.nurses)}}})
       )
 
     result = Query.build!(FatEcto.FatRoom, opts)
@@ -142,10 +125,7 @@ defmodule Query.AggregateTest do
         where: f0.capacity == ^5 and ^true,
         group_by: [f0.capacity],
         order_by: [asc: f0.beds],
-        select:
-          merge(merge(f0, %{"$aggregate" => %{"$sum": %{^"nurses" => sum(f0.nurses)}}}), %{
-            "$group" => %{^"capacity" => f0.capacity}
-          })
+        select: merge(f0, %{"$aggregate" => %{"$sum": %{^"nurses" => sum(f0.nurses)}}})
       )
 
     result = Query.build!(FatEcto.FatRoom, opts)
@@ -165,10 +145,7 @@ defmodule Query.AggregateTest do
         where: f0.capacity == ^5 and ^true,
         group_by: [f0.capacity],
         order_by: [asc: f0.beds],
-        select:
-          merge(merge(f0, %{"$aggregate" => %{"$avg": %{^"level" => avg(f0.level)}}}), %{
-            "$group" => %{^"capacity" => f0.capacity}
-          })
+        select: merge(f0, %{"$aggregate" => %{"$avg": %{^"level" => avg(f0.level)}}})
       )
 
     result = Query.build!(FatEcto.FatRoom, opts)
@@ -195,10 +172,7 @@ defmodule Query.AggregateTest do
         full_join: f1 in assoc(f0, :fat_hospital),
         where: f0.capacity == ^5 and ^true,
         group_by: [f0.capacity],
-        select:
-          merge(merge(f0, %{"$aggregate" => %{"$avg": %{^"level" => avg(f0.level)}}}), %{
-            "$group" => %{^"capacity" => f0.capacity}
-          }),
+        select: merge(f0, %{"$aggregate" => %{"$avg": %{^"level" => avg(f0.level)}}}),
         where: f1.name == ^"Saint" and ^true,
         order_by: [desc: f1.id],
         order_by: [asc: f0.beds],
@@ -236,12 +210,9 @@ defmodule Query.AggregateTest do
         group_by: [f0.capacity],
         order_by: [asc: f0.beds],
         select:
-          merge(
-            merge(%{^"fat_hospital" => map(f1, [:name, :location, :phone])}, %{
-              "$aggregate" => %{"$sum": %{^"level" => sum(f0.level)}}
-            }),
-            %{"$group" => %{^"capacity" => f0.capacity}}
-          )
+          merge(%{^"fat_hospital" => map(f1, [:name, :location, :phone])}, %{
+            "$aggregate" => %{"$sum": %{^"level" => sum(f0.level)}}
+          })
       )
 
     result = Query.build!(FatEcto.FatRoom, opts)
@@ -262,12 +233,9 @@ defmodule Query.AggregateTest do
         where: f0.capacity == ^5 and ^true,
         group_by: [f0.capacity],
         select:
-          merge(
-            merge(map(f0, [:beds, :nurses, :capacity]), %{
-              "$aggregate" => %{"$max": %{^"nurses" => max(f0.nurses)}}
-            }),
-            %{"$group" => %{^"capacity" => f0.capacity}}
-          )
+          merge(map(f0, [:beds, :nurses, :capacity]), %{
+            "$aggregate" => %{"$max": %{^"nurses" => max(f0.nurses)}}
+          })
       )
 
     result = Query.build!(FatEcto.FatRoom, opts)
@@ -286,12 +254,9 @@ defmodule Query.AggregateTest do
         where: f0.capacity == ^5 and ^true,
         group_by: [f0.capacity],
         select:
-          merge(
-            merge(merge(f0, %{"$aggregate" => %{"$max": %{^"nurses" => max(f0.nurses)}}}), %{
-              "$aggregate" => %{"$min": %{^"capacity" => min(f0.capacity)}}
-            }),
-            %{"$group" => %{^"capacity" => f0.capacity}}
-          )
+          merge(merge(f0, %{"$aggregate" => %{"$max": %{^"nurses" => max(f0.nurses)}}}), %{
+            "$aggregate" => %{"$min": %{^"capacity" => min(f0.capacity)}}
+          })
       )
 
     result = Query.build!(FatEcto.FatRoom, opts)
@@ -310,12 +275,9 @@ defmodule Query.AggregateTest do
         where: f0.capacity == ^5 and ^true,
         group_by: [f0.capacity],
         select:
-          merge(
-            merge(merge(f0, %{"$aggregate" => %{"$count": %{^"nurses" => count(f0.nurses)}}}), %{
-              "$aggregate" => %{"$count_distinct": %{^"capacity" => count(f0.capacity, :distinct)}}
-            }),
-            %{"$group" => %{^"capacity" => f0.capacity}}
-          )
+          merge(merge(f0, %{"$aggregate" => %{"$count": %{^"nurses" => count(f0.nurses)}}}), %{
+            "$aggregate" => %{"$count_distinct": %{^"capacity" => count(f0.capacity, :distinct)}}
+          })
       )
 
     result = Query.build!(FatEcto.FatRoom, opts)
@@ -334,12 +296,9 @@ defmodule Query.AggregateTest do
         where: f0.capacity == ^5 and ^true,
         group_by: [f0.capacity],
         select:
-          merge(
-            merge(merge(f0, %{"$aggregate" => %{"$avg": %{^"capacity" => avg(f0.capacity)}}}), %{
-              "$aggregate" => %{"$sum": %{^"nurses" => sum(f0.nurses)}}
-            }),
-            %{"$group" => %{^"capacity" => f0.capacity}}
-          )
+          merge(merge(f0, %{"$aggregate" => %{"$avg": %{^"capacity" => avg(f0.capacity)}}}), %{
+            "$aggregate" => %{"$sum": %{^"nurses" => sum(f0.nurses)}}
+          })
       )
 
     result = Query.build!(FatEcto.FatRoom, opts)
@@ -360,15 +319,12 @@ defmodule Query.AggregateTest do
         select:
           merge(
             merge(
-              merge(
-                merge(merge(f0, %{"$aggregate" => %{"$avg": %{^"capacity" => avg(f0.capacity)}}}), %{
-                  "$aggregate" => %{"$avg": %{^"nurses" => avg(f0.nurses)}}
-                }),
-                %{"$aggregate" => %{"$sum": %{^"nurses" => sum(f0.nurses)}}}
-              ),
-              %{"$aggregate" => %{"$sum": %{^"beds" => sum(f0.beds)}}}
+              merge(merge(f0, %{"$aggregate" => %{"$avg": %{^"capacity" => avg(f0.capacity)}}}), %{
+                "$aggregate" => %{"$avg": %{^"nurses" => avg(f0.nurses)}}
+              }),
+              %{"$aggregate" => %{"$sum": %{^"nurses" => sum(f0.nurses)}}}
             ),
-            %{"$group" => %{^"capacity" => f0.capacity}}
+            %{"$aggregate" => %{"$sum": %{^"beds" => sum(f0.beds)}}}
           )
       )
 
@@ -390,15 +346,12 @@ defmodule Query.AggregateTest do
         select:
           merge(
             merge(
-              merge(
-                merge(merge(f0, %{"$aggregate" => %{"$count": %{^"nurses" => count(f0.nurses)}}}), %{
-                  "$aggregate" => %{"$count": %{^"rating" => count(f0.rating)}}
-                }),
-                %{"$aggregate" => %{"$count_distinct": %{^"capacity" => count(f0.capacity, :distinct)}}}
-              ),
-              %{"$aggregate" => %{"$count_distinct": %{^"beds" => count(f0.beds, :distinct)}}}
+              merge(merge(f0, %{"$aggregate" => %{"$count": %{^"nurses" => count(f0.nurses)}}}), %{
+                "$aggregate" => %{"$count": %{^"rating" => count(f0.rating)}}
+              }),
+              %{"$aggregate" => %{"$count_distinct": %{^"capacity" => count(f0.capacity, :distinct)}}}
             ),
-            %{"$group" => %{^"capacity" => f0.capacity}}
+            %{"$aggregate" => %{"$count_distinct": %{^"beds" => count(f0.beds, :distinct)}}}
           )
       )
 
@@ -420,15 +373,12 @@ defmodule Query.AggregateTest do
         select:
           merge(
             merge(
-              merge(
-                merge(merge(f0, %{"$aggregate" => %{"$max": %{^"nurses" => max(f0.nurses)}}}), %{
-                  "$aggregate" => %{"$max": %{^"beds" => max(f0.beds)}}
-                }),
-                %{"$aggregate" => %{"$min": %{^"capacity" => min(f0.capacity)}}}
-              ),
-              %{"$aggregate" => %{"$min": %{^"level" => min(f0.level)}}}
+              merge(merge(f0, %{"$aggregate" => %{"$max": %{^"nurses" => max(f0.nurses)}}}), %{
+                "$aggregate" => %{"$max": %{^"beds" => max(f0.beds)}}
+              }),
+              %{"$aggregate" => %{"$min": %{^"capacity" => min(f0.capacity)}}}
             ),
-            %{"$group" => %{^"capacity" => f0.capacity}}
+            %{"$aggregate" => %{"$min": %{^"level" => min(f0.level)}}}
           )
       )
 
@@ -491,12 +441,9 @@ defmodule Query.AggregateTest do
         group_by: [f0.capacity],
         order_by: [desc: f0.beds],
         select:
-          merge(
-            merge(merge(f0, %{"$aggregate" => %{"$min": %{^"nurses" => min(f0.nurses)}}}), %{
-              "$aggregate" => %{"$min": %{^"capacity" => min(f0.capacity)}}
-            }),
-            %{"$group" => %{^"capacity" => f0.capacity}}
-          )
+          merge(merge(f0, %{"$aggregate" => %{"$min": %{^"nurses" => min(f0.nurses)}}}), %{
+            "$aggregate" => %{"$min": %{^"capacity" => min(f0.capacity)}}
+          })
       )
 
     result = Query.build!(FatEcto.FatRoom, opts)
@@ -515,12 +462,9 @@ defmodule Query.AggregateTest do
         where: f0.capacity == ^5 and ^true,
         group_by: [f0.capacity],
         select:
-          merge(
-            merge(merge(f0, %{"$aggregate" => %{"$max": %{^"nurses" => max(f0.nurses)}}}), %{
-              "$aggregate" => %{"$max": %{^"level" => max(f0.level)}}
-            }),
-            %{"$group" => %{^"capacity" => f0.capacity}}
-          )
+          merge(merge(f0, %{"$aggregate" => %{"$max": %{^"nurses" => max(f0.nurses)}}}), %{
+            "$aggregate" => %{"$max": %{^"level" => max(f0.level)}}
+          })
       )
 
     result = Query.build!(FatEcto.FatRoom, opts)
@@ -541,12 +485,9 @@ defmodule Query.AggregateTest do
         group_by: [f0.capacity],
         order_by: [asc: f0.beds],
         select:
-          merge(
-            merge(merge(f0, %{"$aggregate" => %{"$sum": %{^"nurses" => sum(f0.nurses)}}}), %{
-              "$aggregate" => %{"$sum": %{^"level" => sum(f0.level)}}
-            }),
-            %{"$group" => %{^"capacity" => f0.capacity}}
-          )
+          merge(merge(f0, %{"$aggregate" => %{"$sum": %{^"nurses" => sum(f0.nurses)}}}), %{
+            "$aggregate" => %{"$sum": %{^"level" => sum(f0.level)}}
+          })
       )
 
     result = Query.build!(FatEcto.FatRoom, opts)
@@ -567,12 +508,9 @@ defmodule Query.AggregateTest do
         group_by: [f0.capacity],
         order_by: [asc: f0.beds],
         select:
-          merge(
-            merge(merge(f0, %{"$aggregate" => %{"$avg": %{^"level" => avg(f0.level)}}}), %{
-              "$aggregate" => %{"$avg": %{^"capacity" => avg(f0.capacity)}}
-            }),
-            %{"$group" => %{^"capacity" => f0.capacity}}
-          )
+          merge(merge(f0, %{"$aggregate" => %{"$avg": %{^"level" => avg(f0.level)}}}), %{
+            "$aggregate" => %{"$avg": %{^"capacity" => avg(f0.capacity)}}
+          })
       )
 
     result = Query.build!(FatEcto.FatRoom, opts)
