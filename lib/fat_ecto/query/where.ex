@@ -731,7 +731,7 @@ defmodule FatEcto.FatQuery.FatWhere do
       Enum.reduce(where_params, queryable, fn {k, v}, {map, queryable} ->
         # TODO: why contains
         if String.contains?(k, "$or") do
-          {map, WhereOr.or_condition(queryable, where_params[k], build_options)}
+          {map, WhereOr.or_condition(queryable, where_params[k], build_options, opts)}
         else
           {Map.put(map, k, v), queryable}
         end
