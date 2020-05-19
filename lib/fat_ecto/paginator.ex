@@ -174,6 +174,8 @@ defmodule FatEcto.FatPaginator do
 
       defp count(query) do
         query
+        |> exclude(:limit)
+        |> exclude(:offset)
         |> subquery
         |> select(count("*"))
       end
