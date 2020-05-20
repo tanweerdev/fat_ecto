@@ -485,7 +485,7 @@ defmodule Query.WhereTest do
           f0.total_staff > ^2 or
             (f0.rating < ^3 or
                (like(fragment("(?)::TEXT", f0.location), ^"%main%") or
-                  (ilike(fragment("(?)::TEXT", f0.address), ^"%123%") or ^true))),
+                  (ilike(fragment("(?)::TEXT", f0.address), ^"%123%") or ^false))),
         where: not ilike(fragment("(?)::TEXT", f0.name), ^"%DJ%") and ^true
       )
 
@@ -534,7 +534,7 @@ defmodule Query.WhereTest do
 
     expected =
       from(f0 in FatEcto.FatHospital,
-        where: f0.total_staff >= ^2 or ^true,
+        where: f0.total_staff >= ^2 or ^false,
         where: f0.rating in ^[2, 3] and (like(fragment("(?)::TEXT", f0.name), ^"%Joh%") and ^true)
       )
 
@@ -576,7 +576,7 @@ defmodule Query.WhereTest do
       from(f0 in FatEcto.FatHospital,
         where:
           (f0.total_staff >= ^5 and f0.total_staff <= ^7) or
-            (like(fragment("(?)::TEXT", f0.name), ^"%Joh%") or ^true)
+            (like(fragment("(?)::TEXT", f0.name), ^"%Joh%") or ^false)
       )
 
     query = Query.build!(FatEcto.FatHospital, opts)
@@ -588,14 +588,6 @@ defmodule Query.WhereTest do
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
     assert result == [
-             %{
-               address: "123 street",
-               location: "main bullevard",
-               name: "st marry",
-               phone: "12345",
-               rating: 5,
-               total_staff: 3
-             },
              %{
                address: "123 street",
                location: "main bullevard",
@@ -632,7 +624,7 @@ defmodule Query.WhereTest do
 
     expected =
       from(f0 in FatEcto.FatHospital,
-        where: f0.total_staff <= ^1 or f0.total_staff >= ^4 or (f0.rating < ^2 or f0.rating > ^3 or ^true),
+        where: f0.total_staff <= ^1 or f0.total_staff >= ^4 or (f0.rating < ^2 or f0.rating > ^3 or ^false),
         where:
           like(fragment("(?)::TEXT", f0.name), ^"%Joh%") and
             (ilike(fragment("(?)::TEXT", f0.location), ^"%main%") and ^true)
@@ -677,7 +669,7 @@ defmodule Query.WhereTest do
       from(f0 in FatEcto.FatHospital,
         where:
           f0.total_staff not in ^[1, 4] or
-            (f0.rating in ^[2, 3] or (ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or ^true)),
+            (f0.rating in ^[2, 3] or (ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or ^false)),
         where: ilike(fragment("(?)::TEXT", f0.location), ^"%main%") and ^true
       )
 
@@ -738,7 +730,7 @@ defmodule Query.WhereTest do
           f0.total_staff == ^2 or
             (f0.rating in ^[2, 3] or
                (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
-                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true)))
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^false)))
       )
 
     query = Query.build!(FatEcto.FatHospital, opts)
@@ -804,12 +796,12 @@ defmodule Query.WhereTest do
           f0.total_staff == ^2 or
             (f0.rating in ^[2, 3] or
                (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
-                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true))),
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^false))),
         where:
           f0.total_staff == ^2 or
             (f0.rating in ^[2, 3] or
                (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
-                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true)))
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^false)))
       )
 
     query = Query.build!(FatEcto.FatHospital, opts)
@@ -877,12 +869,12 @@ defmodule Query.WhereTest do
           f0.total_staff == ^2 or
             (f0.rating in ^[2, 3] or
                (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
-                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true))),
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^false))),
         where:
           f0.total_staff == ^2 or
             (f0.rating in ^[2, 3] or
                (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
-                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true))),
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^false))),
         where:
           not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") and
             (not like(fragment("(?)::TEXT", f0.location), ^"%some%") and ^true)
@@ -951,17 +943,17 @@ defmodule Query.WhereTest do
           f0.total_staff == ^2 or
             (f0.rating in ^[2, 3] or
                (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
-                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true))),
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^false))),
         where:
           f0.total_staff == ^2 or
             (f0.rating in ^[2, 3] or
                (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
-                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true))),
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^false))),
         where:
           (f0.total_staff > ^2 and f0.total_staff < ^6) or
             (f0.rating not in ^[2, 3] or
                (ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
-                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^true))),
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^false))),
         where:
           not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") and
             (not like(fragment("(?)::TEXT", f0.location), ^"%some%") and ^true)
