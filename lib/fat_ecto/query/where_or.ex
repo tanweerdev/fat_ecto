@@ -6,7 +6,7 @@ defmodule FatEcto.FatQuery.WhereOr do
 
   def or_condition(queryable, where_map, build_options, options) do
     dynamics =
-      Enum.reduce(where_map, true, fn {k, map_cond}, dynamics ->
+      Enum.reduce(where_map, false, fn {k, map_cond}, dynamics ->
         FatHelper.params_valid(queryable, k, build_options)
 
         map_condition(k, dynamics, map_cond, options)
