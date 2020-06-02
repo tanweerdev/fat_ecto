@@ -15,7 +15,15 @@ defmodule FatEcto.FatHelper do
     {max_limit, default_limit}
   end
 
-  # TODO: Add docs and examples for ex_doc
+  @doc """
+    Return skip value from given params.
+     ### Parameters
+
+        - `params`  - skip values.
+
+    ### Examples
+        iex>  FatEcto.FatHelper.get_skip_value( params["skip"])
+  """
   @spec get_skip_value(keyword()) :: {any(), keyword()}
   def get_skip_value(params) do
     {skip, params} = Keyword.pop(params, :skip, @min_skip)
@@ -24,7 +32,15 @@ defmodule FatEcto.FatHelper do
     {skip, params}
   end
 
-  # TODO: Add docs and examples for ex_doc
+  @doc """
+    Return limit from given params options.
+     ### Parameters
+
+        - `limit`  - Number of Records vlaue.
+
+    ### Examples
+        iex>  FatEcto.FatHelper.get_limit_value( params["limit"])
+  """
   @spec get_limit_value(keyword(), nil | keyword() | map()) :: {any(), keyword()}
   def get_limit_value(params, options \\ []) do
     {max_limit, default_limit} = get_limit_bounds(options)
@@ -42,7 +58,15 @@ defmodule FatEcto.FatHelper do
     end
   end
 
-  # TODO: Add docs and examples for ex_doc
+  @doc """
+    Return true or false on basis of given value.
+    ### Parameters
+
+        - `value`  - Value of the field.
+
+    ### Examples
+          iex>  FatEcto.FatHelper.is_fat_ecto_field?(value)
+  """
   @spec is_fat_ecto_field?(any()) :: boolean()
   def is_fat_ecto_field?(value) do
     cond do

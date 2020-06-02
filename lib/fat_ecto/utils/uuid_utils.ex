@@ -1,5 +1,12 @@
 defmodule FatUtils.UUID do
-  # TODO: add docs
+  @moduledoc """
+    Provides method that works on UUID
+  """
+
+  @doc """
+    It will take parameters as list of uuid fields and return result.
+  """
+
   # will return {invalid_uuids, params}
   def parse(params, list_of_uuid_fields, options \\ []) when is_map(params) do
     Enum.reduce(params, {[], %{}}, fn {key, value}, acc ->

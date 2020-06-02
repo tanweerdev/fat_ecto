@@ -1,6 +1,5 @@
 defmodule FatEcto.FatQuery do
   # TODO: make paginator optional via global config and via options passed
-  # TODO: Add more docs and examples for ex_doc
   defmacro __using__(options) do
     quote location: :keep do
       @moduledoc """
@@ -100,6 +99,37 @@ defmodule FatEcto.FatQuery do
           #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in \"fat_rooms\", on: f0.id == f1.hospital_id, right_join: f2 in assoc(f0, :fat_doctors), where: f0.rating == ^4 and ^true, where: f1.name == ^\"John\" and ^true, where: f2.designation == ^\"ham\" and ^true, group_by: [f0.rating], order_by: [desc: f2.id], order_by: [desc: f0.id], limit: ^34, offset: ^0, select: merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:floor, :name]}]), %{^\"fat_rooms\" => map(f1, [:name, :floor, :is_active])}), preload: [[fat_doctors: [:fat_patients]]]>
 
 
+      ## Examples
+        iex> query_opts = %{
+        ...>   "$select" => %{
+        ...>     "$fields" => ["name", "rating"],
+        ...>     "fat_beds" => ["name", "description"]
+        ...>  },
+        ...>   "$order" => %{"id" => "$desc"},
+        ...>   "$where" => %{"rating" => 2},
+        ...>   "$group" => "rating",
+        ...>   "$include" => %{
+        ...>       "fat_doctors" => %{
+        ...>           "$include" => ["fat_patients"],
+        ...>           "$where" => %{"designation" => "ham"},
+        ...>           "$order" => %{"id" => "$desc"},
+        ...>           "$join" => "$right"
+        ...>          }
+        ...>     },
+        ...>   "$right_join" => %{
+        ...>      "fat_beds" => %{
+        ...>        "$on_field" => "id",
+        ...>        "$on_table_field" => "hospital_id",
+        ...>        "$select" => ["name", "description"],
+        ...>        "$where" => %{"name" => "John"}
+        ...>       }
+        ...>     }
+        ...>  }
+        iex> build!(FatEcto.FatHospital, query_opts, paginate: false)
+        #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in \"fat_beds\", on: f0.id == f1.hospital_id, right_join: f2 in assoc(f0, :fat_doctors), where: f0.rating == ^2 and ^true, where: f1.name == ^\"John\" and ^true, where: f2.designation == ^\"ham\" and ^true, group_by: [f0.rating], order_by: [desc: f2.id], order_by: [desc: f0.id], limit: ^34, offset: ^0, select: merge(map(f0, [:name, :rating, {:fat_beds, [:name, :description]}]), %{^\"fat_beds\" => map(f1, [:name, :description])}), preload: [[fat_doctors: [:fat_patients]]]>
+
+
+
       ## Options
 
         - `$include`- Include the assoication model `doctors`.
@@ -113,7 +143,6 @@ defmodule FatEcto.FatQuery do
         - `$on_table_field`- Specify the field for join in the joining table.
       """
 
-      # TODO: Add docs and examples for ex_doc
       def build!(queryable, query_opts, build_options \\ []) do
         build_options = Keyword.merge(@options, build_options)
         query_opts = FatUtils.Map.deep_merge(@query_param_defaults, query_opts)
@@ -149,7 +178,6 @@ defmodule FatEcto.FatQuery do
         |> FatEcto.FatQuery.FatGroupBy.build_group_by(opts["$group"], build_options)
       end
 
-      # TODO: Add docs and examples for ex_doc
       @doc """
          Fetch the result from the repo based on the query params.
 
@@ -180,7 +208,6 @@ defmodule FatEcto.FatQuery do
 
       # You can get two types of error from this fetch method.
       # fat_ecto_query_error and fat_ecto_query_db_error
-      # TODO: update docs
 
       def build_by(queryable, query_params, options \\ []) do
         query_param_defaults = options[:defaults] || @query_param_defaults

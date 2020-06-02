@@ -47,7 +47,7 @@ defmodule FatEcto.FatQuery.FatJoin do
     - `$select`                - Select the fields from `hospital` and `rooms`.
     - `$where`                 - Added the where attribute in the query.
     - `$order`                 - Sort the result based on the order attribute.
-    - `$right_join`            - Specify the type of join.  
+    - `$right_join`            - Specify the type of join.
     - `$on_type`               -  Specify the type of condition on the join.
     - `$on_field`              - Specify the field for join.
     - `$on_table_field`        - Specify the field for join in the joining table.
@@ -191,6 +191,86 @@ defmodule FatEcto.FatQuery.FatJoin do
     - `$right_join`            - Specify the type of join.
     - `$on_field`              - Specify the field for join.
     - `$on_table_field`        - Specify the field for join in the joining table.
+
+
+  ### $desc
+  ### Parameters
+
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map.
+
+  ### Example
+
+       iex> query_opts = %{
+       ...> "$select" => %{
+       ...>   "$fields" => ["name", "location", "rating"],
+       ...>   "fat_rooms" => ["floor", "name"]
+       ...>  },
+       ...>  "$where" => %{"name" => "saint claire"},
+       ...>  "$group" => ["rating", "total_staff"],
+       ...>  "$order" => %{"rating" => "$desc"},
+       ...>  "$include" => %{
+       ...>    "fat_doctors" => %{
+       ...>     "$include" => ["fat_patients"],
+       ...>     "$where" => %{"rating" => %{"$gt" => 5}},
+       ...>     "$order" => %{"experience_years" => "$asc"},
+       ...>     "$select" => ["name", "designation", "phone"]
+       ...>    }
+       ...>   },
+       ...>  "$right_join" => %{
+       ...>    "fat_rooms" => %{
+       ...>      "$on_field" => "id",
+       ...>      "$on_table_field" => "hospital_id",
+       ...>      "$select" => ["name", "floor", "is_active"],
+       ...>      "$where" => %{"floor" => 10},
+       ...>      "$order" => %{"floor" => "$desc"}
+       ...>     }
+       ...>   }
+       ...> }
+       iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
+       #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in \"fat_rooms\", on: f0.id == f1.hospital_id, left_join: f2 in assoc(f0, :fat_doctors), where: f0.name == ^\"saint claire\" and ^true, where: f1.floor == ^10 and ^true, where: f2.rating > ^5 and ^true, group_by: [f0.rating], group_by: [f0.total_staff], order_by: [desc: f1.floor], order_by: [asc: f2.experience_years], order_by: [desc: f0.rating], limit: ^34, offset: ^0, select: merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:floor, :name]}]), %{^\"fat_rooms\" => map(f1, [:name, :floor, :is_active])}), preload: [[fat_doctors: [:fat_patients]]]>
+
+  ### Options
+    - `$select`              - Select the fields from `hospital` and `rooms`.
+    - `$right_join: :$select`- Select the fields from  `rooms`.
+    - `$include: :$select`   - Select the fields from  `doctors`.
+    - `$right_join`          - Right join the table `rooms`.
+    - `$include`             - Include the assoication model `doctors` and `patients`.
+    - `$gt`                  - Added the greaterthan attribute in the  where query inside include .
+    - `$order`               - Sort the result based on the order attribute.
+    - `$right_join: :$order` - Sort the result based on the order attribute inside join.
+    - `$include: :$order`    - Sort the result based on the order attribute inside include.
+    - `$group`               - Added the group_by attribute in the query.
+
+   ### Parameters
+
+    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
+    - `query_opts`  - Include query options as a map
+
+  ### $select
+  ### Example
+
+      iex> query_opts = %{
+      ...> "$select" => %{
+      ...>   "$fields" => ["name", "location", "rating"],
+      ...>   "fat_rooms" => ["name", "floor"]
+      ...>  },
+      ...>  "$where" => %{"name" => "saint claire"},
+      ...>  "$right_join" => %{
+      ...>    "fat_rooms" => %{
+      ...>      "$on_field" => "id",
+      ...>      "$on_table_field" => "hospital_id",
+      ...>      "$select" => ["floor", "name", "is_active"],
+      ...>      "$where" => %{"floor" => 10},
+      ...>     }
+      ...>   }
+      ...> }
+      iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
+      #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in \"fat_rooms\", on: f0.id == f1.hospital_id, where: f0.name == ^\"saint claire\" and ^true, where: f1.floor == ^10 and ^true, select: merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:name, :floor]}]), %{^\"fat_rooms\" => map(f1, [:floor, :name, :is_active])})>
+
+  ## Options
+    - `$select`                - Select the fields from `hospital` and `rooms`.
+    - `$where`                 - Added the where attribute in the query.
 
   """
 
@@ -385,8 +465,6 @@ defmodule FatEcto.FatQuery.FatJoin do
       nil ->
         queryable
 
-      # TODO: Add docs and examples of ex_doc for this case here
-      # keep in mind, this is part of join, so example should be with join select
       select when is_list(select) ->
         # Below syntax doesn't support ... in binding
         # queryable |> select_merge([q, c], (%{location_dest_zone: map(c, ^select_atoms)}))
@@ -409,7 +487,6 @@ defmodule FatEcto.FatQuery.FatJoin do
     end
   end
 
-  # TODO: Add docs and examples of ex_doc for this case here. try to use generic order
   defp order(queryable, order_by_params, join_table, app) do
     if order_by_params == nil do
       queryable
