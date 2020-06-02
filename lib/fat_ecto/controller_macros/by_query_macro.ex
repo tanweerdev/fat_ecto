@@ -1,8 +1,38 @@
 defmodule FatEcto.ByQuery do
   @moduledoc false
+  @doc "You can use pre_process_query_for_query_by_method to override query before fetching records for query by."
+  @callback pre_process_query_for_query_by_method(
+              query :: Ecto.Query.t(),
+              conn :: Plug.Conn.t(),
+              params :: map()
+            ) ::
+              Ecto.Query.t()
+  @doc "You can use process_params_before_for_query_by to override query params before processing."
+  @callback pre_process_params_for_query_by_method(
+              query :: Ecto.Query.t(),
+              conn :: Plug.Conn.t(),
+              params :: map()
+            ) :: map()
+  @doc "You can use post_fetch_hook_for_query_by_method to log etc."
+  @callback post_fetch_hook_for_query_by_method(
+              recordz :: map() | list(),
+              meta :: map() | nil,
+              conn :: Plug.Conn.t()
+            ) ::
+              term()
+  @doc "You can use render_data_and_meta to make changes before records are sent to render macro."
+  @callback render_data_and_meta(
+              recordz :: map() | list(),
+              meta :: map() | nil,
+              conn :: Plug.Conn.t(),
+              schema :: module(),
+              options :: list()
+            ) :: term()
 
   defmacro __using__(options) do
     quote location: :keep do
+      @behaviour FatEcto.ByQuery
+
       # quote do
       @repo unquote(options)[:repo]
       if !@repo do
@@ -21,8 +51,8 @@ defmodule FatEcto.ByQuery do
       def query_by(conn, %{} = query_params) do
         # TODO: priority very low: if some query is invalid or due to any reason
         # there is some un-expected 500 or postgres error, it should be handled properly
-        query_params = process_params_before_for_query_by(@schema, conn, query_params)
-        queryable = process_query_before_for_query_by(@schema, conn, query_params)
+        query_params = pre_process_params_for_query_by_method(@schema, conn, query_params)
+        queryable = pre_process_query_for_query_by_method(@schema, conn, query_params)
 
         with {:ok, data_meta} <- FatEcto.Query.fetch(queryable, query_params) do
           {recordz, meta} =
@@ -46,34 +76,31 @@ defmodule FatEcto.ByQuery do
                 {records, meta}
             end
 
-          after_get_hook_for_query_by(recordz, meta, conn)
-          render_record_with_meta(conn, @schema, recordz, meta, unquote(options))
+          post_fetch_hook_for_query_by_method(recordz, meta, conn)
+          render_data_and_meta(conn, @schema, recordz, meta, unquote(options))
         end
       end
 
-      def render_record_with_meta(conn, _schema, records, meta, options) do
+      def render_data_and_meta(conn, _schema, records, meta, options) do
         render_records(conn, records, meta, options)
       end
 
-      # You can use process_query_before_for_query_by to override query before fetching records for query by
-      def process_query_before_for_query_by(query, _conn, _params) do
+      # You can use pre_process_query_for_query_by_method to override query before fetching records for query by
+      def pre_process_query_for_query_by_method(query, _conn, _params) do
         query
       end
 
-      # You can use process_params_before_for_query_by to override query params before processing
-      def process_params_before_for_query_by(_query, _conn, params) do
+      # You can use pre_process_params_for_query_by_method to override query params before processing
+      def pre_process_params_for_query_by_method(_query, _conn, params) do
         params
       end
 
-      # You can use after_get_hook_for_query_by to log etc
-      def after_get_hook_for_query_by(_records, _meta, _conn) do
+      # You can use post_fetch_hook_for_query_by_method to log etc
+      def post_fetch_hook_for_query_by_method(_records, _meta, _conn) do
         "Override if needed"
       end
 
-      defoverridable process_query_before_for_query_by: 3,
-                     process_params_before_for_query_by: 3,
-                     after_get_hook_for_query_by: 3,
-                     render_record_with_meta: 5
+      defoverridable FatEcto.ByQuery
     end
   end
 end
