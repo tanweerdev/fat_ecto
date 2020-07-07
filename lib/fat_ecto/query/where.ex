@@ -839,6 +839,9 @@ defmodule FatEcto.FatQuery.FatWhere do
         "$contains_any" ->
           FatDynamics.contains_any_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
+        "$not_equal" ->
+          FatDynamics.not_eq_dynamic(k, map_cond, dynamics, opts ++ [dynamic_type: :and])
+
         "$not" ->
           # TODO:
           # Example
