@@ -592,6 +592,43 @@ defmodule FatEcto.FatQuery.FatDynamics do
     end
   end
 
+  @spec not_eq_dynamic(any(), any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
+  def not_eq_dynamic(key, value, dynamics, opts \\ []) do
+    value =
+      if is_map(value) do
+        %{"$not_equal" => v} = value
+        v
+      else
+        value
+      end
+
+    if opts[:binding] == :last do
+      if opts[:dynamic_type] == :and do
+        dynamic(
+          [..., c],
+          field(c, ^FatHelper.string_to_existing_atom(key)) != ^value and ^dynamics
+        )
+      else
+        dynamic(
+          [..., c],
+          field(c, ^FatHelper.string_to_existing_atom(key)) != ^value or ^dynamics
+        )
+      end
+    else
+      if opts[:dynamic_type] == :and do
+        dynamic(
+          [q],
+          field(q, ^FatHelper.string_to_existing_atom(key)) != ^value and ^dynamics
+        )
+      else
+        dynamic(
+          [q],
+          field(q, ^FatHelper.string_to_existing_atom(key)) != ^value or ^dynamics
+        )
+      end
+    end
+  end
+
   @doc """
   Builds a dynamic query where value is between the provided attributes.
   ### Parameters

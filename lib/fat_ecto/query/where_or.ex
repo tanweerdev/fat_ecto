@@ -68,9 +68,37 @@ defmodule FatEcto.FatQuery.WhereOr do
         "$equal" ->
           FatDynamics.eq_dynamic(k, value, dynamics, opts ++ [dynamic_type: :or])
 
+        "$not_equal" ->
+          FatDynamics.not_eq_dynamic(k, value, dynamics, opts ++ [dynamic_type: :or])
+
         _ ->
           dynamics
       end
     end)
+  end
+
+  def map_condition(k, dynamics, map_cond, opts) when is_nil(map_cond) do
+    FatDynamics.is_nil_dynamic(k, dynamics, opts ++ [dynamic_type: :or])
+  end
+
+  def map_condition(k, dynamics, map_cond, opts)
+      when map_cond == "$not_null" do
+    FatNotDynamics.not_is_nil_dynamic(k, dynamics, opts ++ [dynamic_type: :or])
+  end
+
+  def map_condition(k, dynamics, map_cond, opts) when not is_list(map_cond) do
+    FatDynamics.eq_dynamic(k, map_cond, dynamics, opts ++ [dynamic_type: :or])
+  end
+
+  def map_condition(k, dynamics, map_cond, opts)
+      when is_list(map_cond) and k == "$not_null" do
+    Enum.reduce(map_cond, dynamics, fn key, dynamics ->
+      FatNotDynamics.not_is_nil_dynamic(key, dynamics, opts ++ [dynamic_type: :or])
+    end)
+  end
+
+  def map_condition(k, dynamics, map_cond, opts)
+      when is_list(map_cond) do
+    FatDynamics.eq_dynamic(k, map_cond, dynamics, opts ++ [dynamic_type: :or])
   end
 end

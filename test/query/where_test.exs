@@ -192,6 +192,20 @@ defmodule Query.WhereTest do
            }
   end
 
+  test "returns the query where field not equal" do
+    opts = %{
+      "$where" => %{"total_staff" => %{"$not_equal" => 3}}
+    }
+
+    expected = from(h in FatEcto.FatHospital, where: h.total_staff != ^3 and ^true)
+    query = Query.build!(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
+
+    result = Repo.one(query)
+
+    assert result == nil
+  end
+
   test "returns the query where field lte another field" do
     opts = %{
       "$where" => %{"rating" => %{"$lte" => "$total_staff"}}
@@ -838,6 +852,45 @@ defmodule Query.WhereTest do
                total_staff: 3
              }
            ]
+  end
+
+  test "returns the query with nil, eq fields" do
+    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
+    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
+
+    opts = %{
+      "$where" => %{
+        "$or" => %{
+          "name" => %{"$not_ilike" => "%Joh%"},
+          "location" => %{"$not_like" => "%some%"},
+          "total_staff" => %{"$equal" => 2},
+          "rating" => nil
+        },
+        "$or_1" => %{
+          "name" => %{"$not_ilike" => "%Joh%"},
+          "location" => %{"$not_like" => "%some%"},
+          "total_staff" => %{"$not_equal" => 2},
+          "rating" => 2
+        }
+      }
+    }
+
+    expected =
+      from(f0 in FatEcto.FatHospital,
+        where:
+          f0.total_staff == ^2 or
+            (is_nil(f0.rating) or
+               (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^false))),
+        where:
+          f0.total_staff != ^2 or
+            (f0.rating == ^2 or
+               (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^false)))
+      )
+
+    query = Query.build!(FatEcto.FatHospital, opts)
+    assert inspect(query) == inspect(expected)
   end
 
   test "returns the query with and/two or not like/ilike/equal fields" do
