@@ -73,6 +73,110 @@ defmodule Query.IncludeTest do
     assert inspect(result) == inspect(expected)
   end
 
+  test "returns the query with include associated model and where and order asc nulls first" do
+    opts = %{
+      "$include" => %{
+        "fat_hospitals" => %{
+          "$limit" => 10,
+          "$order" => %{"id" => "$asc_nulls_first"},
+          "$where" => %{"id" => 10}
+        }
+      }
+    }
+
+    expected =
+      from(
+        d in FatEcto.FatDoctor,
+        left_join: f in assoc(d, :fat_hospitals),
+        where: f.id == ^10 and ^true,
+        order_by: [asc_nulls_first: f.id],
+        preload: [^[:fat_hospitals]],
+        limit: ^10,
+        offset: ^0
+      )
+
+    result = Query.build!(FatEcto.FatDoctor, opts)
+    assert inspect(result) == inspect(expected)
+  end
+
+  test "returns the query with include associated model and where and order asc nulls last" do
+    opts = %{
+      "$include" => %{
+        "fat_hospitals" => %{
+          "$limit" => 10,
+          "$order" => %{"id" => "$asc_nulls_last"},
+          "$where" => %{"id" => 10}
+        }
+      }
+    }
+
+    expected =
+      from(
+        d in FatEcto.FatDoctor,
+        left_join: f in assoc(d, :fat_hospitals),
+        where: f.id == ^10 and ^true,
+        order_by: [asc_nulls_last: f.id],
+        preload: [^[:fat_hospitals]],
+        limit: ^10,
+        offset: ^0
+      )
+
+    result = Query.build!(FatEcto.FatDoctor, opts)
+    assert inspect(result) == inspect(expected)
+  end
+
+  test "returns the query with include associated model and where and order desc nulls first" do
+    opts = %{
+      "$include" => %{
+        "fat_hospitals" => %{
+          "$limit" => 10,
+          "$order" => %{"id" => "$desc_nulls_first"},
+          "$where" => %{"id" => 10}
+        }
+      }
+    }
+
+    expected =
+      from(
+        d in FatEcto.FatDoctor,
+        left_join: f in assoc(d, :fat_hospitals),
+        where: f.id == ^10 and ^true,
+        order_by: [desc_nulls_first: f.id],
+        preload: [^[:fat_hospitals]],
+        limit: ^10,
+        offset: ^0
+      )
+
+    result = Query.build!(FatEcto.FatDoctor, opts)
+    assert inspect(result) == inspect(expected)
+  end
+
+  test "returns the query with include associated model and where and order desc nulls last " do
+    opts = %{
+      "$include" => %{
+        "fat_hospitals" => %{
+          "$limit" => 10,
+          "$order" => %{"id" => "$desc_nulls_last"},
+          "$where" => %{"id" => 10}
+        }
+      }
+    }
+
+    expected =
+      from(
+        d in FatEcto.FatDoctor,
+        left_join: f in assoc(d, :fat_hospitals),
+        where: f.id == ^10 and ^true,
+        order_by: [desc_nulls_last: f.id],
+        preload: [^[:fat_hospitals]],
+        limit: ^10,
+        offset: ^0
+      )
+
+    result = Query.build!(FatEcto.FatDoctor, opts)
+    assert inspect(result) == inspect(expected)
+  end
+
   test "returns the query with include associated model and left join" do
     opts = %{
       "$include" => %{

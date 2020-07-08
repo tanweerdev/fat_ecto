@@ -54,6 +54,70 @@ defmodule Query.OrderTest do
     assert Repo.all(query) |> Enum.map(fn map -> map.appointments_count end) == [4, 6]
   end
 
+  test "returns the query where field is asc_null_last" do
+    Repo.insert(%FatEcto.FatPatient{name: "Doe", phone: "1234", appointments_count: 4})
+    Repo.insert(%FatEcto.FatPatient{name: "Doe", phone: "1234", appointments_count: 6})
+    Repo.insert(%FatEcto.FatPatient{name: "Doe", phone: "1234"})
+
+    opts = %{
+      "$order" => %{"appointments_count" => "$asc_nulls_last"}
+    }
+
+    expected = from(p in FatEcto.FatPatient, order_by: [asc_nulls_last: p.appointments_count])
+
+    query = Query.build!(FatEcto.FatPatient, opts)
+    assert inspect(query) == inspect(expected)
+    assert Repo.all(query) |> Enum.map(fn map -> map.appointments_count end) == [4, 6, nil]
+  end
+
+  test "returns the query where field is asc_null_first" do
+    Repo.insert(%FatEcto.FatPatient{name: "Doe", phone: "1234", appointments_count: 4})
+    Repo.insert(%FatEcto.FatPatient{name: "Doe", phone: "1234", appointments_count: 6})
+    Repo.insert(%FatEcto.FatPatient{name: "Doe", phone: "1234"})
+
+    opts = %{
+      "$order" => %{"appointments_count" => "$asc_nulls_first"}
+    }
+
+    expected = from(p in FatEcto.FatPatient, order_by: [asc_nulls_first: p.appointments_count])
+
+    query = Query.build!(FatEcto.FatPatient, opts)
+    assert inspect(query) == inspect(expected)
+    assert Repo.all(query) |> Enum.map(fn map -> map.appointments_count end) == [nil, 4, 6]
+  end
+
+  test "returns the query where field is desc_null_first" do
+    Repo.insert(%FatEcto.FatPatient{name: "Doe", phone: "1234", appointments_count: 4})
+    Repo.insert(%FatEcto.FatPatient{name: "Doe", phone: "1234", appointments_count: 6})
+    Repo.insert(%FatEcto.FatPatient{name: "Doe", phone: "1234"})
+
+    opts = %{
+      "$order" => %{"appointments_count" => "$desc_nulls_first"}
+    }
+
+    expected = from(p in FatEcto.FatPatient, order_by: [desc_nulls_first: p.appointments_count])
+
+    query = Query.build!(FatEcto.FatPatient, opts)
+    assert inspect(query) == inspect(expected)
+    assert Repo.all(query) |> Enum.map(fn map -> map.appointments_count end) == [nil, 6, 4]
+  end
+
+  test "returns the query where field is desc_null_last" do
+    Repo.insert(%FatEcto.FatPatient{name: "Doe", phone: "1234", appointments_count: 4})
+    Repo.insert(%FatEcto.FatPatient{name: "Doe", phone: "1234", appointments_count: 6})
+    Repo.insert(%FatEcto.FatPatient{name: "Doe", phone: "1234"})
+
+    opts = %{
+      "$order" => %{"appointments_count" => "$desc_nulls_last"}
+    }
+
+    expected = from(p in FatEcto.FatPatient, order_by: [desc_nulls_last: p.appointments_count])
+
+    query = Query.build!(FatEcto.FatPatient, opts)
+    assert inspect(query) == inspect(expected)
+    assert Repo.all(query) |> Enum.map(fn map -> map.appointments_count end) == [6, 4, nil]
+  end
+
   test "returns the query where field is asc and blacklisted" do
     Repo.insert(%FatEcto.FatPatient{name: "Doe", phone: "1234", appointments_count: 4})
     Repo.insert(%FatEcto.FatPatient{name: "Doe", phone: "1234", appointments_count: 6})
