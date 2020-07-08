@@ -152,30 +152,98 @@ defmodule FatEcto.FatQuery.FatOrderBy do
       FatHelper.check_params_validity(build_options, queryable, field)
 
       if opts[:binding] == :last do
-        if format == "$desc" do
-          from([q, ..., c] in queryable,
-            order_by: [desc: field(c, ^FatHelper.string_to_existing_atom(field))]
-          )
-        else
-          from(
-            [q, ..., c] in queryable,
-            order_by: [
-              asc: field(c, ^FatHelper.string_to_existing_atom(field))
-            ]
-          )
+        case format do
+          "$desc" ->
+            from([q, ..., c] in queryable,
+              order_by: [desc: field(c, ^FatHelper.string_to_existing_atom(field))]
+            )
+
+          "$asc" ->
+            from(
+              [q, ..., c] in queryable,
+              order_by: [
+                asc: field(c, ^FatHelper.string_to_existing_atom(field))
+              ]
+            )
+
+          "$asc_nulls_first" ->
+            from(
+              [q, ..., c] in queryable,
+              order_by: [
+                asc_nulls_first: field(c, ^FatHelper.string_to_existing_atom(field))
+              ]
+            )
+
+          "$asc_nulls_last" ->
+            from(
+              [q, ..., c] in queryable,
+              order_by: [
+                asc_nulls_last: field(c, ^FatHelper.string_to_existing_atom(field))
+              ]
+            )
+
+          "$desc_nulls_first" ->
+            from(
+              [q, ..., c] in queryable,
+              order_by: [
+                desc_nulls_first: field(c, ^FatHelper.string_to_existing_atom(field))
+              ]
+            )
+
+          "$desc_nulls_last" ->
+            from(
+              [q, ..., c] in queryable,
+              order_by: [
+                desc_nulls_last: field(c, ^FatHelper.string_to_existing_atom(field))
+              ]
+            )
         end
       else
-        if format == "$desc" do
-          from(queryable,
-            order_by: [desc: ^FatHelper.string_to_existing_atom(field)]
-          )
-        else
-          from(
-            queryable,
-            order_by: [
-              asc: ^FatHelper.string_to_existing_atom(field)
-            ]
-          )
+        case format do
+          "$desc" ->
+            from(queryable,
+              order_by: [desc: ^FatHelper.string_to_existing_atom(field)]
+            )
+
+          "$asc" ->
+            from(
+              queryable,
+              order_by: [
+                asc: ^FatHelper.string_to_existing_atom(field)
+              ]
+            )
+
+          "$asc_nulls_first" ->
+            from(
+              queryable,
+              order_by: [
+                asc_nulls_first: ^FatHelper.string_to_existing_atom(field)
+              ]
+            )
+
+          "$asc_nulls_last" ->
+            from(
+              queryable,
+              order_by: [
+                asc_nulls_last: ^FatHelper.string_to_existing_atom(field)
+              ]
+            )
+
+          "$desc_nulls_first" ->
+            from(
+              queryable,
+              order_by: [
+                desc_nulls_first: ^FatHelper.string_to_existing_atom(field)
+              ]
+            )
+
+          "$desc_nulls_last" ->
+            from(
+              queryable,
+              order_by: [
+                desc_nulls_last: ^FatHelper.string_to_existing_atom(field)
+              ]
+            )
         end
       end
     end)
