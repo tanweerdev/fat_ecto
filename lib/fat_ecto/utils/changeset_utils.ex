@@ -38,7 +38,16 @@ defmodule FatUtils.Changeset do
    Takes changeset and check if one of the key is present and return changeset error.
   """
   def require_only_one_of(changeset, _record, single_keys, _options \\ []) do
-    if FatUtils.Map.get_keys_count(changeset.changes, single_keys) == 1 do
+    keys_count =
+      Enum.reduce(single_keys, 0, fn sk, acc ->
+        if Ecto.Changeset.get_field(changeset, sk) do
+          acc + 1
+        else
+          acc
+        end
+      end)
+
+    if keys_count == 1 do
       changeset
     else
       first_keys = Enum.drop(single_keys, -2)

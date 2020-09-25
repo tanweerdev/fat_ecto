@@ -1,5 +1,6 @@
 defmodule FatEcto.FatPaginator do
   @moduledoc false
+
   # TODO: make paginator optional via global config and via options passed
 
   defmacro __using__(options) do

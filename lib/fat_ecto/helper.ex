@@ -1,5 +1,6 @@
 defmodule FatEcto.FatHelper do
   @moduledoc false
+
   # alias FatEcto.FatHelper
 
   require Ecto.Query

@@ -1,5 +1,6 @@
 defmodule FatEcto.FatContext do
   @moduledoc false
+
   # TODO: make paginator optional via global config and via options passed
   # TODO: Add docs and examples for ex_doc
 

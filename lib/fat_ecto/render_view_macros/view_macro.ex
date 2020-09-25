@@ -2,6 +2,7 @@ defmodule FatEcto.View do
   @moduledoc false
   defmacro __using__(options) do
     quote do
+      # TODO: FatEcto.RecordUtils sanitizer should be passed as params
       @gettext_module unquote(options)[:gettext_module]
       @wrapper unquote(options)[:wrapper]
       @preloads unquote(options)[:preloads]
