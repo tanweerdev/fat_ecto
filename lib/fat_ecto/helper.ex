@@ -1,14 +1,10 @@
 defmodule FatEcto.FatHelper do
   @moduledoc false
-
   # alias FatEcto.FatHelper
-
   require Ecto.Query
   @min_limit 0
-
   @min_skip 0
   @default_skip 0
-
   @spec get_limit_bounds(nil | keyword() | map()) :: {any(), any()}
   def get_limit_bounds(options) do
     max_limit = options[:max_limit] || 100
@@ -19,9 +15,7 @@ defmodule FatEcto.FatHelper do
   @doc """
     Return skip value from given params.
      ### Parameters
-
         - `params`  - skip values.
-
     ### Examples
         iex>  FatEcto.FatHelper.get_skip_value( params["skip"])
   """
@@ -36,9 +30,7 @@ defmodule FatEcto.FatHelper do
   @doc """
     Return limit from given params options.
      ### Parameters
-
         - `limit`  - Number of Records vlaue.
-
     ### Examples
         iex>  FatEcto.FatHelper.get_limit_value( params["limit"])
   """
@@ -52,9 +44,7 @@ defmodule FatEcto.FatHelper do
       {default_limit, params}
     else
       limit = if limit > @min_limit, do: limit, else: @min_limit
-
       limit = if limit > max_limit, do: max_limit, else: limit
-
       {limit, params}
     end
   end
@@ -62,9 +52,7 @@ defmodule FatEcto.FatHelper do
   @doc """
     Return true or false on basis of given value.
     ### Parameters
-
         - `value`  - Value of the field.
-
     ### Examples
           iex>  FatEcto.FatHelper.is_fat_ecto_field?(value)
   """
@@ -136,6 +124,19 @@ defmodule FatEcto.FatHelper do
           owner: owner,
           owner_key: owner_key,
           related: related,
+          related_key: nil
+        }
+
+      %Ecto.Association.HasThrough{
+        owner: owner,
+        owner_key: owner_key
+        # related: related
+        # related_key: related_key
+      } ->
+        %{
+          owner: owner,
+          owner_key: owner_key,
+          related: nil,
           related_key: nil
         }
     end
@@ -211,15 +212,10 @@ defmodule FatEcto.FatHelper do
   end
 
   def dynamic_binding(map) when is_map(map), do: map(map, false)
-
   defp do_binding(_key, value, _nested) when not is_map(value), do: value
-
   defp do_binding("$" <> _key, value, nested), do: map(value, nested)
-
   defp do_binding(_key, value, nested), do: value |> map(true) |> put_binding(nested)
-
   defp map(map, nested), do: :maps.map(&do_binding(&1, &2, nested), map)
-
   defp put_binding(map, false), do: Map.put_new(map, "$binding", :first)
   defp put_binding(map, true), do: Map.put_new(map, "$binding", :last)
 
@@ -236,7 +232,6 @@ defmodule FatEcto.FatHelper do
   end
 
   def dynamic_preloading(map) when is_map(map), do: do_preloading(map)
-
   defp do_preloading(map), do: Enum.reduce(map, [], &do_preloading/2)
 
   defp do_preloading({key, %{"$include" => include}}, acc) when is_map(include),
@@ -250,9 +245,7 @@ defmodule FatEcto.FatHelper do
 
   defp do_preloading({key, %{"$binding" => :last}}, acc), do: [String.to_atom(key) | acc]
   defp do_preloading({key, %{"$binding" => :first}}, acc), do: [String.to_atom(key) | acc]
-
   defp do_preloading({_key, _value}, acc), do: acc
-
   def remove_conflicting_order_by(queryable, nil), do: queryable
 
   def remove_conflicting_order_by(queryable, _distinct) do
