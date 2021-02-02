@@ -33,20 +33,33 @@ defmodule FatEcto.ByQuery do
     quote location: :keep do
       @behaviour FatEcto.ByQuery
 
-      # quote do
-      @repo unquote(options)[:repo]
+      @opt_app unquote(options)[:otp_app]
+      @options unquote(options)
+      # TODO: merge below options and test
+      # @options if !@opt_app do
+      #    unquote(options)
+      # else
+      #      Keyword.merge(Application.get_env(@opt_app, :fat_ecto) || [], unquote(options))
+      # end
+
+      @repo @options[:repo]
+      @query_module @options[:query_module]
       if !@repo do
         raise "please define repo when using by query"
       end
 
-      @schema unquote(options)[:schema]
-      @render_single_record_inside_object unquote(options)[:render_single_record_inside_object]
+      if !@query_module do
+        raise "please define query module when using by query"
+      end
+
+      @schema @options[:schema]
+      @render_single_record_inside_object @options[:render_single_record_inside_object]
 
       if !@schema do
         raise "please define schema when using by query"
       end
 
-      @paginator_function unquote(options)[:paginator_function]
+      @paginator_function @options[:paginator_function]
 
       def query_by(conn, %{} = query_params) do
         # TODO: priority very low: if some query is invalid or due to any reason
@@ -54,7 +67,7 @@ defmodule FatEcto.ByQuery do
         query_params = pre_process_params_for_query_by_method(@schema, conn, query_params)
         queryable = pre_process_query_for_query_by_method(@schema, conn, query_params)
 
-        with {:ok, data_meta} <- FatEcto.Query.fetch(queryable, query_params) do
+        with {:ok, data_meta} <- @query_module.fetch(queryable, query_params) do
           {recordz, meta} =
             case data_meta do
               %{data: record, meta: nil, type: :object} ->
@@ -77,7 +90,7 @@ defmodule FatEcto.ByQuery do
             end
 
           post_fetch_hook_for_query_by_method(recordz, meta, conn)
-          render_data_and_meta(conn, @schema, recordz, meta, unquote(options))
+          render_data_and_meta(conn, @schema, recordz, meta, @options)
         end
       end
 
