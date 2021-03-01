@@ -13,6 +13,14 @@ defmodule FatEcto.ByQuery do
               conn :: Plug.Conn.t(),
               params :: map()
             ) :: map()
+  @doc "You can use post_process_data_for_query_by_method to return custom records and meta"
+  @callback post_process_data_for_query_by_method(
+              recordz :: map() | list(),
+              meta :: map() | nil,
+              conn :: Plug.Conn.t()
+            ) ::
+              term()
+
   @doc "You can use post_fetch_hook_for_query_by_method to log etc."
   @callback post_fetch_hook_for_query_by_method(
               recordz :: map() | list(),
@@ -89,6 +97,7 @@ defmodule FatEcto.ByQuery do
                 {records, meta}
             end
 
+          {recordz, meta} = post_process_data_for_query_by_method(recordz, meta, conn)
           post_fetch_hook_for_query_by_method(recordz, meta, conn)
           render_data_and_meta(conn, @schema, recordz, meta, @options)
         end
@@ -106,6 +115,11 @@ defmodule FatEcto.ByQuery do
       # You can use pre_process_params_for_query_by_method to override query params before processing
       def pre_process_params_for_query_by_method(_query, _conn, params) do
         params
+      end
+
+      # You can use post_process_data_for_query_by_method to return custom structs
+      def post_process_data_for_query_by_method(records, meta, _conn) do
+        {records, meta}
       end
 
       # You can use post_fetch_hook_for_query_by_method to log etc
