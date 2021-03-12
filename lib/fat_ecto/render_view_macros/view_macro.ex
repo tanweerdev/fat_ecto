@@ -85,7 +85,7 @@ defmodule FatEcto.View do
         end
       end
 
-      defoverridable translate_view_error: 1
+      defoverridable translate_view_error: 1, render: 2
     end
   end
 end
