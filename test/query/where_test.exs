@@ -1203,4 +1203,14 @@ defmodule Query.WhereTest do
 
     assert inspect(Query.build!(FatEcto.FatHospital, opts)) == inspect(expected)
   end
+
+  test "failing example for using == for DateTime values" do
+    opts = %{
+      "$where" => %{
+        "start_date" => DateTime.utc_now()
+      }
+    }
+
+    Query.build!(FatEcto.FatDoctor, opts)
+  end
 end
