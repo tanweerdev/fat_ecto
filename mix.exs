@@ -43,8 +43,6 @@ defmodule FatEcto.MixProject do
       {:postgrex, "~> 0.15.3", only: :test},
       {:earmark, "~> 1.4.3", only: :dev},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false, optional: true},
-      # TODO: remove csv from here
-      {:csv, "~> 2.3", optional: true},
       {:ex_machina, "~> 2.3", only: :test},
       # TODO: accept encoder as config/option
       {:jason, "~> 1.1.2"}

@@ -11,7 +11,6 @@ defmodule DocTest do
   doctest MyApp.Query, import: true, except: [fetch: 2, paginate: 2]
 
   doctest Paginator
-  doctest SeedHelper
   doctest SanitizeRecord
 
   doctest FatEcto.FatQuery.FatWhere
