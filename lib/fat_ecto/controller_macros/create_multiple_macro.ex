@@ -24,24 +24,31 @@ defmodule FatEcto.CreateMultipleRecord do
   @callback insert_records_for_multiple_create_method(changesets :: list) ::
               {:ok, list()} | {:error, term(), Ecto.Changeset.t(), term()}
 
-  defmacro __using__(options) do
+  defmacro __using__(options \\ []) do
     quote location: :keep do
-      alias FatEcto.MacrosHelper
-      @repo unquote(options)[:repo]
-      @preloads unquote(options)[:preloads] || []
       @behaviour FatEcto.CreateMultipleRecord
+      alias FatEcto.MacrosHelper
+
+      @opt_app unquote(options)[:otp_app]
+      @options (@opt_app &&
+                  Keyword.merge(
+                    Application.get_env(@opt_app, FatEcto.CreateMultipleRecord || []),
+                    unquote(options)
+                  )) ||
+                 unquote(options)
+
+      @preloads @options[:preloads] || []
+      @schema @options[:schema]
+      @wrapper @options[:wrapper]
+      @repo @options[:repo]
 
       if !@repo do
         raise "please define repo when using create record"
       end
 
-      @schema unquote(options)[:schema]
-
       if !@schema do
         raise "please define schema when using create record"
       end
-
-      @wrapper unquote(options)[:wrapper]
 
       if @wrapper in [nil, ""] do
         def create(conn, [] = params) when is_list(params) do
@@ -62,7 +69,7 @@ defmodule FatEcto.CreateMultipleRecord do
         with {:ok, records} <- insert_records_for_multiple_create_method(changesets) do
           records = MacrosHelper.preload_record(records, @repo, @preloads)
           post_create_hook_for_multiple_create_method(records, conn)
-          render_record(conn, records, [status_to_put: :created] ++ unquote(options))
+          render_record(conn, records, [status_to_put: :created] ++ @options)
         end
       end
 

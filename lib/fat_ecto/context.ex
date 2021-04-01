@@ -4,15 +4,20 @@ defmodule FatEcto.FatContext do
   # TODO: make paginator optional via global config and via options passed
   # TODO: Add docs and examples for ex_doc
 
-  defmacro __using__(options) do
+  defmacro __using__(options \\ []) do
     quote location: :keep do
       @moduledoc """
       Provide methods for the Ecto query and changeset modules.
 
       `use FatEcto.FatContext, repo: Repo`. Place this inside a module and then import or alias that module to use these methods.
       """
-      # TODO: @repo.all and @repo.one nil warning
-      @repo unquote(options)[:repo]
+      @opt_app unquote(options)[:otp_app]
+      @options (@opt_app &&
+                  Keyword.merge(Application.get_env(@opt_app, FatEcto.FatContext) || [], unquote(options))) ||
+                 unquote(options)
+
+      # TODO: Fix @repo.all and @repo.one nil warning
+      @repo @options[:repo]
 
       if !@repo do
         raise "please define repo when using context"

@@ -37,21 +37,24 @@ defmodule FatEcto.ByQuery do
               options :: list()
             ) :: term()
 
-  defmacro __using__(options) do
+  defmacro __using__(options \\ []) do
     quote location: :keep do
       @behaviour FatEcto.ByQuery
-
       @opt_app unquote(options)[:otp_app]
-      @options unquote(options)
-      # TODO: merge below options and test
-      # @options if !@opt_app do
-      #    unquote(options)
-      # else
-      #      Keyword.merge(Application.get_env(@opt_app, :fat_ecto) || [], unquote(options))
-      # end
+      @options (@opt_app &&
+                  Keyword.merge(Application.get_env(@opt_app, FatEcto.ByQuery) || [], unquote(options))) ||
+                 unquote(options)
 
       @repo @options[:repo]
       @query_module @options[:query_module]
+      @schema @options[:schema]
+      @render_single_record_inside_object @options[:render_single_record_inside_object]
+      @paginator_function @options[:paginator_function]
+
+      if !@opt_app do
+        raise "please define opt app when using fat IQCRUD methods"
+      end
+
       if !@repo do
         raise "please define repo when using by query"
       end
@@ -60,14 +63,9 @@ defmodule FatEcto.ByQuery do
         raise "please define query module when using by query"
       end
 
-      @schema @options[:schema]
-      @render_single_record_inside_object @options[:render_single_record_inside_object]
-
       if !@schema do
         raise "please define schema when using by query"
       end
-
-      @paginator_function @options[:paginator_function]
 
       def query_by(conn, %{} = query_params) do
         # TODO: priority very low: if some query is invalid or due to any reason

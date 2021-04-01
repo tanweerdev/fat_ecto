@@ -7,23 +7,27 @@ defmodule FatEcto.DeleteRecord do
   @doc "Perform any action after deletion"
   @callback post_delete_hook_for_delete_method(record :: struct(), conn :: Plug.Conn.t()) :: term()
 
-  defmacro __using__(options) do
+  defmacro __using__(options \\ []) do
     quote location: :keep do
-      # quote do
-      alias FatEcto.MacrosHelper
       @behaviour FatEcto.DeleteRecord
+      alias FatEcto.MacrosHelper
 
-      @repo unquote(options)[:repo]
-      @status_to_put unquote(options)[:status_to_put]
+      @opt_app unquote(options)[:otp_app]
+      @options (@opt_app &&
+                  Keyword.merge(Application.get_env(@opt_app, FatEcto.DeleteRecord) || [], unquote(options))) ||
+                 unquote(options)
+
+      @repo @options[:repo]
+      @status_to_put @options[:status_to_put]
       # You can disable add_assoc_constraint by passing add_assoc_constraint value false
-      @add_assoc_constraint unquote(options)[:add_assoc_constraint]
-      @get_by_unqiue_field unquote(options)[:get_by_unqiue_field]
+      @add_assoc_constraint @options[:add_assoc_constraint]
+      @get_by_unqiue_field @options[:get_by_unqiue_field]
+      @schema @options[:schema]
 
       if !@repo do
         raise "please define repo when using delete record"
       end
 
-      @schema unquote(options)[:schema]
       if !@schema do
         raise "please define schema when using delete record"
       end
@@ -45,9 +49,9 @@ defmodule FatEcto.DeleteRecord do
 
         case MacrosHelper.get_record_by_query(key, value, @repo, query) do
           {:error, :not_found} ->
-            error_view_module = unquote(options)[:error_view_module]
-            error_view = unquote(options)[:error_view_404]
-            data_to_view_as = unquote(options)[:error_data_to_view_as]
+            error_view_module = @options[:error_view_module]
+            error_view = @options[:error_view_404]
+            data_to_view_as = @options[:error_data_to_view_as]
 
             render_record(
               conn,
@@ -57,7 +61,7 @@ defmodule FatEcto.DeleteRecord do
                 put_view_module: error_view_module,
                 view_to_render: error_view,
                 data_to_view_as: data_to_view_as
-              ] ++ unquote(options)
+              ] ++ @options
             )
 
           {:ok, record} ->
@@ -79,7 +83,7 @@ defmodule FatEcto.DeleteRecord do
                 end
 
               {:error, changeset} ->
-                error_view = unquote(options)[:error_view]
+                error_view = @options[:error_view]
                 errors_changeset(conn, changeset, status_to_put: 422, put_view_module: error_view)
             end
         end
@@ -94,7 +98,7 @@ defmodule FatEcto.DeleteRecord do
       end
 
       def add_assoc_constraint(record, id) do
-        foreign_keys = unquote(options)[:foreign_keys]
+        foreign_keys = @options[:foreign_keys]
         associations = FatEcto.AssocModel.has_and_many_to_many(@schema)
         table_name = @schema |> to_string() |> String.split(".") |> List.last() |> String.downcase()
 

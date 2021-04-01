@@ -1,29 +1,37 @@
 defmodule FatEcto.View do
   @moduledoc false
-  defmacro __using__(options) do
+  defmacro __using__(options \\ []) do
     quote do
-      # TODO: FatEcto.RecordUtils sanitizer should be passed as params
-      @gettext_module unquote(options)[:gettext_module]
-      @wrapper unquote(options)[:wrapper]
-      @preloads unquote(options)[:preloads]
+      @opt_app unquote(options)[:otp_app]
+      @options (@opt_app &&
+                  Keyword.merge(Application.get_env(@opt_app, FatEcto.View) || [], unquote(options))) ||
+                 unquote(options)
+
+      @gettext_module @options[:gettext_module]
+      @wrapper @options[:wrapper]
+      @data_sanitizer @options[:data_sanitizer]
 
       if !@gettext_module do
         raise "please define gettext_module when using view macro"
       end
 
+      if !@sanitizer do
+        raise "please define gettext_module when using view macro"
+      end
+
       def render("show.json", %{data: record}) do
         if @wrapper in [nil, ""] do
-          FatEcto.RecordUtils.sanitize(record)
+          @data_sanitizer.sanitize(record)
         else
-          %{@wrapper => FatEcto.RecordUtils.sanitize(record)}
+          %{@wrapper => @data_sanitizer.sanitize(record)}
         end
       end
 
       def render("index.json", %{data: records}) do
         if @wrapper in [nil, ""] do
-          FatEcto.RecordUtils.sanitize(records)
+          @data_sanitizer.sanitize(records)
         else
-          %{@wrapper => FatEcto.RecordUtils.sanitize(records)}
+          %{@wrapper => @data_sanitizer.sanitize(records)}
         end
       end
 
@@ -42,14 +50,14 @@ defmodule FatEcto.View do
             options[:meta_to_put_as]
           end
 
-        %{records_wrapper => FatEcto.RecordUtils.sanitize(records), meta_wrapper => meta}
+        %{records_wrapper => @data_sanitizer.sanitize(records), meta_wrapper => meta}
       end
 
       def render("index.json", %{records: records, options: options}) do
         if options[:data_to_view_as] in [nil, ""] do
-          FatEcto.RecordUtils.sanitize(records)
+          @data_sanitizer.sanitize(records)
         else
-          %{options[:data_to_view_as] => FatEcto.RecordUtils.sanitize(records)}
+          %{options[:data_to_view_as] => @data_sanitizer.sanitize(records)}
         end
       end
 

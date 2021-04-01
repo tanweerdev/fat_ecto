@@ -33,27 +33,30 @@ defmodule FatEcto.UpdateRecord do
               conn :: Plug.Conn.t()
             ) :: Ecto.Query.t()
 
-  defmacro __using__(options) do
+  defmacro __using__(options \\ []) do
     quote location: :keep do
-      # quote do
-      alias FatEcto.MacrosHelper
-      @repo unquote(options)[:repo]
-      @preloads unquote(options)[:preloads] || []
       @behaviour FatEcto.UpdateRecord
+      alias FatEcto.MacrosHelper
+
+      @opt_app unquote(options)[:otp_app]
+      @options (@opt_app &&
+                  Keyword.merge(Application.get_env(@opt_app, FatEcto.ByQuery) || [], unquote(options))) ||
+                 unquote(options)
+
+      @preloads @options[:preloads] || []
+      @schema @options[:schema]
+      @custom_changeset @options[:custom_changeset]
+      @wrapper @options[:wrapper]
+      @get_by_unqiue_field @options[:get_by_unqiue_field]
+      @repo @options[:repo]
 
       if !@repo do
         raise "please define repo when using create record"
       end
 
-      @schema unquote(options)[:schema]
-      @get_by_unqiue_field unquote(options)[:get_by_unqiue_field]
-
       if !@schema do
         raise "please define schema when using create record"
       end
-
-      @custom_changeset unquote(options)[:custom_changeset]
-      @wrapper unquote(options)[:wrapper]
 
       case {@wrapper in [nil, ""], @get_by_unqiue_field in [nil, ""]} do
         {true, true} ->
@@ -81,8 +84,8 @@ defmodule FatEcto.UpdateRecord do
         query = pre_process_fetch_query_for_update_method(@schema, params, conn)
 
         with {:ok, record} <- MacrosHelper.get_record_by_query(key, value, @repo, query) do
-          soft_delete_key = unquote(options)[:soft_delete_key]
-          soft_deleted_value = unquote(options)[:soft_deleted_value]
+          soft_delete_key = @options[:soft_delete_key]
+          soft_deleted_value = @options[:soft_deleted_value]
 
           if soft_delete_key && params[to_string(soft_delete_key)] == soft_deleted_value do
             soft_delete(
@@ -96,9 +99,9 @@ defmodule FatEcto.UpdateRecord do
           else
             case check_if_record_soft_deleted?(record, soft_delete_key, soft_deleted_value) do
               true ->
-                error_view_module = unquote(options)[:error_view_module]
-                error_view = unquote(options)[:error_view_403]
-                data_to_view_as = unquote(options)[:error_data_to_view_as]
+                error_view_module = @options[:error_view_module]
+                error_view = @options[:error_view_403]
+                data_to_view_as = @options[:error_data_to_view_as]
 
                 render_record(
                   conn,
@@ -108,7 +111,7 @@ defmodule FatEcto.UpdateRecord do
                     put_view_module: error_view_module,
                     view_to_render: error_view,
                     data_to_view_as: data_to_view_as
-                  ] ++ unquote(options)
+                  ] ++ @options
                 )
 
               false ->
@@ -121,7 +124,7 @@ defmodule FatEcto.UpdateRecord do
                 with {:ok, record} <- @repo.update(changeset) do
                   record = MacrosHelper.preload_record(record, @repo, @preloads)
                   post_update_hook_for_update_method(record, record_before_update, params, conn)
-                  render_record(conn, record, [status_to_put: :ok] ++ unquote(options))
+                  render_record(conn, record, [status_to_put: :ok] ++ @options)
                 end
             end
           end
@@ -129,7 +132,7 @@ defmodule FatEcto.UpdateRecord do
           # && record.is_active != false if want to disable multiple soft deletion
 
           # can be used to later undo soft delete
-          # not_soft_deleted_value = unquote(options)[:not_soft_deleted_value]
+          # not_soft_deleted_value = @options[:not_soft_deleted_value]
         end
       end
 

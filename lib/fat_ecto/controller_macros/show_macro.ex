@@ -8,25 +8,29 @@ defmodule FatEcto.ShowRecord do
   @doc "Perform any action after show"
   @callback post_fetch_hook_for_show_method(record :: struct(), conn :: Plug.Conn.t()) :: term()
 
-  defmacro __using__(options) do
+  defmacro __using__(options \\ []) do
     quote location: :keep do
-      # quote do
       alias FatEcto.MacrosHelper
       @behaviour FatEcto.ShowRecord
 
-      @repo unquote(options)[:repo]
+      @opt_app unquote(options)[:otp_app]
+      @options (@opt_app &&
+                  Keyword.merge(Application.get_env(@opt_app, FatEcto.ShowRecord || []), unquote(options))) ||
+                 unquote(options)
+
+      @repo @options[:repo]
       if !@repo do
         raise "please define repo when using delete record"
       end
 
-      @schema unquote(options)[:schema]
+      @schema @options[:schema]
       if !@schema do
         raise "please define schema when using delete record"
       end
 
-      @preloads unquote(options)[:preloads] || []
+      @preloads @options[:preloads] || []
 
-      @get_by_unqiue_field unquote(options)[:get_by_unqiue_field]
+      @get_by_unqiue_field @options[:get_by_unqiue_field]
 
       if @get_by_unqiue_field in [nil, ""] do
         def show(conn, %{"id" => id}) do
@@ -43,9 +47,9 @@ defmodule FatEcto.ShowRecord do
 
         case MacrosHelper.get_record_by_query(key, value, @repo, query) do
           {:error, :not_found} ->
-            error_view_module = unquote(options)[:error_view_module]
-            error_view = unquote(options)[:error_view_404]
-            data_to_view_as = unquote(options)[:error_data_to_view_as]
+            error_view_module = @options[:error_view_module]
+            error_view = @options[:error_view_404]
+            data_to_view_as = @options[:error_data_to_view_as]
 
             render_record(
               conn,
@@ -55,13 +59,13 @@ defmodule FatEcto.ShowRecord do
                 put_view_module: error_view_module,
                 view_to_render: error_view,
                 data_to_view_as: data_to_view_as
-              ] ++ unquote(options)
+              ] ++ @options
             )
 
           {:ok, record} ->
             record = MacrosHelper.preload_record(record, @repo, @preloads)
             post_fetch_hook_for_show_method(record, conn)
-            render_record(conn, record, [status_to_put: :ok] ++ unquote(options))
+            render_record(conn, record, [status_to_put: :ok] ++ @options)
         end
       end
 

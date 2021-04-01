@@ -3,12 +3,15 @@ defmodule FatEcto.FatPaginator do
 
   # TODO: make paginator optional via global config and via options passed
 
-  defmacro __using__(options) do
+  defmacro __using__(options \\ []) do
     quote location: :keep do
       import Ecto.Query
 
       # TODO: @repo.all and @repo.one nil warning
-      @options unquote(options)
+      @opt_app unquote(options)[:otp_app]
+      @options (@opt_app &&
+                  Keyword.merge(Application.get_env(@opt_app, FatEcto.FatPaginator) || [], unquote(options))) ||
+                 unquote(options)
       @doc """
         Paginate the records.
       ### Parameters

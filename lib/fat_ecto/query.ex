@@ -1,6 +1,6 @@
 defmodule FatEcto.FatQuery do
   # TODO: make paginator optional via global config and via options passed
-  defmacro __using__(options) do
+  defmacro __using__(options \\ []) do
     quote location: :keep do
       @moduledoc """
       Entry Point module for building queries.
@@ -9,11 +9,9 @@ defmodule FatEcto.FatQuery do
       """
 
       @opt_app unquote(options)[:otp_app]
-      if !@opt_app do
-        raise "please define opt app when using fat query methods"
-      end
-
-      @options Keyword.merge(Application.get_env(@opt_app, :fat_ecto) || [], unquote(options))
+      @options (@opt_app &&
+                  Keyword.merge(Application.get_env(@opt_app, FatEcto.FatQuery) || [], unquote(options))) ||
+                 unquote(options)
 
       @repo @options[:repo]
       if !@repo do

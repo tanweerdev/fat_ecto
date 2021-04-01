@@ -1,7 +1,14 @@
-defmodule FatEcto.Render do
-  defmacro __using__(_options) do
+defmodule FatEcto.RenderUtils do
+  defmacro __using__(options \\ []) do
     quote do
+      @opt_app unquote(options)[:otp_app]
+      @options (@opt_app &&
+                  Keyword.merge(Application.get_env(@opt_app, FatEcto.RenderUtils) || [], unquote(options))) ||
+                 unquote(options)
+
       def render_records(conn, records, meta, opts \\ []) do
+        opts = Keyword.merge(@options, opts)
+
         put_view_module = opts[:put_view_module]
         view_to_render = opts[:view_to_render]
         data_to_view_as = opts[:data_to_view_as]
@@ -56,6 +63,7 @@ defmodule FatEcto.Render do
       end
 
       def render_record(conn, record, opts \\ []) do
+        opts = Keyword.merge(@options, opts)
         put_view_module = opts[:put_view_module]
         view_to_render = opts[:view_to_render]
         data_to_view_as = opts[:data_to_view_as]
@@ -84,6 +92,7 @@ defmodule FatEcto.Render do
       end
 
       def errors_changeset(conn, changeset, opts \\ []) do
+        opts = Keyword.merge(@options, opts)
         put_view_module = opts[:put_view_module]
         status_to_put = opts[:status_to_put]
         view_to_render = opts[:view_to_render]
@@ -119,6 +128,7 @@ defmodule FatEcto.Render do
       end
 
       def render_resp(conn, msg, status_to_put, opts \\ []) do
+        opts = Keyword.merge(@options, opts)
         put_content_type = opts[:put_content_type]
 
         conn =

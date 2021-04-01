@@ -3,11 +3,10 @@ defmodule FatUtils.FatRecord do
   defmacro __using__(options) do
     quote location: :keep do
       @opt_app unquote(options)[:otp_app]
-      if !@opt_app do
-        raise "please define opt app when using fat query methods"
-      end
+      @options (@opt_app &&
+                  Keyword.merge(Application.get_env(@opt_app, FatUtils.FatRecord) || [], unquote(options))) ||
+                 unquote(options)
 
-      @options Keyword.merge(Application.get_env(@opt_app, :fat_ecto) || [], unquote(options))
       @encoder_library @options[:encoder_library]
 
       if !@encoder_library do

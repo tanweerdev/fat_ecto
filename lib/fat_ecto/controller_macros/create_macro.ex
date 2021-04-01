@@ -17,36 +17,45 @@ defmodule FatEcto.CreateRecord do
   @doc "Insert record and it takes changeset and repo name as an argument"
   @callback insert_record_for_create_method(changeset :: Ecto.Changeset.t(), repo :: module()) ::
               {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
-  defmacro __using__(options) do
+  defmacro __using__(options \\ []) do
     quote location: :keep do
       alias FatEcto.MacrosHelper
-      @repo unquote(options)[:repo]
-      @preloads unquote(options)[:preloads] || []
       @behaviour FatEcto.CreateRecord
+
+      @opt_app unquote(options)[:otp_app]
+      @options (@opt_app &&
+                  Keyword.merge(Application.get_env(@opt_app, FatEcto.CreateRecord) || [], unquote(options))) ||
+                 unquote(options)
+
+      @preloads @options[:preloads] || []
+      @schema @options[:schema]
+      @wrapper @options[:wrapper]
+      @custom_changeset @options[:custom_changeset]
+      @repo @options[:repo]
+
+      if !@opt_app do
+        raise "please define opt app when using fat IQCRUD methods"
+      end
 
       if !@repo do
         raise "please define repo when using create record"
       end
 
-      @schema unquote(options)[:schema]
-
       if !@schema do
         raise "please define schema when using create record"
       end
 
-      @wrapper unquote(options)[:wrapper]
-      @custom_changeset unquote(options)[:custom_changeset]
       if @wrapper in [nil, ""] do
         def create(conn, %{} = params) do
-          _craete(conn, params)
+          _create(conn, params)
         end
       else
         def create(conn, %{@wrapper => params}) do
-          _craete(conn, params)
+          _create(conn, params)
         end
       end
 
-      defp _craete(conn, params) do
+      defp _create(conn, params) do
         params = pre_process_params_for_create_method(params, conn)
         changeset = build_insert_changeset(@custom_changeset, params)
         changeset = pre_process_changeset_for_create_method(changeset, params, conn)
@@ -54,7 +63,7 @@ defmodule FatEcto.CreateRecord do
         with {:ok, record} <- insert_record_for_create_method(changeset, @repo) do
           record = MacrosHelper.preload_record(record, @repo, @preloads)
           post_create_hook_for_create_method(record, params, conn)
-          render_record(conn, record, [status_to_put: :created] ++ unquote(options))
+          render_record(conn, record, [status_to_put: :created] ++ @options)
         end
       end
 
