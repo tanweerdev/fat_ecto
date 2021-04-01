@@ -30,12 +30,9 @@ defmodule FatEcto.CreateMultipleRecord do
       alias FatEcto.MacrosHelper
 
       @opt_app unquote(options)[:otp_app]
-      @options (@opt_app &&
-                  Keyword.merge(
-                    Application.get_env(@opt_app, FatEcto.CreateMultipleRecord || []),
-                    unquote(options)
-                  )) ||
-                 unquote(options)
+      @app_level_configs (@opt_app && Application.get_env(@opt_app, FatEcto.CreateMultipleRecord)) || []
+      @unquoted_options unquote(options)
+      @options Keyword.merge(@app_level_configs, @unquoted_options)
 
       @preloads @options[:preloads] || []
       @schema @options[:schema]

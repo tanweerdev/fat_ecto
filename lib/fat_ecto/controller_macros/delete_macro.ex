@@ -13,9 +13,9 @@ defmodule FatEcto.DeleteRecord do
       alias FatEcto.MacrosHelper
 
       @opt_app unquote(options)[:otp_app]
-      @options (@opt_app &&
-                  Keyword.merge(Application.get_env(@opt_app, FatEcto.DeleteRecord) || [], unquote(options))) ||
-                 unquote(options)
+      @app_level_configs (@opt_app && Application.get_env(@opt_app, FatEcto.DeleteRecord)) || []
+      @unquoted_options unquote(options)
+      @options Keyword.merge(@app_level_configs, @unquoted_options)
 
       @repo @options[:repo]
       @status_to_put @options[:status_to_put]

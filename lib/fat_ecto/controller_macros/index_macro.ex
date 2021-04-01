@@ -15,9 +15,9 @@ defmodule FatEcto.IndexRecord do
       @behaviour FatEcto.IndexRecord
 
       @opt_app unquote(options)[:otp_app]
-      @options (@opt_app &&
-                  Keyword.merge(Application.get_env(@opt_app, FatEcto.IndexRecord) || [], unquote(options))) ||
-                 unquote(options)
+      @app_level_configs (@opt_app && Application.get_env(@opt_app, FatEcto.IndexRecord)) || []
+      @unquoted_options unquote(options)
+      @options Keyword.merge(@app_level_configs, @unquoted_options)
 
       @schema @options[:schema]
       @preloads @options[:preloads] || []

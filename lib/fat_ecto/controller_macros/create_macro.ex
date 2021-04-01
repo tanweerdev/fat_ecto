@@ -23,9 +23,9 @@ defmodule FatEcto.CreateRecord do
       @behaviour FatEcto.CreateRecord
 
       @opt_app unquote(options)[:otp_app]
-      @options (@opt_app &&
-                  Keyword.merge(Application.get_env(@opt_app, FatEcto.CreateRecord) || [], unquote(options))) ||
-                 unquote(options)
+      @app_level_configs (@opt_app && Application.get_env(@opt_app, FatEcto.CreateRecord)) || []
+      @unquoted_options unquote(options)
+      @options Keyword.merge(@app_level_configs, @unquoted_options)
 
       @preloads @options[:preloads] || []
       @schema @options[:schema]

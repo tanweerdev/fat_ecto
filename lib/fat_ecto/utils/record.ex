@@ -3,9 +3,9 @@ defmodule FatUtils.FatRecord do
   defmacro __using__(options) do
     quote location: :keep do
       @opt_app unquote(options)[:otp_app]
-      @options (@opt_app &&
-                  Keyword.merge(Application.get_env(@opt_app, FatUtils.FatRecord) || [], unquote(options))) ||
-                 unquote(options)
+      @app_level_configs (@opt_app && Application.get_env(@opt_app, FatUtils.FatRecord)) || []
+      @unquoted_options unquote(options)
+      @options Keyword.merge(@app_level_configs, @unquoted_options)
 
       @encoder_library @options[:encoder_library]
 

@@ -1,10 +1,10 @@
 defmodule FatEcto.RenderUtils do
   defmacro __using__(options \\ []) do
-    quote do
+    quote location: :keep do
       @opt_app unquote(options)[:otp_app]
-      @options (@opt_app &&
-                  Keyword.merge(Application.get_env(@opt_app, FatEcto.RenderUtils) || [], unquote(options))) ||
-                 unquote(options)
+      @app_level_configs (@opt_app && Application.get_env(@opt_app, FatEcto.RenderUtils)) || []
+      @unquoted_options unquote(options)
+      @options Keyword.merge(@app_level_configs, @unquoted_options)
 
       def render_records(conn, records, meta, opts \\ []) do
         opts = Keyword.merge(@options, opts)

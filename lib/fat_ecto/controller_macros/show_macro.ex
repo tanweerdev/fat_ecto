@@ -14,9 +14,9 @@ defmodule FatEcto.ShowRecord do
       @behaviour FatEcto.ShowRecord
 
       @opt_app unquote(options)[:otp_app]
-      @options (@opt_app &&
-                  Keyword.merge(Application.get_env(@opt_app, FatEcto.ShowRecord || []), unquote(options))) ||
-                 unquote(options)
+      @app_level_configs (@opt_app && Application.get_env(@opt_app, FatEcto.ShowRecord)) || []
+      @unquoted_options unquote(options)
+      @options Keyword.merge(@app_level_configs, @unquoted_options)
 
       @repo @options[:repo]
       if !@repo do

@@ -1,11 +1,11 @@
 defmodule FatEcto.View do
   @moduledoc false
   defmacro __using__(options \\ []) do
-    quote do
+    quote location: :keep do
       @opt_app unquote(options)[:otp_app]
-      @options (@opt_app &&
-                  Keyword.merge(Application.get_env(@opt_app, FatEcto.View) || [], unquote(options))) ||
-                 unquote(options)
+      @app_level_configs (@opt_app && Application.get_env(@opt_app, FatEcto.View)) || []
+      @unquoted_options unquote(options)
+      @options Keyword.merge(@app_level_configs, @unquoted_options)
 
       @gettext_module @options[:gettext_module]
       @wrapper @options[:wrapper]
@@ -15,8 +15,8 @@ defmodule FatEcto.View do
         raise "please define gettext_module when using view macro"
       end
 
-      if !@sanitizer do
-        raise "please define gettext_module when using view macro"
+      if !@data_sanitizer do
+        raise "please define data_sanitizer when using view macro"
       end
 
       def render("show.json", %{data: record}) do
