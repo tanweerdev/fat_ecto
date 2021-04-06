@@ -727,6 +727,12 @@ defmodule FatEcto.FatQuery.FatWhere do
               %{"$not" => value} ->
                 FatNotDynamics.not_eq_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
+              %{"$not_equal" => value} ->
+                FatNotDynamics.not_eq_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+
+              %{"$equal" => value} ->
+                FatNotDynamics.eq_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+
               %{"$lte" => value} ->
                 FatDynamics.lte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
@@ -757,6 +763,9 @@ defmodule FatEcto.FatQuery.FatWhere do
 
               %{"$lt" => value} ->
                 FatNotDynamics.not_lt_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
+
+              %{"$equal" => value} ->
+                FatDynamics.eq_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
 
               %{"$lte" => value} ->
                 FatNotDynamics.not_lte_dynamic(key, value, dynamics, opts ++ [dynamic_type: :or])
@@ -841,6 +850,9 @@ defmodule FatEcto.FatQuery.FatWhere do
 
         "$not_equal" ->
           FatDynamics.not_eq_dynamic(k, map_cond, dynamics, opts ++ [dynamic_type: :and])
+
+        "$equal" ->
+          FatDynamics.eq_dynamic(k, map_cond, dynamics, opts ++ [dynamic_type: :and])
 
         "$not" ->
           # TODO:
