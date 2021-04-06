@@ -13,6 +13,17 @@ defmodule FatUtils.FatRecord do
         raise "please define encoder_library when using fat record utils"
       end
 
+      # TODO: Add a jason library configuration support
+      # @doc """
+      # Returns the configured JSON encoding library for FatUtils.FatRecord.
+      # To customize the JSON library, including the following
+      # in your `config/config.exs`:
+      #     config :phoenix, :json_library, Jason
+      # """
+      # def json_library do
+      #   Application.get_env(:phoenix, :json_library, Jason)
+      # end
+
       @doc """
         Sanitize the records.
       ### Parameters

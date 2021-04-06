@@ -547,6 +547,51 @@ defmodule FatEcto.FatQuery.FatNotDynamics do
   end
 
   @doc """
+  Builds a dynamic query where field is equal to the value.
+  ### Parameters
+
+     - `key`       - Field name.
+     - `value`     - Value of the field.
+     - `dynamics`  - Default or previous dynamic to append to the query.
+     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+
+  ### Examples
+
+       iex> result = #{__MODULE__}.eq_dynamic("experience_years", 2, true, [dynamic_type: :and])
+       iex> inspect(result)
+       "dynamic([q], q.experience_years == ^2 and ^true)"
+  """
+
+  @spec eq_dynamic(any(), any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
+  def eq_dynamic(key, value, dynamics, opts \\ []) do
+    if opts[:binding] == :last do
+      if opts[:dynamic_type] == :and do
+        dynamic(
+          [..., c],
+          field(c, ^FatHelper.string_to_existing_atom(key)) == ^value and ^dynamics
+        )
+      else
+        dynamic(
+          [..., c],
+          field(c, ^FatHelper.string_to_existing_atom(key)) == ^value or ^dynamics
+        )
+      end
+    else
+      if opts[:dynamic_type] == :and do
+        dynamic(
+          [q],
+          field(q, ^FatHelper.string_to_existing_atom(key)) == ^value and ^dynamics
+        )
+      else
+        dynamic(
+          [q],
+          field(q, ^FatHelper.string_to_existing_atom(key)) == ^value or ^dynamics
+        )
+      end
+    end
+  end
+
+  @doc """
   Builds a dynamic query where value is not between the provided attributes.
   ### Parameters
 

@@ -1,6 +1,7 @@
 defmodule FatEcto.IQCRUD do
   defmacro __using__(opts \\ []) do
     # quote location: :keep do
+    # TODO: start using bind_quoted in all macros
     quote location: :keep, bind_quoted: [opts: opts] do
       import FatEcto.IncludeHelper
 

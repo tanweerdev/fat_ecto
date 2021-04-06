@@ -2,6 +2,8 @@ defmodule FatEcto.FatQuery do
   # TODO: make paginator optional via global config and via options passed
   defmacro __using__(options \\ []) do
     quote location: :keep do
+      # TODO: add typespecs. good example is https://github.com/elixir-ecto/ecto/blob/master/lib/ecto/repo.ex
+      # TODO: repo typespec is Ecto.Repo.t eg is https://github.com/elixir-ecto/ecto/blob/7f9a1420b6dfcf4b2df8b715db287d2cfd5361fb/lib/mix/ecto.ex
       @moduledoc """
       Entry Point module for building queries.
 
