@@ -1205,12 +1205,19 @@ defmodule Query.WhereTest do
   end
 
   test "failing example for using == for DateTime values" do
+    now = DateTime.utc_now()
+
     opts = %{
       "$where" => %{
-        "start_date" => DateTime.utc_now()
+        "start_date" => %{"$equal" => now}
       }
     }
 
-    Query.build!(FatEcto.FatDoctor, opts)
+    expected =
+      from(f0 in FatEcto.FatDoctor,
+        where: f0.start_date == ^%{"$equal" => now} and ^true
+      )
+
+    assert inspect(Query.build!(FatEcto.FatDoctor, opts)) == inspect(expected)
   end
 end
