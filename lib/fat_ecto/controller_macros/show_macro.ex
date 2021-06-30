@@ -3,7 +3,7 @@ defmodule FatEcto.ShowRecord do
 
   @doc "Update a query before sending it in the fetch method. By default the query is name of your schema"
   @callback pre_process_fetch_query_for_show_method(query :: Ecto.Query.t(), conn :: Plug.Conn.t()) ::
-              Ecto.Query.t()
+              {:ok, Ecto.Query.t()}
 
   @doc "Perform any action after show"
   @callback post_fetch_hook_for_show_method(record :: struct(), conn :: Plug.Conn.t()) :: term()
@@ -43,34 +43,34 @@ defmodule FatEcto.ShowRecord do
       end
 
       defp _show(conn, %{"key" => key, "value" => value}) do
-        query = pre_process_fetch_query_for_show_method(@schema, conn)
+        with {:ok, query} <- pre_process_fetch_query_for_show_method(@schema, conn) do
+          case MacrosHelper.get_record_by_query(key, value, @repo, query) do
+            {:error, :not_found} ->
+              error_view_module = @options[:error_view_module]
+              error_view = @options[:error_view_404]
+              data_to_view_as = @options[:error_data_to_view_as]
 
-        case MacrosHelper.get_record_by_query(key, value, @repo, query) do
-          {:error, :not_found} ->
-            error_view_module = @options[:error_view_module]
-            error_view = @options[:error_view_404]
-            data_to_view_as = @options[:error_data_to_view_as]
+              render_record(
+                conn,
+                "Record not found",
+                [
+                  status_to_put: 404,
+                  put_view_module: error_view_module,
+                  view_to_render: error_view,
+                  data_to_view_as: data_to_view_as
+                ] ++ @options
+              )
 
-            render_record(
-              conn,
-              "Record not found",
-              [
-                status_to_put: 404,
-                put_view_module: error_view_module,
-                view_to_render: error_view,
-                data_to_view_as: data_to_view_as
-              ] ++ @options
-            )
-
-          {:ok, record} ->
-            record = MacrosHelper.preload_record(record, @repo, @preloads)
-            post_fetch_hook_for_show_method(record, conn)
-            render_record(conn, record, [status_to_put: :ok] ++ @options)
+            {:ok, record} ->
+              record = MacrosHelper.preload_record(record, @repo, @preloads)
+              post_fetch_hook_for_show_method(record, conn)
+              render_record(conn, record, [status_to_put: :ok] ++ @options)
+          end
         end
       end
 
       def pre_process_fetch_query_for_show_method(query, _conn) do
-        query
+        {:ok, query}
       end
 
       def post_fetch_hook_for_show_method(_record, _conn) do

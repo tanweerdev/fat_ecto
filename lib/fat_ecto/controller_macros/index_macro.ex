@@ -2,7 +2,7 @@ defmodule FatEcto.IndexRecord do
   @moduledoc false
   @doc "Update a query before sending it in the fetch method. By default the query is name of your schema"
   @callback pre_process_fetch_query_for_index_method(query :: Ecto.Query.t(), conn :: Plug.Conn.t()) ::
-              Ecto.Query.t()
+              {:ok, Ecto.Query.t()}
 
   @doc "Perform any action after index"
   @callback after_fetch_hook_for_index_method(records :: list(), meta :: map(), conn :: Plug.Conn.t()) ::
@@ -41,10 +41,11 @@ defmodule FatEcto.IndexRecord do
         #     @schema
         #   end
 
-        query = pre_process_fetch_query_for_index_method(@schema, conn)
         # TODO: add docs that paginator_function shoud return records and meta
         # eg {records, meta} = @paginator_function.(query, params)
-        _get_and_render(conn, query, params, @paginator_function, @repo)
+        with {:ok, query} <- pre_process_fetch_query_for_index_method(@schema, conn) do
+          _get_and_render(conn, query, params, @paginator_function, @repo)
+        end
       end
 
       defp _get_and_render(conn, query, params, paginator_function, repo)
@@ -70,7 +71,7 @@ defmodule FatEcto.IndexRecord do
       end
 
       def pre_process_fetch_query_for_index_method(query, _conn) do
-        query
+        {:ok, query}
       end
 
       def after_fetch_hook_for_index_method(_records, _meta, _conn) do

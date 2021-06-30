@@ -2,7 +2,7 @@ defmodule FatEcto.DeleteRecord do
   @moduledoc false
   @doc "Update a query before sending it in the fetch method. By default the query is name of your schema"
   @callback pre_process_fetch_query_for_delete_method(query :: Ecto.Query.t(), conn :: Plug.Conn.t()) ::
-              Ecto.Query.t()
+              {:ok, Ecto.Query.t()}
 
   @doc "Perform any action after deletion"
   @callback post_delete_hook_for_delete_method(record :: struct(), conn :: Plug.Conn.t()) :: term()
@@ -45,52 +45,52 @@ defmodule FatEcto.DeleteRecord do
       # TODO: Lets implement with in these macros and add sample fallback controller
       # then we will be independent of few options eg we dont have to render error
       defp _delete(conn, %{"key" => key, "value" => value}) do
-        query = pre_process_fetch_query_for_delete_method(@schema, conn)
+        with {:ok, query} <- pre_process_fetch_query_for_delete_method(@schema, conn) do
+          case MacrosHelper.get_record_by_query(key, value, @repo, query) do
+            {:error, :not_found} ->
+              error_view_module = @options[:error_view_module]
+              error_view = @options[:error_view_404]
+              data_to_view_as = @options[:error_data_to_view_as]
 
-        case MacrosHelper.get_record_by_query(key, value, @repo, query) do
-          {:error, :not_found} ->
-            error_view_module = @options[:error_view_module]
-            error_view = @options[:error_view_404]
-            data_to_view_as = @options[:error_data_to_view_as]
+              render_record(
+                conn,
+                "Record not found",
+                [
+                  status_to_put: 404,
+                  put_view_module: error_view_module,
+                  view_to_render: error_view,
+                  data_to_view_as: data_to_view_as
+                ] ++ @options
+              )
 
-            render_record(
-              conn,
-              "Record not found",
-              [
-                status_to_put: 404,
-                put_view_module: error_view_module,
-                view_to_render: error_view,
-                data_to_view_as: data_to_view_as
-              ] ++ @options
-            )
-
-          {:ok, record} ->
-            record =
-              if @add_assoc_constraint == false do
-                record
-              else
-                add_assoc_constraint(record, value)
-              end
-
-            case @repo.delete(record) do
-              {:ok, _struct} ->
-                post_delete_hook_for_delete_method(record, conn)
-
-                if @status_to_put do
-                  render_resp(conn, "Record Deleted", @status_to_put, put_content_type: "application/json")
+            {:ok, record} ->
+              record =
+                if @add_assoc_constraint == false do
+                  record
                 else
-                  render_resp(conn, "Record Deleted", 200, put_content_type: "application/json")
+                  add_assoc_constraint(record, value)
                 end
 
-              {:error, changeset} ->
-                error_view = @options[:error_view]
-                errors_changeset(conn, changeset, status_to_put: 422, put_view_module: error_view)
-            end
+              case @repo.delete(record) do
+                {:ok, _struct} ->
+                  post_delete_hook_for_delete_method(record, conn)
+
+                  if @status_to_put do
+                    render_resp(conn, "Record Deleted", @status_to_put, put_content_type: "application/json")
+                  else
+                    render_resp(conn, "Record Deleted", 200, put_content_type: "application/json")
+                  end
+
+                {:error, changeset} ->
+                  error_view = @options[:error_view]
+                  errors_changeset(conn, changeset, status_to_put: 422, put_view_module: error_view)
+              end
+          end
         end
       end
 
       def pre_process_fetch_query_for_delete_method(query, _conn) do
-        query
+        {:ok, query}
       end
 
       def post_delete_hook_for_delete_method(_record, _conn) do

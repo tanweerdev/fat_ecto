@@ -6,13 +6,13 @@ defmodule FatEcto.ByQuery do
               conn :: Plug.Conn.t(),
               params :: map()
             ) ::
-              Ecto.Query.t()
+              {:ok, Ecto.Query.t()}
   @doc "You can use process_params_before_for_query_by to override query params before processing."
   @callback pre_process_params_for_query_by_method(
               query :: Ecto.Query.t(),
               conn :: Plug.Conn.t(),
               params :: map()
-            ) :: map()
+            ) :: {:ok, map()}
   @doc "You can use post_process_data_for_query_by_method to return custom records and meta"
   @callback post_process_data_for_query_by_method(
               recordz :: map() | list(),
@@ -70,10 +70,10 @@ defmodule FatEcto.ByQuery do
       def query_by(conn, %{} = query_params) do
         # TODO: priority very low: if some query is invalid or due to any reason
         # there is some un-expected 500 or postgres error, it should be handled properly
-        query_params = pre_process_params_for_query_by_method(@schema, conn, query_params)
-        queryable = pre_process_query_for_query_by_method(@schema, conn, query_params)
 
-        with {:ok, data_meta} <- @query_module.fetch(queryable, query_params) do
+        with {:ok, query_params} <- pre_process_params_for_query_by_method(@schema, conn, query_params),
+             {:ok, queryable} <- pre_process_query_for_query_by_method(@schema, conn, query_params),
+             {:ok, data_meta} <- @query_module.fetch(queryable, query_params) do
           {recordz, meta} =
             case data_meta do
               %{data: record, meta: nil, type: :object} ->
@@ -107,12 +107,12 @@ defmodule FatEcto.ByQuery do
 
       # You can use pre_process_query_for_query_by_method to override query before fetching records for query by
       def pre_process_query_for_query_by_method(query, _conn, _params) do
-        query
+        {:ok, query}
       end
 
       # You can use pre_process_params_for_query_by_method to override query params before processing
       def pre_process_params_for_query_by_method(_query, _conn, params) do
-        params
+        {:ok, params}
       end
 
       # You can use post_process_data_for_query_by_method to return custom structs

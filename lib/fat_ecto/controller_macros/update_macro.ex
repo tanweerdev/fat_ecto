@@ -5,10 +5,10 @@ defmodule FatEcto.UpdateRecord do
               changeset :: Ecto.Changeset.t(),
               params :: map(),
               conn :: Plug.Conn.t()
-            ) :: Ecto.Changeset.t()
+            ) :: {:ok, Ecto.Changeset.t()}
 
   @doc "Preprocess params before passing them to changeset"
-  @callback pre_process_params_for_update_method(params :: map(), conn :: Plug.Conn.t()) :: map()
+  @callback pre_process_params_for_update_method(params :: map(), conn :: Plug.Conn.t()) :: {:ok, map()}
 
   @doc "Perform any action on old or updated record after record is updated"
   @callback post_update_hook_for_update_method(
@@ -31,7 +31,7 @@ defmodule FatEcto.UpdateRecord do
               query :: Ecto.Query.t(),
               params :: map(),
               conn :: Plug.Conn.t()
-            ) :: Ecto.Query.t()
+            ) :: {:ok, Ecto.Query.t()}
 
   defmacro __using__(options \\ []) do
     quote location: :keep do
@@ -81,9 +81,8 @@ defmodule FatEcto.UpdateRecord do
       end
 
       defp _update(conn, %{"key" => key, "value" => value}, params) do
-        query = pre_process_fetch_query_for_update_method(@schema, params, conn)
-
-        with {:ok, record} <- MacrosHelper.get_record_by_query(key, value, @repo, query) do
+        with {:ok, query} <- pre_process_fetch_query_for_update_method(@schema, params, conn),
+             {:ok, record} <- MacrosHelper.get_record_by_query(key, value, @repo, query) do
           soft_delete_key = @options[:soft_delete_key]
           soft_deleted_value = @options[:soft_deleted_value]
 
@@ -116,12 +115,12 @@ defmodule FatEcto.UpdateRecord do
 
               false ->
                 record_before_update = MacrosHelper.preload_record(record, @repo, @preloads)
-                params = pre_process_params_for_update_method(params, conn)
-                changeset = build_update_changeset(@custom_changeset, record_before_update, params)
 
-                changeset = pre_process_changeset_for_update_method(changeset, params, conn)
-
-                with {:ok, record} <- @repo.update(changeset) do
+                with {:ok, params} <- pre_process_params_for_update_method(params, conn),
+                     changeset <-
+                       build_update_changeset(@custom_changeset, record_before_update, params),
+                     {:ok, changeset} <- pre_process_changeset_for_update_method(changeset, params, conn),
+                     {:ok, record} <- @repo.update(changeset) do
                   record = MacrosHelper.preload_record(record, @repo, @preloads)
                   post_update_hook_for_update_method(record, record_before_update, params, conn)
                   render_record(conn, record, [status_to_put: :ok] ++ @options)
@@ -137,15 +136,15 @@ defmodule FatEcto.UpdateRecord do
       end
 
       def pre_process_params_for_update_method(params, _conn) do
-        params
+        {:ok, params}
       end
 
       def pre_process_changeset_for_update_method(changeset, _params, _conn) do
-        changeset
+        {:ok, changeset}
       end
 
       def pre_process_fetch_query_for_update_method(query, _params, _conn) do
-        query
+        {:ok, query}
       end
 
       def post_update_hook_for_update_method(_record, _record_before_update, _params, _conn) do

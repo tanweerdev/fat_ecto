@@ -2,14 +2,15 @@ defmodule FatEcto.CreateMultipleRecord do
   @moduledoc false
 
   @doc "Preprocess params before passing them to changesets"
-  @callback pre_process_params_for_multiple_create_method(params :: map(), conn :: Plug.Conn.t()) :: map()
+  @callback pre_process_params_for_multiple_create_method(params :: map(), conn :: Plug.Conn.t()) ::
+              {:ok, map()}
 
   @doc "Preprocess changesets before inserting records"
   @callback pre_process_changesets_for_multiple_create_method(
               changeset :: Ecto.Changeset.t(),
               conn :: Plug.Conn.t()
             ) ::
-              Ecto.Changeset.t()
+              {:ok, Ecto.Changeset.t()}
 
   @doc "Perform any action on new records after records are created"
   @callback post_create_hook_for_multiple_create_method(records :: list(), conn :: Plug.Conn.t()) :: term()
@@ -58,12 +59,11 @@ defmodule FatEcto.CreateMultipleRecord do
       end
 
       defp _create(conn, params) do
-        params = pre_process_params_for_multiple_create_method(params, conn)
-        changesets = build_changesets_for_multiple_create_method(params, conn)
-        changesets = pre_process_changesets_for_multiple_create_method(changesets, conn)
-
         # TODO: Support partial insert via options passed
-        with {:ok, records} <- insert_records_for_multiple_create_method(changesets) do
+        with {:ok, params} <- pre_process_params_for_multiple_create_method(params, conn),
+             changesets <- build_changesets_for_multiple_create_method(params, conn),
+             {:ok, changesets} <- pre_process_changesets_for_multiple_create_method(changesets, conn),
+             {:ok, records} <- insert_records_for_multiple_create_method(changesets) do
           records = MacrosHelper.preload_record(records, @repo, @preloads)
           post_create_hook_for_multiple_create_method(records, conn)
           render_record(conn, records, [status_to_put: :created] ++ @options)
@@ -106,11 +106,11 @@ defmodule FatEcto.CreateMultipleRecord do
       end
 
       def pre_process_params_for_multiple_create_method(params, _conn) do
-        params
+        {:ok, params}
       end
 
       def pre_process_changesets_for_multiple_create_method(changesets, _conn) do
-        changesets
+        {:ok, changesets}
       end
 
       def post_create_hook_for_multiple_create_method(_records, _conn) do

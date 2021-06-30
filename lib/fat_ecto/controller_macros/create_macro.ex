@@ -1,14 +1,14 @@
 defmodule FatEcto.CreateRecord do
   @moduledoc false
   @doc "Preprocess params before passing them to changeset"
-  @callback pre_process_params_for_create_method(params :: map(), conn :: Plug.Conn.t()) :: map()
+  @callback pre_process_params_for_create_method(params :: map(), conn :: Plug.Conn.t()) :: {:ok, map()}
 
   @doc "Preprocess changeset before inserting record"
   @callback pre_process_changeset_for_create_method(
               changeset :: Ecto.Changeset.t(),
               params :: map(),
               conn :: Plug.Conn.t()
-            ) :: Ecto.Changeset.t()
+            ) :: {:ok, Ecto.Changeset.t()}
 
   @doc "Perform any action on new record after record is created"
   @callback post_create_hook_for_create_method(record :: struct(), params :: map(), conn :: Plug.Conn.t()) ::
@@ -56,11 +56,10 @@ defmodule FatEcto.CreateRecord do
       end
 
       defp _create(conn, params) do
-        params = pre_process_params_for_create_method(params, conn)
-        changeset = build_insert_changeset(@custom_changeset, params)
-        changeset = pre_process_changeset_for_create_method(changeset, params, conn)
-
-        with {:ok, record} <- insert_record_for_create_method(changeset, @repo) do
+        with {:ok, params} <- pre_process_params_for_create_method(params, conn),
+             changeset <- build_insert_changeset(@custom_changeset, params),
+             {:ok, changeset} <- pre_process_changeset_for_create_method(changeset, params, conn),
+             {:ok, record} <- insert_record_for_create_method(changeset, @repo) do
           record = MacrosHelper.preload_record(record, @repo, @preloads)
           post_create_hook_for_create_method(record, params, conn)
           render_record(conn, record, [status_to_put: :created] ++ @options)
@@ -72,11 +71,11 @@ defmodule FatEcto.CreateRecord do
       end
 
       def pre_process_params_for_create_method(params, _conn) do
-        params
+        {:ok, params}
       end
 
       def pre_process_changeset_for_create_method(changeset, _params, _conn) do
-        changeset
+        {:ok, changeset}
       end
 
       def post_create_hook_for_create_method(_record, _params, _conn) do
