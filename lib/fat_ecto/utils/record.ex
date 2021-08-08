@@ -96,6 +96,7 @@ defmodule FatUtils.FatRecord do
 
       def sanitize_map_iteratively(record, opts \\ []) when is_map(record) do
         schema_keys = [:__struct__, :__meta__]
+
         # not_loaded_keys = [:__field__, :__owner__, :__cardinality__]
 
         Enum.reduce(Map.drop(record, schema_keys), %{}, fn {k, v}, acc ->

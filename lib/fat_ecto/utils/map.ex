@@ -11,6 +11,22 @@ defmodule FatUtils.Map do
   end
 
   @doc """
+    Check if only the given keys are present in map and returns true.
+  """
+  # TODO: add test cases
+  def has_all_keys_exclusive?(map, keys) do
+    contain_only_allowed_keys?(map, keys) && has_all_keys?(map, keys)
+  end
+
+  @doc """
+    Check if only the allowed keys are present in map and returns true.
+  """
+  # TODO: add test cases
+  def contain_only_allowed_keys?(map, keys) do
+    Enum.all?(map, fn {k, _v} -> k in keys end)
+  end
+
+  @doc """
     Check if keys inside map are equal to specific value.
   """
   def has_all_val_equal_to?(map, keys, equal_to) do
