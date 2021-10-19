@@ -20,4 +20,14 @@ defmodule FatEcto.IncludeHelper do
         true
     end
   end
+
+  def overridables(names, options, config \\ []) do
+    Enum.reduce(names, [], fn {name, parity}, acc ->
+      if include?(name, options) do
+        acc ++ [{name, parity}]
+      else
+        acc
+      end
+    end)
+  end
 end

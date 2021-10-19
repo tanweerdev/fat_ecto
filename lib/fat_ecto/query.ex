@@ -15,7 +15,7 @@ defmodule FatEcto.FatQuery do
       @unquoted_options unquote(options)
       @options Keyword.merge(@app_level_configs, @unquoted_options)
 
-      @repo @options[:repo]
+      @repo @options[:repo][:module]
       if !@repo do
         raise "please define repo when using fat query methods"
       end
@@ -219,7 +219,6 @@ defmodule FatEcto.FatQuery do
           rescue
             e in ArgumentError -> {:error, e}
           end
-
         case queryable do
           {:error, info} ->
             %{message: error_message} = info
@@ -264,8 +263,6 @@ defmodule FatEcto.FatQuery do
       end
 
       def fetch(queryable, query_params, fetch_options \\ []) do
-        fetch_options = if fetch_options[:timeout], do: fetch_options, else: fetch_options ++ [timeout: 15000]
-
         with {:ok, query_data} <- build_by(queryable, query_params, fetch_options) do
           case query_data do
             %{query: queryable, type: :object} ->
@@ -281,7 +278,7 @@ defmodule FatEcto.FatQuery do
               try do
                 {:ok,
                  %{
-                   data: @repo.all(queryable, timeout: fetch_options[:timeout]),
+                   data: @repo.all(queryable, fetch_options[:repo] || []),
                    type: :array,
                    meta: nil
                  }}
@@ -297,12 +294,12 @@ defmodule FatEcto.FatQuery do
               try do
                 {:ok,
                  %{
-                   data: @repo.all(data_query, timeout: fetch_options[:timeout]),
+                   data: @repo.all(data_query, fetch_options[:repo] || []),
                    type: :array,
                    meta: %{
                      skip: skip,
                      limit: limit,
-                     count: count_records(count_query, fetch_options, query_params["$count_on"])
+                     count: count_records(count_query, fetch_options[:repo], query_params["$count_on"] || nil )
                    }
                  }}
               rescue
@@ -322,20 +319,20 @@ defmodule FatEcto.FatQuery do
             records,
             :count,
             String.to_atom(count_on),
-            timeout: fetch_opts[:timeout]
+            fetch_opts
           )
         else
           @repo.aggregate(
             records,
             :count,
             FatEcto.FatHelper.get_primary_keys(records) |> hd(),
-            timeout: fetch_opts[:timeout]
+            fetch_opts
           )
         end
       end
 
       def count_records(records, fetch_opts, _count_on) do
-        @repo.one(records, timeout: fetch_opts[:timeout])
+        @repo.one(records, fetch_opts)
       end
     end
   end
