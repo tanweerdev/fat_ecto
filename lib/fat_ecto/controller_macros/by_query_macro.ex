@@ -41,9 +41,7 @@ defmodule FatEcto.ByQuery do
     quote location: :keep do
       @behaviour FatEcto.ByQuery
       @opt_app unquote(options)[:otp_app]
-      @app_level_configs (@opt_app && Application.get_env(@opt_app, FatEcto.ByQuery)) || []
-      @unquoted_options unquote(options)
-      @options Keyword.merge(@app_level_configs, @unquoted_options)
+      @options FatEcto.FatHelper.get_module_options(unquote(options)[:otp_app], :query_by, unquote(options), [])
 
       @repo @options[:repo][:module]
       @query_module @options[:query][:module]
