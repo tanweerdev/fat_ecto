@@ -19,10 +19,10 @@ defmodule FatEcto.IndexRecord do
       @unquoted_options unquote(options)
       @options Keyword.merge(@app_level_configs, @unquoted_options)
 
-      @schema @options[:schema]
+      @schema @options[:schema][:module]
       @preloads @options[:preloads] || []
       @paginator_function @options[:paginator_function]
-      @repo @options[:repo]
+      @repo @options[:repo][:module]
 
       if !@repo do
         raise "please define repo when using delete record"

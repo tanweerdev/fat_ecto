@@ -28,10 +28,10 @@ defmodule FatEcto.CreateRecord do
       @options Keyword.merge(@app_level_configs, @unquoted_options)
 
       @preloads @options[:preloads] || []
-      @schema @options[:schema]
+      @schema @options[:schema][:module]
       @wrapper @options[:wrapper]
       @custom_changeset @options[:custom_changeset]
-      @repo @options[:repo]
+      @repo @options[:repo][:module]
 
       if !@opt_app do
         raise "please define opt app when using fat IQCRUD methods"

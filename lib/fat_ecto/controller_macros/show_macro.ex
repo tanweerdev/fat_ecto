@@ -18,12 +18,12 @@ defmodule FatEcto.ShowRecord do
       @unquoted_options unquote(options)
       @options Keyword.merge(@app_level_configs, @unquoted_options)
 
-      @repo @options[:repo]
+      @repo @options[:repo][:module]
       if !@repo do
         raise "please define repo when using delete record"
       end
 
-      @schema @options[:schema]
+      @schema @options[:schema][:module]
       if !@schema do
         raise "please define schema when using delete record"
       end

@@ -44,11 +44,11 @@ defmodule FatEcto.UpdateRecord do
       @options Keyword.merge(@app_level_configs, @unquoted_options)
 
       @preloads @options[:preloads] || []
-      @schema @options[:schema]
+      @schema @options[:schema][:module]
       @custom_changeset @options[:custom_changeset]
       @wrapper @options[:wrapper]
       @get_by_unqiue_field @options[:get_by_unqiue_field]
-      @repo @options[:repo]
+      @repo @options[:repo][:module]
 
       if !@repo do
         raise "please define repo when using create record"

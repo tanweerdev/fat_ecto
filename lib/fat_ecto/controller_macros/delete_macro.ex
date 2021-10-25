@@ -17,12 +17,12 @@ defmodule FatEcto.DeleteRecord do
       @unquoted_options unquote(options)
       @options Keyword.merge(@app_level_configs, @unquoted_options)
 
-      @repo @options[:repo]
+      @repo @options[:repo][:module]
       @status_to_put @options[:status_to_put]
       # You can disable add_assoc_constraint by passing add_assoc_constraint value false
       @add_assoc_constraint @options[:add_assoc_constraint]
       @get_by_unqiue_field @options[:get_by_unqiue_field]
-      @schema @options[:schema]
+      @schema @options[:schema][:module]
 
       if !@repo do
         raise "please define repo when using delete record"

@@ -36,9 +36,9 @@ defmodule FatEcto.CreateMultipleRecord do
       @options Keyword.merge(@app_level_configs, @unquoted_options)
 
       @preloads @options[:preloads] || []
-      @schema @options[:schema]
+      @schema @options[:schema][:module]
       @wrapper @options[:wrapper]
-      @repo @options[:repo]
+      @repo @options[:repo][:module]
 
       if !@repo do
         raise "please define repo when using create record"
