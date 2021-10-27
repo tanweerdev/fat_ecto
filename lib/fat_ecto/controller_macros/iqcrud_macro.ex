@@ -31,7 +31,7 @@ defmodule FatEcto.IQCRUD do
       end
 
       if include?(:query_by, @options) do
-        use FatEcto.ByQuery, Keyword.merge(@options, @options[:query_by_method] || [])
+        use FatEcto.QueryBy, Keyword.merge(@options, @options[:query_by_method] || [])
       end
 
       defoverridable overridables([create: 2, update: 2, show: 2, index: 2, delete: 2, query_by: 2], @options)

@@ -1,4 +1,4 @@
-defmodule FatEcto.ByQuery do
+defmodule FatEcto.QueryBy do
   @moduledoc false
   @doc "You can use pre_process_query_for_query_by_method to override query before fetching records for query by."
   @callback pre_process_query_for_query_by_method(
@@ -39,26 +39,24 @@ defmodule FatEcto.ByQuery do
 
   defmacro __using__(options \\ []) do
     quote location: :keep do
-      @behaviour FatEcto.ByQuery
+      @behaviour FatEcto.QueryBy
       @opt_app unquote(options)[:otp_app]
-      @options FatEcto.FatHelper.get_module_options(unquote(options)[:otp_app], :query_by, unquote(options), [])
-
-      @repo @options[:repo][:module]
-      @query_module @options[:query][:module]
-      @schema @options[:schema][:module]
-      @render_single_record_inside_object @options[:render_single_record_inside_object]
-      @paginator_function @options[:paginator_function]
-
       if !@opt_app do
         raise "please define opt app when using fat IQCRUD methods"
       end
 
+      @options FatEcto.FatHelper.get_module_options(@opt_app, :query_by, unquote(options), [])
+
+      @repo @options[:repo][:module]
+      @schema @options[:schema][:module]
+      @render_single_record_inside_object @options[:render_single_record_inside_object]
+      @paginator_function @options[:paginator_function]
+
+      use FatEcto.FatQuery, @options
+
+
       if !@repo do
         raise "please define repo when using by query"
-      end
-
-      if !@query_module do
-        raise "please define query module when using by query"
       end
 
       if !@schema do
@@ -70,7 +68,7 @@ defmodule FatEcto.ByQuery do
         # there is some un-expected 500 or postgres error, it should be handled properly
         with {:ok, query_params} <- pre_process_params_for_query_by_method(@schema, conn, query_params),
              {:ok, queryable} <- pre_process_query_for_query_by_method(@schema, conn, query_params),
-             {:ok, data_meta} <- @query_module.fetch(queryable, query_params, @options) do
+             {:ok, data_meta} <- fetch(queryable, query_params, @options) do
           {recordz, meta} =
             case data_meta do
               %{data: record, meta: nil, type: :object} ->
@@ -121,7 +119,7 @@ defmodule FatEcto.ByQuery do
         "Override if needed"
       end
 
-      defoverridable FatEcto.ByQuery
+      defoverridable FatEcto.QueryBy
     end
   end
 end
