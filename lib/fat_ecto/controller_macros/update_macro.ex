@@ -39,16 +39,14 @@ defmodule FatEcto.UpdateRecord do
       alias FatEcto.MacrosHelper
 
       @opt_app unquote(options)[:otp_app]
-      @app_level_configs (@opt_app && Application.get_env(@opt_app, FatEcto.UpdateRecord)) || []
-      @unquoted_options unquote(options)
-      @options Keyword.merge(@app_level_configs, @unquoted_options)
+      @options FatEcto.FatHelper.get_module_options(@opt_app, :update_record, unquote(options), [])
 
       @preloads @options[:preloads] || []
-      @schema @options[:schema]
+      @schema @options[:schema][:module]
       @custom_changeset @options[:custom_changeset]
       @wrapper @options[:wrapper]
       @get_by_unqiue_field @options[:get_by_unqiue_field]
-      @repo @options[:repo]
+      @repo @options[:repo][:module]
 
       if !@repo do
         raise "please define repo when using create record"

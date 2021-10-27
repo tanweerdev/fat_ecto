@@ -14,16 +14,14 @@ defmodule FatEcto.ShowRecord do
       @behaviour FatEcto.ShowRecord
 
       @opt_app unquote(options)[:otp_app]
-      @app_level_configs (@opt_app && Application.get_env(@opt_app, FatEcto.ShowRecord)) || []
-      @unquoted_options unquote(options)
-      @options Keyword.merge(@app_level_configs, @unquoted_options)
+      @options FatEcto.FatHelper.get_module_options(@opt_app, :show_record, unquote(options), [])
 
-      @repo @options[:repo]
+      @repo @options[:repo][:module]
       if !@repo do
         raise "please define repo when using delete record"
       end
 
-      @schema @options[:schema]
+      @schema @options[:schema][:module]
       if !@schema do
         raise "please define schema when using delete record"
       end

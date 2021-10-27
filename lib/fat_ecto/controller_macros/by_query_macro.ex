@@ -41,13 +41,11 @@ defmodule FatEcto.ByQuery do
     quote location: :keep do
       @behaviour FatEcto.ByQuery
       @opt_app unquote(options)[:otp_app]
-      @app_level_configs (@opt_app && Application.get_env(@opt_app, FatEcto.ByQuery)) || []
-      @unquoted_options unquote(options)
-      @options Keyword.merge(@app_level_configs, @unquoted_options)
+      @options FatEcto.FatHelper.get_module_options(unquote(options)[:otp_app], :query_by, unquote(options), [])
 
-      @repo @options[:repo]
-      @query_module @options[:query_module]
-      @schema @options[:schema]
+      @repo @options[:repo][:module]
+      @query_module @options[:query][:module]
+      @schema @options[:schema][:module]
       @render_single_record_inside_object @options[:render_single_record_inside_object]
       @paginator_function @options[:paginator_function]
 
@@ -70,10 +68,9 @@ defmodule FatEcto.ByQuery do
       def query_by(conn, %{} = query_params) do
         # TODO: priority very low: if some query is invalid or due to any reason
         # there is some un-expected 500 or postgres error, it should be handled properly
-
         with {:ok, query_params} <- pre_process_params_for_query_by_method(@schema, conn, query_params),
              {:ok, queryable} <- pre_process_query_for_query_by_method(@schema, conn, query_params),
-             {:ok, data_meta} <- @query_module.fetch(queryable, query_params) do
+             {:ok, data_meta} <- @query_module.fetch(queryable, query_params, @options) do
           {recordz, meta} =
             case data_meta do
               %{data: record, meta: nil, type: :object} ->
@@ -88,7 +85,6 @@ defmodule FatEcto.ByQuery do
 
               %{data: records, meta: nil} ->
                 # means pagination was false
-
                 {records, nil}
 
               %{data: records, meta: meta} ->

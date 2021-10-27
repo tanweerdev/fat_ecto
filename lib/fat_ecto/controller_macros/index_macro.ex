@@ -15,14 +15,12 @@ defmodule FatEcto.IndexRecord do
       @behaviour FatEcto.IndexRecord
 
       @opt_app unquote(options)[:otp_app]
-      @app_level_configs (@opt_app && Application.get_env(@opt_app, FatEcto.IndexRecord)) || []
-      @unquoted_options unquote(options)
-      @options Keyword.merge(@app_level_configs, @unquoted_options)
+      @options FatEcto.FatHelper.get_module_options(@opt_app, :index_record, unquote(options), [])
 
-      @schema @options[:schema]
+      @schema @options[:schema][:module]
       @preloads @options[:preloads] || []
       @paginator_function @options[:paginator_function]
-      @repo @options[:repo]
+      @repo @options[:repo][:module]
 
       if !@repo do
         raise "please define repo when using delete record"
