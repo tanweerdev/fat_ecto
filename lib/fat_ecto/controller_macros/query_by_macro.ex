@@ -1,4 +1,4 @@
-defmodule FatEcto.ByQuery do
+defmodule FatEcto.QueryBy do
   @moduledoc false
   @doc "You can use pre_process_query_for_query_by_method to override query before fetching records for query by."
   @callback pre_process_query_for_query_by_method(
@@ -39,7 +39,7 @@ defmodule FatEcto.ByQuery do
 
   defmacro __using__(options \\ []) do
     quote location: :keep do
-      @behaviour FatEcto.ByQuery
+      @behaviour FatEcto.QueryBy
       @opt_app unquote(options)[:otp_app]
       @options FatEcto.FatHelper.get_module_options(unquote(options)[:otp_app], :query_by, unquote(options), [])
 
@@ -121,7 +121,7 @@ defmodule FatEcto.ByQuery do
         "Override if needed"
       end
 
-      defoverridable FatEcto.ByQuery
+      defoverridable FatEcto.QueryBy
     end
   end
 end
