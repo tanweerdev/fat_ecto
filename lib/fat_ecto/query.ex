@@ -11,9 +11,7 @@ defmodule FatEcto.FatQuery do
       """
 
       @opt_app unquote(options)[:otp_app]
-      @app_level_configs (@opt_app && Application.get_env(@opt_app, FatEcto.FatQuery)) || []
-      @unquoted_options unquote(options)
-      @options Keyword.merge(@app_level_configs, @unquoted_options)
+      @options FatEcto.FatHelper.get_module_options(unquote(options)[:otp_app], :fat_query, unquote(options), [])
 
       @repo @options[:repo][:module]
       if !@repo do
