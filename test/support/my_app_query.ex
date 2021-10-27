@@ -10,5 +10,5 @@ defmodule MyApp.Query do
       {:fat_doctors, ["name"]},
       {:fat_patients, ["date_of_birth"]}
     ],
-    repo: FatEcto.Repo
+    repo: [module: FatEcto.Repo]
 end
