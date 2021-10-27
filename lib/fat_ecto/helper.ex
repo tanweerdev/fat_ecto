@@ -14,8 +14,9 @@ defmodule FatEcto.FatHelper do
 
   def get_module_options(opt_app, module, options, defaults \\ []) do
     fat_ecto_configs = (opt_app && Application.get_env(opt_app, :fat_ecto)) || []
-    root_module_configs =  fat_ecto_configs[module] ||  []
-    configs = Keyword.merge(defaults, root_module_configs)
+    root_module_configs = fat_ecto_configs[module] || []
+    configs = Keyword.merge(defaults, fat_ecto_configs)
+    configs = Keyword.merge(configs, root_module_configs)
     Keyword.merge(configs, options)
   end
 

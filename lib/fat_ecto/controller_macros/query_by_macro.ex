@@ -54,7 +54,6 @@ defmodule FatEcto.QueryBy do
 
       use FatEcto.FatQuery, @options
 
-
       if !@repo do
         raise "please define repo when using by query"
       end

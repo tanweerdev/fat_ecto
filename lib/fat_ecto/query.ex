@@ -11,7 +11,12 @@ defmodule FatEcto.FatQuery do
       """
 
       @opt_app unquote(options)[:otp_app]
-      @options FatEcto.FatHelper.get_module_options(unquote(options)[:otp_app], :fat_query, unquote(options), [])
+      @options FatEcto.FatHelper.get_module_options(
+                 unquote(options)[:otp_app],
+                 :fat_query,
+                 unquote(options),
+                 []
+               )
 
       @repo @options[:repo][:module]
       if !@repo do
@@ -217,6 +222,7 @@ defmodule FatEcto.FatQuery do
           rescue
             e in ArgumentError -> {:error, e}
           end
+
         case queryable do
           {:error, info} ->
             %{message: error_message} = info
@@ -297,7 +303,7 @@ defmodule FatEcto.FatQuery do
                    meta: %{
                      skip: skip,
                      limit: limit,
-                     count: count_records(count_query, fetch_options[:repo], query_params["$count_on"] || nil )
+                     count: count_records(count_query, fetch_options[:repo], query_params["$count_on"] || nil)
                    }
                  }}
               rescue
