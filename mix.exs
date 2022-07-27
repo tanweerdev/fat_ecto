@@ -11,6 +11,7 @@ defmodule FatEcto.MixProject do
       deps: deps(),
       name: "FatEcto",
       elixirc_paths: elixirc_paths(Mix.env()),
+      elixirc_options: [warnings_as_errors: true],
       description: description(),
       package: package(),
       aliases: aliases(),
@@ -38,14 +39,14 @@ defmodule FatEcto.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ecto, "~> 3.2 or ~> 3.5"},
-      {:ecto_sql, "~> 3.3", only: :test},
-      {:postgrex, "~> 0.15.3", only: :test},
+      {:ecto, "~> 3.2 or ~> 3.5 or ~> 3.8"},
+      {:ecto_sql, "~> 3.2 or ~> 3.5 or ~> 3.8", only: :test},
+      {:postgrex, "~> 0.15 or ~> 0.16", only: :test},
       {:earmark, "~> 1.4.3", only: :dev},
-      {:ex_doc, "~> 0.19", only: :dev, runtime: false, optional: true},
-      {:ex_machina, "~> 2.3", only: :test},
+      {:ex_doc, "~> 0.19 or ~> 0.28", only: :dev, runtime: false, optional: true},
+      {:ex_machina, "~> 2.3 or ~> 2.7", only: :test},
       # TODO: accept encoder as config/option
-      {:jason, "~> 1.1.2"}
+      {:jason, "~> 1.1 or ~> 1.2 or ~> 1.3"}
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
     ]
   end

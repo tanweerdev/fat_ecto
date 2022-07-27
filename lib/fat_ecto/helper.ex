@@ -150,12 +150,17 @@ defmodule FatEcto.FatHelper do
     end
   end
 
+  # @spec params_valid(
+  #         queryable :: Ecto.Queryable.t() | (any -> Ecto.Queryable.t()),
+  #         String.t() | [String.t()],
+  #         opts :: Keyword.t()
+  #       ) :: Ecto.Queryable.t()
   def params_valid(queryable, k, options) do
     table =
       case queryable do
         queryable when is_atom(queryable) ->
-          [Ecto.Schema.Metadata, nil, nil, _model_name, table_name, :built] =
-            Map.values(queryable.__struct__.__meta__)
+          struct = apply(queryable, :__struct__, [])
+          [Ecto.Schema.Metadata, nil, nil, _model_name, table_name, :built] = Map.values(struct.__meta__)
 
           table_name
 
