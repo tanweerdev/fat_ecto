@@ -10,6 +10,10 @@ defmodule FatEcto.ConnCase do
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
+      alias MyApp.DoctorFilter
+      alias MyApp.HospitalFilter
+      alias MyApp.PatientFilter
+      alias MyApp.RoomFilter
       alias MyApp.Query
       import FatEcto.Factory
     end

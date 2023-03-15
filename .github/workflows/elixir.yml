@@ -15,8 +15,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-18.04]
-        otp: [22.x]
-        elixir: [1.9.x]
+        otp: [24.x]
+        elixir: [1.13.x]
         node: [12.x]
 
     services:
@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1.0.0
-      - uses: actions/setup-elixir@v1.0.0
+      - uses: erlef/setup-beam@v1
         with:
           otp-version: ${{ matrix.otp }}
           elixir-version: ${{ matrix.elixir }}
