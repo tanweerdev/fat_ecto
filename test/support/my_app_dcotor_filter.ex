@@ -5,5 +5,9 @@ defmodule MyApp.DoctorFilter do
     },
     fields_not_allowed: %{
       "phone" => "*"
+    },
+    ignoreable_fields_values: %{
+      "email" => ["%%", "", [], nil],
+      "phone" => ["%%", "", [], nil]
     }
 end

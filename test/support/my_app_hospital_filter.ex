@@ -4,5 +4,9 @@ defmodule MyApp.HospitalFilter do
     fields_not_allowed: %{
       "name" => "*",
       "phone" => "$ilike"
+    },
+    ignoreable_fields_values: %{
+      "name" => ["%%", "", [], nil],
+      "phone" => ["%%", "", [], nil]
     }
 end
