@@ -22,14 +22,17 @@ defmodule FatEcto.FatQuery.Filterable do
       @options unquote(options)
       @fields_allowed @options[:fields_allowed] || %{}
       @fields_not_allowed @options[:fields_not_allowed] || %{}
+      @ignoreable_fields_values @options[:ignoreable_fields_values] || %{}
       @all_operators "*"
       @exact_match_operator "$equal"
 
       def build(queryable, where_params, build_options \\ []) do
+        filtered_where_params = remove_fields_with_ignoreable_values(where_params)
+
         {not_allowed_params, filtered_allowed_params} =
-          where_params
+          filtered_where_params
           |> filter_allowed_fields(@fields_allowed)
-          |> filter_not_allowed_fields(where_params, @fields_not_allowed)
+          |> filter_not_allowed_fields(filtered_where_params, @fields_not_allowed)
 
         queryable
         |> FatWhere.build_where(filtered_allowed_params, build_options)
@@ -137,6 +140,40 @@ defmodule FatEcto.FatQuery.Filterable do
             payload["compare_with"]
           )
         end)
+      end
+
+      defp remove_fields_with_ignoreable_values(params) do
+        Enum.reduce(params, params, fn {param_key, param_value}, params ->
+          if param_key in Map.keys(@ignoreable_fields_values) do
+            do_remove_fields_with_ignoreable_values(
+              @ignoreable_fields_values[param_key],
+              params,
+              {param_key, param_value}
+            )
+          else
+            params
+          end
+        end)
+      end
+
+      defp do_remove_fields_with_ignoreable_values(ignoreable_field_value, params, {param_key, param_value})
+           when not is_list(ignoreable_field_value) or length(ignoreable_field_value) == 0 do
+        do_remove_fields_with_ignoreable_values([ignoreable_field_value], params, {param_key, param_value})
+      end
+
+      defp do_remove_fields_with_ignoreable_values(ignoreable_field_values, params, {param_key, param_value})
+           when is_map(param_value) do
+        Enum.reduce(param_value, params, fn {operator, compare_with}, params ->
+          if compare_with in ignoreable_field_values,
+            do: params |> pop_in([param_key, operator]) |> elem(1),
+            else: params
+        end)
+      end
+
+      defp do_remove_fields_with_ignoreable_values(ignoreable_field_values, params, {param_key, compare_with}) do
+        if compare_with in ignoreable_field_values,
+          do: Map.delete(params, param_key),
+          else: params
       end
 
       defoverridable not_allowed_fields_filter_fallback: 4

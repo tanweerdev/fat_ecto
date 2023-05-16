@@ -37,6 +37,29 @@ defmodule Query.FilterableTest do
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
     end
+
+    test "ignore empty_string when matched with value in ignorables configured" do
+      opts = %{
+        "email" => ""
+      }
+
+      expected = from(d in FatEcto.FatDoctor)
+
+      query = DoctorFilter.build(FatEcto.FatDoctor, opts)
+      assert inspect(query) == inspect(expected)
+    end
+
+    test "ignore %% when matched with value in ignorables configured" do
+      opts = %{
+        "email" => %{"$like" => "%%"},
+        "phone" => %{"$like" => "%test%"}
+      }
+
+      expected = from(d in FatEcto.FatDoctor)
+
+      query = DoctorFilter.build(FatEcto.FatDoctor, opts)
+      assert inspect(query) == inspect(expected)
+    end
   end
 
   describe "Filter the params from where_params when params passed in not_allowed_fields & allowed_fields empty" do
@@ -48,6 +71,18 @@ defmodule Query.FilterableTest do
 
       expected =
         from(h in FatEcto.FatHospital, where: like(fragment("(?)::TEXT", h.phone), ^"%234%") and ^true)
+
+      query = HospitalFilter.build(FatEcto.FatHospital, opts)
+      assert inspect(query) == inspect(expected)
+    end
+
+    test "ignore `nil` when matched with value in ignorables configured" do
+      opts = %{
+        "name" => %{"$like" => nil},
+        "phone" => %{"$like" => nil}
+      }
+
+      expected = from(h in FatEcto.FatHospital)
 
       query = HospitalFilter.build(FatEcto.FatHospital, opts)
       assert inspect(query) == inspect(expected)
@@ -76,6 +111,18 @@ defmodule Query.FilterableTest do
       query = HospitalFilter.build(FatEcto.FatHospital, opts)
       assert inspect(query) == inspect(expected)
     end
+
+    test "ignore empty_string when matched with value in ignorables configured" do
+      opts = %{
+        "name" => %{"$like" => "%test%"},
+        "phone" => ""
+      }
+
+      expected = from(h in FatEcto.FatHospital)
+
+      query = HospitalFilter.build(FatEcto.FatHospital, opts)
+      assert inspect(query) == inspect(expected)
+    end
   end
 
   describe "Filter the params from where_params when not_allowed_fields & allowed_fields are empty" do
@@ -92,6 +139,18 @@ defmodule Query.FilterableTest do
               (like(fragment("(?)::TEXT", p.name), ^"%marr%") and
                  ^true)
         )
+
+      query = PatientFilter.build(FatEcto.FatPatient, opts)
+      assert inspect(query) == inspect(expected)
+    end
+
+    test "ignore %% when matched with value in ignorables configured" do
+      opts = %{
+        "name" => %{"$like" => "%%"},
+        "phone" => %{"$like" => "%%"}
+      }
+
+      expected = from(p in FatEcto.FatPatient)
 
       query = PatientFilter.build(FatEcto.FatPatient, opts)
       assert inspect(query) == inspect(expected)
@@ -114,6 +173,18 @@ defmodule Query.FilterableTest do
       query = PatientFilter.build(FatEcto.FatPatient, opts)
       assert inspect(query) == inspect(expected)
     end
+
+    test "ignore `nil` && empty_string when matched with value in ignorables configured" do
+      opts = %{
+        "name" => "",
+        "phone" => nil
+      }
+
+      expected = from(p in FatEcto.FatPatient)
+
+      query = PatientFilter.build(FatEcto.FatPatient, opts)
+      assert inspect(query) == inspect(expected)
+    end
   end
 
   describe "Filter the params from where_params when not_allowed_fields there and override not_allowed_fields_fallback" do
@@ -128,6 +199,32 @@ defmodule Query.FilterableTest do
           where: ilike(fragment("(?)::TEXT", r.phone), ^"%234%"),
           where: like(fragment("(?)::TEXT", r.name), ^"%marr%")
         )
+
+      query = RoomFilter.build(FatEcto.FatRoom, opts)
+      assert inspect(query) == inspect(expected)
+    end
+
+    test "ignore %% when matched with value in ignorables configured" do
+      opts = %{
+        "name" => %{"$like" => "%%"},
+        "phone" => %{"$ilike" => "%%"}
+      }
+
+      expected = from(r in FatEcto.FatRoom)
+
+      query = RoomFilter.build(FatEcto.FatRoom, opts)
+      assert inspect(query) == inspect(expected)
+    end
+
+    test "ignore %%, `nil` and empty_list [] when matched with value in ignorables configured" do
+      opts = %{
+        "name" => %{"$like" => "%%"},
+        "phone" => %{"$ilike" => "%%"},
+        "purpose" => %{"$in" => []},
+        "description" => nil
+      }
+
+      expected = from(r in FatEcto.FatRoom)
 
       query = RoomFilter.build(FatEcto.FatRoom, opts)
       assert inspect(query) == inspect(expected)
