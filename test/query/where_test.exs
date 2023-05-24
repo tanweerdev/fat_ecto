@@ -1215,7 +1215,7 @@ defmodule Query.WhereTest do
 
     expected =
       from(f0 in FatEcto.FatDoctor,
-        where: f0.start_date == ^%{"$equal" => now} and ^true
+        where: f0.start_date == ^now and ^true
       )
 
     assert inspect(Query.build!(FatEcto.FatDoctor, opts)) == inspect(expected)

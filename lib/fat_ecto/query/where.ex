@@ -849,10 +849,10 @@ defmodule FatEcto.FatQuery.FatWhere do
           FatDynamics.contains_any_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
         "$not_equal" ->
-          FatDynamics.not_eq_dynamic(k, map_cond, dynamics, opts ++ [dynamic_type: :and])
+          FatDynamics.not_eq_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
         "$equal" ->
-          FatDynamics.eq_dynamic(k, map_cond, dynamics, opts ++ [dynamic_type: :and])
+          FatDynamics.eq_dynamic(k, value, dynamics, opts ++ [dynamic_type: :and])
 
         "$not" ->
           # TODO:

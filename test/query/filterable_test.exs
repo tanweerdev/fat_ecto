@@ -17,7 +17,7 @@ defmodule Query.FilterableTest do
 
     test "returns the query with exact match for field" do
       opts = %{
-        "email" => "test@test.com"
+        "email" => %{"$equal" => "test@test.com"}
       }
 
       expected = from(d in FatEcto.FatDoctor, where: d.email == ^"test@test.com" and ^true)
@@ -40,7 +40,7 @@ defmodule Query.FilterableTest do
 
     test "ignore empty_string when matched with value in ignorables configured" do
       opts = %{
-        "email" => ""
+        "email" => %{"$equal" => ""}
       }
 
       expected = from(d in FatEcto.FatDoctor)
@@ -103,7 +103,7 @@ defmodule Query.FilterableTest do
     test "return query with exact match on the phone field" do
       opts = %{
         "name" => %{"$like" => "%test%"},
-        "phone" => "12345"
+        "phone" => %{"$equal" => "12345"}
       }
 
       expected = from(h in FatEcto.FatHospital, where: h.phone == ^"12345" and ^true)
@@ -115,7 +115,7 @@ defmodule Query.FilterableTest do
     test "ignore empty_string when matched with value in ignorables configured" do
       opts = %{
         "name" => %{"$like" => "%test%"},
-        "phone" => ""
+        "phone" => %{"$equal" => ""}
       }
 
       expected = from(h in FatEcto.FatHospital)
@@ -158,8 +158,8 @@ defmodule Query.FilterableTest do
 
     test "returns the query where field exact match" do
       opts = %{
-        "name" => "st marry",
-        "phone" => "12345"
+        "name" => %{"$equal" => "st marry"},
+        "phone" => %{"$equal" => "12345"}
       }
 
       expected =
@@ -176,8 +176,8 @@ defmodule Query.FilterableTest do
 
     test "ignore `nil` && empty_string when matched with value in ignorables configured" do
       opts = %{
-        "name" => "",
-        "phone" => nil
+        "name" => %{"$equal" => ""},
+        "phone" => %{"$equal" => nil}
       }
 
       expected = from(p in FatEcto.FatPatient)
@@ -221,7 +221,7 @@ defmodule Query.FilterableTest do
         "name" => %{"$like" => "%%"},
         "phone" => %{"$ilike" => "%%"},
         "purpose" => %{"$in" => []},
-        "description" => nil
+        "description" => %{"$equal" => nil}
       }
 
       expected = from(r in FatEcto.FatRoom)
