@@ -24,7 +24,6 @@ defmodule FatEcto.FatQuery.Filterable do
       @fields_not_allowed @options[:fields_not_allowed] || %{}
       @ignoreable_fields_values @options[:ignoreable_fields_values] || %{}
       @all_operators "*"
-      @exact_match_operator "$equal"
 
       def build(queryable, where_params, build_options \\ []) do
         filtered_where_params = remove_fields_with_ignoreable_values(where_params)
@@ -98,24 +97,6 @@ defmodule FatEcto.FatQuery.Filterable do
         end)
       end
 
-      defp do_filter_query_expressions(
-             query_operators,
-             {param_key, param_value},
-             {list, params},
-             :fields_not_allowed
-           ) do
-        if @exact_match_operator in query_operators or @all_operators in query_operators do
-          list =
-            [%{"field" => param_key, "operator" => @exact_match_operator, "compare_with" => param_value}] ++
-              list
-
-          params = Map.delete(params, param_key)
-          {list, params}
-        else
-          {list, params}
-        end
-      end
-
       defp do_filter_query_expressions(query_operators, {param_key, param_value}, params, :fields_allowed)
            when is_map(param_value) do
         Enum.reduce(param_value, params, fn {operator, _compare_with}, params ->
@@ -123,12 +104,6 @@ defmodule FatEcto.FatQuery.Filterable do
             do: params,
             else: params |> pop_in([param_key, operator]) |> elem(1)
         end)
-      end
-
-      defp do_filter_query_expressions(query_operators, {param_key, param_value}, params, :fields_allowed) do
-        if @exact_match_operator in query_operators or @all_operators in query_operators,
-          do: params,
-          else: Map.delete(params, param_key)
       end
 
       defp build_query_for_not_allowed_fields(query, not_allowed_params) do
@@ -168,12 +143,6 @@ defmodule FatEcto.FatQuery.Filterable do
             do: params |> pop_in([param_key, operator]) |> elem(1),
             else: params
         end)
-      end
-
-      defp do_remove_fields_with_ignoreable_values(ignoreable_field_values, params, {param_key, compare_with}) do
-        if compare_with in ignoreable_field_values,
-          do: Map.delete(params, param_key),
-          else: params
       end
 
       defoverridable not_allowed_fields_filter_fallback: 4
