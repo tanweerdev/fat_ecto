@@ -1,7 +1,7 @@
 defmodule FatEcto.Sample.Pagination do
   use FatEcto.FatPaginator,
-    default_limit: Application.get_env(:data, :fat_ecto)[:default_limit],
-    max_limit: Application.get_env(:data, :fat_ecto)[:max_limit]
+    default_limit: 10,
+    max_limit: 100
 
   def paginator(query, params, repo) do
     limit = params["limit"]

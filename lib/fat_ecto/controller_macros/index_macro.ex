@@ -15,7 +15,7 @@ defmodule FatEcto.IndexRecord do
       @behaviour FatEcto.IndexRecord
 
       @opt_app unquote(options)[:otp_app]
-      @options FatEcto.FatHelper.get_module_options(@opt_app, :index_record, unquote(options), [])
+      @options FatEcto.FatHelper.get_module_options(unquote(options), :index_record)
 
       @schema @options[:schema][:module]
       @preloads @options[:preloads] || []

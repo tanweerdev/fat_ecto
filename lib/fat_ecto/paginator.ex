@@ -8,10 +8,7 @@ defmodule FatEcto.FatPaginator do
       import Ecto.Query
 
       # TODO: @repo.all and @repo.one nil warning
-      @opt_app unquote(options)[:otp_app]
-      @app_level_configs (@opt_app && Application.get_env(@opt_app, FatEcto.FatPaginator)) || []
-      @unquoted_options unquote(options)
-      @options Keyword.merge(@app_level_configs, @unquoted_options)
+      @options FatEcto.FatHelper.get_module_options(unquote(options), FatEcto.FatPaginator)
       @doc """
         Paginate the records.
       ### Parameters

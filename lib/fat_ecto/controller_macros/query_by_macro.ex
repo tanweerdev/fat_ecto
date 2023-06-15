@@ -45,7 +45,7 @@ defmodule FatEcto.QueryBy do
         raise "please define opt app when using fat IQCRUD methods"
       end
 
-      @options FatEcto.FatHelper.get_module_options(@opt_app, :query_by, unquote(options), [])
+      @options FatEcto.FatHelper.get_module_options(unquote(options), :query_by)
 
       @repo @options[:repo][:module]
       @schema @options[:schema][:module]

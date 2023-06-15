@@ -13,7 +13,7 @@ defmodule FatEcto.DeleteRecord do
       alias FatEcto.MacrosHelper
 
       @opt_app unquote(options)[:otp_app]
-      @options FatEcto.FatHelper.get_module_options(@opt_app, :delete_record, unquote(options), [])
+      @options FatEcto.FatHelper.get_module_options(unquote(options), :delete_record)
 
       @repo @options[:repo][:module]
       @status_to_put @options[:status_to_put]
