@@ -14,7 +14,7 @@ defmodule FatEcto.ShowRecord do
       @behaviour FatEcto.ShowRecord
 
       @opt_app unquote(options)[:otp_app]
-      @options FatEcto.FatHelper.get_module_options(@opt_app, :show_record, unquote(options), [])
+      @options FatEcto.FatHelper.get_module_options(unquote(options), :show_record)
 
       @repo @options[:repo][:module]
       if !@repo do

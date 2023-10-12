@@ -11,12 +11,7 @@ defmodule FatEcto.FatQuery do
       """
 
       @opt_app unquote(options)[:otp_app]
-      @options FatEcto.FatHelper.get_module_options(
-                 unquote(options)[:otp_app],
-                 :fat_query,
-                 unquote(options),
-                 []
-               )
+      @options FatEcto.FatHelper.get_module_options(unquote(options), :fat_query)
 
       @repo @options[:repo][:module]
       if !@repo do

@@ -161,7 +161,7 @@ defmodule Query.DistinctTest do
           merge(map(f0, [:designation, :experience_years]), %{
             ^"fat_patients" => map(f1, [:name, :prescription])
           }),
-        preload: [^[:fat_hospitals]]
+        preload: [:fat_hospitals]
       )
 
     query = Query.build!(FatEcto.FatDoctor, opts)

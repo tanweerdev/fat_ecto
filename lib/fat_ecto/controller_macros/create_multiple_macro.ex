@@ -31,7 +31,7 @@ defmodule FatEcto.CreateMultipleRecord do
       alias FatEcto.MacrosHelper
 
       @opt_app unquote(options)[:otp_app]
-      @options FatEcto.FatHelper.get_module_options(@opt_app, :create_multiple_record, unquote(options), [])
+      @options FatEcto.FatHelper.get_module_options(unquote(options), :create_multiple_record)
 
       @preloads @options[:preloads] || []
       @schema @options[:schema][:module]

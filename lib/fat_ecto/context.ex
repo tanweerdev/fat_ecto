@@ -11,10 +11,7 @@ defmodule FatEcto.FatContext do
 
       `use FatEcto.FatContext, repo: Repo`. Place this inside a module and then import or alias that module to use these methods.
       """
-      @opt_app unquote(options)[:otp_app]
-      @app_level_configs (@opt_app && Application.get_env(@opt_app, FatEcto.FatContext)) || []
-      @unquoted_options unquote(options)
-      @options Keyword.merge(@app_level_configs, @unquoted_options)
+      @options FatEcto.FatHelper.get_module_options(unquote(options), FatEcto.FatContext)
 
       # TODO: Fix @repo.all and @repo.one nil warning
       @repo @options[:repo]

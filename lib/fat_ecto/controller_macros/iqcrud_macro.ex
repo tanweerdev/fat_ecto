@@ -6,7 +6,7 @@ defmodule FatEcto.IQCRUD do
       import FatEcto.IncludeHelper
 
       @opt_app opts[:otp_app]
-      @options FatEcto.FatHelper.get_module_options(@opt_app, :iqcrud, opts, [])
+      @options FatEcto.FatHelper.get_module_options(opts, :iqcrud)
 
       use FatEcto.RenderUtils, Keyword.merge(@options, @options[:render_utils] || [])
 
