@@ -42,7 +42,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
       ...> }
       iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in \"fat_rooms\", on: f0.id == f1.hospital_id, left_join: f2 in assoc(f0, :fat_doctors), where: f0.name == ^\"saint claire\" and ^true, where: f1.floor == ^10 and ^true, where: f2.rating > ^5 and ^true, group_by: [f0.rating], group_by: [f0.total_staff], order_by: [asc: f1.name], order_by: [asc: f2.experience_years], order_by: [asc: f0.total_staff], limit: ^34, offset: ^0, select: merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:floor, :name]}]), %{^\"fat_rooms\" => map(f1, [:floor, :name, :is_active])}), preload: [[fat_doctors: [:fat_patients]]]>
-      
+
   ### Options
   - `$select`              - Select the fields from `hospital` and `rooms`.
   - `$right_join: :$select`- Select the fields from  `rooms`.
@@ -92,7 +92,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
        ...>   }
        ...> }
        iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
-       #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in \"fat_rooms\", on: f0.id == f1.hospital_id, left_join: f2 in assoc(f0, :fat_doctors), where: f0.name == ^\"saint claire\" and ^true, where: f1.floor == ^10 and ^true, where: f2.rating > ^5 and ^true, group_by: [f0.rating], group_by: [f0.total_staff], order_by: [desc: f1.floor], order_by: [asc: f2.experience_years], order_by: [desc: f0.rating], limit: ^34, offset: ^0, select: merge(map(f0, [:name, :location, :rating, {:fat_rooms, [:floor, :name]}]), %{^\"fat_rooms\" => map(f1, [:name, :floor, :is_active])}), preload: [[fat_doctors: [:fat_patients]]]>
+       #Ecto.Query<from f0 in FatEcto.FatHospital, right_join: f1 in \"fat_rooms\", on: f0.id == f1.hospital_id, left_join: f2 in assoc(f0, :fat_doctors), where: f0.name == ^\"saint claire\" and ^true, where: f1.floor == ^10 and ^true, where: f2.rating > ^5 and ^true, group_by: [f0.rating], group_by: [f0.total_staff], order_by: [desc: f1.floor], order_by: [asc: f2.experience_years], order_by: [desc: f0.rating], limit: ^34, offset: ^0, select: merge(map(f0, [:name, :location, :rating, fat_rooms: [:floor, :name]]), %{\n  ^\"fat_rooms\" => map(f1, [:name, :floor, :is_active])\n}), preload: [fat_doctors: [:fat_patients]]>
 
   ### Options
   - `$select`              - Select the fields from `hospital` and `rooms`.
@@ -124,7 +124,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
     - `queryable`        - Ecto Queryable that represents your schema name, table name or query.
     - `order_by_params`  - Order_By query options as a map.
     - `opts`             - Pass options related to query bindings.
-    - `build_options`    - Pass options related to otp_app. 
+    - `build_options`    - Pass options related to otp_app.
 
   ### Examples
 

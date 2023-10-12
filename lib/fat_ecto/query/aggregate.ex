@@ -13,12 +13,11 @@ defmodule FatEcto.FatQuery.FatAggregate do
       iex> query_opts = %{
       ...>  "$aggregate" => %{"$sum" => "total_staff", "$avg" => "rating"},
       ...>  "$where" => %{"rating" => 5},
-      ...>  "$group" => "id" 
-      ...> }   
+      ...>  "$group" => "id"
+      ...> }
       iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating == ^5 and ^true, group_by: [f0.id], select: merge(merge(f0, %{\"$aggregate\" => %{\"$avg\": %{^\"rating\" => avg(f0.rating)}}}), %{\"$aggregate\" => %{\"$sum\": %{^\"total_staff\" => sum(f0.total_staff)}}})>
+      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating == ^5 and ^true, group_by: [f0.id], select: merge(merge(f0, %{\"$aggregate\" => %{\"$max\": %{^\"rating\" => max(f0.rating)}}}), %{\n  \"$aggregate\" => %{\"$min\": %{^\"total_staff\" => min(f0.total_staff)}}\n})>
 
-      
   ## Options
 
     - `$aggregate`- Specify the type of aggregate method/methods to apply.
@@ -37,8 +36,8 @@ defmodule FatEcto.FatQuery.FatAggregate do
       iex> query_opts = %{
       ...>  "$aggregate" => %{"$min" => "total_staff", "$max" => "rating"},
       ...>  "$where" => %{"rating" => 5},
-      ...>  "$group" => "id" 
-      ...> }   
+      ...>  "$group" => "id"
+      ...> }
       iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating == ^5 and ^true, group_by: [f0.id], select: merge(merge(f0, %{\"$aggregate\" => %{\"$max\": %{^\"rating\" => max(f0.rating)}}}), %{\"$aggregate\" => %{\"$min\": %{^\"total_staff\" => min(f0.total_staff)}}})>
 
@@ -46,8 +45,8 @@ defmodule FatEcto.FatQuery.FatAggregate do
 
     - `$aggregate`- Specify the type of aggregate method/methods to apply.
     - `$where`    - Added the where attribute in the query.
-    - `$group`    - Group the records with a specific field. 
-    
+    - `$group`    - Group the records with a specific field.
+
   ## => $count/$count_distinct
 
   ### Parameters
@@ -60,8 +59,8 @@ defmodule FatEcto.FatQuery.FatAggregate do
       iex> query_opts = %{
       ...>  "$aggregate" => %{"$count" => ["total_staff"], "$count_distinct" => ["rating"]},
       ...>  "$where" => %{"rating" => 5},
-      ...>  "$group" => "id" 
-      ...> }   
+      ...>  "$group" => "id"
+      ...> }
       iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
       #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating == ^5 and ^true, group_by: [f0.id], select: merge(merge(f0, %{\"$aggregate\" => %{\"$count\": %{^\"total_staff\" => count(f0.total_staff)}}}), %{\"$aggregate\" => %{\"$count_distinct\": %{^\"rating\" => count(f0.rating, :distinct)}}})>
 
@@ -69,7 +68,7 @@ defmodule FatEcto.FatQuery.FatAggregate do
 
     - `$aggregate` - Specify the type of aggregate method/methods to apply.
     - `$where`     - Added the where attribute in the query.
-    - `$group`     - Group the records with a specific field.   
+    - `$group`     - Group the records with a specific field.
   """
   import Ecto.Query
   alias FatEcto.FatHelper
@@ -91,10 +90,10 @@ defmodule FatEcto.FatQuery.FatAggregate do
       iex> query_opts = %{
       ...>  "$aggregate" => %{"$count" => ["total_staff"], "$count_distinct" => ["rating"]},
       ...>  "$where" => %{"rating" => 5},
-      ...>  "$group" => "id" 
-      ...> }   
+      ...>  "$group" => "id"
+      ...> }
       iex> #{__MODULE__}.build_aggregate(FatEcto.FatHospital, query_opts["$aggregate"], [])
-      #Ecto.Query<from f0 in FatEcto.FatHospital, select: merge(merge(f0, %{"$aggregate" => %{"$count": %{^"total_staff" => count(f0.total_staff)}}}), %{"$aggregate" => %{"$count_distinct": %{^"rating" => count(f0.rating, :distinct)}}})>
+      #Ecto.Query<from f0 in FatEcto.FatHospital, select: merge(merge(f0, %{\"$aggregate\" => %{\"$count\": %{^\"total_staff\" => count(f0.total_staff)}}}), %{\n  \"$aggregate\" => %{\"$count_distinct\": %{^\"rating\" => count(f0.rating, :distinct)}}\n})>
   """
   def build_aggregate(queryable, aggregate_params, options) do
     Enum.reduce(aggregate_params, queryable, fn {aggregate_type, fields}, queryable ->

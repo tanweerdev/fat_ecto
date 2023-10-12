@@ -12,7 +12,9 @@ defmodule FatEcto.FatHelper do
     {max_limit, default_limit}
   end
 
-  def get_module_options(opt_app, module, options, defaults \\ []) do
+  @spec get_module_options(keyword, any, keyword) :: keyword
+  def get_module_options(options, module, defaults \\ []) do
+    opt_app = options[:otp_app]
     fat_ecto_configs = (opt_app && Application.get_env(opt_app, :fat_ecto)) || []
     root_module_configs = fat_ecto_configs[module] || []
     configs = Keyword.merge(defaults, fat_ecto_configs)
@@ -160,7 +162,7 @@ defmodule FatEcto.FatHelper do
       case queryable do
         queryable when is_atom(queryable) ->
           struct = apply(queryable, :__struct__, [])
-          [Ecto.Schema.Metadata, nil, nil, _model_name, table_name, :built] = Map.values(struct.__meta__)
+          [:built, nil, nil, table_name, Ecto.Schema.Metadata, _model_name] = Map.values(struct.__meta__)
 
           table_name
 

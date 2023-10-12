@@ -176,7 +176,7 @@ defmodule Query.AggregateTest do
         where: f1.name == ^"Saint" and ^true,
         order_by: [desc: f1.id],
         order_by: [asc: f0.beds],
-        preload: [^[:fat_hospital]],
+        preload: [:fat_hospital],
         limit: ^34,
         offset: ^0
       )

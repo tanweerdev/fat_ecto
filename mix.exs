@@ -39,14 +39,14 @@ defmodule FatEcto.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ecto, "~> 3.2 or ~> 3.5 or ~> 3.8"},
-      {:ecto_sql, "~> 3.2 or ~> 3.5 or ~> 3.8", only: :test},
-      {:postgrex, "~> 0.15 or ~> 0.16", only: :test},
-      {:earmark, "~> 1.4.3", only: :dev},
-      {:ex_doc, "~> 0.19 or ~> 0.28", only: :dev, runtime: false, optional: true},
+      {:ecto, "~> 3.2 or ~> 3.5 or ~> 3.8 or ~> 3.10"},
+      {:ecto_sql, "~> 3.2 or ~> 3.5 or ~> 3.8 or ~> 3.10", only: :test},
+      {:postgrex, "~> 0.15 or ~> 0.16 or ~> 0.17", only: :test},
+      {:earmark, "~> 1.4", only: :dev},
+      {:ex_doc, "~> 0.19 or ~> 0.28 or ~> 0.30", only: :dev, runtime: false, optional: true},
       {:ex_machina, "~> 2.3 or ~> 2.7", only: :test},
       # TODO: accept encoder as config/option
-      {:jason, "~> 1.1 or ~> 1.2 or ~> 1.3"}
+      {:jason, "~> 1.1 or ~> 1.2 or ~> 1.3 or ~> 1.4"}
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
     ]
   end
