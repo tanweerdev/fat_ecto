@@ -553,7 +553,7 @@ defmodule Query.IncludeTest do
         offset: ^0,
         preload: [
           fat_hospitals: [fat_rooms: [:fat_hospital, :fat_beds]],
-          fat_patients: [fat_doctors: [fat_hospitals: :fat_rooms]],
+          fat_patients: [fat_doctors: [fat_hospitals: :fat_rooms]]
         ]
       )
 
