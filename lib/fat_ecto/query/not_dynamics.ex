@@ -21,7 +21,7 @@ defmodule FatEcto.FatQuery.FatNotDynamics do
       ...>    }
       ...>  }
       iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.total_staff > ^1 and f0.total_staff < ^3 and (not(is_nil(f0.rating)) and (f0.name == ^"%John%" and (is_nil(f0.location) and ^true))), select: map(f0, [:name, :location, :rating])>
+      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.total_staff > ^1 and f0.total_staff < ^3 and\n  (not is_nil(f0.rating) and (f0.name == ^"%John%" and (is_nil(f0.location) and ^true))), select: map(f0, [:name, :location, :rating])>
 
   ### Options
 
@@ -43,7 +43,7 @@ defmodule FatEcto.FatQuery.FatNotDynamics do
   ### Examples
       iex> result = #{__MODULE__}.not_is_nil_dynamic("location", true, [dynamic_type: :and])
       iex> inspect(result)
-      "dynamic([c], not(is_nil(c.location)) and ^true)"
+      "dynamic([c], not is_nil(c.location) and ^true)"
   """
   @spec not_is_nil_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.DynamicExpr.t()
   def not_is_nil_dynamic(key, dynamics, opts \\ []) do
