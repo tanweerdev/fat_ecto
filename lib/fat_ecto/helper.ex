@@ -162,9 +162,7 @@ defmodule FatEcto.FatHelper do
       case queryable do
         queryable when is_atom(queryable) ->
           struct = apply(queryable, :__struct__, [])
-          [:built, nil, nil, table_name, Ecto.Schema.Metadata, _model_name] = Map.values(struct.__meta__)
-
-          table_name
+          struct.__meta__.source
 
         queryable when is_binary(queryable) ->
           queryable
