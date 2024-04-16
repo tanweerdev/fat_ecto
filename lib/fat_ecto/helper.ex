@@ -266,7 +266,7 @@ defmodule FatEcto.FatHelper do
       queryable when is_map(queryable) ->
         %{order_bys: order} = queryable
 
-        if Enum.count(order) == 0 do
+        if Enum.empty?(order) do
           queryable
         else
           queryable
