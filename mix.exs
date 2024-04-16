@@ -5,7 +5,7 @@ defmodule FatEcto.MixProject do
     [
       app: :fat_ecto,
       version: "0.5.0",
-      elixir: "~> 1.9",
+      elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       build_embedded: Mix.env() == :prod,
       deps: deps(),
@@ -39,12 +39,16 @@ defmodule FatEcto.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ecto, "~> 3.2 or ~> 3.5 or ~> 3.8 or ~> 3.10"},
-      {:ecto_sql, "~> 3.2 or ~> 3.5 or ~> 3.8 or ~> 3.10", only: :test},
-      {:postgrex, "~> 0.15 or ~> 0.16 or ~> 0.17", only: :test},
-      {:earmark, "~> 1.4", only: :dev},
-      {:ex_doc, "~> 0.19 or ~> 0.28 or ~> 0.30", only: :dev, runtime: false, optional: true},
-      {:ex_machina, "~> 2.3 or ~> 2.7", only: :test},
+      {:ecto, "~> 3.2 or ~> 3.5 or ~> 3.8 or ~> 3.10 or ~> 3.11"},
+      {:ecto_sql, "~> 3.2 or ~> 3.5 or ~> 3.8 or ~> 3.10 or ~> 3.11"},
+      {:postgrex, "~> 0.15 or ~> 0.16 or ~> 0.17"},
+      {:earmark, "~> 1.4", only: [:dev, :test], optional: true},
+      {:ex_doc, "~> 0.19 or ~> 0.28 or ~> 0.30 or ~> 0.31 or ~> 0.32",
+       only: [:dev, :test], runtime: false, optional: true},
+      {:ex_machina, "~> 2.3 or ~> 2.7", only: [:dev, :test], optional: true},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false, optional: true},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false, optional: true},
+
       # TODO: accept encoder as config/option
       {:jason, "~> 1.1 or ~> 1.2 or ~> 1.3 or ~> 1.4"}
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
@@ -69,15 +73,10 @@ defmodule FatEcto.MixProject do
 
   defp aliases do
     [
-      "ecto.init": [],
-      "ecto.create": ["ecto.create"],
-      "ecto.migrate": ["ecto.migrate"],
-      role_action_seeds: [],
-      "ecto.setup.quite": ["ecto.create", "ecto.init", "ecto.migrate"],
+      "ecto.setup": ["ecto.create", "ecto.migrate"],
+      "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: [
-        "ecto.setup.quite",
-        # "run apps/haitracker/priv/repo/role_action_seeds.exs",
-        "role_action_seeds",
+        "ecto.setup",
         "test"
       ]
     ]
