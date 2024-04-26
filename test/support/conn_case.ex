@@ -15,6 +15,10 @@ defmodule FatEcto.ConnCase do
       alias MyApp.PatientFilter
       alias MyApp.RoomFilter
       alias MyApp.Query
+      alias MyApp.DoctorOrderby
+      alias MyApp.HospitalOrderby
+      alias MyApp.PatientOrderby
+      alias MyApp.RoomOrderby
       import FatEcto.Factory
     end
   end
