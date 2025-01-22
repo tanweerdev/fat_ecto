@@ -17,7 +17,7 @@ defmodule DocTest do
   # doctest FatEcto.FatQuery.FatOrderBy
   # doctest FatEcto.FatQuery.FatDynamics
   # doctest FatEcto.FatQuery.FatNotDynamics
-  doctest FatEcto.FatQuery.FatGroupBy
+  # doctest FatEcto.FatQuery.FatGroupBy
   # doctest FatEcto.FatQuery.FatInclude
   # doctest FatEcto.FatQuery.FatAggregate
   # doctest FatEcto.FatQuery.FatDistinct

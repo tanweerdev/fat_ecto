@@ -111,7 +111,7 @@ defmodule FatEcto.FatPaginator do
               query
               |> exclude(:select)
               |> select(
-                [q, ..., c],
+                [q, _, _, c],
                 fragment(
                   "COUNT(DISTINCT ROW(?, ?))::int",
                   field(q, ^Enum.at(primary_keys, 0)),
@@ -123,7 +123,7 @@ defmodule FatEcto.FatPaginator do
               query
               |> exclude(:select)
               |> select(
-                [q, ..., c],
+                [q, _, _, c],
                 fragment(
                   "COUNT(DISTINCT ROW(?, ?, ?))::int",
                   field(q, ^Enum.at(primary_keys, 0)),
@@ -136,7 +136,7 @@ defmodule FatEcto.FatPaginator do
               query
               |> exclude(:select)
               |> select(
-                [q, ..., c],
+                [q, _, _, c],
                 fragment(
                   "COUNT(DISTINCT ROW(?, ?, ?, ?))::int",
                   field(q, ^Enum.at(primary_keys, 0)),
@@ -150,7 +150,7 @@ defmodule FatEcto.FatPaginator do
               query
               |> exclude(:select)
               |> select(
-                [q, ..., c],
+                [q, _, _, c],
                 fragment(
                   "COUNT(DISTINCT ROW(?, ?, ?, ?, ?))::int",
                   field(q, ^Enum.at(primary_keys, 0)),

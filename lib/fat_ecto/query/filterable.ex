@@ -131,8 +131,16 @@ defmodule FatEcto.FatQuery.Filterable do
         end)
       end
 
+      defp do_remove_fields_with_ignoreable_values(
+             ignoreable_field_value = [],
+             params,
+             {param_key, param_value}
+           ) do
+        do_remove_fields_with_ignoreable_values([ignoreable_field_value], params, {param_key, param_value})
+      end
+
       defp do_remove_fields_with_ignoreable_values(ignoreable_field_value, params, {param_key, param_value})
-           when not is_list(ignoreable_field_value) or Enum.empty?(ignoreable_field_value) do
+           when not is_list(ignoreable_field_value) do
         do_remove_fields_with_ignoreable_values([ignoreable_field_value], params, {param_key, param_value})
       end
 

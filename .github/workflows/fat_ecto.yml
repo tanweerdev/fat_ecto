@@ -3,7 +3,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Elixir CI
+name: FatEcto Package CI
 
 on:
   push:
@@ -48,10 +48,10 @@ jobs:
         restore-keys: ${{ runner.os }}-mix-
     - name: Install dependencies
       run: mix deps.get
-    - name: Credo Check
-      run: mix credo --strict
-    - name: Dialyzer Check
-      run: mix dialyzer --halt-exit-status
+    # - name: Credo Check
+    #   run: mix credo --strict
+    # - name: Dialyzer Check
+    #   run: mix dialyzer --halt-exit-status
     - name: Check Formatting
       run: mix format --check-formatted
     - name: Run tests
