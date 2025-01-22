@@ -50,7 +50,6 @@
 #       iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
 #       #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.rating == ^4 and ^true, group_by: [f0.total_staff], group_by: [f0.rating], order_by: [desc: f0.id], select: map(f0, [:name, :location, :rating, fat_rooms: [:name, :floor]])>
 
-
 #   ### Options
 
 #     - `$select`- Select the fields from `hospital` and `rooms`.

@@ -55,7 +55,6 @@
 #   - `$include: :$order`    - Sort the result based on the order attribute inside include.
 #   - `$group`               - Added the group_by attribute in the query.
 
-
 #   ## => $desc
 
 #   ### Parameters
