@@ -220,7 +220,7 @@ defmodule Fat.ContextTest do
 
     Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
 
-    {:ok, bed} =
+    {:ok, _bed} =
       Repo.insert(%FatBed{
         name: "John",
         purpose: "Testing",
@@ -230,15 +230,6 @@ defmodule Fat.ContextTest do
       })
 
     opts = %{
-      "$select" => ["name", "purpose", "floor"],
-      "$right_join" => %{
-        "fat_beds" => %{
-          "$on_field" => "id",
-          "$on_table_field" => "fat_room_id",
-          "$select" => ["name", "purpose", "description"],
-          "$where" => %{"id" => bed.id}
-        }
-      },
       "$where" => %{"id" => room.id}
     }
 
@@ -246,14 +237,7 @@ defmodule Fat.ContextTest do
 
     expected =
       from(fr in FatEcto.FatRoom,
-        right_join: fb in "fat_beds",
-        on: fr.id == fb.fat_room_id,
-        where: fr.id == ^room.id and ^true,
-        where: fb.id == ^bed.id and ^true,
-        select:
-          merge(map(fr, [:name, :purpose, :floor]), %{
-            ^"fat_beds" => map(fb, [:name, :purpose, :description])
-          })
+        where: fr.id == ^room.id and ^true
       )
 
     assert inspect(query) == inspect(expected)

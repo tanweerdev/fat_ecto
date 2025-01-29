@@ -1,9 +1,4 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: FatEcto Package CI
+name: CI
 
 on:
   push:
@@ -15,44 +10,50 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    name: Build and test
+  test:
+    name: Compile, Apply Checks and test
     runs-on: ubuntu-latest
 
     services:
-      db:
+      postgres:
+        image: postgres:16
+        ports:
+          - "5432:5432"
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: postgres
-        image: postgres:17.2
-        ports: ['5432:5432']
+          POSTGRES_DB: test_db
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Elixir
-      uses: erlef/setup-beam@v1 # v1.16.0
-      with:
-        elixir-version: '1.18.1' # [Required] Define the Elixir version
-        otp-version: '27.2'      # [Required] Define the Erlang/OTP version
-    - name: Restore dependencies cache
-      uses: actions/checkout@v4
-      with:
-        path: deps
-        key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
-        restore-keys: ${{ runner.os }}-mix-
-    - name: Install dependencies
-      run: mix deps.get
-    # - name: Credo Check
-    #   run: mix credo --strict
-    # - name: Dialyzer Check
-    #   run: mix dialyzer --halt-exit-status
-    - name: Check Formatting
-      run: mix format --check-formatted
-    - name: Run tests
-      run: mix test
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: 1.18.2
+          otp-version: 27.2
+
+      - name: Install dependencies
+        run: |
+          mix local.hex --force
+          mix local.rebar --force
+          mix deps.get
+
+      - name: Compile project
+        run: |
+          mix compile --warnings-as-errors
+
+      - name: Check Formatting
+        run: mix format --check-formatted
+
+      - name: Run tests
+        env:
+          MIX_ENV: test
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: mix coveralls.github

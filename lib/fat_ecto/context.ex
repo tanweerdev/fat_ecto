@@ -163,7 +163,7 @@ defmodule FatEcto.FatContext do
         Create a record by passing schema and attributes to a changeset. It will return the record created.
       """
       def create(schema, attrs, opts \\ []) do
-        schema.__struct__
+        schema.__struct__()
         |> schema.changeset(attrs)
         |> @repo.insert(opts)
       end
