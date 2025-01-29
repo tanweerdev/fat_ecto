@@ -1,5 +1,7 @@
 # FatEcto
 
+[![Coverage Status](https://coveralls.io/repos/github/tanweerdev/fat_ecto/badge.svg?branch=master)](https://coveralls.io/github/tanweerdev/fat_ecto?branch=master)
+
 ## Description
 
 FAT provides methods for _dynamically_ building queries depending on the parameters it receive.
