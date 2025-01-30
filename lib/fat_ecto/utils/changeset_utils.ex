@@ -112,20 +112,18 @@ defmodule FatUtils.Changeset do
     {error_message_title, error_message} =
       error_msg_title(options, start_date_key, "must be before #{end_date_key}")
 
-    cond do
-      options[:compare_type] == :time ->
-        if start_date && end_date && Time.diff(start_date, end_date) >= 0 do
-          add_custom_error(changeset, error_message_title, error_message)
-        else
-          changeset
-        end
-
-      true ->
-        if start_date && end_date && DateTime.diff(start_date, end_date) >= 0 do
-          add_custom_error(changeset, error_message_title, error_message)
-        else
-          changeset
-        end
+    if options[:compare_type] == :time do
+      if start_date && end_date && Time.diff(start_date, end_date) >= 0 do
+        add_custom_error(changeset, error_message_title, error_message)
+      else
+        changeset
+      end
+    else
+      if start_date && end_date && DateTime.diff(start_date, end_date) >= 0 do
+        add_custom_error(changeset, error_message_title, error_message)
+      else
+        changeset
+      end
     end
   end
 
@@ -142,20 +140,18 @@ defmodule FatUtils.Changeset do
     {error_message_title, error_message} =
       error_msg_title(options, start_date_key, "must be before or equal to #{end_date_key}")
 
-    cond do
-      options[:compare_type] == :time ->
-        if start_date && end_date && Time.diff(start_date, end_date) > 0 do
-          add_custom_error(changeset, error_message_title, error_message)
-        else
-          changeset
-        end
-
-      true ->
-        if start_date && end_date && DateTime.diff(start_date, end_date) > 0 do
-          add_custom_error(changeset, error_message_title, error_message)
-        else
-          changeset
-        end
+    if options[:compare_type] == :time do
+      if start_date && end_date && Time.diff(start_date, end_date) > 0 do
+        add_custom_error(changeset, error_message_title, error_message)
+      else
+        changeset
+      end
+    else
+      if start_date && end_date && DateTime.diff(start_date, end_date) > 0 do
+        add_custom_error(changeset, error_message_title, error_message)
+      else
+        changeset
+      end
     end
   end
 

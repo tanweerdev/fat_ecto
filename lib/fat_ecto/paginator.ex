@@ -102,7 +102,11 @@ defmodule FatEcto.FatPaginator do
       defp aggregate(query) do
         primary_keys = FatEcto.FatHelper.get_primary_keys(query)
         # TODO: Make this part dynamic
-        if !is_nil(primary_keys) do
+        if is_nil(primary_keys) do
+          query
+          |> exclude(:select)
+          |> select(count("*"))
+        else
           case Enum.count(primary_keys) do
             1 ->
               exclude(query, :select)
@@ -166,10 +170,6 @@ defmodule FatEcto.FatPaginator do
               |> exclude(:select)
               |> select(count("*"))
           end
-        else
-          query
-          |> exclude(:select)
-          |> select(count("*"))
         end
       end
 

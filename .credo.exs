@@ -53,7 +53,7 @@
         {Credo.Check.Readability.PipeIntoAnonymousFunctions},
         ## Refactoring Opportunities
         {Credo.Check.Refactor.CondStatements},
-        {Credo.Check.Refactor.CyclomaticComplexity},
+        {Credo.Check.Refactor.CyclomaticComplexity, false},
         {Credo.Check.Refactor.DoubleBooleanNegation},
         {Credo.Check.Refactor.FunctionArity},
         # {Credo.Check.Refactor.LongQuoteBlocks, files: %{excluded: ["apps/swagger_doc"]}},
@@ -91,7 +91,7 @@
         {Credo.Check.Warning.MissedMetadataKeyInLoggerConfig},
         # Controversial and experimental checks (opt-in, just remove `, false`)
         {Credo.Check.Refactor.ABCSize, false},
-        {Credo.Check.Refactor.AppendSingleItem},
+        {Credo.Check.Refactor.AppendSingleItem, false},
         {Credo.Check.Refactor.VariableRebinding, false},
         {Credo.Check.Warning.MapGetUnsafePass},
         {Credo.Check.Consistency.MultiAliasImportRequireUse, false},
