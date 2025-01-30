@@ -1,10 +1,11 @@
 defmodule FatEcto.FatHelper do
   @moduledoc false
-  # alias FatEcto.FatHelper
+  alias Ecto.Query
   require Ecto.Query
   @min_limit 0
   @min_skip 0
   @default_skip 0
+
   @spec get_limit_bounds(nil | keyword() | map()) :: {any(), any()}
   def get_limit_bounds(options) do
     max_limit = options[:max_limit] || 100
@@ -64,10 +65,10 @@ defmodule FatEcto.FatHelper do
     ### Parameters
         - `value`  - Value of the field.
     ### Examples
-          iex>  FatEcto.FatHelper.is_fat_ecto_field?(value)
+          iex>  FatEcto.FatHelper.fat_ecto_reserve_field?(value)
   """
-  @spec is_fat_ecto_field?(any()) :: boolean()
-  def is_fat_ecto_field?(value) do
+  @spec fat_ecto_reserve_field?(any()) :: boolean()
+  def fat_ecto_reserve_field?(value) do
     cond do
       is_number(value) ->
         false
@@ -152,78 +153,7 @@ defmodule FatEcto.FatHelper do
     end
   end
 
-  # @spec params_valid(
-  #         queryable :: Ecto.Queryable.t() | (any -> Ecto.Queryable.t()),
-  #         String.t() | [String.t()],
-  #         opts :: Keyword.t()
-  #       ) :: Ecto.Queryable.t()
-  def params_valid(queryable, k, options) do
-    table =
-      case queryable do
-        queryable when is_atom(queryable) ->
-          struct = apply(queryable, :__struct__, [])
-          struct.__meta__.source
-
-        queryable when is_binary(queryable) ->
-          queryable
-
-        _ ->
-          %{source: {table, _model}} = queryable.from
-          table
-      end
-
-    restrict_params(string_to_atom(table), k, options)
-  end
-
-  def restrict_params(table, select_params, options) when is_binary(select_params) do
-    restrict_params(table, [select_params], options)
-    |> hd()
-  end
-
-  def restrict_params(_table, select_params, _options) when is_boolean(select_params) do
-    select_params
-  end
-
-  def restrict_params(table, select_params, options) do
-    if options[:blacklist_params] do
-      check_blacklist_params(table, select_params, options)
-    else
-      case Application.get_env(options[:otp_app], :fat_ecto)[:blacklist_params] do
-        nil ->
-          select_params
-
-        _ ->
-          check_blacklist_params(table, select_params, options)
-      end
-    end
-  end
-
-  def check_blacklist_params(table, select_params, options) do
-    if Keyword.has_key?(options[:blacklist_params], table) do
-      filtered_params =
-        Enum.reject(Keyword.fetch!(options[:blacklist_params], table), fn el ->
-          !Enum.member?(select_params, el)
-        end)
-
-      case Enum.count(filtered_params) do
-        0 ->
-          select_params
-
-        _ ->
-          raise ArgumentError,
-            message: "the fields #{inspect(filtered_params)} of #{table} are not allowed in the query"
-      end
-    else
-      select_params
-    end
-  end
-
-  def check_params_validity(build_options, queryable, k) do
-    if build_options[:table],
-      do: params_valid(build_options[:table], k, build_options),
-      else: params_valid(queryable, k, build_options)
-  end
-
+  @spec dynamic_binding(map()) :: map()
   def dynamic_binding(map) when is_map(map), do: map(map, false)
   defp do_binding(_key, value, _nested) when not is_map(value), do: value
   defp do_binding("$" <> _key, value, nested), do: map(value, nested)
@@ -232,6 +162,7 @@ defmodule FatEcto.FatHelper do
   defp put_binding(map, false), do: Map.put_new(map, "$binding", :first)
   defp put_binding(map, true), do: Map.put_new(map, "$binding", :last)
 
+  @spec get_primary_keys(any()) :: any()
   def get_primary_keys(query) do
     %{source: {_table, model}} = query.from
 
@@ -244,6 +175,7 @@ defmodule FatEcto.FatHelper do
     end
   end
 
+  @spec dynamic_preloading(map()) :: any()
   def dynamic_preloading(map) when is_map(map), do: do_preloading(map)
   defp do_preloading(map), do: Enum.reduce(map, [], &do_preloading/2)
 
@@ -259,6 +191,7 @@ defmodule FatEcto.FatHelper do
   defp do_preloading({key, %{"$binding" => :last}}, acc), do: [String.to_atom(key) | acc]
   defp do_preloading({key, %{"$binding" => :first}}, acc), do: [String.to_atom(key) | acc]
   defp do_preloading({_key, _value}, acc), do: acc
+  @spec remove_conflicting_order_by(any(), any()) :: any()
   def remove_conflicting_order_by(queryable, nil), do: queryable
 
   def remove_conflicting_order_by(queryable, _distinct) do
@@ -269,8 +202,7 @@ defmodule FatEcto.FatHelper do
         if Enum.empty?(order) do
           queryable
         else
-          queryable
-          |> Ecto.Query.exclude(:order_by)
+          Query.exclude(queryable, :order_by)
         end
 
       _ ->

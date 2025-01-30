@@ -1,15 +1,7 @@
 defmodule FatUtils.FatRecord do
   @moduledoc false
-  defmacro __using__(options) do
+  defmacro __using__(_options) do
     quote location: :keep do
-      @options FatEcto.FatHelper.get_module_options(unquote(options), FatUtils.FatRecord)
-
-      @encoder_library @options[:encoder_library]
-
-      if !@encoder_library do
-        raise "please define encoder_library when using fat record utils"
-      end
-
       # TODO: Add a jason library configuration support
       # @doc """
       # Returns the configured JSON encoding library for FatUtils.FatRecord.
@@ -45,6 +37,7 @@ defmodule FatUtils.FatRecord do
             }
 
       """
+
       def sanitize(records) when is_list(records) do
         sanitize_list(records)
       end
@@ -73,13 +66,23 @@ defmodule FatUtils.FatRecord do
             [key, value] = Tuple.to_list(record)
             %{key => sanitize(value)}
 
-          # TODO: fix this warning
           _size ->
+            encoder_library = Application.get_env(:fat_ecto, :json_library, Jason)
+
+            if !encoder_library do
+              raise "please define encoder_library when using fat record utils"
+            end
+
+            opts = get_encoder_opts(encoder_library)
+
             record
             |> Tuple.to_list()
-            |> @encoder_library.Encoder.List.encode([])
+            |> encoder_library.encode(opts)
         end
       end
+
+      defp get_encoder_opts(Jason), do: []
+      defp get_encoder_opts(_), do: []
 
       def sanitize_map(record) when is_map(record) do
         {rec, condition} = custom_map?(record)

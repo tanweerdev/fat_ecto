@@ -17,8 +17,7 @@ defmodule FatEcto.FatHospital do
   end
 
   def changeset(struct, params \\ %{}) do
-    struct
-    |> cast(params, [
+    cast(struct, params, [
       :name,
       :location,
       :phone,

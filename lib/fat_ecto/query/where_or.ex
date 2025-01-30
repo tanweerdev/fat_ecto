@@ -1,20 +1,34 @@
 defmodule FatEcto.FatQuery.WhereOr do
-  alias FatEcto.FatQuery.{FatDynamics, FatNotDynamics}
-  alias FatEcto.FatHelper
+  @moduledoc """
+  This module provides functionality for constructing dynamic `where` or `where not` queries in Ecto.
+
+  It includes aliases for `FatEcto.FatQuery.FatDynamics` and `FatEcto.FatQuery.FatNotDynamics` to simplify the usage of dynamic query generation.
+
+  ## Examples
+
+    # Example usage of FatDynamics
+    FatDynamics.some_function(...)
+
+    # Example usage of FatNotDynamics
+    FatNotDynamics.some_function(...)
+  """
+
   import Ecto.Query
+  alias FatEcto.FatQuery.{FatDynamics, FatNotDynamics}
+
+  @spec or_condition(any(), any(), any(), any()) :: any()
   def or_condition(queryable, nil, _build_options, _options), do: queryable
 
-  def or_condition(queryable, where_map, build_options, options) do
+  def or_condition(queryable, where_map, _build_options, options) do
     dynamics =
       Enum.reduce(where_map, false, fn {k, map_cond}, dynamics ->
-        FatHelper.params_valid(queryable, k, build_options)
-
         map_condition(k, dynamics, map_cond, options)
       end)
 
     from(q in queryable, where: ^dynamics)
   end
 
+  @spec map_condition(any(), any(), any(), any()) :: any()
   def map_condition(k, dynamics, map_cond, opts) when is_map(map_cond) do
     Enum.reduce(map_cond, dynamics, fn {key, value}, dynamics ->
       case key do
@@ -78,12 +92,12 @@ defmodule FatEcto.FatQuery.WhereOr do
   end
 
   def map_condition(k, dynamics, map_cond, opts) when is_nil(map_cond) do
-    FatDynamics.is_nil_dynamic(k, dynamics, opts ++ [dynamic_type: :or])
+    FatDynamics.nil_dynamic?(k, dynamics, opts ++ [dynamic_type: :or])
   end
 
   def map_condition(k, dynamics, map_cond, opts)
       when map_cond == "$not_null" do
-    FatNotDynamics.not_is_nil_dynamic(k, dynamics, opts ++ [dynamic_type: :or])
+    FatNotDynamics.not_nil_dynamic?(k, dynamics, opts ++ [dynamic_type: :or])
   end
 
   def map_condition(k, dynamics, map_cond, opts) when not is_list(map_cond) do
@@ -93,7 +107,7 @@ defmodule FatEcto.FatQuery.WhereOr do
   def map_condition(k, dynamics, map_cond, opts)
       when is_list(map_cond) and k == "$not_null" do
     Enum.reduce(map_cond, dynamics, fn key, dynamics ->
-      FatNotDynamics.not_is_nil_dynamic(key, dynamics, opts ++ [dynamic_type: :or])
+      FatNotDynamics.not_nil_dynamic?(key, dynamics, opts ++ [dynamic_type: :or])
     end)
   end
 

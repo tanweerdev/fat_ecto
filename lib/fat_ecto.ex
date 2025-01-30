@@ -170,7 +170,7 @@ defmodule FatEcto do
         }
       },
       "$where" => %{"rating" => 3}
-    }   
+    }
   iex> build(FatEcto.FatHospital, query_opts)
   iex> #Ecto.Query<from(
          h in FatEcto.FatHospital,
@@ -181,7 +181,7 @@ defmodule FatEcto do
             ((h.total_staff <= ^4 or h.total_staff >= ^5) and ((h.rating < ^1 or h.rating > ^3) and ^true)),
          where: r.incharge == ^"John" and ^true,
          select: %{^"fat_rooms" => map(r, [:beds, :capacity, :level])}
-        )>  
+        )>
   ```
 
 
@@ -346,7 +346,7 @@ defmodule FatEcto do
             %{"$group" => %{^"capacity" => f0.capacity}}
           )
       ))>
-    
+
   ```
   ### Distinct
     Adds _distinct_ query expression to avoid duplication of records. You can pass the distinct _field name_ or _true_.
@@ -358,7 +358,7 @@ defmodule FatEcto do
     }
 
   iex> build(FatEcto.FatHospital, opts)
-  iex> Ecto.Query<from(h in FatEcto.FatHospital, distinct: [asc: h.name])>  
+  iex> Ecto.Query<from(h in FatEcto.FatHospital, distinct: [asc: h.name])>
 
   query_opts = %{
       "$distinct" => true
@@ -394,13 +394,6 @@ defmodule FatEcto do
   #### Example
 
   ```elixir
-  blacklist_params: [
-      {:fat_rooms, ["description"]},
-      {:fat_beds, ["is_active"]},
-      {:fat_hospitals, ["phone"]},
-      {:fat_doctors, ["name"]},
-      {:fat_patients, ["date_of_birth"]}
-    ]
   query_opts = %{
       "$select" => %{
         "$fields" => ["name", "purpose", "description"],
@@ -411,6 +404,6 @@ defmodule FatEcto do
   iex> Query.build!(FatEcto.FatRoom, query_opts)
   iex>  ** (ArgumentError) the fields ["description"] of fat_rooms are not allowed in the query
   ```
-                               
+
   """
 end

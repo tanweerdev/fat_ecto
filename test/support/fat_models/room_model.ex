@@ -14,9 +14,9 @@ defmodule FatEcto.FatRoom do
     has_many(:fat_beds, FatEcto.FatBed)
   end
 
+  # TODO: check do we really use changeset in fat_ecto
   def changeset(struct, params \\ %{}) do
-    struct
-    |> cast(params, [
+    cast(struct, params, [
       :name,
       :purpose,
       :description,

@@ -7,7 +7,6 @@ defmodule Query.WhereTest do
     insert(:hospital)
     room = insert(:room)
     insert(:bed, fat_room_id: room.id)
-    Application.delete_env(:fat_ecto, :fat_ecto, [:blacklist_params])
 
     :ok
   end
@@ -24,7 +23,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.one(query)
+      query
+      |> Repo.one()
       |> sanitize()
       |> Map.drop([:start_date, :end_date, :id])
 
@@ -56,7 +56,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.one(query)
+      query
+      |> Repo.one()
       |> sanitize()
       |> Map.drop([:start_date, :end_date, :id])
 
@@ -87,7 +88,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.one(query)
+      query
+      |> Repo.one()
       |> sanitize()
       |> Map.drop([:start_date, :end_date, :id])
 
@@ -118,7 +120,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.one(query)
+      query
+      |> Repo.one()
       |> sanitize()
       |> Map.drop([:start_date, :end_date, :id])
 
@@ -154,7 +157,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.one(query)
+      query
+      |> Repo.one()
       |> sanitize()
       |> Map.drop([:id])
 
@@ -178,7 +182,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.one(query)
+      query
+      |> Repo.one()
       |> sanitize()
       |> Map.drop([:id])
 
@@ -238,7 +243,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.one(query)
+      query
+      |> Repo.one()
       |> sanitize()
       |> Map.drop([:id])
 
@@ -262,7 +268,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.one(query)
+      query
+      |> Repo.one()
       |> sanitize()
       |> Map.drop([:id])
 
@@ -286,7 +293,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.one(query)
+      query
+      |> Repo.one()
       |> sanitize()
       |> Map.drop([:id])
 
@@ -341,15 +349,19 @@ defmodule Query.WhereTest do
   end
 
   test "returns the query where field notbetween blacklisted" do
-    Application.put_env(:fat_ecto, :fat_ecto,
-      blacklist_params: [{:fat_hospitals, ["some", "total_staff"]}, {:fat_patients, ["appointments_count"]}]
-    )
-
     opts = %{
       "$where" => %{"date_of_birth" => %{"$not_between" => [10, 20]}}
     }
 
-    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatPatient, opts) end
+    query = Query.build!(FatEcto.FatPatient, opts)
+
+    expected =
+      from(
+        p in FatEcto.FatPatient,
+        where: (p.date_of_birth < ^10 or p.date_of_birth > ^20) and ^true
+      )
+
+    assert inspect(query) == inspect(expected)
   end
 
   test "returns the query where field notbetween equal" do
@@ -402,7 +414,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.one(query)
+      query
+      |> Repo.one()
       |> sanitize()
       |> Map.drop([:id])
 
@@ -427,7 +440,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.one(query)
+      query
+      |> Repo.one()
       |> sanitize()
       |> Map.drop([:id])
 
@@ -451,7 +465,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.one(query)
+      query
+      |> Repo.one()
       |> sanitize()
       |> Map.drop([:id])
 
@@ -465,16 +480,19 @@ defmodule Query.WhereTest do
            }
   end
 
-  test "returns the query where field is binary and blacklisted" do
-    Application.put_env(:fat_ecto, :fat_ecto,
-      blacklist_params: [{:fat_hospitals, ["location"]}, {:fat_beds, ["is_active"]}]
-    )
-
+  test "returns query where field is binary" do
     opts = %{
       "$where" => %{"phone" => "1234567"}
     }
 
-    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatHospital, opts) end
+    query = Query.build!(FatEcto.FatHospital, opts)
+
+    expected =
+      from(f0 in FatEcto.FatHospital,
+        where: f0.phone == ^"1234567" and ^true
+      )
+
+    assert inspect(query) == inspect(expected)
   end
 
   test "returns the query with or fields" do
@@ -508,7 +526,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.all(query)
+      query
+      |> Repo.all()
       |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
@@ -557,7 +576,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.all(query)
+      query
+      |> Repo.all()
       |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
@@ -597,7 +617,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.all(query)
+      query
+      |> Repo.all()
       |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
@@ -648,7 +669,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.all(query)
+      query
+      |> Repo.all()
       |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
@@ -691,7 +713,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.all(query)
+      query
+      |> Repo.all()
       |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
@@ -751,7 +774,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.all(query)
+      query
+      |> Repo.all()
       |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
@@ -822,7 +846,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.all(query)
+      query
+      |> Repo.all()
       |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
@@ -937,7 +962,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.all(query)
+      query
+      |> Repo.all()
       |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
@@ -1016,7 +1042,8 @@ defmodule Query.WhereTest do
     assert inspect(query) == inspect(expected)
 
     result =
-      Repo.all(query)
+      query
+      |> Repo.all()
       |> sanitize()
       |> Enum.map(fn record -> Map.drop(record, [:id]) end)
 
@@ -1044,10 +1071,6 @@ defmodule Query.WhereTest do
     insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
     insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
 
-    Application.put_env(:fat_ecto, :fat_ecto,
-      blacklist_params: [{:fat_hospitals, ["some", "total_staff"]}, {:fat_beds, ["is_active"]}]
-    )
-
     opts = %{
       "$where" => %{
         "name" => %{"$not_ilike" => "%Joh%"},
@@ -1074,7 +1097,32 @@ defmodule Query.WhereTest do
       }
     }
 
-    assert_raise ArgumentError, fn -> Query.build!(FatEcto.FatHospital, opts) end
+    query = Query.build!(FatEcto.FatHospital, opts)
+
+    expected =
+      from(f0 in FatEcto.FatHospital,
+        where:
+          f0.total_staff == ^2 or
+            (f0.rating in ^[2, 3] or
+               (f0.phone == ^"0071566025410" or
+                  (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
+                     (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^false)))),
+        where:
+          f0.total_staff == ^2 or
+            (f0.rating in ^[2, 3] or
+               (not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^false))),
+        where:
+          (f0.total_staff > ^2 and f0.total_staff < ^6) or
+            (f0.rating not in ^[2, 3] or
+               (ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") or
+                  (not like(fragment("(?)::TEXT", f0.location), ^"%some%") or ^false))),
+        where:
+          not ilike(fragment("(?)::TEXT", f0.name), ^"%Joh%") and
+            (not like(fragment("(?)::TEXT", f0.location), ^"%some%") and ^true)
+      )
+
+    assert inspect(expected) == inspect(query)
   end
 
   test "paginator with primary key id" do
@@ -1083,7 +1131,8 @@ defmodule Query.WhereTest do
     }
 
     paginator =
-      Query.build!(FatEcto.FatPatient, opts)
+      FatEcto.FatPatient
+      |> Query.build!(opts)
       |> Query.paginate(skip: 0, limit: 10)
 
     %{count_query: count_query} = paginator
@@ -1101,7 +1150,8 @@ defmodule Query.WhereTest do
     }
 
     paginator =
-      Query.build!(FatEcto.FatRoom, opts)
+      FatEcto.FatRoom
+      |> Query.build!(opts)
       |> Query.paginate(skip: 0, limit: 10)
 
     %{count_query: count_query} = paginator
@@ -1121,7 +1171,8 @@ defmodule Query.WhereTest do
     }
 
     paginator =
-      Query.build!(FatEcto.FatHospitalDoctor, opts)
+      FatEcto.FatHospitalDoctor
+      |> Query.build!(opts)
       |> Query.paginate(skip: 0, limit: 10)
 
     %{count_query: count_query} = paginator
@@ -1140,7 +1191,8 @@ defmodule Query.WhereTest do
     }
 
     paginator =
-      Query.build!("fat_doctors_patients", opts)
+      "fat_doctors_patients"
+      |> Query.build!(opts)
       |> Query.paginate(skip: 0, limit: 10)
 
     %{count_query: count_query} = paginator
@@ -1161,7 +1213,8 @@ defmodule Query.WhereTest do
     }
 
     paginator =
-      Query.build!("fat_patients", opts)
+      "fat_patients"
+      |> Query.build!(opts)
       |> Query.paginate(skip: 0, limit: 10)
 
     %{count_query: count_query} = paginator

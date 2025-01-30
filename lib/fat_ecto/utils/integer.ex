@@ -4,8 +4,10 @@ defmodule FatUtils.Integer do
   """
 
   @doc """
-    Parse integer from string and return result in the form of tuple. 
+    Parse integer from string and return result in the form of tuple.
   """
+  @spec parse(any()) :: {:error, nil} | {:ok, any()}
+
   def parse(int_str) do
     if is_integer(int_str) do
       {:ok, int_str}
@@ -23,6 +25,7 @@ defmodule FatUtils.Integer do
   @doc """
     Parse integer from string and return result.
   """
+  @spec parse!(any()) :: any()
 
   def parse!(int_str) do
     if is_integer(int_str) do

@@ -7,6 +7,8 @@
         excluded: [
           ~r"/_build/",
           ~r"/deps/",
+          ~r"/priv/repo/migrations/",
+          ~r"/test/support/",
           ~r"/assets/"
         ]
       },
@@ -32,7 +34,7 @@
         {Credo.Check.Readability.LargeNumbers, only_greater_than: 99999},
         {Credo.Check.Readability.MaxLineLength, max_length: 120},
         {Credo.Check.Readability.ModuleAttributeNames},
-        {Credo.Check.Readability.ModuleDoc, false},
+        {Credo.Check.Readability.ModuleDoc},
         {Credo.Check.Readability.ModuleNames},
         {Credo.Check.Readability.ParenthesesOnZeroArityDefs},
         {Credo.Check.Readability.ParenthesesInCondition},
@@ -54,14 +56,15 @@
         {Credo.Check.Refactor.CyclomaticComplexity},
         {Credo.Check.Refactor.DoubleBooleanNegation},
         {Credo.Check.Refactor.FunctionArity},
-        {Credo.Check.Refactor.LongQuoteBlocks, files: %{excluded: ["apps/swagger_doc"]}},
+        # {Credo.Check.Refactor.LongQuoteBlocks, files: %{excluded: ["apps/swagger_doc"]}},
+        {Credo.Check.Refactor.LongQuoteBlocks, false},
         {Credo.Check.Refactor.MatchInCondition},
         {Credo.Check.Refactor.NegatedConditionsInUnless},
         {Credo.Check.Refactor.NegatedConditionsWithElse},
         {Credo.Check.Refactor.Nesting, false},
         {Credo.Check.Refactor.PipeChainStart},
         {Credo.Check.Refactor.UnlessWithElse},
-        {Credo.Check.Refactor.WithClauses, false},
+        {Credo.Check.Refactor.WithClauses},
         {Credo.Check.Refactor.RedundantWithClauseResult},
         {Credo.Check.Refactor.FilterFilter},
         {Credo.Check.Refactor.FilterCount},
@@ -85,12 +88,12 @@
         {Credo.Check.Warning.RaiseInsideRescue},
         # TODO: need to be enable in code improvement part
         {Credo.Check.Warning.SpecWithStruct, false},
-        {Credo.Check.Warning.MissedMetadataKeyInLoggerConfig, false},
+        {Credo.Check.Warning.MissedMetadataKeyInLoggerConfig},
         # Controversial and experimental checks (opt-in, just remove `, false`)
         {Credo.Check.Refactor.ABCSize, false},
-        {Credo.Check.Refactor.AppendSingleItem, false},
+        {Credo.Check.Refactor.AppendSingleItem},
         {Credo.Check.Refactor.VariableRebinding, false},
-        {Credo.Check.Warning.MapGetUnsafePass, false},
+        {Credo.Check.Warning.MapGetUnsafePass},
         {Credo.Check.Consistency.MultiAliasImportRequireUse, false},
         # Deprecated checks (these will be deleted after a grace period)
         {Credo.Check.Readability.Specs},

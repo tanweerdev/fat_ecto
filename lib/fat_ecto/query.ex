@@ -1,4 +1,8 @@
 defmodule FatEcto.FatQuery do
+  @moduledoc """
+  This module provides functionality for constructing dynamic queries in Ecto.
+  """
+
   # TODO: make paginator optional via global config and via options passed
   defmacro __using__(options \\ []) do
     quote location: :keep do
@@ -19,46 +23,22 @@ defmodule FatEcto.FatQuery do
       end
 
       @query_param_defaults %{
-        "$find" => "$all",
         "$where" => nil,
-        # TODO: $max and $min should be part of select as in example docs
-        "$max" => nil,
-        "$min" => nil,
-        "$include" => nil,
-        "$select" => nil,
         "$order" => nil,
-        # TODO: $group should be part of select
-        "$group" => nil,
         "$skip" => 0,
-        "$limit" => @options[:default_limit] || 10,
-        "$count_on" => nil
+        "$limit" => @options[:default_limit] || 10
       }
 
       use FatEcto.FatPaginator, @options
 
       # import FatEcto.FatQuery.FatWhere, only: [build_where: 2] # import and use like this if without defmacro
       # import FatEcto.FatQuery.FatOrderBy, only: [build_order_by: 2]
-      # import FatEcto.FatQuery.FatInclude, only: [build_include: 3]
-      # import FatEcto.FatQuery.FatSelect, only: [build_select: 4]
-      # import FatEcto.FatQuery.FatJoin, only: [build_join: 2]
-      # import FatEcto.FatQuery.FatGroupBy, only: [build_group_by: 2]
-
       import Ecto.Query
-      alias FatEcto.FatQuery.FatWhere
       alias FatEcto.FatQuery.FatOrderBy
-      alias FatEcto.FatQuery.FatInclude
-      alias FatEcto.FatQuery.FatSelect
-      alias FatEcto.FatQuery.FatJoin
-      alias FatEcto.FatQuery.FatGroupBy
-      alias FatEcto.FatQuery.FatAggregate
+      alias FatEcto.FatQuery.FatWhere
 
       defdelegate build_where(queryable, params, build_options), to: FatWhere
-      # defdelegate build_order_by(queryable, params, build_options), to: FatOrderBy
-      # defdelegate build_include(queryable, params, model, build_options), to: FatInclude
-      # defdelegate build_select(queryable, params, model, build_options), to: FatSelect
-      # defdelegate build_join(queryable, params, build_options), to: FatJoin
-      # defdelegate build_group_by(queryable, params, build_options), to: FatGroupBy
-      # defdelegate build_aggregate(queryable, params, build_options), to: FatAggregate
+      defdelegate build_order_by(queryable, params, build_options), to: FatOrderBy
 
       # TODO: Should return {:ok, query}
       @doc """
@@ -172,7 +152,8 @@ defmodule FatEcto.FatQuery do
         # |> FatEcto.FatQuery.FatInclude.build_include_preloads(opts["$include"])
         # |> FatEcto.FatHelper.remove_conflicting_order_by(opts["$distinct_nested"])
         # |> FatEcto.FatQuery.FatDistinct.build_distinct(opts["$distinct"], build_options)
-        # |> FatEcto.FatQuery.FatOrderBy.build_order_by(opts["$order"], build_options)
+        |> FatEcto.FatQuery.FatOrderBy.build_order_by(opts["$order"], build_options)
+
         # |> FatEcto.FatQuery.FatAggregate.build_aggregate(opts["$aggregate"], build_options)
         # |> FatEcto.FatQuery.FatGroupBy.build_group_by(opts["$group"], build_options)
       end
@@ -325,7 +306,7 @@ defmodule FatEcto.FatQuery do
           @repo.aggregate(
             records,
             :count,
-            FatEcto.FatHelper.get_primary_keys(records) |> hd(),
+            records |> FatEcto.FatHelper.get_primary_keys() |> hd(),
             fetch_opts
           )
         end

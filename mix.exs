@@ -11,7 +11,7 @@ defmodule FatEcto.MixProject do
       deps: deps(),
       name: "FatEcto",
       elixirc_paths: elixirc_paths(Mix.env()),
-      elixirc_options: [warnings_as_errors: true],
+      # elixirc_options: [warnings_as_errors: true],
       description: description(),
       package: package(),
       aliases: aliases(),

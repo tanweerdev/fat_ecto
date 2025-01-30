@@ -1,4 +1,7 @@
 defmodule FatEcto.IncludeHelper do
+  @moduledoc false
+  @spec include?(any(), any()) :: boolean()
+  @spec include?(any(), any(), keyword()) :: boolean()
   def include?(name, options, config \\ []) do
     only_key = Keyword.get(config, :only_field_name) || :only
     except_key = Keyword.get(config, :except_field_name) || :except
@@ -21,6 +24,8 @@ defmodule FatEcto.IncludeHelper do
     end
   end
 
+  @spec overridables(any(), any()) :: any()
+  @spec overridables(any(), any(), any()) :: any()
   def overridables(names, options, _config \\ []) do
     Enum.reduce(names, [], fn {name, parity}, acc ->
       if include?(name, options) do

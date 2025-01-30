@@ -3,6 +3,7 @@ defmodule FatUtils.DateTime do
     Takes integer and binary values to convert them to proper DateTime format.
   """
 
+  @spec parse(any()) :: :error | {:ok, DateTime.t()}
   @doc """
     Takes date time in the form of integer to convert to unix format and also in binary format to convert to iso8601.
   """
@@ -13,6 +14,7 @@ defmodule FatUtils.DateTime do
     end
   end
 
+  @spec parse!(any()) :: nil | DateTime.t()
   @doc """
     Takes date time in the form of integer to convert to unix format and also in binary format to convert to iso8601.
   """

@@ -6,16 +6,20 @@ defmodule FatUtils.String do
   @doc """
     Generate string of length 8 if length is not defined.
   """
+  @spec random(non_neg_integer()) :: binary()
   def random(length \\ 8) do
-    :crypto.strong_rand_bytes(length) |> Base.url_encode64(padding: false) |> binary_part(0, length)
+    length |> :crypto.strong_rand_bytes() |> Base.url_encode64(padding: false) |> binary_part(0, length)
   end
 
-  @chars "ABCDEFGHIJKLMNOPQRSTUVWXYZ" |> String.split("")
+  @chars String.split("ABCDEFGHIJKLMNOPQRSTUVWXYZ", "")
   @doc """
     Generate string of specific length and also takes comma separated characters from which string is generated.
   """
+  @spec random_of(integer(), any()) :: binary()
+
   def random_of(length, array_of_chars \\ @chars) do
-    Enum.reduce(1..length, [], fn _i, acc ->
+    1..length
+    |> Enum.reduce([], fn _i, acc ->
       [Enum.random(array_of_chars) | acc]
     end)
     |> Enum.join("")

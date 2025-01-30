@@ -132,7 +132,7 @@ defmodule FatEcto.FatQuery.Filterable do
       end
 
       defp do_remove_fields_with_ignoreable_values(
-             ignoreable_field_value = [],
+             [] = ignoreable_field_value,
              params,
              {param_key, param_value}
            ) do

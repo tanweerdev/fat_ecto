@@ -98,7 +98,7 @@ defmodule FatEcto.FatContext do
         #     schema
         #   end
 
-        @repo.all(schema) |> @repo.preload(preloads)
+        schema |> @repo.all() |> @repo.preload(preloads)
       end
 
       # Context.list(User,[name: "john"] , [:actions])
@@ -108,7 +108,7 @@ defmodule FatEcto.FatContext do
       def list_by(schema, keyword_cond, preloads \\ []) do
         query = Ecto.Query.where(schema, ^keyword_cond)
 
-        @repo.all(query) |> @repo.preload(preloads)
+        query |> @repo.all() |> @repo.preload(preloads)
       end
 
       # Context.get!(User, 2)
@@ -125,19 +125,6 @@ defmodule FatEcto.FatContext do
         case @repo.get(schema, id) do
           nil -> {:error, :not_found}
           record -> {:ok, @repo.preload(record, preloads)}
-        end
-      end
-
-      @doc """
-        Return record which matches the id and return error tuple if id is invalid.
-      """
-      def get_catch(schema, id, preloads \\ []) do
-        try do
-          schema
-          |> @repo.get(id)
-          |> @repo.preload(preloads)
-        rescue
-          _ in _ -> {:error, :invalid_id}
         end
       end
 
@@ -244,7 +231,8 @@ defmodule FatEcto.FatContext do
 
       # TODO: add docs and test cases.
       # TODO: also accept limit and order_by options
-      # TODO: add find_and_update method, {:error, :not_found} if record not found, also accept limit and order_by options
+      # TODO: add find_and_update method, {:error, :not_found} if record not found,
+      # also accept limit and order_by options
       def upsert(
             schema,
             [get_by_clauses: get_by_clauses, update_params: update_params, create_params: create_params],

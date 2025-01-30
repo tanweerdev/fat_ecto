@@ -1,4 +1,6 @@
 defmodule FatEcto.AssocModel do
+  @moduledoc false
+  @spec has_and_many_to_many(atom()) :: list()
   def has_and_many_to_many(model) do
     Enum.filter(all(model), fn association ->
       case association do
@@ -9,6 +11,7 @@ defmodule FatEcto.AssocModel do
     end)
   end
 
+  @spec has_only(atom()) :: list()
   def has_only(model) do
     Enum.filter(all(model), fn association ->
       case association do
@@ -18,6 +21,7 @@ defmodule FatEcto.AssocModel do
     end)
   end
 
+  @spec all(atom()) :: any()
   def all(model) do
     Enum.reduce(model.__schema__(:associations), [], fn relation_name, acc ->
       acc ++ [model.__schema__(:association, relation_name)]

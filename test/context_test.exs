@@ -1,12 +1,11 @@
 defmodule Fat.ContextTest do
   use FatEcto.ConnCase
   alias Fat.ContextMacro
-  alias FatEcto.{Repo, FatRoom, FatBed}
+  alias FatEcto.{FatBed, FatRoom, Repo}
 
   setup do
     Repo.start_link()
     Repo.insert(%FatRoom{name: "John", purpose: "Testing", description: "descriptive", is_active: true})
-    Application.delete_env(:fat_ecto, :fat_ecto, [:blacklist_params])
 
     :ok
   end
@@ -15,11 +14,12 @@ defmodule Fat.ContextTest do
     Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
 
     room =
-      from(c in FatRoom,
-        where: c.name == "John",
-        limit: 1
+      Repo.one(
+        from(c in FatRoom,
+          where: c.name == "John",
+          limit: 1
+        )
       )
-      |> Repo.one()
 
     Repo.insert(%FatBed{
       name: "John",
@@ -40,11 +40,12 @@ defmodule Fat.ContextTest do
     Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
 
     room =
-      from(c in FatRoom,
-        where: c.name == "Doe",
-        limit: 1
+      Repo.one(
+        from(c in FatRoom,
+          where: c.name == "Doe",
+          limit: 1
+        )
       )
-      |> Repo.one()
 
     Repo.insert(%FatBed{
       name: "John",
@@ -129,13 +130,8 @@ defmodule Fat.ContextTest do
     assert result == {:error, :not_found}
 
     {:ok, record} = ContextMacro.get(FatRoom, room.id, [:fat_beds])
-    sibling = record.fat_beds |> List.first()
+    sibling = List.first(record.fat_beds)
     assert sibling.fat_room_id == room.id
-  end
-
-  test "get record with string id" do
-    record = ContextMacro.get_catch(FatRoom, "fsg")
-    assert record == {:error, :invalid_id}
   end
 
   test "get by record with preload association" do
@@ -155,7 +151,7 @@ defmodule Fat.ContextTest do
 
     {:ok, record} = ContextMacro.get_by(FatRoom, [name: "Doe"], [:fat_beds])
 
-    sibling = record.fat_beds |> List.first()
+    sibling = List.first(record.fat_beds)
     assert sibling.fat_room_id == room.id
   end
 
@@ -211,7 +207,7 @@ defmodule Fat.ContextTest do
     })
 
     record = ContextMacro.get_all_by(FatRoom, [name: "Doe"], [:fat_beds])
-    assert record |> Enum.count() == 2
+    assert Enum.count(record) == 2
   end
 
   test "insert record and use fat ecto to query the result" do

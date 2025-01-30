@@ -17,11 +17,13 @@ defmodule FatEcto.Sample.Pagination do
 
     total_records = count_records(count_query, repo)
 
+    pages = (total_records / limit) |> Float.ceil() |> trunc()
+
     meta = %{
       skip: skip,
       limit: limit,
       total_records: total_records,
-      pages: Float.ceil(total_records / limit) |> trunc()
+      pages: pages
     }
 
     {query, meta}
@@ -34,7 +36,7 @@ defmodule FatEcto.Sample.Pagination do
   end
 
   def count_records(%{select: nil} = count_query, repo) do
-    count_query |> repo.aggregate(:count, FatEcto.FatHelper.get_primary_keys(count_query) |> hd())
+    repo.aggregate(count_query, :count, count_query |> FatEcto.FatHelper.get_primary_keys() |> hd())
   end
 
   def count_records(count_query, repo) do

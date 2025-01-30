@@ -12,6 +12,7 @@ defmodule FatUtils.Network do
       :world
 
   """
+  @spec ubuntu_network_address() :: any()
   def ubuntu_network_address do
     {ip_string, 0} = System.cmd("hostname", ["-I"])
     List.first(String.split(ip_string))

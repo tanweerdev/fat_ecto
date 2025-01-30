@@ -1,4 +1,4 @@
-defmodule SanitizeRecord do
+defmodule SanitizeRecordsDocs do
   @moduledoc """
   This module sanitize the response by removing structs that are not loaded alognwith meta. It supports lists of maps, tuples and map.
 

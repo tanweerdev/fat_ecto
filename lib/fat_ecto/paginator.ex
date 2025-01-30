@@ -37,9 +37,11 @@ defmodule FatEcto.FatPaginator do
               iex> skip
               0
               iex> count_query
-              #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.total_staff > ^1 and f0.total_staff < ^3 and (not(is_nil(f0.rating)) and (f0.name == ^"%John%" and (is_nil(f0.location) and ^true))), distinct: true>
+              #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.total_staff > ^1 and f0.total_staff < ^3 and
+                (not is_nil(f0.rating) and (f0.name == ^"%John%" and (is_nil(f0.location) and ^true))), distinct: true>
               iex> data_query
-              #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.total_staff > ^1 and f0.total_staff < ^3 and (not(is_nil(f0.rating)) and (f0.name == ^\"%John%\" and (is_nil(f0.location) and ^true))), limit: ^10, offset: ^0, select: map(f0, [:name, :location, :rating])>
+              #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.total_staff > ^1 and f0.total_staff < ^3 and
+                (not is_nil(f0.rating) and (f0.name == ^\"%John%\" and (is_nil(f0.location) and ^true))), limit: ^10, offset: ^0>
       """
 
       def paginate(query, params) do
@@ -68,8 +70,7 @@ defmodule FatEcto.FatPaginator do
           |> aggregate()
           |> exclude(:distinct)
 
-        queryable
-        |> distinct(true)
+        distinct(queryable, true)
 
         # |> exclude(:select)
 
@@ -104,8 +105,7 @@ defmodule FatEcto.FatPaginator do
         if !is_nil(primary_keys) do
           case Enum.count(primary_keys) do
             1 ->
-              query
-              |> exclude(:select)
+              exclude(query, :select)
 
             2 ->
               query

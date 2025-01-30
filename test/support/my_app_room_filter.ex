@@ -1,6 +1,4 @@
 defmodule MyApp.RoomFilter do
-  import Ecto.Query
-
   use FatEcto.FatQuery.Filterable,
     fields_allowed: %{},
     fields_not_allowed: %{
@@ -15,6 +13,8 @@ defmodule MyApp.RoomFilter do
       "purpose" => [],
       "description" => nil
     }
+
+  import Ecto.Query
 
   def not_allowed_fields_filter_fallback(query, "phone", "$ilike", compare_with) do
     where(query, [r], ilike(fragment("(?)::TEXT", r.phone), ^compare_with))

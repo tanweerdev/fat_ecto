@@ -52,6 +52,12 @@ jobs:
       - name: Check Formatting
         run: mix format --check-formatted
 
+      - name: Apply Credo checks
+        run: mix credo --strict
+
+      - name: Apply Dialyzer checks
+        run: mix dialyzer --halt-exit-status
+
       - name: Run tests
         env:
           MIX_ENV: test

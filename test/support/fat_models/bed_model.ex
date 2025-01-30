@@ -12,8 +12,7 @@ defmodule FatEcto.FatBed do
   end
 
   def changeset(struct, params \\ %{}) do
-    struct
-    |> cast(params, [
+    cast(struct, params, [
       :name,
       :purpose,
       :description,

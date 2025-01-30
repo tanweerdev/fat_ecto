@@ -127,9 +127,9 @@ defmodule Utils.ChangesetTest do
     orgnl_changeset =
       FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "testing"})
 
-    changeset = Change.add_error(orgnl_changeset, :phone, "must be present")
+    changeset = Change.add_custom_error(orgnl_changeset, :phone, "must be present")
     assert changeset.errors == [phone: {"must be present", []}]
-    changeset = Change.add_error(orgnl_changeset, :name)
+    changeset = Change.add_custom_error(orgnl_changeset, :name)
     assert changeset.errors == [name: {"is invalid", []}]
   end
 
