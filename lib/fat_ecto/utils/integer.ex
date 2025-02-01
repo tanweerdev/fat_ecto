@@ -1,43 +1,42 @@
 defmodule FatUtils.Integer do
   @moduledoc """
-    Parse integer from strings.
+  Provides utility functions for parsing integers from strings.
+
+  This module handles parsing of integers from strings and ensures consistent return types.
   """
 
   @doc """
-    Parse integer from string and return result in the form of tuple.
+  Parses an integer from a string or returns the integer if already an integer.
+
+  Returns `{:ok, integer}` on success or `{:error, nil}` on failure.
   """
-  @spec parse(any()) :: {:error, nil} | {:ok, any()}
-
+  @spec parse(any()) :: {:ok, integer()} | {:error, nil}
   def parse(int_str) do
-    if is_integer(int_str) do
-      {:ok, int_str}
-    else
-      case int_str && Integer.parse(int_str) do
-        {integer, _} ->
-          {:ok, integer}
-
-        _whatever ->
-          {:error, nil}
-      end
+    case parse!(int_str) do
+      nil -> {:error, nil}
+      integer -> {:ok, integer}
     end
   end
 
   @doc """
-    Parse integer from string and return result.
+  Parses an integer from a string or returns the integer if already an integer.
+
+  Returns the parsed integer on success or `nil` on failure.
   """
-  @spec parse!(any()) :: any()
-
+  @spec parse!(any()) :: integer() | nil
   def parse!(int_str) do
-    if is_integer(int_str) do
-      int_str
-    else
-      case int_str && Integer.parse(int_str) do
-        {integer, _} ->
-          integer
+    cond do
+      is_integer(int_str) -> int_str
+      is_binary(int_str) -> parse_integer(int_str)
+      true -> nil
+    end
+  end
 
-        _whatever ->
-          nil
-      end
+  # Helper function to parse an integer from a string
+  defp parse_integer(int_str) do
+    case Integer.parse(int_str) do
+      {integer, _} -> integer
+      :error -> nil
     end
   end
 end

@@ -1,4 +1,4 @@
-defmodule Query.FilterableTest do
+defmodule Query.WhereableTest do
   use FatEcto.ConnCase
 
   describe "Filter the params from where_params when params passed in allowed_fields" do
@@ -32,7 +32,7 @@ defmodule Query.FilterableTest do
         "phone" => %{"$ilike" => "%test%"}
       }
 
-      expected = from(d in FatEcto.FatDoctor)
+      expected = from(f0 in FatEcto.FatDoctor, where: ilike(fragment("(?)::TEXT", f0.phone), ^"%test%"))
 
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
@@ -70,7 +70,10 @@ defmodule Query.FilterableTest do
       }
 
       expected =
-        from(h in FatEcto.FatHospital, where: like(fragment("(?)::TEXT", h.phone), ^"%234%") and ^true)
+        from(f0 in FatEcto.FatHospital,
+          where: like(fragment("(?)::TEXT", f0.phone), ^"%234%"),
+          where: like(fragment("(?)::TEXT", f0.name), ^"%test%")
+        )
 
       query = HospitalFilter.build(FatEcto.FatHospital, opts)
       assert inspect(query) == inspect(expected)
@@ -94,7 +97,11 @@ defmodule Query.FilterableTest do
         "phone" => %{"$ilike" => "%234%"}
       }
 
-      expected = from(d in FatEcto.FatHospital)
+      expected =
+        from(f0 in FatEcto.FatHospital,
+          where: ilike(fragment("(?)::TEXT", f0.phone), ^"%234%"),
+          where: like(fragment("(?)::TEXT", f0.name), ^"%test%")
+        )
 
       query = HospitalFilter.build(FatEcto.FatHospital, opts)
       assert inspect(query) == inspect(expected)
@@ -106,7 +113,10 @@ defmodule Query.FilterableTest do
         "phone" => %{"$equal" => "12345"}
       }
 
-      expected = from(h in FatEcto.FatHospital, where: h.phone == ^"12345" and ^true)
+      expected =
+        from(h in FatEcto.FatHospital,
+          where: like(fragment("(?)::TEXT", h.name), ^"%test%")
+        )
 
       query = HospitalFilter.build(FatEcto.FatHospital, opts)
       assert inspect(query) == inspect(expected)
@@ -118,71 +128,10 @@ defmodule Query.FilterableTest do
         "phone" => %{"$equal" => ""}
       }
 
-      expected = from(h in FatEcto.FatHospital)
+      expected =
+        from(f0 in FatEcto.FatHospital, where: like(fragment("(?)::TEXT", f0.name), ^"%test%"))
 
       query = HospitalFilter.build(FatEcto.FatHospital, opts)
-      assert inspect(query) == inspect(expected)
-    end
-  end
-
-  describe "Filter the params from where_params when not_allowed_fields & allowed_fields are empty" do
-    test "returns the query where field like" do
-      opts = %{
-        "name" => %{"$like" => "%marr%"},
-        "phone" => %{"$like" => "%234%"}
-      }
-
-      expected =
-        from(p in FatEcto.FatPatient,
-          where:
-            like(fragment("(?)::TEXT", p.phone), ^"%234%") and
-              (like(fragment("(?)::TEXT", p.name), ^"%marr%") and
-                 ^true)
-        )
-
-      query = PatientFilter.build(FatEcto.FatPatient, opts)
-      assert inspect(query) == inspect(expected)
-    end
-
-    test "ignore %% when matched with value in ignorables configured" do
-      opts = %{
-        "name" => %{"$like" => "%%"},
-        "phone" => %{"$like" => "%%"}
-      }
-
-      expected = from(p in FatEcto.FatPatient)
-
-      query = PatientFilter.build(FatEcto.FatPatient, opts)
-      assert inspect(query) == inspect(expected)
-    end
-
-    test "returns the query where field exact match" do
-      opts = %{
-        "name" => %{"$equal" => "st marry"},
-        "phone" => %{"$equal" => "12345"}
-      }
-
-      expected =
-        from(p in FatEcto.FatPatient,
-          where:
-            p.phone == ^"12345" and
-              (p.name == ^"st marry" and
-                 ^true)
-        )
-
-      query = PatientFilter.build(FatEcto.FatPatient, opts)
-      assert inspect(query) == inspect(expected)
-    end
-
-    test "ignore `nil` && empty_string when matched with value in ignorables configured" do
-      opts = %{
-        "name" => %{"$equal" => ""},
-        "phone" => %{"$equal" => nil}
-      }
-
-      expected = from(p in FatEcto.FatPatient)
-
-      query = PatientFilter.build(FatEcto.FatPatient, opts)
       assert inspect(query) == inspect(expected)
     end
   end

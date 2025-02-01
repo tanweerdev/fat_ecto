@@ -14,7 +14,6 @@ defmodule FatEcto.ConnCase do
       alias MyApp.DoctorOrderby
       alias MyApp.HospitalFilter
       alias MyApp.HospitalOrderby
-      alias MyApp.PatientFilter
       alias MyApp.PatientOrderby
       alias MyApp.Query
       alias MyApp.RoomFilter

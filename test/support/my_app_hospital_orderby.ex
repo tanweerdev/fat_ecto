@@ -1,8 +1,5 @@
 defmodule MyApp.HospitalOrderby do
   use FatEcto.FatQuery.Sortable,
-    allowed_fields: %{},
-    customizable_fields: %{
-      "name" => "$asc",
-      "phone" => "$desc"
-    }
+    sortable_fields: %{},
+    overrideable_fields: ["name", "phone"]
 end

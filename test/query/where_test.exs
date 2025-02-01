@@ -29,7 +29,7 @@ defmodule Query.WhereTest do
       |> Map.drop([:start_date, :end_date, :id])
 
     assert result == %{
-             address: "main bulevard",
+             address: "main boulevard",
              designation: "Surgeon",
              email: "test@test.com",
              experience_years: 7,
@@ -62,7 +62,7 @@ defmodule Query.WhereTest do
       |> Map.drop([:start_date, :end_date, :id])
 
     assert result == %{
-             address: "main bulevard",
+             address: "main boulevard",
              designation: "Surgeon",
              email: "test@test.com",
              experience_years: 7,
@@ -94,7 +94,7 @@ defmodule Query.WhereTest do
       |> Map.drop([:start_date, :end_date, :id])
 
     assert result == %{
-             address: "main bulevard",
+             address: "main boulevard",
              designation: "Surgeon",
              email: "test@test.com",
              experience_years: 7,
@@ -126,7 +126,7 @@ defmodule Query.WhereTest do
       |> Map.drop([:start_date, :end_date, :id])
 
     assert result == %{
-             address: "main bulevard",
+             address: "main boulevard",
              designation: "Surgeon",
              email: "test@test.com",
              experience_years: 7,
@@ -164,8 +164,8 @@ defmodule Query.WhereTest do
 
     assert result == %{
              address: "123 street",
-             location: "main bullevard",
-             name: "st marry",
+             location: "main boulevard",
+             name: "St. Mary",
              phone: "12345",
              rating: 5,
              total_staff: 3
@@ -189,8 +189,8 @@ defmodule Query.WhereTest do
 
     assert result == %{
              address: "123 street",
-             location: "main bullevard",
-             name: "st marry",
+             location: "main boulevard",
+             name: "St. Mary",
              phone: "12345",
              rating: 5,
              total_staff: 3
@@ -250,8 +250,8 @@ defmodule Query.WhereTest do
 
     assert result == %{
              address: "123 street",
-             location: "main bullevard",
-             name: "st marry",
+             location: "main boulevard",
+             name: "St. Mary",
              phone: "12345",
              rating: 5,
              total_staff: 3
@@ -278,7 +278,7 @@ defmodule Query.WhereTest do
              fat_hospital_id: nil,
              floor: 3,
              is_active: true,
-             name: "room 1",
+             name: "Room 1",
              purpose: "serious patients"
            }
   end
@@ -300,8 +300,8 @@ defmodule Query.WhereTest do
 
     assert result == %{
              address: "123 street",
-             location: "main bullevard",
-             name: "st marry",
+             location: "main boulevard",
+             name: "St. Mary",
              phone: "12345",
              rating: 5,
              total_staff: 3
@@ -447,8 +447,8 @@ defmodule Query.WhereTest do
 
     assert result == %{
              address: "123 street",
-             location: "main bullevard",
-             name: "st marry",
+             location: "main boulevard",
+             name: "St. Mary",
              phone: "12345",
              rating: 5,
              total_staff: 3
@@ -457,10 +457,10 @@ defmodule Query.WhereTest do
 
   test "returns the query where field is binary" do
     opts = %{
-      "$where" => %{"location" => "main bullevard"}
+      "$where" => %{"location" => "main boulevard"}
     }
 
-    expected = from(h in FatEcto.FatHospital, where: h.location == ^"main bullevard" and ^true)
+    expected = from(h in FatEcto.FatHospital, where: h.location == ^"main boulevard" and ^true)
     query = Query.build!(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
 
@@ -472,8 +472,8 @@ defmodule Query.WhereTest do
 
     assert result == %{
              address: "123 street",
-             location: "main bullevard",
-             name: "st marry",
+             location: "main boulevard",
+             name: "St. Mary",
              phone: "12345",
              rating: 5,
              total_staff: 3
@@ -496,8 +496,8 @@ defmodule Query.WhereTest do
   end
 
   test "returns the query with or fields" do
-    insert(:hospital, name: "DJ", location: "main bullevard")
-    insert(:hospital, name: "Johnson", location: "main bullevard")
+    insert(:hospital, name: "DJ", location: "main boulevard")
+    insert(:hospital, name: "Johnson", location: "main boulevard")
 
     opts = %{
       "$where" => %{
@@ -534,15 +534,15 @@ defmodule Query.WhereTest do
     assert result == [
              %{
                address: "123 street",
-               location: "main bullevard",
-               name: "st marry",
+               location: "main boulevard",
+               name: "St. Mary",
                phone: "12345",
                rating: 5,
                total_staff: 3
              },
              %{
                address: "123 street",
-               location: "main bullevard",
+               location: "main boulevard",
                name: "Johnson",
                phone: "12345",
                rating: 5,
@@ -552,8 +552,8 @@ defmodule Query.WhereTest do
   end
 
   test "returns the query with or/and fields" do
-    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
-    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
+    insert(:hospital, name: "Belarus", location: "main boulevard", rating: 2)
+    insert(:hospital, name: "Johnson", location: "main boulevard", rating: 3)
 
     opts = %{
       "$where" => %{
@@ -584,7 +584,7 @@ defmodule Query.WhereTest do
     assert result == [
              %{
                address: "123 street",
-               location: "main bullevard",
+               location: "main boulevard",
                name: "Johnson",
                phone: "12345",
                rating: 3,
@@ -594,8 +594,8 @@ defmodule Query.WhereTest do
   end
 
   test "returns the query only with or fields" do
-    insert(:hospital, name: "Belarus", location: "main bullevard", total_staff: 6)
-    insert(:hospital, name: "Johnson", location: "main bullevard", total_staff: 6)
+    insert(:hospital, name: "Belarus", location: "main boulevard", total_staff: 6)
+    insert(:hospital, name: "Johnson", location: "main boulevard", total_staff: 6)
 
     opts = %{
       "$where" => %{
@@ -625,7 +625,7 @@ defmodule Query.WhereTest do
     assert result == [
              %{
                address: "123 street",
-               location: "main bullevard",
+               location: "main boulevard",
                name: "Belarus",
                phone: "12345",
                rating: 5,
@@ -633,7 +633,7 @@ defmodule Query.WhereTest do
              },
              %{
                address: "123 street",
-               location: "main bullevard",
+               location: "main boulevard",
                name: "Johnson",
                phone: "12345",
                rating: 5,
@@ -643,8 +643,8 @@ defmodule Query.WhereTest do
   end
 
   test "returns the query with and/ or not between fields" do
-    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 4)
-    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 5)
+    insert(:hospital, name: "Belarus", location: "main boulevard", rating: 4)
+    insert(:hospital, name: "Johnson", location: "main boulevard", rating: 5)
 
     opts = %{
       "$where" => %{
@@ -677,7 +677,7 @@ defmodule Query.WhereTest do
     assert result == [
              %{
                address: "123 street",
-               location: "main bullevard",
+               location: "main boulevard",
                name: "Johnson",
                phone: "12345",
                rating: 5,
@@ -687,8 +687,8 @@ defmodule Query.WhereTest do
   end
 
   test "returns the query with and/ or in fields" do
-    insert(:hospital, name: "Belarus", location: "main bullevard")
-    insert(:hospital, name: "Johnson", location: "main bullevard")
+    insert(:hospital, name: "Belarus", location: "main boulevard")
+    insert(:hospital, name: "Johnson", location: "main boulevard")
 
     opts = %{
       "$where" => %{
@@ -721,15 +721,15 @@ defmodule Query.WhereTest do
     assert result == [
              %{
                address: "123 street",
-               location: "main bullevard",
-               name: "st marry",
+               location: "main boulevard",
+               name: "St. Mary",
                phone: "12345",
                rating: 5,
                total_staff: 3
              },
              %{
                address: "123 street",
-               location: "main bullevard",
+               location: "main boulevard",
                name: "Belarus",
                phone: "12345",
                rating: 5,
@@ -737,7 +737,7 @@ defmodule Query.WhereTest do
              },
              %{
                address: "123 street",
-               location: "main bullevard",
+               location: "main boulevard",
                name: "Johnson",
                phone: "12345",
                rating: 5,
@@ -747,8 +747,8 @@ defmodule Query.WhereTest do
   end
 
   test "returns the query with and/ or not like/ilike/equal fields" do
-    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
-    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
+    insert(:hospital, name: "Belarus", location: "main boulevard", rating: 2)
+    insert(:hospital, name: "Johnson", location: "main boulevard", rating: 3)
 
     opts = %{
       "$where" => %{
@@ -782,15 +782,15 @@ defmodule Query.WhereTest do
     assert result == [
              %{
                address: "123 street",
-               location: "main bullevard",
-               name: "st marry",
+               location: "main boulevard",
+               name: "St. Mary",
                phone: "12345",
                rating: 5,
                total_staff: 3
              },
              %{
                address: "123 street",
-               location: "main bullevard",
+               location: "main boulevard",
                name: "Belarus",
                phone: "12345",
                rating: 2,
@@ -798,7 +798,7 @@ defmodule Query.WhereTest do
              },
              %{
                address: "123 street",
-               location: "main bullevard",
+               location: "main boulevard",
                name: "Johnson",
                phone: "12345",
                rating: 3,
@@ -808,8 +808,8 @@ defmodule Query.WhereTest do
   end
 
   test "returns the query with two or not like/ilike/equal fields" do
-    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
-    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
+    insert(:hospital, name: "Belarus", location: "main boulevard", rating: 2)
+    insert(:hospital, name: "Johnson", location: "main boulevard", rating: 3)
 
     opts = %{
       "$where" => %{
@@ -854,15 +854,15 @@ defmodule Query.WhereTest do
     assert result == [
              %{
                address: "123 street",
-               location: "main bullevard",
-               name: "st marry",
+               location: "main boulevard",
+               name: "St. Mary",
                phone: "12345",
                rating: 5,
                total_staff: 3
              },
              %{
                address: "123 street",
-               location: "main bullevard",
+               location: "main boulevard",
                name: "Belarus",
                phone: "12345",
                rating: 2,
@@ -870,7 +870,7 @@ defmodule Query.WhereTest do
              },
              %{
                address: "123 street",
-               location: "main bullevard",
+               location: "main boulevard",
                name: "Johnson",
                phone: "12345",
                rating: 3,
@@ -880,8 +880,8 @@ defmodule Query.WhereTest do
   end
 
   test "returns the query with nil, eq fields" do
-    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
-    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
+    insert(:hospital, name: "Belarus", location: "main boulevard", rating: 2)
+    insert(:hospital, name: "Johnson", location: "main boulevard", rating: 3)
 
     opts = %{
       "$where" => %{
@@ -919,8 +919,8 @@ defmodule Query.WhereTest do
   end
 
   test "returns the query with and/two or not like/ilike/equal fields" do
-    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
-    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
+    insert(:hospital, name: "Belarus", location: "main boulevard", rating: 2)
+    insert(:hospital, name: "Johnson", location: "main boulevard", rating: 3)
 
     opts = %{
       "$where" => %{
@@ -970,15 +970,15 @@ defmodule Query.WhereTest do
     assert result == [
              %{
                address: "123 street",
-               location: "main bullevard",
-               name: "st marry",
+               location: "main boulevard",
+               name: "St. Mary",
                phone: "12345",
                rating: 5,
                total_staff: 3
              },
              %{
                address: "123 street",
-               location: "main bullevard",
+               location: "main boulevard",
                name: "Belarus",
                phone: "12345",
                rating: 2,
@@ -988,8 +988,8 @@ defmodule Query.WhereTest do
   end
 
   test "returns the query with and/three or not like/ilike/equal fields" do
-    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
-    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
+    insert(:hospital, name: "Belarus", location: "main boulevard", rating: 2)
+    insert(:hospital, name: "Johnson", location: "main boulevard", rating: 3)
 
     opts = %{
       "$where" => %{
@@ -1050,15 +1050,15 @@ defmodule Query.WhereTest do
     assert result == [
              %{
                address: "123 street",
-               location: "main bullevard",
-               name: "st marry",
+               location: "main boulevard",
+               name: "St. Mary",
                phone: "12345",
                rating: 5,
                total_staff: 3
              },
              %{
                address: "123 street",
-               location: "main bullevard",
+               location: "main boulevard",
                name: "Belarus",
                phone: "12345",
                rating: 2,
@@ -1068,8 +1068,8 @@ defmodule Query.WhereTest do
   end
 
   test "returns the query with and/three or not like/ilike/equal fields with blacklist params" do
-    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
-    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
+    insert(:hospital, name: "Belarus", location: "main boulevard", rating: 2)
+    insert(:hospital, name: "Johnson", location: "main boulevard", rating: 3)
 
     opts = %{
       "$where" => %{
@@ -1230,8 +1230,8 @@ defmodule Query.WhereTest do
   end
 
   test "test dynamics with different data structures" do
-    insert(:hospital, name: "Belarus", location: "main bullevard", rating: 2)
-    insert(:hospital, name: "Johnson", location: "main bullevard", rating: 3)
+    insert(:hospital, name: "Belarus", location: "main boulevard", rating: 2)
+    insert(:hospital, name: "Johnson", location: "main boulevard", rating: 3)
 
     opts = %{
       "$where" => %{

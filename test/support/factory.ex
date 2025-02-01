@@ -13,19 +13,16 @@ defmodule FatEcto.Factory do
   end
 
   def doctor_factory do
-    {:ok, start_date, _} = DateTime.from_iso8601("2017-01-01T00:00:00Z")
-    {:ok, end_date, _} = DateTime.from_iso8601("2017-01-02T00:00:00Z")
-
     %FatEcto.FatDoctor{
       name: "John",
       designation: "Surgeon",
       phone: "12345",
-      address: "main bulevard",
+      address: "main boulevard",
       email: "test@test.com",
       experience_years: 7,
       rating: 9,
-      start_date: start_date,
-      end_date: end_date
+      start_date: DateTime.from_naive!(~N[2017-01-01T00:00:00], "Etc/UTC"),
+      end_date: DateTime.from_naive!(~N[2017-01-02T00:00:00], "Etc/UTC")
     }
   end
 
@@ -39,8 +36,8 @@ defmodule FatEcto.Factory do
 
   def hospital_factory do
     %FatEcto.FatHospital{
-      name: "st marry",
-      location: "main bullevard",
+      name: "St. Mary",
+      location: "main boulevard",
       phone: "12345",
       address: "123 street",
       total_staff: 3,
@@ -50,20 +47,20 @@ defmodule FatEcto.Factory do
 
   def patient_factory do
     %FatEcto.FatPatient{
-      name: "st marry",
-      location: "main bullevard",
+      name: "St. Mary",
+      location: "main boulevard",
       phone: "12345",
       address: "123 street",
       prescription: "doses",
       symptoms: "fever",
-      date_of_birth: "1-4-1994",
+      date_of_birth: "1994-04-01",
       appointments_count: 4
     }
   end
 
   def room_factory do
     %FatEcto.FatRoom{
-      name: "room 1",
+      name: "Room 1",
       purpose: "serious patients",
       description: "sensitive",
       is_active: true,

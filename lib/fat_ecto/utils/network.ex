@@ -1,20 +1,31 @@
 defmodule FatUtils.Network do
   @moduledoc """
-  Documentation for `FatUtils.Network`.
+  Provides utility functions for working with network-related tasks.
+
+  This module includes functions for retrieving local network addresses.
   """
 
   @doc """
-  Gives you local network address.
+  Retrieves the local network address.
 
   ## Examples
+      iex> FatUtils.Network.local_address()
+      "192.168.1.100"
 
-      iex> FatUtils.Network.ubuntu_network_address()
-      :world
-
+  ## Returns
+  - A string representing the local network address, or `nil` if the address cannot be determined.
   """
-  @spec ubuntu_network_address() :: any()
-  def ubuntu_network_address do
-    {ip_string, 0} = System.cmd("hostname", ["-I"])
-    List.first(String.split(ip_string))
+  @spec local_address() :: String.t() | nil
+  def local_address do
+    case System.cmd("hostname", ["-I"]) do
+      {ip_string, 0} ->
+        ip_string
+        |> String.trim()
+        |> String.split()
+        |> List.first()
+
+      _ ->
+        nil
+    end
   end
 end

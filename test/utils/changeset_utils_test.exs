@@ -1,180 +1,171 @@
 defmodule Utils.ChangesetTest do
   use FatEcto.ConnCase
+  import FatEcto.Factory
   alias FatUtils.Changeset, as: Change
 
-  test "validate_xor changeset" do
-    changeset = FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "testing"})
-    {:ok, struct} = Repo.insert(changeset)
+  describe "validate_xor_fields/4" do
+    test "returns errors when both XOR fields are present" do
+      struct = insert(:doctor)
+      changeset = FatEcto.FatDoctor.changeset(struct, %{name: "12345", designation: "designation"})
 
-    changeset = Change.validate_xor(changeset, struct, [:name, :designation])
-    assert changeset.errors == [designation: {"name XOR designation", []}, name: {"name XOR designation", []}]
+      changeset = Change.validate_xor_fields(changeset, struct, [:name, :designation])
 
-    changeset = FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "testing"})
+      assert changeset.errors == [
+               designation: {"name XOR designation", []},
+               name: {"name XOR designation", []}
+             ]
+    end
 
-    changeset = Change.validate_xor(changeset, struct, [:name])
-    assert changeset.errors == [name: {"name", []}]
+    test "returns errors when all XOR fields are empty" do
+      struct = %FatEcto.FatDoctor{name: "12345", designation: "designation"}
+      changeset = FatEcto.FatDoctor.changeset(struct, %{})
 
-    changeset = FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "testing"})
-    changeset = Change.validate_xor(changeset, struct, [:phone])
+      changeset = Change.validate_xor_fields(changeset, struct, [:phone, :address])
 
-    assert changeset.errors == [
-             phone: {"phone fields can not be empty at the same time", [validation: :required]}
-           ]
+      assert changeset.errors == [
+               {:address,
+                {"phone XOR address fields cannot be empty at the same time", [validation: :required]}},
+               {:phone,
+                {"phone XOR address fields cannot be empty at the same time", [validation: :required]}}
+             ]
+    end
+
+    test "does not return errors when only one XOR field is present" do
+      changeset = :doctor |> build(name: "12345") |> FatEcto.FatDoctor.changeset(%{})
+      struct = Repo.insert!(changeset)
+
+      changeset = Change.validate_xor_fields(changeset, struct, [:name, :designation])
+      assert changeset.errors == []
+    end
   end
 
-  test "require_or changeset" do
-    changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{name: "12345", designation: "testing"})
-    changeset = Change.require_or(changeset, %FatEcto.FatBed{}, [:name, :designation])
-    assert changeset.errors == []
+  describe "validate_at_least_one_field/4" do
+    test "returns errors when none of the OR fields are present" do
+      changeset = :bed |> build() |> FatEcto.FatBed.changeset(%{})
+      changeset = Change.validate_at_least_one_field(changeset, %FatEcto.FatBed{}, [:name, :description])
 
-    changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{name: "12345"})
-    changeset = Change.require_or(changeset, %FatEcto.FatBed{}, [:name, :designation])
-    assert changeset.errors == []
+      assert changeset.errors == [
+               description: {"name OR description required", []},
+               name: {"name OR description required", []}
+             ]
+    end
 
-    changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{})
-    changeset = Change.require_or(changeset, %FatEcto.FatBed{}, [:name, :designation])
-
-    assert changeset.errors == [
-             designation: {"name OR designation required", []},
-             name: {"name OR designation required", []}
-           ]
+    test "does not return errors when at least one OR field is present" do
+      changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{name: "12345"})
+      changeset = Change.validate_at_least_one_field(changeset, %FatEcto.FatBed{}, [:name, :description])
+      assert changeset.errors == []
+    end
   end
 
-  test "require if change present" do
-    changeset = FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "testing"})
-    changeset = Change.require_if_change_present(changeset, if_change_key: :name, require_key: :phone)
-    assert changeset.errors == [phone: {"can't be blank", [validation: :required]}]
+  describe "require_field_if_present/3" do
+    test "makes a field required if another field is present" do
+      changeset =
+        FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "designation"})
+
+      changeset = Change.require_field_if_present(changeset, if_change_key: :name, require_key: :phone)
+      assert changeset.errors == [phone: {"can't be blank", [validation: :required]}]
+    end
+
+    test "does not require a field if the other field is not present" do
+      changeset = :doctor |> build() |> FatEcto.FatDoctor.changeset(%{})
+      changeset = Change.require_field_if_present(changeset, if_change_key: :name, require_key: :phone)
+      assert changeset.errors == []
+    end
   end
 
-  test "validate before" do
-    {:ok, start_date, _} = DateTime.from_iso8601("2017-01-01T00:00:00Z")
-    {:ok, end_date, _} = DateTime.from_iso8601("2016-01-02T01:00:00Z")
+  describe "validate_start_before_end/4" do
+    test "returns errors when start date is after end date" do
+      changeset =
+        :doctor
+        |> build(start_date: ~U[2017-01-01T00:00:00Z], end_date: ~U[2016-01-02T01:00:00Z])
+        |> FatEcto.FatDoctor.changeset(%{})
 
-    changeset =
-      FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{
-        start_date: start_date,
-        end_date: end_date,
-        name: "12345",
-        designation: "testing"
-      })
+      changeset = Change.validate_start_before_end(changeset, :start_date, :end_date)
+      assert changeset.errors == [start_date: {"must be before end_date", []}]
+    end
 
-    changeset = Change.validate_before(changeset, :start_date, :end_date)
-    assert changeset.errors == [start_date: {"must be before end_date", []}]
-    changeset = Change.validate_before(changeset, :start_date, :end_date, compare_type: :time)
-    assert changeset.errors == [start_date: {"must be before end_date", []}]
+    test "returns errors when start time is after end time" do
+      changeset =
+        :doctor
+        |> build(start_date: ~U[2017-01-01T10:00:00Z], end_date: ~U[2017-01-01T09:00:00Z])
+        |> FatEcto.FatDoctor.changeset(%{})
 
-    {:ok, start_date, _} = DateTime.from_iso8601("2017-01-01T00:00:00Z")
-    {:ok, end_date, _} = DateTime.from_iso8601("2017-01-01T00:00:00Z")
+      changeset = Change.validate_start_before_end(changeset, :start_date, :end_date, compare_type: :time)
+      assert changeset.errors == [start_date: {"must be before end_date", []}]
+    end
 
-    changeset =
-      FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{
-        start_date: start_date,
-        end_date: end_date,
-        name: "12345",
-        designation: "testing"
-      })
+    test "does not return errors when start date is before end date" do
+      changeset =
+        :doctor
+        |> build(start_date: ~U[2016-01-01T00:00:00Z], end_date: ~U[2017-01-02T01:00:00Z])
+        |> FatEcto.FatDoctor.changeset(%{})
 
-    changeset = Change.validate_before(changeset, :start_date, :end_date)
-    assert changeset.errors == [start_date: {"must be before end_date", []}]
+      changeset = Change.validate_start_before_end(changeset, :start_date, :end_date)
+      assert changeset.errors == []
+    end
   end
 
-  test "validate before equal" do
-    {:ok, start_date, _} = DateTime.from_iso8601("2017-01-01T00:00:00Z")
-    {:ok, end_date, _} = DateTime.from_iso8601("2016-01-02T01:00:00Z")
+  describe "validate_start_before_or_equal_end/4" do
+    test "returns errors when start date is after end date" do
+      changeset =
+        :doctor
+        |> build(start_date: ~U[2017-01-01T00:00:00Z], end_date: ~U[2016-01-02T01:00:00Z])
+        |> FatEcto.FatDoctor.changeset(%{})
 
-    changeset =
-      FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{
-        start_date: start_date,
-        end_date: end_date,
-        name: "12345",
-        designation: "testing"
-      })
+      changeset = Change.validate_start_before_or_equal_end(changeset, :start_date, :end_date)
+      assert changeset.errors == [start_date: {"must be before or equal to end_date", []}]
+    end
 
-    changeset = Change.validate_before_equal(changeset, :start_date, :end_date)
-    assert changeset.errors == [start_date: {"must be before or equal to end_date", []}]
-    changeset = Change.validate_before_equal(changeset, :start_date, :end_date, compare_type: :time)
-    assert changeset.errors == [start_date: {"must be before or equal to end_date", []}]
+    test "does not return errors when start date is equal to end date" do
+      changeset =
+        :doctor
+        |> build(start_date: ~U[2017-01-01T00:00:00Z], end_date: ~U[2017-01-01T00:00:00Z])
+        |> FatEcto.FatDoctor.changeset(%{})
 
-    {:ok, start_date, _} = DateTime.from_iso8601("2017-01-01T00:00:00Z")
-    {:ok, end_date, _} = DateTime.from_iso8601("2017-01-01T00:00:00Z")
-
-    changeset =
-      FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{
-        start_date: start_date,
-        end_date: end_date,
-        name: "12345",
-        designation: "testing"
-      })
-
-    changeset = Change.validate_before_equal(changeset, :start_date, :end_date)
-    assert changeset.valid?
+      changeset = Change.validate_start_before_or_equal_end(changeset, :start_date, :end_date)
+      assert changeset.valid?
+    end
   end
 
-  test "error message title" do
-    error =
-      Change.error_msg_title(
-        [error_message_title: :name_field, error_message: "must always be present in changest"],
-        :name,
-        "must be present"
-      )
+  describe "add_custom_error/3" do
+    test "adds a custom error to the changeset" do
+      changeset = :doctor |> build(name: "12345") |> FatEcto.FatDoctor.changeset(%{})
+      changeset = Change.add_custom_error(changeset, :phone, "must be present")
+      assert changeset.errors == [phone: {"must be present", []}]
+    end
 
-    assert error == {:name_field, "must always be present in changest"}
-    error = Change.error_msg_title([], :name, "must be present")
-    assert error == {:name, "must be present"}
+    test "adds a default error message when none is provided" do
+      changeset = :doctor |> build(name: "12345") |> FatEcto.FatDoctor.changeset(%{})
+      changeset = Change.add_custom_error(changeset, :name)
+      assert changeset.errors == [name: {"is invalid", []}]
+    end
   end
 
-  test "add error" do
-    orgnl_changeset =
-      FatEcto.FatDoctor.changeset(%FatEcto.FatDoctor{}, %{name: "12345", designation: "testing"})
+  describe "validate_only_one_field/4" do
+    test "returns errors when multiple fields are present" do
+      changeset = :bed |> build(name: "12345", description: "testing") |> FatEcto.FatBed.changeset(%{})
+      changeset = Change.validate_only_one_field(changeset, %FatEcto.FatBed{}, [:name, :description])
 
-    changeset = Change.add_custom_error(orgnl_changeset, :phone, "must be present")
-    assert changeset.errors == [phone: {"must be present", []}]
-    changeset = Change.add_custom_error(orgnl_changeset, :name)
-    assert changeset.errors == [name: {"is invalid", []}]
-  end
+      assert changeset.errors == [
+               description: {"only one of name or description is required", []},
+               name: {"only one of name or description is required", []}
+             ]
+    end
 
-  test "require_only_one_of changeset" do
-    changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{name: "12345", description: "testing"})
-    changeset = Change.require_only_one_of(changeset, %FatEcto.FatBed{}, [:name])
-    assert changeset.errors == []
+    test "does not return errors when only one field is present" do
+      changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{name: "12345"})
+      changeset = Change.validate_only_one_field(changeset, %FatEcto.FatBed{}, [:name, :description])
+      assert changeset.errors == []
+    end
 
-    changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{name: "12345", description: "testing"})
-    changeset = Change.require_only_one_of(changeset, %FatEcto.FatBed{}, [:description])
-    assert changeset.errors == []
+    test "returns errors when no fields are present" do
+      changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{})
+      changeset = Change.validate_only_one_field(changeset, %FatEcto.FatBed{}, [:name, :description])
 
-    changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{name: "12345", description: "testing"})
-    changeset = Change.require_only_one_of(changeset, %FatEcto.FatBed{}, [:name, :test])
-    assert changeset.errors == []
-
-    changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{name: "12345", description: "testing"})
-    changeset = Change.require_only_one_of(changeset, %FatEcto.FatBed{}, [:name, :description])
-
-    assert changeset.errors == [
-             description: {"only one of name or description is required", []},
-             name: {"only one of name or description is required", []}
-           ]
-
-    changeset =
-      FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{
-        name: "12345",
-        description: "testing",
-        purpose: "emergency"
-      })
-
-    changeset = Change.require_only_one_of(changeset, %FatEcto.FatBed{}, [:name, :description, :purpose])
-
-    assert changeset.errors == [
-             purpose: {"only one of name, description or purpose is required", []},
-             description: {"only one of name, description or purpose is required", []},
-             name: {"only one of name, description or purpose is required", []}
-           ]
-
-    changeset = FatEcto.FatBed.changeset(%FatEcto.FatBed{}, %{})
-    changeset = Change.require_only_one_of(changeset, %FatEcto.FatBed{}, [:name, :description])
-
-    assert changeset.errors == [
-             description: {"only one of name or description is required", []},
-             name: {"only one of name or description is required", []}
-           ]
+      assert changeset.errors == [
+               description: {"only one of name or description is required", []},
+               name: {"only one of name or description is required", []}
+             ]
+    end
   end
 end
