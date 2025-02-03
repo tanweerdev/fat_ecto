@@ -75,7 +75,8 @@ defmodule FatEcto.MixProject do
     [
       # These are the default files included in the package
       files: ~w(lib .formatter.exs mix.exs README*),
-      licenses: ["Apache 2.0"],
+      licenses: ["MIT"],
+      maintainers: ["Muhammad Tanweer"],
       links: %{
         "GitHub" => "https://github.com/tanweerdev/fat_ecto",
         "Docs" => "https://hexdocs.pm/fat_ecto/"
