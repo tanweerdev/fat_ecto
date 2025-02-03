@@ -1,7 +1,7 @@
 # FatEcto
 
 
-[![Build Status](https://github.com/tanweerdev/fat_ecto/workflows/tests/badge.svg)](https://github.com/parroty/excoveralls/actions)
+[![Build Status](https://github.com/tanweerdev/fat_ecto/workflows/tests/badge.svg)](https://github.com/tanweerdev/fat_ecto/actions)
 [![Coverage Status](https://coveralls.io/repos/github/tanweerdev/fat_ecto/badge.svg?branch=master)](https://coveralls.io/github/tanweerdev/fat_ecto?branch=master)
 [![hex.pm version](https://img.shields.io/hexpm/v/fat_ecto.svg)](https://hex.pm/packages/fat_ecto)
 [![hex.pm downloads](https://img.shields.io/hexpm/dt/fat_ecto.svg)](https://hex.pm/packages/fat_ecto)
@@ -124,10 +124,9 @@ Example Usage
 
 ```elixir
 # Example of using a utility function
-alias FatEcto.Utils.MapUtils
+FatUtils.Map.has_all_keys?(%{a: 1, b: 2}, [:a, :b])
 
-data = %{name: "John", age: 30, email: "john@example.com"}
-filtered_data = MapUtils.filter_keys(data, [:name, :email])
+FatUtils.Map.contain_only_allowed_keys?(%{a: 1, c: 3}, [:a, :b])
 ```
 
 ### Contributing
