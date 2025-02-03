@@ -111,10 +111,18 @@ defmodule FatEcto.FatQuery.WhereableHelper do
   # Filters a value based on allowed operators
   defp filter_filterable_value(value, allowed_operators) when is_map(value) do
     Enum.reduce(value, %{}, fn {operator, operator_value}, acc ->
-      if allowed_operators == "*" or operator in allowed_operators do
-        Map.put(acc, operator, operator_value)
-      else
-        acc
+      cond do
+        allowed_operators == "*" ->
+          Map.put(acc, operator, operator_value)
+
+        is_list(allowed_operators) && operator in allowed_operators ->
+          Map.put(acc, operator, operator_value)
+
+        is_binary(allowed_operators) && operator == allowed_operators ->
+          Map.put(acc, operator, operator_value)
+
+        true ->
+          acc
       end
     end)
   end
