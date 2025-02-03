@@ -4,5 +4,5 @@ defmodule MyApp.DoctorOrderby do
       "email" => "*",
       "phone" => "$asc"
     },
-    overrideable_fields: ["phone"]
+    overrideable_fields: []
 end

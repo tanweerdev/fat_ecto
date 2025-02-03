@@ -70,6 +70,7 @@ defmodule FatEcto.FatQuery.Whereable do
       @overrideable_fields @options[:overrideable_fields] || []
       @ignoreable_fields_values @options[:ignoreable_fields_values] || %{}
       @all_operators "*"
+      alias FatEcto.FatQuery.WhereableHelper
 
       # Ensure at least one of `filterable_fields` or `overrideable_fields` is provided.
       if @filterable_fields == %{} and @overrideable_fields == [] do
@@ -110,16 +111,22 @@ defmodule FatEcto.FatQuery.Whereable do
         - The query with filtering applied.
       """
       def build(queryable, where_params, build_options \\ []) do
-        filtered_where_params = remove_ignoreable_fields(where_params)
+        filtered_where_params =
+          WhereableHelper.remove_ignoreable_fields(where_params, @ignoreable_fields_values)
 
         # Filter filterable fields
-        filterable_params = filter_filterable_fields(filtered_where_params, @filterable_fields)
+        combined_params = WhereableHelper.filter_filterable_fields(filtered_where_params, @filterable_fields)
 
         # Filter overrideable fields
-        overrideable_params = filter_overrideable_fields(filtered_where_params, @overrideable_fields)
+        overrideable_params =
+          WhereableHelper.filter_overrideable_fields(
+            where_params,
+            @overrideable_fields,
+            @ignoreable_fields_values
+          )
 
         queryable
-        |> FatWhere.build_where(filterable_params, build_options)
+        |> FatWhere.build_where(combined_params, build_options)
         |> apply_overrideable_filters(overrideable_params)
       end
 
@@ -129,92 +136,6 @@ defmodule FatEcto.FatQuery.Whereable do
       This function can be overridden by the using module to implement custom filtering logic.
       """
       def override_whereable(query, _field, _operator, _value), do: query
-
-      # Removes fields with ignoreable values from the parameters.
-      defp remove_ignoreable_fields(params) do
-        Enum.reduce(params, params, fn {field, value}, acc ->
-          case @ignoreable_fields_values[field] do
-            nil -> acc
-            ignoreable_values -> remove_ignoreable_values(acc, field, value, ignoreable_values)
-          end
-        end)
-      end
-
-      # Removes specific values from a field's operators.
-      defp remove_ignoreable_values(params, field, value, ignoreable_values) when is_map(value) do
-        Enum.reduce(value, params, fn {operator, value}, acc ->
-          if ignoreable_value?(value, ignoreable_values) do
-            acc |> pop_in([field, operator]) |> elem(1)
-          else
-            acc
-          end
-        end)
-      end
-
-      # Checks if a value is ignoreable for a given ignoreable_values.
-      defp ignoreable_value?(value, ignoreable_values) when is_list(ignoreable_values) do
-        value in ignoreable_values
-      end
-
-      defp ignoreable_value?(value, ignoreable_value) when is_binary(ignoreable_value) do
-        value == ignoreable_value
-      end
-
-      # Filters filterable fields based on the provided filterable_fields map.
-      defp filter_filterable_fields(params, filterable_fields) when filterable_fields == %{}, do: %{}
-
-      defp filter_filterable_fields(params, filterable_fields) do
-        Enum.reduce(params, %{}, fn {field, value}, acc ->
-          case filterable_fields[field] do
-            # Skip fields not defined in filterable_fields
-            nil -> acc
-            allowed_operators -> filter_field_operators(acc, field, value, allowed_operators)
-          end
-        end)
-      end
-
-      # Filters operators for a specific field based on allowed operators.
-      defp filter_field_operators(acc, field, value, allowed_operators) when is_map(value) do
-        filtered_value =
-          Enum.reduce(value, %{}, fn {operator, value}, acc_value ->
-            if operator_matches?(operator, allowed_operators) do
-              Map.put(acc_value, operator, value)
-            else
-              acc_value
-            end
-          end)
-
-        if filtered_value != %{} do
-          Map.put(acc, field, filtered_value)
-        else
-          acc
-        end
-      end
-
-      # Filters overrideable fields based on the provided overrideable_fields list.
-      defp filter_overrideable_fields(params, overrideable_fields) when overrideable_fields == [],
-        do: []
-
-      defp filter_overrideable_fields(params, overrideable_fields) do
-        Enum.reduce(params, [], fn {field, value}, acc ->
-          if field in overrideable_fields do
-            Enum.reduce(value, acc, fn {operator, value}, acc ->
-              if ignoreable_value?(value, @ignoreable_fields_values[field] || []) do
-                acc
-              else
-                [%{field: field, operator: operator, value: value} | acc]
-              end
-            end)
-          else
-            acc
-          end
-        end)
-      end
-
-      # Checks if an operator matches the allowed or overrideable operators.
-      defp operator_matches?(operator, operators) do
-        is_list(operators) and (operator in operators or @all_operators in operators)
-      end
 
       # Applies custom filtering for overrideable fields using the fallback function.
       defp apply_overrideable_filters(query, overrideable_params) do

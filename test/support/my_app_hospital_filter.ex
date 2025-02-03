@@ -10,20 +10,20 @@ defmodule MyApp.HospitalFilter do
   import Ecto.Query
 
   @impl true
-  def override_whereable(query, "name", "$ilike", compare_with) do
-    where(query, [r], ilike(fragment("(?)::TEXT", r.name), ^compare_with))
+  def override_whereable(query, "name", "$ilike", value) do
+    where(query, [r], ilike(fragment("(?)::TEXT", r.name), ^value))
   end
 
-  def override_whereable(query, "name", "$like", compare_with) do
-    where(query, [r], like(fragment("(?)::TEXT", r.name), ^compare_with))
+  def override_whereable(query, "name", "$like", value) do
+    where(query, [r], like(fragment("(?)::TEXT", r.name), ^value))
   end
 
-  def override_whereable(query, "phone", "$ilike", compare_with) do
-    where(query, [r], ilike(fragment("(?)::TEXT", r.phone), ^compare_with))
+  def override_whereable(query, "phone", "$ilike", value) do
+    where(query, [r], ilike(fragment("(?)::TEXT", r.phone), ^value))
   end
 
-  def override_whereable(query, "phone", "$like", compare_with) do
-    where(query, [r], like(fragment("(?)::TEXT", r.phone), ^compare_with))
+  def override_whereable(query, "phone", "$like", value) do
+    where(query, [r], like(fragment("(?)::TEXT", r.phone), ^value))
   end
 
   def override_whereable(query, _, _, _) do

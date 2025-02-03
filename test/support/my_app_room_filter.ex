@@ -19,6 +19,10 @@ defmodule MyApp.RoomFilter do
     where(query, [r], like(fragment("(?)::TEXT", r.name), ^value))
   end
 
+  def override_whereable(query, "name", "$ilike", value) do
+    where(query, [r], ilike(fragment("(?)::TEXT", r.name), ^value))
+  end
+
   def override_whereable(query, "description", "$equal", value) do
     where(query, [r], r.description == ^value)
   end

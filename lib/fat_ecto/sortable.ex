@@ -7,7 +7,9 @@ defmodule FatEcto.FatQuery.Sortable do
 
   ## Usage
 
-      defmodule MyApp.Query do
+      defmodule MyApp.SortQuery do
+        <!-- needed if you are writing queries in override_sortable -->
+        import Ecto.Query
         use FatEcto.FatQuery.Sortable,
           sortable_fields: %{"id" => "$asc", "name" => ["$asc", "$desc"]},
           overrideable_fields: ["custom_field"]
@@ -27,7 +29,7 @@ defmodule FatEcto.FatQuery.Sortable do
 
       query = from(u in User)
       sort_params = %{"id" => "$asc", "name" => "$desc", "custom_field" => "$asc"}
-      MyApp.Query.build(query, sort_params)
+      MyApp.SortQuery.build(query, sort_params)
 
   This will sort the query by `id` in ascending order, `name` in descending order, and apply custom sorting for `custom_field`.
   """
@@ -52,6 +54,7 @@ defmodule FatEcto.FatQuery.Sortable do
       @options unquote(options)
       @sortable_fields @options[:sortable_fields] || %{}
       @overrideable_fields @options[:overrideable_fields] || []
+      alias FatEcto.FatQuery.SortableHelper
 
       # Raise a compile-time error if both sortable_fields and overrideable_fields are empty.
       if @sortable_fields == %{} and @overrideable_fields == [] do
@@ -90,44 +93,23 @@ defmodule FatEcto.FatQuery.Sortable do
       ### Returns
         - The query with sorting applied.
       """
+      @spec build(Ecto.Query.t(), map(), keyword()) :: Ecto.Query.t()
       def build(queryable, sort_params, options \\ []) do
         # Step 1: Filter sortable_fields and prepare params for FatOrderBy
-        order_by_params = filter_sortable_fields(sort_params, @sortable_fields)
+        order_by_params = SortableHelper.filter_sortable_fields(sort_params, @sortable_fields)
 
         # Step 2: Apply sorting using FatOrderBy
         queryable = FatOrderBy.build_order_by(queryable, order_by_params, options)
 
         # Step 3: Apply custom sorting for overrideable_fields
-        Enum.reduce(sort_params, queryable, fn {field, operator}, query ->
-          if field in @overrideable_fields do
-            override_sortable(query, field, operator)
-          else
-            query
-          end
-        end)
-      end
+        # Filter sort_params to only include fields in @overrideable_fields
+        # TODO: we need to fix this to allow for multiple operators inside $or
+        override_params =
+          Enum.filter(sort_params, fn {field, _operator} -> field in @overrideable_fields end)
 
-      defp filter_sortable_fields(filtered_params, sortable_fields) do
-        Enum.reduce(filtered_params, %{}, fn {field, operator}, acc ->
-          if Map.has_key?(sortable_fields, field) do
-            allowed_operators = sortable_fields[field]
-
-            case allowed_operators do
-              "*" ->
-                Map.put(acc, field, operator)
-
-              allowed when is_binary(allowed) ->
-                if allowed == operator, do: Map.put(acc, field, operator), else: acc
-
-              allowed when is_list(allowed) ->
-                if operator in allowed, do: Map.put(acc, field, operator), else: acc
-
-              _ ->
-                acc
-            end
-          else
-            acc
-          end
+        # Apply custom sorting only if there are fields to override
+        Enum.reduce(override_params, queryable, fn {field, operator}, query ->
+          override_sortable(query, field, operator)
         end)
       end
 
@@ -136,6 +118,7 @@ defmodule FatEcto.FatQuery.Sortable do
 
       This function can be overridden by the using module to implement custom sorting logic.
       """
+      @spec override_sortable(Ecto.Query.t(), String.t() | atom(), String.t()) :: Ecto.Query.t()
       def override_sortable(query, _field, _operator), do: query
 
       defoverridable override_sortable: 3
