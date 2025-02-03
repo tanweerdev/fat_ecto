@@ -17,7 +17,7 @@ defmodule FatEcto.FatDoctor do
     many_to_many(:fat_patients, FatEcto.FatPatient, join_through: FatEcto.FatDoctorPatient)
   end
 
-  def changeset(struct, params \\ %{}) do
+  def changeset(struct, params) do
     struct
     |> cast(params, [
       :name,

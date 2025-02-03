@@ -1,10 +1,16 @@
 defmodule FatUtils.DateTime do
   @moduledoc """
-    Takes integer and binary values to convert them to proper DateTime format.
+  Provides utility functions for parsing and converting date-time values.
+
+  This module handles parsing of date-time values from integers (Unix timestamps) and
+  binary strings (ISO 8601 format).
   """
 
+  @spec parse(any()) :: :error | {:ok, DateTime.t()}
   @doc """
-    Takes date time in the form of integer to convert to unix format and also in binary format to convert to iso8601.
+  Parses a date-time value from an integer (Unix timestamp) or a binary string (ISO 8601 format).
+
+  Returns `{:ok, DateTime.t()}` on success or `:error` on failure.
   """
   def parse(dtu) do
     case parse!(dtu) do
@@ -13,46 +19,39 @@ defmodule FatUtils.DateTime do
     end
   end
 
+  @spec parse!(any()) :: nil | DateTime.t()
   @doc """
-    Takes date time in the form of integer to convert to unix format and also in binary format to convert to iso8601.
+  Parses a date-time value from an integer (Unix timestamp) or a binary string (ISO 8601 format).
+
+  Returns a `DateTime.t()` on success or `nil` on failure.
   """
   def parse!(dtu) do
     cond do
-      is_integer(dtu) && from_uni?(dtu) ->
-        {:ok, dt} = DateTime.from_unix(dtu)
-        dt
-
-      is_integer(dtu) && from_uni_ms?(dtu) ->
-        {:ok, dt} = DateTime.from_unix(dtu, :microsecond)
-        dt
-
-      is_binary(dtu) && from_iso8601?(dtu) ->
-        {:ok, datetime, _} = DateTime.from_iso8601(dtu)
-        datetime
-
-      true ->
-        nil
+      is_integer(dtu) && valid_unix?(dtu) -> DateTime.from_unix!(dtu)
+      is_integer(dtu) && valid_unix_ms?(dtu) -> DateTime.from_unix!(dtu, :microsecond)
+      is_binary(dtu) && valid_iso8601?(dtu) -> parse_iso8601!(dtu)
+      true -> nil
     end
   end
 
-  defp from_uni?(dtu) do
-    case DateTime.from_unix(dtu) do
-      {:ok, _dt} -> true
-      _other -> false
-    end
+  # Helper functions
+
+  defp valid_unix?(dtu) do
+    match?({:ok, _}, DateTime.from_unix(dtu))
   end
 
-  defp from_uni_ms?(dtu) do
-    case DateTime.from_unix(dtu, :microsecond) do
-      {:ok, _dt} -> true
-      _other -> false
-    end
+  defp valid_unix_ms?(dtu) do
+    match?({:ok, _}, DateTime.from_unix(dtu, :microsecond))
   end
 
-  defp from_iso8601?(dtu) do
+  defp valid_iso8601?(dtu) do
+    match?({:ok, _, _}, DateTime.from_iso8601(dtu))
+  end
+
+  defp parse_iso8601!(dtu) do
     case DateTime.from_iso8601(dtu) do
-      {:ok, _datetime, _} -> true
-      _other -> false
+      {:ok, datetime, _} -> datetime
+      _ -> nil
     end
   end
 end

@@ -1,18 +1,46 @@
 defmodule FatEcto.FatHelper do
-  @moduledoc false
-  # alias FatEcto.FatHelper
+  @moduledoc """
+  Provides utility functions for FatEcto, including handling pagination limits, skip values,
+  dynamic binding, and preloading associations.
+  """
+
+  alias Ecto.Query
   require Ecto.Query
+
   @min_limit 0
   @min_skip 0
   @default_skip 0
-  @spec get_limit_bounds(nil | keyword() | map()) :: {any(), any()}
+
+  @doc """
+  Returns the maximum and default limit values based on the provided options.
+
+  ## Parameters
+  - `options`: A keyword list or map containing `max_limit` and `default_limit`.
+
+  ## Examples
+      iex> FatEcto.FatHelper.get_limit_bounds(max_limit: 50, default_limit: 10)
+      {50, 10}
+  """
+  @spec get_limit_bounds(nil | keyword() | map()) :: {integer(), integer()}
   def get_limit_bounds(options) do
     max_limit = options[:max_limit] || 100
     default_limit = options[:default_limit] || 10
     {max_limit, default_limit}
   end
 
-  @spec get_module_options(keyword, any, keyword) :: keyword
+  @doc """
+  Merges module-specific options with global and root-level configurations.
+
+  ## Parameters
+  - `options`: A keyword list of options.
+  - `module`: The module for which options are being configured.
+  - `defaults`: Default options to merge.
+
+  ## Examples
+      iex> FatEcto.FatHelper.get_module_options([max_limit: 50], MyApp.MyContext)
+      [max_limit: 50, default_limit: 10]
+  """
+  @spec get_module_options(keyword(), module(), keyword()) :: keyword()
   def get_module_options(options, module, defaults \\ []) do
     opt_app = options[:otp_app]
     fat_ecto_configs = (opt_app && Application.get_env(opt_app, :fat_ecto)) || []
@@ -23,13 +51,16 @@ defmodule FatEcto.FatHelper do
   end
 
   @doc """
-    Return skip value from given params.
-     ### Parameters
-        - `params`  - skip values.
-    ### Examples
-        iex>  FatEcto.FatHelper.get_skip_value( params["skip"])
+  Extracts and validates the skip value from the given parameters.
+
+  ## Parameters
+  - `params`: A keyword list containing the `:skip` value.
+
+  ## Examples
+      iex> FatEcto.FatHelper.get_skip_value(skip: 20)
+      {20, []}
   """
-  @spec get_skip_value(keyword()) :: {any(), keyword()}
+  @spec get_skip_value(keyword()) :: {integer(), keyword()}
   def get_skip_value(params) do
     {skip, params} = Keyword.pop(params, :skip, @min_skip)
     skip = FatUtils.Integer.parse!(skip)
@@ -38,13 +69,17 @@ defmodule FatEcto.FatHelper do
   end
 
   @doc """
-    Return limit from given params options.
-     ### Parameters
-        - `limit`  - Number of Records vlaue.
-    ### Examples
-        iex>  FatEcto.FatHelper.get_limit_value( params["limit"])
+  Extracts and validates the limit value from the given parameters.
+
+  ## Parameters
+  - `params`: A keyword list containing the `:limit` value.
+  - `options`: A keyword list or map containing `max_limit` and `default_limit`.
+
+  ## Examples
+      iex> FatEcto.FatHelper.get_limit_value([limit: 15], max_limit: 50, default_limit: 10)
+      {15, []}
   """
-  @spec get_limit_value(keyword(), nil | keyword() | map()) :: {any(), keyword()}
+  @spec get_limit_value(keyword(), nil | keyword() | map()) :: {integer(), keyword()}
   def get_limit_value(params, options \\ []) do
     {max_limit, default_limit} = get_limit_bounds(options)
     {limit, params} = Keyword.pop(params, :limit, default_limit)
@@ -60,41 +95,62 @@ defmodule FatEcto.FatHelper do
   end
 
   @doc """
-    Return true or false on basis of given value.
-    ### Parameters
-        - `value`  - Value of the field.
-    ### Examples
-          iex>  FatEcto.FatHelper.is_fat_ecto_field?(value)
+  Determines if a value is a reserved field in FatEcto.
+
+  ## Parameters
+  - `value`: The value to check.
+
+  ## Examples
+      iex> FatEcto.FatHelper.fat_ecto_reserve_field?("$include")
+      true
   """
-  @spec is_fat_ecto_field?(any()) :: boolean()
-  def is_fat_ecto_field?(value) do
-    cond do
-      is_number(value) ->
-        false
-
-      is_binary(value) && String.starts_with?(value, "$") == true ->
-        true
-
-      true ->
-        false
-    end
+  @spec fat_ecto_reserve_field?(any()) :: boolean()
+  def fat_ecto_reserve_field?(value) do
+    is_binary(value) && String.starts_with?(value, "$")
   end
 
-  @spec string_to_atom(any()) :: any()
-  def string_to_atom(str) do
-    String.to_atom(str)
-  end
+  @doc """
+  Converts a string to an atom.
 
-  @spec string_to_existing_atom(any()) :: any()
-  def string_to_existing_atom(str) do
-    String.to_existing_atom(str)
-  end
+  ## Parameters
+  - `str`: The string to convert.
 
-  @spec model_related_owner(atom(), any()) :: %{
-          owner: any(),
-          owner_key: any(),
-          related: any(),
-          related_key: any()
+  ## Examples
+      iex> FatEcto.FatHelper.string_to_atom("example")
+      :example
+  """
+  @spec string_to_atom(String.t()) :: atom()
+  def string_to_atom(str), do: String.to_atom(str)
+
+  @doc """
+  Converts a string to an existing atom.
+
+  ## Parameters
+  - `str`: The string to convert.
+
+  ## Examples
+      iex> FatEcto.FatHelper.string_to_existing_atom("example")
+      :example
+  """
+  @spec string_to_existing_atom(String.t()) :: atom()
+  def string_to_existing_atom(str), do: String.to_existing_atom(str)
+
+  @doc """
+  Retrieves the owner and related association details for a given model and relation.
+
+  ## Parameters
+  - `model`: The Ecto model.
+  - `relation_name`: The name of the association.
+
+  ## Examples
+      iex> FatEcto.FatHelper.model_related_owner(MyApp.User, :posts)
+      %{owner: MyApp.User, owner_key: :user_id, related: MyApp.Post, related_key: :id}
+  """
+  @spec model_related_owner(module(), atom()) :: %{
+          owner: module(),
+          owner_key: atom(),
+          related: module(),
+          related_key: atom() | nil
         }
   def model_related_owner(model, relation_name) do
     case model.__schema__(:association, relation_name) do
@@ -104,12 +160,7 @@ defmodule FatEcto.FatHelper do
         related: related,
         related_key: related_key
       } ->
-        %{
-          owner: owner,
-          owner_key: owner_key,
-          related: related,
-          related_key: related_key
-        }
+        %{owner: owner, owner_key: owner_key, related: related, related_key: related_key}
 
       %Ecto.Association.BelongsTo{
         owner: owner,
@@ -117,114 +168,36 @@ defmodule FatEcto.FatHelper do
         related: related,
         related_key: related_key
       } ->
-        %{
-          owner: owner,
-          owner_key: owner_key,
-          related: related,
-          related_key: related_key
-        }
+        %{owner: owner, owner_key: owner_key, related: related, related_key: related_key}
 
       %Ecto.Association.ManyToMany{
         owner: owner,
         owner_key: owner_key,
         related: related
-        # related_key: related_key
       } ->
-        %{
-          owner: owner,
-          owner_key: owner_key,
-          related: related,
-          related_key: nil
-        }
+        %{owner: owner, owner_key: owner_key, related: related, related_key: nil}
 
       %Ecto.Association.HasThrough{
         owner: owner,
         owner_key: owner_key
-        # related: related
-        # related_key: related_key
       } ->
-        %{
-          owner: owner,
-          owner_key: owner_key,
-          related: nil,
-          related_key: nil
-        }
+        %{owner: owner, owner_key: owner_key, related: nil, related_key: nil}
     end
   end
 
-  # @spec params_valid(
-  #         queryable :: Ecto.Queryable.t() | (any -> Ecto.Queryable.t()),
-  #         String.t() | [String.t()],
-  #         opts :: Keyword.t()
-  #       ) :: Ecto.Queryable.t()
-  def params_valid(queryable, k, options) do
-    table =
-      case queryable do
-        queryable when is_atom(queryable) ->
-          struct = apply(queryable, :__struct__, [])
-          struct.__meta__.source
+  @doc """
+  Adds dynamic binding information to a map.
 
-        queryable when is_binary(queryable) ->
-          queryable
+  ## Parameters
+  - `map`: The map to process.
 
-        _ ->
-          %{source: {table, _model}} = queryable.from
-          table
-      end
-
-    restrict_params(string_to_atom(table), k, options)
-  end
-
-  def restrict_params(table, select_params, options) when is_binary(select_params) do
-    restrict_params(table, [select_params], options)
-    |> hd()
-  end
-
-  def restrict_params(_table, select_params, _options) when is_boolean(select_params) do
-    select_params
-  end
-
-  def restrict_params(table, select_params, options) do
-    if options[:blacklist_params] do
-      check_blacklist_params(table, select_params, options)
-    else
-      case Application.get_env(options[:otp_app], :fat_ecto)[:blacklist_params] do
-        nil ->
-          select_params
-
-        _ ->
-          check_blacklist_params(table, select_params, options)
-      end
-    end
-  end
-
-  def check_blacklist_params(table, select_params, options) do
-    if Keyword.has_key?(options[:blacklist_params], table) do
-      filtered_params =
-        Enum.reject(Keyword.fetch!(options[:blacklist_params], table), fn el ->
-          !Enum.member?(select_params, el)
-        end)
-
-      case Enum.count(filtered_params) do
-        0 ->
-          select_params
-
-        _ ->
-          raise ArgumentError,
-            message: "the fields #{inspect(filtered_params)} of #{table} are not allowed in the query"
-      end
-    else
-      select_params
-    end
-  end
-
-  def check_params_validity(build_options, queryable, k) do
-    if build_options[:table],
-      do: params_valid(build_options[:table], k, build_options),
-      else: params_valid(queryable, k, build_options)
-  end
-
+  ## Examples
+      iex> FatEcto.FatHelper.dynamic_binding(%{"$include" => %{"key" => "value"}})
+      %{"$include" => %{"key" => "value", "$binding" => :first}}
+  """
+  @spec dynamic_binding(map()) :: map()
   def dynamic_binding(map) when is_map(map), do: map(map, false)
+
   defp do_binding(_key, value, _nested) when not is_map(value), do: value
   defp do_binding("$" <> _key, value, nested), do: map(value, nested)
   defp do_binding(_key, value, nested), do: value |> map(true) |> put_binding(nested)
@@ -232,19 +205,40 @@ defmodule FatEcto.FatHelper do
   defp put_binding(map, false), do: Map.put_new(map, "$binding", :first)
   defp put_binding(map, true), do: Map.put_new(map, "$binding", :last)
 
+  @doc """
+  Retrieves the primary keys for a given query.
+
+  ## Parameters
+  - `query`: The Ecto query.
+
+  ## Examples
+      iex> FatEcto.FatHelper.get_primary_keys(from(u in User))
+      [:id]
+  """
+  @spec get_primary_keys(Ecto.Query.t()) :: list(atom()) | nil
   def get_primary_keys(query) do
     %{source: {_table, model}} = query.from
 
-    case model do
-      nil ->
-        nil
-
-      _ ->
-        model.__schema__(:primary_key)
+    if model do
+      model.__schema__(:primary_key)
+    else
+      nil
     end
   end
 
+  @doc """
+  Dynamically preloads associations based on a map.
+
+  ## Parameters
+  - `map`: The map containing preloading instructions.
+
+  ## Examples
+      iex> FatEcto.FatHelper.dynamic_preloading(%{"posts" => %{"$include" => "comments"}})
+      [posts: :comments]
+  """
+  @spec dynamic_preloading(map()) :: list({atom(), atom() | list(atom())})
   def dynamic_preloading(map) when is_map(map), do: do_preloading(map)
+
   defp do_preloading(map), do: Enum.reduce(map, [], &do_preloading/2)
 
   defp do_preloading({key, %{"$include" => include}}, acc) when is_map(include),
@@ -256,22 +250,29 @@ defmodule FatEcto.FatHelper do
   defp do_preloading({key, %{"$include" => include}}, acc) when is_list(include),
     do: [{String.to_atom(key), Enum.map(include, &String.to_atom/1)} | acc]
 
-  defp do_preloading({key, %{"$binding" => :last}}, acc), do: [String.to_atom(key) | acc]
-  defp do_preloading({key, %{"$binding" => :first}}, acc), do: [String.to_atom(key) | acc]
+  defp do_preloading({key, %{"$binding" => binding}}, acc) when binding in [:first, :last],
+    do: [String.to_atom(key) | acc]
+
   defp do_preloading({_key, _value}, acc), do: acc
+
+  @doc """
+  Removes conflicting `order_by` clauses from a query.
+
+  ## Parameters
+  - `queryable`: The Ecto query.
+  - `distinct`: The distinct clause.
+
+  ## Examples
+      iex> FatEcto.FatHelper.remove_conflicting_order_by(from(u in User), nil)
+      #Ecto.Query<from u in User>
+  """
+  @spec remove_conflicting_order_by(Ecto.Query.t(), any()) :: Ecto.Query.t()
   def remove_conflicting_order_by(queryable, nil), do: queryable
 
   def remove_conflicting_order_by(queryable, _distinct) do
     case queryable do
-      queryable when is_map(queryable) ->
-        %{order_bys: order} = queryable
-
-        if Enum.count(order) == 0 do
-          queryable
-        else
-          queryable
-          |> Ecto.Query.exclude(:order_by)
-        end
+      %{order_bys: order_bys} when order_bys != [] ->
+        Query.exclude(queryable, :order_by)
 
       _ ->
         queryable

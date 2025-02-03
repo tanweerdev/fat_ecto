@@ -1,23 +1,53 @@
 defmodule FatUtils.String do
   @moduledoc """
-    Generate string with different number of characters.
+  Provides utility functions for generating random strings.
+
+  This module includes functions for generating random strings of specified lengths
+  and from specific character sets.
   """
 
+  @default_length 8
+  @default_chars String.graphemes("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
   @doc """
-    Generate string of length 8 if length is not defined.
+  Generates a random string of the specified length.
+
+  ## Parameters
+  - `length`: The length of the random string (default: 8).
+
+  ## Examples
+      iex> FatUtils.String.random()
+      "aB3dEfG1"
+
+      iex> FatUtils.String.random(12)
+      "xYz1aB2cD3eF"
   """
-  def random(length \\ 8) do
-    :crypto.strong_rand_bytes(length) |> Base.url_encode64(padding: false) |> binary_part(0, length)
+  @spec random(non_neg_integer()) :: binary()
+  def random(length \\ @default_length) do
+    length
+    |> :crypto.strong_rand_bytes()
+    |> Base.url_encode64(padding: false)
+    |> binary_part(0, length)
   end
 
-  @chars "ABCDEFGHIJKLMNOPQRSTUVWXYZ" |> String.split("")
   @doc """
-    Generate string of specific length and also takes comma separated characters from which string is generated.
+  Generates a random string of the specified length using a custom character set.
+
+  ## Parameters
+  - `length`: The length of the random string.
+  - `char_set`: A list of characters to use for generating the string (default: A-Z).
+
+  ## Examples
+      iex> FatUtils.String.random_of(10)
+      "ABCDEFGHIJ"
+
+      iex> FatUtils.String.random_of(5, ["a", "b", "c"])
+      "abcba"
   """
-  def random_of(length, array_of_chars \\ @chars) do
-    Enum.reduce(1..length, [], fn _i, acc ->
-      [Enum.random(array_of_chars) | acc]
-    end)
-    |> Enum.join("")
+  @spec random_of(non_neg_integer(), list(String.t())) :: binary()
+  def random_of(length, char_set \\ @default_chars) do
+    char_set
+    |> Enum.take_random(length)
+    |> Enum.join()
   end
 end

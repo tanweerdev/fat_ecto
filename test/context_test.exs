@@ -1,263 +1,196 @@
 defmodule Fat.ContextTest do
   use FatEcto.ConnCase
-  alias Fat.ContextMacro
-  alias FatEcto.{Repo, FatRoom, FatBed}
+  import FatEcto.Factory
+  alias Fat.TestContext
+  alias FatEcto.{FatRoom, Repo}
 
   setup do
     Repo.start_link()
-    Repo.insert(%FatRoom{name: "John", purpose: "Testing", description: "descriptive", is_active: true})
-    Application.delete_env(:fat_ecto, :fat_ecto, [:blacklist_params])
-
     :ok
   end
 
-  test "return first record from table with association" do
-    Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
+  test "first/2 returns the first record with associations" do
+    # Insert rooms and a bed associated with the first room
+    room1 = insert(:room, name: "John", is_active: true)
+    insert(:room, name: "Doe", is_active: false)
+    insert(:bed, fat_room_id: room1.id)
 
-    room =
-      from(c in FatRoom,
-        where: c.name == "John",
-        limit: 1
-      )
-      |> Repo.one()
+    # Fetch the first room with preloaded beds
+    record = TestContext.first(FatRoom, [:fat_beds])
 
-    Repo.insert(%FatBed{
-      name: "John",
-      purpose: "Testing",
-      description: "descriptive",
-      is_active: false,
-      fat_room_id: room.id
-    })
-
-    record = ContextMacro.first(FatEcto.FatRoom, [:fat_beds])
-    assert record.is_active == true
-    assert record.name == "John"
+    # Assertions
+    assert record.is_active == true, "Expected the first room to be active"
+    assert record.name == "John", "Expected the first room to have the name 'John'"
     sibling = List.first(record.fat_beds)
-    assert sibling.fat_room_id == room.id
+    assert sibling.fat_room_id == room1.id, "Expected the bed to be associated with the room"
   end
 
-  test "return last record from table with association" do
-    Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
+  test "last/2 returns the last record with associations" do
+    # Insert rooms and a bed associated with the last room
+    insert(:room, name: "John", is_active: true)
+    room2 = insert(:room, name: "Doe", is_active: false)
+    insert(:bed, fat_room_id: room2.id)
 
-    room =
-      from(c in FatRoom,
-        where: c.name == "Doe",
-        limit: 1
-      )
-      |> Repo.one()
+    # Fetch the last room with preloaded beds
+    record = TestContext.last(FatRoom, [:fat_beds])
 
-    Repo.insert(%FatBed{
-      name: "John",
-      purpose: "Testing",
-      description: "descriptive",
-      is_active: false,
-      fat_room_id: room.id
-    })
-
-    record = ContextMacro.last(FatEcto.FatRoom, [:fat_beds])
-    assert record.is_active == false
-    assert record.name == "Doe"
+    # Assertions
+    assert record.is_active == false, "Expected the last room to be inactive"
+    assert record.name == "Doe", "Expected the last room to have the name 'Doe'"
     sibling = List.first(record.fat_beds)
-    assert sibling.fat_room_id == room.id
+    assert sibling.fat_room_id == room2.id, "Expected the bed to be associated with the room"
   end
 
-  test "count records in the table" do
-    Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
-    Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
+  test "count/1 returns the total number of records in the table" do
+    # Insert additional rooms
+    insert(:room, name: "John")
+    insert(:room, name: "Doe")
+    insert(:room, name: "Jane")
 
-    assert ContextMacro.count(FatRoom) == 3
+    # Assert the total count
+    assert TestContext.count(FatRoom) == 3, "Expected 3 rooms in the table"
   end
 
-  test "count records in the table with specific condition" do
-    Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
-    Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
+  test "count/2 returns the number of records matching a condition" do
+    # Insert additional rooms with the same name
+    insert(:room, name: "Doe")
+    insert(:room, name: "Doe")
 
-    assert ContextMacro.count(FatRoom, name: "Doe") == 2
+    # Assert the count of rooms with the name "Doe"
+    assert TestContext.count(FatRoom, name: "Doe") == 2, "Expected 2 rooms with the name 'Doe'"
   end
 
-  test "preload schema and associations" do
-    {:ok, room} =
-      Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
+  test "list/2 returns all records with preloaded associations" do
+    # Insert additional rooms and beds
+    room1 = insert(:room, name: "Doe")
+    room2 = insert(:room, name: "Jane")
+    insert(:bed, fat_room_id: room1.id)
+    insert(:bed, fat_room_id: room2.id)
 
-    {:ok, room_1} =
-      Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
+    # Fetch all rooms with preloaded beds
+    list = TestContext.list(FatRoom, [:fat_beds])
 
-    Repo.insert(%FatBed{
-      name: "John",
-      purpose: "Testing",
-      description: "descriptive",
-      is_active: false,
-      fat_room_id: room.id
-    })
-
-    Repo.insert(%FatBed{
-      name: "John",
-      purpose: "Testing",
-      description: "descriptive",
-      is_active: false,
-      fat_room_id: room_1.id
-    })
-
-    list = ContextMacro.list(FatRoom, [:fat_beds])
-    assert Enum.count(list) == 3
+    # Assertions
+    assert Enum.count(list) == 2, "Expected 2 rooms in the list"
+    assert Enum.any?(list, &(&1.name == "Doe")), "Expected a room with the name 'Doe'"
+    assert Enum.any?(list, &(&1.name == "Jane")), "Expected a room with the name 'Jane'"
   end
 
-  test "get record " do
-    {:ok, room} =
-      Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
+  test "get!/2 returns a record by ID or raises if not found" do
+    # Insert a room
+    room = insert(:room)
 
-    record = ContextMacro.get!(FatRoom, room.id)
-    assert record.id == room.id
+    # Fetch the room by ID
+    record = TestContext.get!(FatRoom, room.id)
+
+    # Assertions
+    assert record.id == room.id, "Expected the fetched room to match the inserted room"
+
+    # Test raising an error for a non-existent ID
+    assert_raise Ecto.NoResultsError, fn ->
+      TestContext.get!(FatRoom, -1)
+    end
   end
 
-  test "get record in tuple and preload association " do
-    {:ok, room} =
-      Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
+  test "get/3 returns a record by ID with preloaded associations or an error tuple if not found" do
+    # Insert a room and a bed
+    room = insert(:room)
+    insert(:bed, fat_room_id: room.id)
 
-    Repo.insert(%FatBed{
-      name: "John",
-      purpose: "Testing",
-      description: "descriptive",
-      is_active: false,
-      fat_room_id: room.id
-    })
+    # Fetch the room by ID with preloaded beds
+    {:ok, record} = TestContext.get(FatRoom, room.id, [:fat_beds])
 
-    {:ok, record} = ContextMacro.get(FatRoom, room.id)
-    assert record.id == room.id
+    # Assertions
+    assert record.id == room.id, "Expected the fetched room to match the inserted room"
+    sibling = List.first(record.fat_beds)
+    assert sibling.fat_room_id == room.id, "Expected the bed to be associated with the room"
 
-    result = ContextMacro.get(FatRoom, -1)
-    assert result == {:error, :not_found}
-
-    {:ok, record} = ContextMacro.get(FatRoom, room.id, [:fat_beds])
-    sibling = record.fat_beds |> List.first()
-    assert sibling.fat_room_id == room.id
+    # Test error tuple for a non-existent ID
+    assert TestContext.get(FatRoom, -1) == {:error, :not_found}
   end
 
-  test "get record with string id" do
-    record = ContextMacro.get_catch(FatRoom, "fsg")
-    assert record == {:error, :invalid_id}
+  test "get_by/3 returns a record by conditions with preloaded associations or an error tuple if not found" do
+    # Insert a room and a bed
+    room = insert(:room, name: "Doe")
+    insert(:bed, fat_room_id: room.id)
+
+    # Fetch the room by name with preloaded beds
+    {:ok, record} = TestContext.get_by(FatRoom, [name: "Doe"], [:fat_beds])
+
+    # Assertions
+    assert record.name == "Doe", "Expected the fetched room to have the name 'Doe'"
+    sibling = List.first(record.fat_beds)
+    assert sibling.fat_room_id == room.id, "Expected the bed to be associated with the room"
+
+    # Test error tuple for a non-existent condition
+    assert TestContext.get_by(FatRoom, name: "Non-existent") == {:error, :not_found}
   end
 
-  test "get by record with preload association" do
-    {:ok, room} =
-      Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
+  test "create/2 creates a new record" do
+    # Create a new room
+    {:ok, record} = TestContext.create(FatRoom, %{name: "Doe", purpose: "Testing"})
 
-    Repo.insert(%FatBed{
-      name: "John",
-      purpose: "Testing",
-      description: "descriptive",
-      is_active: false,
-      fat_room_id: room.id
-    })
-
-    {:ok, record} = ContextMacro.get_by(FatRoom, name: "Doe")
-    assert record.name == "Doe"
-
-    {:ok, record} = ContextMacro.get_by(FatRoom, [name: "Doe"], [:fat_beds])
-
-    sibling = record.fat_beds |> List.first()
-    assert sibling.fat_room_id == room.id
+    # Assertions
+    assert record.name == "Doe", "Expected the created room to have the name 'Doe'"
   end
 
-  test "create record" do
-    {:ok, record} = ContextMacro.create(FatRoom, %{name: "Doe", purpose: "Testing"})
-    assert record.name == "Doe"
+  test "update/4 updates an existing record" do
+    # Insert a room
+    room = insert(:room)
+
+    # Update the room's name
+    {:ok, record} = TestContext.update(room, FatRoom, %{name: "John"})
+
+    # Assertions
+    assert record.name == "John", "Expected the updated room to have the name 'John'"
   end
 
-  test "update record" do
-    {:ok, context} =
-      Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
+  test "delete/1 deletes a record" do
+    # Insert a room
+    room = insert(:room)
 
-    {:ok, record} = ContextMacro.update(context, FatRoom, %{name: "John"})
-    assert record.name == "John"
+    # Delete the room
+    TestContext.delete(room)
+
+    # Assertions
+    assert Repo.get(FatRoom, room.id) == nil, "Expected the room to be deleted"
   end
 
-  test "delete record" do
-    {:ok, room} =
-      Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
+  test "delete_all/1 deletes all records from the schema" do
+    # Insert multiple rooms
+    insert(:room)
+    insert(:room)
 
-    ContextMacro.delete(room)
-    assert Repo.get(FatRoom, room.id) == nil
+    # Delete all rooms
+    TestContext.delete_all(FatRoom)
+
+    # Assertions
+    assert Repo.all(FatRoom) == [], "Expected all rooms to be deleted"
   end
 
-  test "delete all records from schema" do
-    {:ok, _context} =
-      Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
+  test "changeset/3 creates a changeset for a record" do
+    # Insert a room
+    room = insert(:room)
 
-    ContextMacro.delete_all(FatRoom)
-    assert Repo.all(FatRoom) == []
+    # Create a changeset
+    changeset = TestContext.changeset(FatRoom, room, %{name: "Doe", purpose: "Testing"})
+
+    # Assertions
+    assert changeset.valid?, "Expected the changeset to be valid"
   end
 
-  test "make changeset from schema" do
-    {:ok, room} =
-      Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
+  test "get_all_by/3 returns all records matching conditions with preloaded associations" do
+    # Insert multiple rooms and beds
+    room1 = insert(:room, name: "Doe")
+    room2 = insert(:room, name: "Doe")
+    insert(:bed, fat_room_id: room1.id)
+    insert(:bed, fat_room_id: room2.id)
 
-    changeset = ContextMacro.changeset(FatRoom, room, %{name: "Doe", purpose: "Testing"})
-    assert changeset.valid?
-  end
+    # Fetch all rooms with the name "Doe" and preloaded beds
+    records = TestContext.get_all_by(FatRoom, [name: "Doe"], [:fat_beds])
 
-  test "Get all records with associations and which meets specific condition" do
-    {:ok, room} =
-      Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
-
-    Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
-
-    Repo.insert(%FatBed{
-      name: "John",
-      purpose: "Testing",
-      description: "descriptive",
-      is_active: false,
-      fat_room_id: room.id
-    })
-
-    record = ContextMacro.get_all_by(FatRoom, [name: "Doe"], [:fat_beds])
-    assert record |> Enum.count() == 2
-  end
-
-  test "insert record and use fat ecto to query the result" do
-    {:ok, room} =
-      Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
-
-    Repo.insert(%FatRoom{name: "Doe", purpose: "Testing", description: "descriptive", is_active: false})
-
-    {:ok, bed} =
-      Repo.insert(%FatBed{
-        name: "John",
-        purpose: "Testing",
-        description: "descriptive",
-        is_active: false,
-        fat_room_id: room.id
-      })
-
-    opts = %{
-      "$select" => ["name", "purpose", "floor"],
-      "$right_join" => %{
-        "fat_beds" => %{
-          "$on_field" => "id",
-          "$on_table_field" => "fat_room_id",
-          "$select" => ["name", "purpose", "description"],
-          "$where" => %{"id" => bed.id}
-        }
-      },
-      "$where" => %{"id" => room.id}
-    }
-
-    query = Query.build!(FatEcto.FatRoom, opts)
-
-    expected =
-      from(fr in FatEcto.FatRoom,
-        right_join: fb in "fat_beds",
-        on: fr.id == fb.fat_room_id,
-        where: fr.id == ^room.id and ^true,
-        where: fb.id == ^bed.id and ^true,
-        select:
-          merge(map(fr, [:name, :purpose, :floor]), %{
-            ^"fat_beds" => map(fb, [:name, :purpose, :description])
-          })
-      )
-
-    assert inspect(query) == inspect(expected)
-    # TODO: match on records returned
-    Repo.all(query)
+    # Assertions
+    assert Enum.count(records) == 2, "Expected 2 rooms with the name 'Doe'"
+    assert Enum.all?(records, &(&1.name == "Doe")), "Expected all fetched rooms to have the name 'Doe'"
   end
 end

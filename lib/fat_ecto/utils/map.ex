@@ -1,69 +1,137 @@
 defmodule FatUtils.Map do
   @moduledoc """
-    Provides methods to work with maps and structs cleanup.
+  Provides utility functions for working with maps and structs.
+
+  This module includes functions for checking keys, values, and performing deep merges.
   """
 
   @doc """
-    Check if all the keys present in the map and returns true.
+  Checks if all the specified keys are present in the map.
+
+  ## Parameters
+  - `map`: The map to check.
+  - `keys`: A list of keys to check for.
+
+  ## Examples
+      iex> FatUtils.Map.has_all_keys?(%{a: 1, b: 2}, [:a, :b])
+      true
+      iex> FatUtils.Map.has_all_keys?(%{a: 1}, [:a, :b])
+      false
   """
+  @spec has_all_keys?(map(), list(any())) :: boolean()
   def has_all_keys?(map, keys) do
-    Enum.all?(keys, fn key -> Map.has_key?(map, key) end)
+    Enum.all?(keys, &Map.has_key?(map, &1))
   end
 
   @doc """
-    Check if only the given keys are present in map and returns true.
+  Checks if the map contains only the specified keys and no others.
+
+  ## Parameters
+  - `map`: The map to check.
+  - `keys`: A list of allowed keys.
+
+  ## Examples
+      iex> FatUtils.Map.has_all_keys_exclusive?(%{a: 1, b: 2}, [:a, :b])
+      true
+      iex> FatUtils.Map.has_all_keys_exclusive?(%{a: 1, c: 3}, [:a, :b])
+      false
   """
-  # TODO: add test cases
+  @spec has_all_keys_exclusive?(map(), list(any())) :: boolean()
   def has_all_keys_exclusive?(map, keys) do
     contain_only_allowed_keys?(map, keys) && has_all_keys?(map, keys)
   end
 
   @doc """
-    Check if only the allowed keys are present in map and returns true.
+  Checks if the map contains only the allowed keys.
+
+  ## Parameters
+  - `map`: The map to check.
+  - `keys`: A list of allowed keys.
+
+  ## Examples
+      iex> FatUtils.Map.contain_only_allowed_keys?(%{a: 1, b: 2}, [:a, :b])
+      true
+      iex> FatUtils.Map.contain_only_allowed_keys?(%{a: 1, c: 3}, [:a, :b])
+      false
   """
-  # TODO: add test cases
+  @spec contain_only_allowed_keys?(map(), list(any())) :: boolean()
   def contain_only_allowed_keys?(map, keys) do
     Enum.all?(map, fn {k, _v} -> k in keys end)
   end
 
   @doc """
-    Check if keys inside map are equal to specific value.
+  Checks if all the specified keys in the map have the given value.
+
+  ## Parameters
+  - `map`: The map to check.
+  - `keys`: A list of keys to check.
+  - `equal_to`: The value to compare against.
+
+  ## Examples
+      iex> FatUtils.Map.has_all_val_equal_to?(%{a: 1, b: 1}, [:a, :b], 1)
+      true
+      iex> FatUtils.Map.has_all_val_equal_to?(%{a: 1, b: 2}, [:a, :b], 1)
+      false
   """
+  @spec has_all_val_equal_to?(map(), list(any()), any()) :: boolean()
   def has_all_val_equal_to?(map, keys, equal_to) do
-    Enum.all?(keys, fn key -> Map.get(map, key) == equal_to end)
+    Enum.all?(keys, &(Map.get(map, &1) == equal_to))
   end
 
   @doc """
-  Check if map contains any of the keys. Reverse to has_all_keys.
-  """
+  Checks if the map contains any of the specified keys.
 
+  ## Parameters
+  - `map`: The map to check.
+  - `keys`: A list of keys to check for.
+
+  ## Examples
+      iex> FatUtils.Map.has_any_of_keys?(%{a: 1}, [:a, :b])
+      true
+      iex> FatUtils.Map.has_any_of_keys?(%{c: 3}, [:a, :b])
+      false
+  """
+  @spec has_any_of_keys?(map(), list(any())) :: boolean()
   def has_any_of_keys?(map, keys) do
-    Enum.any?(keys, fn key -> Map.has_key?(map, key) end)
+    Enum.any?(keys, &Map.has_key?(map, &1))
   end
 
   @doc """
-    Count the number of given keys in a given map.
-  """
+  Counts the number of specified keys present in the map.
 
+  ## Parameters
+  - `map`: The map to check.
+  - `keys`: A list of keys to count.
+
+  ## Examples
+      iex> FatUtils.Map.get_keys_count(%{a: 1, b: 2}, [:a, :b, :c])
+      2
+  """
+  @spec get_keys_count(map(), list(any())) :: non_neg_integer()
   def get_keys_count(map, keys) do
-    Enum.count(keys, fn key -> Map.has_key?(map, key) end)
+    Enum.count(keys, &Map.has_key?(map, &1))
   end
 
   @doc """
-   Deep merge two maps.
-  """
+  Deep merges two maps.
 
+  ## Parameters
+  - `left`: The first map.
+  - `right`: The second map.
+
+  ## Examples
+      iex> FatUtils.Map.deep_merge(%{a: %{b: 1}}, %{a: %{c: 2}})
+      %{a: %{b: 1, c: 2}}
+  """
+  @spec deep_merge(map(), map()) :: map()
   def deep_merge(left, right) do
     Map.merge(left, right, &deep_resolve/3)
   end
-
-  @doc false
 
   defp deep_resolve(_key, %{} = left, %{} = right) do
     deep_merge(left, right)
   end
 
-  @doc false
   defp deep_resolve(_key, _left, right) do
     right
   end

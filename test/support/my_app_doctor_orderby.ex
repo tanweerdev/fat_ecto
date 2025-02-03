@@ -1,10 +1,8 @@
 defmodule MyApp.DoctorOrderby do
   use FatEcto.FatQuery.Sortable,
-    allowed_fields: %{
-      "email" => "$desc",
+    sortable_fields: %{
+      "email" => "*",
       "phone" => "$asc"
     },
-    customizable_fields: %{
-      "phone" => "$desc"
-    }
+    overrideable_fields: []
 end

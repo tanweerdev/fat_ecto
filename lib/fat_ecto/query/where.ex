@@ -1,6 +1,4 @@
 defmodule FatEcto.FatQuery.FatWhere do
-  import Ecto.Query
-
   @moduledoc """
   Where supports multiple query methods.
 
@@ -645,8 +643,8 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   """
 
+  import Ecto.Query
   alias FatEcto.FatQuery.{FatDynamics, FatNotDynamics, WhereOr}
-  alias FatEcto.FatHelper
 
   @doc """
   Build a  `where query` depending on the params.
@@ -678,6 +676,8 @@ defmodule FatEcto.FatQuery.FatWhere do
     - `$order`- Sort the result based on the order attribute.
 
   """
+
+  @spec build_where(Ecto.Queryable.t(), map() | keyword(), map() | keyword(), keyword()) :: Ecto.Query.t()
   def build_where(queryable, where_params, build_options, opts \\ [])
 
   def build_where(queryable, nil, _opts, _build_options) do
@@ -699,8 +699,6 @@ defmodule FatEcto.FatQuery.FatWhere do
 
     dynamics =
       Enum.reduce(where_params, true, fn {k, v}, dynamics ->
-        FatHelper.check_params_validity(build_options, queryable, k)
-
         query_where(dynamics, {k, v}, opts)
       end)
 
@@ -908,7 +906,7 @@ defmodule FatEcto.FatQuery.FatWhere do
   # TODO: Add docs and examples of ex_doc for this case here
   # $where: {score == nil}
   defp query_where(dynamics, {k, map_cond}, opts) when is_nil(map_cond) do
-    FatDynamics.is_nil_dynamic(k, dynamics, opts ++ [dynamic_type: :and])
+    FatDynamics.nil_dynamic?(k, dynamics, opts ++ [dynamic_type: :and])
   end
 
   # TODO: Add docs and examples of ex_doc for this case here
@@ -916,7 +914,7 @@ defmodule FatEcto.FatQuery.FatWhere do
 
   defp query_where(dynamics, {k, map_cond}, opts)
        when map_cond == "$not_null" do
-    FatNotDynamics.not_is_nil_dynamic(k, dynamics, opts ++ [dynamic_type: :and])
+    FatNotDynamics.not_nil_dynamic?(k, dynamics, opts ++ [dynamic_type: :and])
   end
 
   defp query_where(dynamics, {k, map_cond}, opts) when not is_list(map_cond) do
@@ -928,7 +926,7 @@ defmodule FatEcto.FatQuery.FatWhere do
   defp query_where(dynamics, {k, map_cond}, opts)
        when is_list(map_cond) and k == "$not_null" do
     Enum.reduce(map_cond, dynamics, fn key, dynamics ->
-      FatNotDynamics.not_is_nil_dynamic(key, dynamics, opts ++ [dynamic_type: :and])
+      FatNotDynamics.not_nil_dynamic?(key, dynamics, opts ++ [dynamic_type: :and])
     end)
   end
 

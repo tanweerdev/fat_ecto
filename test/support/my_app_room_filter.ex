@@ -1,38 +1,37 @@
 defmodule MyApp.RoomFilter do
-  import Ecto.Query
-
-  use FatEcto.FatQuery.Filterable,
-    fields_allowed: %{},
-    fields_not_allowed: %{
-      "name" => "*",
-      "phone" => "$ilike",
-      "purpose" => "$in",
-      "description" => "$equal"
-    },
+  use FatEcto.FatQuery.Whereable,
+    filterable_fields: %{},
+    overrideable_fields: ["name", "phone", "purpose", "description"],
     ignoreable_fields_values: %{
       "name" => "%%",
       "phone" => "%%",
-      "purpose" => [],
-      "description" => nil
+      "purpose" => [[], %{"$in" => []}],
+      "description" => [nil, %{"$equal" => nil}]
     }
 
-  def not_allowed_fields_filter_fallback(query, "phone", "$ilike", compare_with) do
-    where(query, [r], ilike(fragment("(?)::TEXT", r.phone), ^compare_with))
+  import Ecto.Query
+  @impl FatEcto.FatQuery.Whereable
+  def override_whereable(query, "phone", "$ilike", value) do
+    where(query, [r], ilike(fragment("(?)::TEXT", r.phone), ^value))
   end
 
-  def not_allowed_fields_filter_fallback(query, "name", "$like", compare_with) do
-    where(query, [r], like(fragment("(?)::TEXT", r.name), ^compare_with))
+  def override_whereable(query, "name", "$like", value) do
+    where(query, [r], like(fragment("(?)::TEXT", r.name), ^value))
   end
 
-  def not_allowed_fields_filter_fallback(query, "description", "$equal", compare_with) do
-    where(query, [r], r.description == ^compare_with)
+  def override_whereable(query, "name", "$ilike", value) do
+    where(query, [r], ilike(fragment("(?)::TEXT", r.name), ^value))
   end
 
-  def not_allowed_fields_filter_fallback(query, "purpose", "$in", compare_with) do
-    where(query, [r], r.purpose in ^compare_with)
+  def override_whereable(query, "description", "$equal", value) do
+    where(query, [r], r.description == ^value)
   end
 
-  def not_allowed_fields_filter_fallback(query, _, _, _) do
+  def override_whereable(query, "purpose", "$in", value) when is_list(value) do
+    where(query, [r], r.purpose in ^value)
+  end
+
+  def override_whereable(query, _, _, _) do
     query
   end
 end

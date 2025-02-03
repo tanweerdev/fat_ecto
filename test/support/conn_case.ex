@@ -5,21 +5,18 @@ defmodule FatEcto.ConnCase do
 
   using do
     quote do
-      alias FatEcto.Repo
-
-      import Ecto
       import Ecto.Changeset
       import Ecto.Query
+      import FatEcto.Factory
+
+      alias FatEcto.Repo
       alias MyApp.DoctorFilter
-      alias MyApp.HospitalFilter
-      alias MyApp.PatientFilter
-      alias MyApp.RoomFilter
-      alias MyApp.Query
       alias MyApp.DoctorOrderby
+      alias MyApp.HospitalFilter
       alias MyApp.HospitalOrderby
       alias MyApp.PatientOrderby
+      alias MyApp.RoomFilter
       alias MyApp.RoomOrderby
-      import FatEcto.Factory
     end
   end
 

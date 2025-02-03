@@ -1,125 +1,183 @@
 defmodule FatEcto.FatContext do
-  @moduledoc false
+  @moduledoc """
+  Provides a set of utility functions to simplify common Ecto operations such as querying, creating, updating, and deleting records.
 
-  # TODO: make paginator optional via global config and via options passed
-  # TODO: Add docs and examples for ex_doc
+  This module is designed to be used within a context module to provide a consistent and easy-to-use API for interacting with your database.
+
+  ## Usage
+
+      defmodule MyApp.UserContext do
+        use FatEcto.FatContext, repo: MyApp.Repo
+
+        # Custom functions can be added here
+      end
+
+  Now you can use the functions provided by `FatEcto.FatContext` within `MyApp.UserContext`.
+  """
 
   defmacro __using__(options \\ []) do
     quote location: :keep do
-      @moduledoc """
-      Provide methods for the Ecto query and changeset modules.
-
-      `use FatEcto.FatContext, repo: Repo`. Place this inside a module and then import or alias that module to use these methods.
-      """
       @options FatEcto.FatHelper.get_module_options(unquote(options), FatEcto.FatContext)
-
-      # TODO: Fix @repo.all and @repo.one nil warning
-      @repo @options[:repo]
-
-      if !@repo do
-        raise "please define repo when using context"
-      end
+      @repo @options[:repo] || raise("Please define :repo when using FatEcto.FatContext")
 
       import Ecto.Query, warn: false
-      # alias MyApp.{Repo}
 
-      # get first record
-      # user = FatEcto.Context.first(MyApp.User)
-      # TODO: add order_by support dynamicall and let user define default order_by in config
       @doc """
-       Return first record from the schema and preload associations.
+      Retrieves the first record from the given schema.
+
+      ## Parameters
+      - `schema`: The Ecto schema module.
+      - `preloads`: A list of associations to preload (default: []).
+
+      ## Examples
+          iex> first(MyApp.User)
+          %MyApp.User{}
+
+          iex> first(MyApp.User, [:posts])
+          %MyApp.User{posts: [%MyApp.Post{}]}
       """
       def first(schema, preloads \\ []) do
         query =
           cond do
-            Enum.member?(schema.__schema__(:fields), :id) && schema.__schema__(:field_source, :id) == :id ->
-              from(q in schema, order_by: q.id, limit: 1)
-
-            Enum.member?(schema.__schema__(:fields), :inserted_at) &&
-                schema.__schema__(:field_source, :inserted_at) == :naive_datetime ->
-              from(q in schema, order_by: q.inserted_at, limit: 1)
-
-            true ->
-              from(q in schema, limit: 1)
+            has_field?(schema, :id) -> from(q in schema, order_by: q.id, limit: 1)
+            has_field?(schema, :inserted_at) -> from(q in schema, order_by: q.inserted_at, limit: 1)
+            true -> from(q in schema, limit: 1)
           end
 
         @repo.one(from(q in query, preload: ^preloads))
       end
 
-      # get last record
       @doc """
-        Return last record from the schema and preload associations.
+      Retrieves the last record from the given schema.
+
+      ## Parameters
+      - `schema`: The Ecto schema module.
+      - `preloads`: A list of associations to preload (default: []).
+
+      ## Examples
+          iex> last(MyApp.User)
+          %MyApp.User{}
+
+          iex> last(MyApp.User, [:posts])
+          %MyApp.User{posts: [%MyApp.Post{}]}
       """
       def last(schema, preloads \\ []) do
         query =
           cond do
-            Enum.member?(schema.__schema__(:fields), :id) && schema.__schema__(:field_source, :id) == :id ->
-              from(q in schema, order_by: [desc: q.id], limit: 1)
-
-            Enum.member?(schema.__schema__(:fields), :inserted_at) &&
-                schema.__schema__(:field_source, :inserted_at) == :naive_datetime ->
-              from(q in schema, order_by: [desc: q.inserted_at], limit: 1)
-
-            true ->
-              from(q in schema, limit: 1)
+            has_field?(schema, :id) -> from(q in schema, order_by: [desc: q.id], limit: 1)
+            has_field?(schema, :inserted_at) -> from(q in schema, order_by: [desc: q.inserted_at], limit: 1)
+            true -> from(q in schema, limit: 1)
           end
 
         @repo.one(from(q in query, preload: ^preloads))
       end
 
-      # Context.count(User)
       @doc """
-        Count the total number of records from schema.
+      Counts the total number of records in the given schema.
+
+      ## Parameters
+      - `schema`: The Ecto schema module.
+
+      ## Examples
+          iex> count(MyApp.User)
+          42
       """
       def count(schema) do
         query = from(q in schema, select: fragment("count(*)"))
         @repo.one(query)
       end
 
-      # Context.count(User, username: "name")
       @doc """
-        Count number of records that meet specific condition.
+      Counts the number of records that match the given conditions.
+
+      ## Parameters
+      - `schema`: The Ecto schema module.
+      - `conditions`: A keyword list of conditions.
+
+      ## Examples
+          iex> count(MyApp.User, name: "John Doe")
+          1
       """
-      def count(schema, keyword_cond) do
-        query = Ecto.Query.where(schema, ^keyword_cond)
-        query = from(q in query, select: fragment("count(*)"))
-        @repo.one(query)
+      def count(schema, conditions) do
+        schema
+        |> where(^conditions)
+        |> select([q], fragment("count(*)"))
+        |> @repo.one()
       end
 
-      # Context.list(User, [:actions]) or Context.list(User)
       @doc """
-        Return all records and preload the associations from schema in a list.
+      Retrieves all records from the given schema and preloads the specified associations.
+
+      ## Parameters
+      - `schema`: The Ecto schema module.
+      - `preloads`: A list of associations to preload (default: []).
+
+      ## Examples
+          iex> list(MyApp.User)
+          [%MyApp.User{}, %MyApp.User{}]
+
+          iex> list(MyApp.User, [:posts])
+          [%MyApp.User{posts: [%MyApp.Post{}]}, %MyApp.User{posts: []}]
       """
       def list(schema, preloads \\ []) do
-        # query =
-        #   if Enum.member?(schema.__schema__(:fields), :name) do
-        #     from(q in schema, order_by: q.name)
-        #   else
-        #     schema
-        #   end
-
-        @repo.all(schema) |> @repo.preload(preloads)
+        schema |> @repo.all() |> @repo.preload(preloads)
       end
 
-      # Context.list(User,[name: "john"] , [:actions])
       @doc """
-        Return all records and preload the associations from schema in a list.
+      Retrieves all records from the given schema that match the specified conditions and preloads the specified associations.
+
+      ## Parameters
+      - `schema`: The Ecto schema module.
+      - `conditions`: A keyword list of conditions.
+      - `preloads`: A list of associations to preload (default: []).
+
+      ## Examples
+          iex> list_by(MyApp.User, name: "John Doe")
+          [%MyApp.User{name: "John Doe"}]
+
+          iex> list_by(MyApp.User, name: "John Doe", [:posts])
+          [%MyApp.User{name: "John Doe", posts: [%MyApp.Post{}]}]
       """
-      def list_by(schema, keyword_cond, preloads \\ []) do
-        query = Ecto.Query.where(schema, ^keyword_cond)
-
-        @repo.all(query) |> @repo.preload(preloads)
+      def list_by(schema, conditions, preloads \\ []) do
+        schema
+        |> where(^conditions)
+        |> @repo.all()
+        |> @repo.preload(preloads)
       end
 
-      # Context.get!(User, 2)
       @doc """
-        Return record from schema which matches the id and raise if no record found.
+      Retrieves a record by its ID and raises if not found.
+
+      ## Parameters
+      - `schema`: The Ecto schema module.
+      - `id`: The ID of the record.
+
+      ## Examples
+          iex> get!(MyApp.User, 1)
+          %MyApp.User{id: 1}
+
+          iex> get!(MyApp.User, 999)
+          ** (Ecto.NoResultsError)
       """
       def get!(schema, id), do: @repo.get!(schema, id)
 
-      # Context.get(User, 2, assoc)
       @doc """
-        Return record from schema which meets the id and preload assocations and return error tuple if record doesnot exist.
+      Retrieves a record by its ID and preloads the specified associations. Returns an error tuple if the record is not found.
+
+      ## Parameters
+      - `schema`: The Ecto schema module.
+      - `id`: The ID of the record.
+      - `preloads`: A list of associations to preload (default: []).
+
+      ## Examples
+          iex> get(MyApp.User, 1)
+          {:ok, %MyApp.User{id: 1}}
+
+          iex> get(MyApp.User, 999)
+          {:error, :not_found}
+
+          iex> get(MyApp.User, 1, [:posts])
+          {:ok, %MyApp.User{id: 1, posts: [%MyApp.Post{}]}}
       """
       def get(schema, id, preloads \\ []) do
         case @repo.get(schema, id) do
@@ -129,48 +187,63 @@ defmodule FatEcto.FatContext do
       end
 
       @doc """
-        Return record which matches the id and return error tuple if id is invalid.
-      """
-      def get_catch(schema, id, preloads \\ []) do
-        try do
-          schema
-          |> @repo.get(id)
-          |> @repo.preload(preloads)
-        rescue
-          _ in _ -> {:error, :invalid_id}
-        end
-      end
+      Retrieves a record by the given conditions and preloads the specified associations. Returns an error tuple if the record is not found.
 
-      # Context.get_by(User, name: name) OR
-      # Context.get_by(User, [name: name], [:actions])
-      @doc """
-        Get record which meets the creteria. Clauses should be passed in a list.
-      """
-      def get_by(schema, clauses, preloads \\ []) do
-        record =
-          schema
-          |> @repo.get_by(clauses)
-          |> @repo.preload(preloads)
+      ## Parameters
+      - `schema`: The Ecto schema module.
+      - `conditions`: A keyword list of conditions.
+      - `preloads`: A list of associations to preload (default: []).
 
-        case record do
+      ## Examples
+          iex> get_by(MyApp.User, name: "John Doe")
+          {:ok, %MyApp.User{name: "John Doe"}}
+
+          iex> get_by(MyApp.User, name: "Non-existent")
+          {:error, :not_found}
+
+          iex> get_by(MyApp.User, name: "John Doe", [:posts])
+          {:ok, %MyApp.User{name: "John Doe", posts: [%MyApp.Post{}]}}
+      """
+      def get_by(schema, conditions, preloads \\ []) do
+        case @repo.get_by(schema, conditions) do
           nil -> {:error, :not_found}
-          _record -> {:ok, record}
+          record -> {:ok, @repo.preload(record, preloads)}
         end
       end
 
-      # Context.create(User, %{name: "John Doe"})
       @doc """
-        Create a record by passing schema and attributes to a changeset. It will return the record created.
+      Creates a new record with the given attributes.
+
+      ## Parameters
+      - `schema`: The Ecto schema module.
+      - `attrs`: A map of attributes.
+      - `opts`: Options to pass to the repository (default: []).
+
+      ## Examples
+          iex> create(MyApp.User, %{name: "John Doe"})
+          {:ok, %MyApp.User{name: "John Doe"}}
+
+          iex> create(MyApp.User, %{name: "John Doe"}, [returning: true])
+          {:ok, %MyApp.User{name: "John Doe"}}
       """
       def create(schema, attrs, opts \\ []) do
-        schema.__struct__
+        schema.__struct__()
         |> schema.changeset(attrs)
         |> @repo.insert(opts)
       end
 
-      # Context.create_by(%User{}, &User.changeset/2, %{name: "John Doe"})
       @doc """
-        Create a record by passing schema, struct and attributes to a changeset. It will return the record created.
+      Creates a new record using a custom changeset function.
+
+      ## Parameters
+      - `struct`: The Ecto struct.
+      - `changeset_fn`: A function that takes a struct and attributes and returns a changeset.
+      - `attrs`: A map of attributes.
+      - `opts`: Options to pass to the repository (default: []).
+
+      ## Examples
+          iex> create_by(%MyApp.User{}, &MyApp.User.changeset/2, %{name: "John Doe"})
+          {:ok, %MyApp.User{name: "John Doe"}}
       """
       def create_by(struct, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn, 2) do
         struct
@@ -178,19 +251,39 @@ defmodule FatEcto.FatContext do
         |> @repo.insert(opts)
       end
 
-      # Context.create!(User, %{name: "John Doe"})
       @doc """
-        Create a record by passing schema and attributes to a changeset. It will return the record created.
+      Creates a new record with the given attributes and raises on failure.
+
+      ## Parameters
+      - `schema`: The Ecto schema module.
+      - `attrs`: A map of attributes.
+      - `opts`: Options to pass to the repository (default: []).
+
+      ## Examples
+          iex> create!(MyApp.User, %{name: "John Doe"})
+          %MyApp.User{name: "John Doe"}
+
+          iex> create!(MyApp.User, %{name: nil})
+          ** (Ecto.InvalidChangesetError)
       """
       def create!(schema, attrs, opts \\ []) do
-        schema.__struct__
+        schema.__struct__()
         |> schema.changeset(attrs)
         |> @repo.insert!(opts)
       end
 
-      # Context.create_by!(%User{}, &User.changeset/2, %{name: "John Doe"})
       @doc """
-        Create a record by passing schema and attributes to a changeset. It will return the record created.
+      Creates a new record using a custom changeset function and raises on failure.
+
+      ## Parameters
+      - `struct`: The Ecto struct.
+      - `changeset_fn`: A function that takes a struct and attributes and returns a changeset.
+      - `attrs`: A map of attributes.
+      - `opts`: Options to pass to the repository (default: []).
+
+      ## Examples
+          iex> create_by!(%MyApp.User{}, &MyApp.User.changeset/2, %{name: "John Doe"})
+          %MyApp.User{name: "John Doe"}
       """
       def create_by!(struct, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn, 2) do
         struct
@@ -198,110 +291,175 @@ defmodule FatEcto.FatContext do
         |> @repo.insert!(opts)
       end
 
-      # Context.update_by(%User{name: "old name", id: ...}, &User.changeset/2, %{name: "new name"})
       @doc """
-        Update a record by passing record, changeset_fn and attributes. It will return the record updated.
+      Updates a record using a custom changeset function.
 
+      ## Parameters
+      - `record`: The record to update.
+      - `changeset_fn`: A function that takes a record and attributes and returns a changeset.
+      - `attrs`: A map of attributes.
+      - `opts`: Options to pass to the repository (default: []).
+
+      ## Examples
+          iex> update_by(%MyApp.User{name: "Old Name"}, &MyApp.User.changeset/2, %{name: "New Name"})
+          {:ok, %MyApp.User{name: "New Name"}}
       """
-      def update_by(item, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn, 2) do
-        item
+      def update_by(record, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn, 2) do
+        record
         |> changeset_fn.(attrs)
         |> @repo.update(opts)
       end
 
-      # Context.update(%User{name: "old name", id: ...}, User, %{name: "new name"})
       @doc """
-        Update a record by passing record, schema and attributes to a changeset. It will return the record updated.
+      Updates a record using the schema's changeset function.
 
+      ## Parameters
+      - `record`: The record to update.
+      - `schema`: The Ecto schema module.
+      - `attrs`: A map of attributes.
+      - `opts`: Options to pass to the repository (default: []).
+
+      ## Examples
+          iex> update(%MyApp.User{name: "Old Name"}, MyApp.User, %{name: "New Name"})
+          {:ok, %MyApp.User{name: "New Name"}}
       """
-      def update(item, schema, attrs, opts \\ []) do
-        item
+      def update(record, schema, attrs, opts \\ []) do
+        record
         |> schema.changeset(attrs)
         |> @repo.update(opts)
       end
 
-      # Context.update_by!(%User{name: "old name", id: ...}, &User.changeset/2, %{name: "new name"})
       @doc """
-        Update a record by passing record, changeset_fn and attributes. It will return the record updated or raises.
+      Updates a record using a custom changeset function and raises on failure.
 
+      ## Parameters
+      - `record`: The record to update.
+      - `changeset_fn`: A function that takes a record and attributes and returns a changeset.
+      - `attrs`: A map of attributes.
+      - `opts`: Options to pass to the repository (default: []).
+
+      ## Examples
+          iex> update_by!(%MyApp.User{name: "Old Name"}, &MyApp.User.changeset/2, %{name: "New Name"})
+          %MyApp.User{name: "New Name"}
       """
-      def update_by!(item, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn, 2) do
-        item
+      def update_by!(record, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn, 2) do
+        record
         |> changeset_fn.(attrs)
         |> @repo.update!(opts)
       end
 
-      # Context.update!(%User{name: "old name", id: ...}, User, %{name: "new name"})
       @doc """
-        Update a record by passing record, schema and attributes to a changeset. It will return the record updated or raises.
+      Updates a record using the schema's changeset function and raises on failure.
 
+      ## Parameters
+      - `record`: The record to update.
+      - `schema`: The Ecto schema module.
+      - `attrs`: A map of attributes.
+      - `opts`: Options to pass to the repository (default: []).
+
+      ## Examples
+          iex> update!(%MyApp.User{name: "Old Name"}, MyApp.User, %{name: "New Name"})
+          %MyApp.User{name: "New Name"}
       """
-      def update!(item, schema, attrs, opts \\ []) do
-        item
+      def update!(record, schema, attrs, opts \\ []) do
+        record
         |> schema.changeset(attrs)
         |> @repo.update!(opts)
       end
 
-      # TODO: add docs and test cases.
-      # TODO: also accept limit and order_by options
-      # TODO: add find_and_update method, {:error, :not_found} if record not found, also accept limit and order_by options
+      @doc """
+      Upserts a record based on the given conditions. If the record exists, it updates it; otherwise, it creates a new one.
+
+      ## Parameters
+      - `schema`: The Ecto schema module.
+      - `conditions`: A keyword list of conditions.
+      - `update_params`: A map of attributes to update.
+      - `create_params`: A map of attributes to create.
+      - `opts`: Options to pass to the repository (default: []).
+
+      ## Examples
+          iex> upsert(MyApp.User, [get_by_clauses: [name: "John Doe"], update_params: %{name: "John Doe Updated"}, create_params: %{name: "John Doe"}])
+          {:ok, %MyApp.User{name: "John Doe Updated"}}
+      """
       def upsert(
             schema,
             [get_by_clauses: get_by_clauses, update_params: update_params, create_params: create_params],
             opts \\ []
           ) do
         case get_by(schema, get_by_clauses, opts[:preloads] || []) do
-          {:ok, record} ->
-            # Record is found, now update
-            update(record, schema, update_params, opts)
-
-          {:error, :not_found} ->
-            # Record not found, so create one
-            create(schema, create_params, opts)
+          {:ok, record} -> update(record, schema, update_params, opts)
+          {:error, :not_found} -> create(schema, create_params, opts)
         end
       end
 
-      # Context.delete(%User{name: "name", id: 1})
       @doc """
-        Delete the record.
+      Deletes a record.
+
+      ## Parameters
+      - `record`: The record to delete.
+
+      ## Examples
+          iex> delete(%MyApp.User{id: 1})
+          {:ok, %MyApp.User{}}
       """
-      def delete(item) do
-        @repo.delete(item)
+      def delete(record) do
+        @repo.delete(record)
       end
 
-      # Context.delete_all(User)
-      # Context.delete_all(from a in User, where: a.id in [1, 2])
       @doc """
-        Delete all records from schema.
+      Deletes all records from the given schema.
+
+      ## Parameters
+      - `schema`: The Ecto schema module.
+
+      ## Examples
+          iex> delete_all(MyApp.User)
+          {2, nil}
       """
       def delete_all(schema) do
         @repo.delete_all(schema)
       end
 
-      # Context.changeset(User, %{id: 1, name: "somename"})
       @doc """
-        Make changeset from record and params.
+      Creates a changeset for the given record and attributes.
+
+      ## Parameters
+      - `schema`: The Ecto schema module.
+      - `record`: The record to create a changeset for.
+      - `attrs`: A map of attributes.
+
+      ## Examples
+          iex> changeset(MyApp.User, %MyApp.User{}, %{name: "John Doe"})
+          #Ecto.Changeset<...>
       """
-      def changeset(schema, item, params \\ %{}) do
-        schema.changeset(item, params)
+      def changeset(schema, record, attrs \\ %{}) do
+        schema.changeset(record, attrs)
       end
 
-      # Context.get_all_by(User, name: "somename", [:actions])
       @doc """
-        Get all the records which match the condition and preload associations. keyword must be passed in a list.
-      """
-      def get_all_by(schema, keyword_cond, preloads \\ []) do
-        # query =
-        #   if Enum.member?(schema.__schema__(:fields), :name) do
-        #     from(q in schema, order_by: q.name)
-        #   else
-        #     schema
-        #   end
+      Retrieves all records that match the given conditions and preloads the specified associations.
 
+      ## Parameters
+      - `schema`: The Ecto schema module.
+      - `conditions`: A keyword list of conditions.
+      - `preloads`: A list of associations to preload (default: []).
+
+      ## Examples
+          iex> get_all_by(MyApp.User, name: "John Doe")
+          [%MyApp.User{name: "John Doe"}]
+
+          iex> get_all_by(MyApp.User, name: "John Doe", [:posts])
+          [%MyApp.User{name: "John Doe", posts: [%MyApp.Post{}]}]
+      """
+      def get_all_by(schema, conditions, preloads \\ []) do
         schema
-        |> Ecto.Query.where(^keyword_cond)
+        |> where(^conditions)
         |> @repo.all()
         |> @repo.preload(preloads)
+      end
+
+      defp has_field?(schema, field) do
+        Enum.member?(schema.__schema__(:fields), field) && schema.__schema__(:field_source, field) == field
       end
     end
   end

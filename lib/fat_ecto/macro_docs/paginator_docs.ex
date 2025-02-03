@@ -1,4 +1,4 @@
-defmodule Paginator do
+defmodule PaginatorDocs do
   @moduledoc """
   Paginator module can limit the number of records returned and also apply the offset and return meta information. You can use it inside a module.
 

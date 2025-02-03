@@ -1,2 +1,0 @@
-Guard test is_function(__@4::'nil',2) can never succeed
-Guard test is_function(__@4::'nil',3) can never succeed
