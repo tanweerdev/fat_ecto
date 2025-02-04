@@ -1,8 +1,8 @@
 # FatEcto
 
 
-[![Build Status](https://github.com/tanweerdev/fat_ecto/workflows/tests/badge.svg)](https://github.com/tanweerdev/fat_ecto/actions)
-[![Coverage Status](https://coveralls.io/repos/github/tanweerdev/fat_ecto/badge.svg?branch=master)](https://coveralls.io/github/tanweerdev/fat_ecto?branch=master)
+[![Build Status](https://github.com/tanweerdev/fat_ecto/actions/workflows/fat_ecto.yml/badge.svg)](https://github.com/tanweerdev/fat_ecto/actions)
+[![Coverage Status](https://coveralls.io/repos/github/tanweerdev/fat_ecto/badge.svg)](https://coveralls.io/github/tanweerdev/fat_ecto)
 [![hex.pm version](https://img.shields.io/hexpm/v/fat_ecto.svg)](https://hex.pm/packages/fat_ecto)
 [![hex.pm downloads](https://img.shields.io/hexpm/dt/fat_ecto.svg)](https://hex.pm/packages/fat_ecto)
 [![hex.pm license](https://img.shields.io/hexpm/l/fat_ecto.svg)](https://github.com/tanweerdev/fat_ecto/blob/master/LICENSE)
