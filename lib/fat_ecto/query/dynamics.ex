@@ -21,9 +21,9 @@ defmodule FatEcto.FatQuery.FatDynamics do
   - `opts`: Options to control the behavior, such `:binding` (`:last` for joins).
 
   ### Example:
-      iex> dynamic = FatDynamics.eq_dynamic("name", "John")
-      iex> query = from(u in User, where: ^dynamic)
-      #Ecto.Query<from u in User, where: u.name == ^"John">
+    iex> result = #{__MODULE__}.nil_dynamic?("location")
+    iex> inspect(result)
+    "dynamic([c], is_nil(c.location))"
 
   This module is typically used internally by `FatEcto` to construct queries based on user-provided filters.
   """
@@ -292,7 +292,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
   ### Examples
 
-      iex> result = #{__MODULE__}.array_ilike_dynamic("tags", "%elixir%")
+      iex> result = #{__MODULE__}.array_ilike_dynamic("tags", \"%elixir%\")
       iex> inspect(result)
       "dynamic([q], fragment(\"exists (SELECT 1 FROM unnest(?) as value WHERE value ILIKE ?)\", q.tags, ^\"%elixir%\"))"
   """
@@ -536,7 +536,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
   ### Examples
 
-      iex> result = #{__MODULE__}.contains_dynamic("metadata", %{"role" => "admin"})
+      iex> result = #{__MODULE__}.contains_dynamic("metadata", %{\"role\" => \"admin\"})
       iex> inspect(result)
       "dynamic([q], fragment(\"? @> ?\", q.metadata, ^%{\"role\" => \"admin\"}))"
   """
