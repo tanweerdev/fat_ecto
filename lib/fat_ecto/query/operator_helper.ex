@@ -1,4 +1,54 @@
 defmodule FatEcto.FatQuery.OperatorHelper do
+  @moduledoc """
+  Provides helper functions to apply dynamic query operators for Ecto queries.
+
+  This module centralizes the logic for applying various query operators such as `$like`, `$ilike`, `$lt`, `$gt`, etc.,
+  as well as their negated counterparts (e.g., `$not_like`, `$not_ilike`). It is designed to work with `FatDynamics` and
+  `FatNotDynamics` modules to generate dynamic Ecto query conditions.
+
+  ## Supported Operators
+
+  ### Positive Operators
+  - `$like`: Matches a pattern in a string.
+  - `$not_like`: Excludes rows that match a pattern in a string.
+  - `$ilike`: Case-insensitive match of a pattern in a string.
+  - `$not_ilike`: Case-insensitive exclusion of rows that match a pattern in a string.
+  - `$lt`: Less than.
+  - `$lte`: Less than or equal to.
+  - `$gt`: Greater than.
+  - `$gte`: Greater than or equal to.
+  - `$between`: Matches values between a range (exclusive).
+  - `$between_equal`: Matches values between a range (inclusive).
+  - `$not_between`: Excludes values between a range (exclusive).
+  - `$not_between_equal`: Excludes values between a range (inclusive).
+  - `$in`: Matches values in a list.
+  - `$not_in`: Excludes values in a list.
+  - `$equal`: Matches a specific value.
+  - `$not_equal`: Excludes a specific value.
+
+  ### Negated Operators (for `$not` conditions)
+  - `$like`: Negates the `$like` condition.
+  - `$ilike`: Negates the `$ilike` condition.
+  - `$lt`: Negates the `$lt` condition.
+  - `$lte`: Negates the `$lte` condition.
+  - `$gt`: Negates the `$gt` condition.
+  - `$gte`: Negates the `$gte` condition.
+  - `$equal`: Negates the `$equal` condition.
+
+  ## Usage
+
+  This module is typically used internally by `FatEcto.FatQuery.FatWhere` and `FatEcto.FatQuery.WhereOr` to construct
+  dynamic queries. It abstracts away the complexity of applying operators and ensures consistency across the codebase.
+
+  ### Example
+
+      # Applying a `$like` operator
+      OperatorHelper.apply_operator("$like", :name, "%John%", [])
+
+      # Applying a negated `$equal` operator
+      OperatorHelper.apply_not_condition("$equal", :age, 30, [])
+  """
+
   alias FatEcto.FatQuery.FatDynamics
   alias FatEcto.FatQuery.FatNotDynamics
 
