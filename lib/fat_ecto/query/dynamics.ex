@@ -1,591 +1,411 @@
 defmodule FatEcto.FatQuery.FatDynamics do
   @moduledoc """
-  Builds a `where query` using dynamics.
+  Provides functions to build dynamic `where` conditions for Ecto queries.
 
-  ### Parameters
+  This module is designed to construct complex `where` clauses dynamically using Ecto's `dynamic/2` macro.
+  It supports a variety of conditions such as equality, inequality, comparison operators (`>`, `<`, `>=`, `<=`),
+  `IN` clauses, `LIKE`/`ILIKE` for string matching, and JSONB operations (`@>`, `&&`).
 
-    - `queryable`   - Ecto Queryable that represents your schema name, table name or query.
-    - `query_opts`  - Where query options as a map.
+  ### Key Features:
+  - **Dynamic Conditions**: Builds `where` clauses dynamically based on field names, values, and logic types (`:and`/`:or`).
+  - **Binding Support**: Supports query bindings for joins or nested queries via the `:binding` option.
+  - **JSONB Operations**: Provides functions to work with JSONB fields, such as checking containment or overlap.
+  - **String Matching**: Supports `LIKE` and `ILIKE` for substring matching, including case-insensitive searches.
+  - **Range Queries**: Allows building conditions for ranges (`BETWEEN`, `IN`, etc.).
 
-  ### Examples
+  ### Usage:
+  Each function in this module constructs a dynamic expression that can be combined with other dynamics or used directly
+  in an Ecto query. The functions accept the following common parameters:
+  - `key`: The field name (as a string or atom).
+  - `value`: The value to compare against (can be a single value, list, or map depending on the function).
+  - `opts`: Options to control the behavior, such `:binding` (`:last` for joins).
 
-      iex> query_opts = %{
-      ...>    "$select" => %{
-      ...>     "$fields" => ["name", "location", "rating"]
-      ...>    },
-      ...>   "$where" => %{
-      ...>      "name" => "%John%",
-      ...>      "location" => nil,
-      ...>      "rating" => "$not_null",
-      ...>      "total_staff" => %{"$between" => [1, 3]}
-      ...>    }
-      ...>  }
-      iex> #{MyApp.Query}.build!(FatEcto.FatHospital, query_opts)
-      #Ecto.Query<from f0 in FatEcto.FatHospital, where: f0.total_staff > ^1 and f0.total_staff < ^3 and
-  (not is_nil(f0.rating) and (f0.name == ^"%John%" and (is_nil(f0.location) and ^true))), select: map(f0, [:name, :location, :rating])>
+  ### Example:
+      iex> dynamic = FatDynamics.eq_dynamic("name", "John")
+      iex> query = from(u in User, where: ^dynamic)
+      #Ecto.Query<from u in User, where: u.name == ^"John">
 
-  ### Options
-
-    - `$select` - Select the fields from `hospital` and `rooms`.
-    - `$where`  - Added the where attribute in the query.
+  This module is typically used internally by `FatEcto` to construct queries based on user-provided filters.
   """
+
   import Ecto.Query
   alias FatEcto.FatHelper
 
   @doc """
-   Builds a dynamic query where field is nil.
-  ### Parameters
+  Builds a dynamic query where field is nil.
 
-    - `key`       - Field name .
-    - `dynamics`  - Default or previous dynamic to append to the query.
-    - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
-
-  ### Examples
-      iex> result = #{__MODULE__}.nil_dynamic?("location", true, [dynamic_type: :and])
-      iex> inspect(result)
-      "dynamic([c], is_nil(c.location) and ^true)"
+  Parameters
+  - `key`       - Field name.
+  - `opts`      - Options for binding.
+  Examples
+    iex> result = #{__MODULE__}.nil_dynamic?("location")
+    iex> inspect(result)
+    "dynamic([c], is_nil(c.location))"
   """
-  @spec nil_dynamic?(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
-  def nil_dynamic?(key, dynamics, opts \\ []) do
+  @spec nil_dynamic?(any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def nil_dynamic?(key, opts \\ []) do
     if opts[:binding] == :last do
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [_, _, c],
-          is_nil(field(c, ^FatHelper.string_to_existing_atom(key))) and ^dynamics
-        )
-      else
-        dynamic(
-          [_, _, c],
-          is_nil(field(c, ^FatHelper.string_to_existing_atom(key))) or ^dynamics
-        )
-      end
+      dynamic(
+        [_, ..., c],
+        is_nil(field(c, ^key))
+      )
     else
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [c],
-          is_nil(field(c, ^FatHelper.string_to_existing_atom(key))) and ^dynamics
-        )
-      else
-        dynamic(
-          [c],
-          is_nil(field(c, ^FatHelper.string_to_existing_atom(key))) or ^dynamics
-        )
-      end
+      dynamic(
+        [c],
+        is_nil(field(c, ^key))
+      )
     end
   end
 
   @doc """
-  Builds a dynamic query where field is greater than the value.
-  ### Parameters
+  Builds dynamic condition for field greater than value.
 
-     - `key`       - Field name.
-     - `value`     - Value of the field.
-     - `dynamics`  - Default or previous dynamic to append to the query.
-     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
-
-  ### Examples
-
-      iex> result = #{__MODULE__}.gt_dynamic("experience_years", 2, true, [dynamic_type: :or, binding: :last])
-      iex> inspect(result)
-      "dynamic([_, _, c], c.experience_years > ^2 or ^true)"
+  Parameters
+   - `key`       - Field name.
+   - `value`     - Comparison value or field reference.
+   - `opts`      - Options for binding
+  Examples
+    iex> result = #{__MODULE__}.gt_dynamic("experience_years", 2, [binding: :last])
+    iex> inspect(result)
+    "dynamic([_, ..., c], c.experience_years > ^2)"
   """
-  @spec gt_dynamic(any(), any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
-  def gt_dynamic(key, value, dynamics, opts \\ []) do
+  @spec gt_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def gt_dynamic(key, value, opts \\ []) do
     if opts[:binding] == :last do
       if FatHelper.fat_ecto_reserve_field?(value) do
         value = String.replace(value, "$", "", global: false)
 
-        if opts[:dynamic_type] == :and do
-          dynamic(
-            [_, _, c],
-            field(c, ^FatHelper.string_to_existing_atom(key)) >
-              field(c, ^FatHelper.string_to_existing_atom(value)) and ^dynamics
-          )
-        else
-          dynamic(
-            [_, _, c],
-            field(c, ^FatHelper.string_to_existing_atom(key)) >
-              field(c, ^FatHelper.string_to_existing_atom(value)) or ^dynamics
-          )
-        end
-      else
-        if opts[:dynamic_type] == :and do
-          dynamic(
-            [_, _, c],
-            field(c, ^FatHelper.string_to_existing_atom(key)) > ^value and ^dynamics
-          )
-        else
-          dynamic(
-            [_, _, c],
-            field(c, ^FatHelper.string_to_existing_atom(key)) > ^value or ^dynamics
-          )
-        end
-      end
-    else
-      if FatHelper.fat_ecto_reserve_field?(value) do
-        value = String.replace(value, "$", "", global: false)
-
-        if opts[:dynamic_type] == :and do
-          dynamic(
-            [q],
-            field(q, ^FatHelper.string_to_existing_atom(key)) >
-              field(q, ^FatHelper.string_to_existing_atom(value)) and ^dynamics
-          )
-        else
-          dynamic(
-            [q],
-            field(q, ^FatHelper.string_to_existing_atom(key)) >
-              field(q, ^FatHelper.string_to_existing_atom(value)) or ^dynamics
-          )
-        end
-      else
-        if opts[:dynamic_type] == :and do
-          dynamic(
-            [q],
-            field(q, ^FatHelper.string_to_existing_atom(key)) > ^value and ^dynamics
-          )
-        else
-          dynamic(
-            [q],
-            field(q, ^FatHelper.string_to_existing_atom(key)) > ^value or ^dynamics
-          )
-        end
-      end
-    end
-  end
-
-  @doc """
-  Builds a dynamic query where field is greater than and equal to given value.
-  ### Parameters
-
-     - `key`       - Field name.
-     - `value`     - Value of the field.
-     - `dynamics`  - Default or previous dynamic to append to the query.
-     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
-
-  ### Examples
-
-      iex> result = #{__MODULE__}.gte_dynamic("experience_years", 2, true, [dynamic_type: :and, binding: :last])
-      iex> inspect(result)
-      "dynamic([_, _, c], c.experience_years >= ^2 and ^true)"
-  """
-  @spec gte_dynamic(any(), any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
-  def gte_dynamic(key, value, dynamics, opts \\ []) do
-    if opts[:binding] == :last do
-      if FatHelper.fat_ecto_reserve_field?(value) do
-        value = String.replace(value, "$", "", global: false)
-
-        if opts[:dynamic_type] == :and do
-          dynamic(
-            [_, _, c],
-            field(c, ^FatHelper.string_to_existing_atom(key)) >=
-              field(c, ^FatHelper.string_to_existing_atom(value)) and ^dynamics
-          )
-        else
-          dynamic(
-            [_, _, c],
-            field(c, ^FatHelper.string_to_existing_atom(key)) >=
-              field(c, ^FatHelper.string_to_existing_atom(value)) or ^dynamics
-          )
-        end
-      else
-        if opts[:dynamic_type] == :and do
-          dynamic(
-            [_, _, c],
-            field(c, ^FatHelper.string_to_existing_atom(key)) >= ^value and ^dynamics
-          )
-        else
-          dynamic(
-            [_, _, c],
-            field(c, ^FatHelper.string_to_existing_atom(key)) >= ^value or ^dynamics
-          )
-        end
-      end
-    else
-      if FatHelper.fat_ecto_reserve_field?(value) do
-        value = String.replace(value, "$", "", global: false)
-
-        if opts[:dynamic_type] == :and do
-          dynamic(
-            [q],
-            field(q, ^FatHelper.string_to_existing_atom(key)) >=
-              field(q, ^FatHelper.string_to_existing_atom(value)) and ^dynamics
-          )
-        else
-          dynamic(
-            [q],
-            field(q, ^FatHelper.string_to_existing_atom(key)) >=
-              field(q, ^FatHelper.string_to_existing_atom(value)) or ^dynamics
-          )
-        end
-      else
-        if opts[:dynamic_type] == :and do
-          dynamic(
-            [q],
-            field(q, ^FatHelper.string_to_existing_atom(key)) >= ^value and ^dynamics
-          )
-        else
-          dynamic(
-            [q],
-            field(q, ^FatHelper.string_to_existing_atom(key)) >= ^value or ^dynamics
-          )
-        end
-      end
-    end
-  end
-
-  @doc """
-  Builds a dynamic query where field is less than and equal to the value.
-  ### Parameters
-
-     - `key`       - Field name.
-     - `value`     - Value of the field.
-     - `dynamics`  - Default or previous dynamic to append to the query.
-     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
-
-  ### Examples
-
-      iex> result = #{__MODULE__}.lte_dynamic("experience_years", 2, true, [dynamic_type: :or])
-      iex> inspect(result)
-      "dynamic([q], q.experience_years <= ^2 or ^true)"
-  """
-  @spec lte_dynamic(any(), any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
-  def lte_dynamic(key, value, dynamics, opts \\ []) do
-    if opts[:binding] == :last do
-      if FatHelper.fat_ecto_reserve_field?(value) do
-        value = String.replace(value, "$", "", global: false)
-
-        if opts[:dynamic_type] == :and do
-          dynamic(
-            [_, _, c],
-            field(c, ^FatHelper.string_to_existing_atom(key)) <=
-              field(c, ^FatHelper.string_to_existing_atom(value)) and ^dynamics
-          )
-        else
-          dynamic(
-            [_, _, c],
-            field(c, ^FatHelper.string_to_existing_atom(key)) <=
-              field(c, ^FatHelper.string_to_existing_atom(value)) or ^dynamics
-          )
-        end
-      else
-        if opts[:dynamic_type] == :and do
-          dynamic(
-            [c],
-            field(c, ^FatHelper.string_to_existing_atom(key)) <= ^value and ^dynamics
-          )
-        else
-          dynamic(
-            [c],
-            field(c, ^FatHelper.string_to_existing_atom(key)) <= ^value or ^dynamics
-          )
-        end
-      end
-    else
-      if FatHelper.fat_ecto_reserve_field?(value) do
-        value = String.replace(value, "$", "", global: false)
-
-        if opts[:dynamic_type] == :and do
-          dynamic(
-            [q],
-            field(q, ^FatHelper.string_to_existing_atom(key)) <=
-              field(q, ^FatHelper.string_to_existing_atom(value)) and ^dynamics
-          )
-        else
-          dynamic(
-            [q],
-            field(q, ^FatHelper.string_to_existing_atom(key)) <=
-              field(q, ^FatHelper.string_to_existing_atom(value)) or ^dynamics
-          )
-        end
-      else
-        if opts[:dynamic_type] == :and do
-          dynamic(
-            [q],
-            field(q, ^FatHelper.string_to_existing_atom(key)) <= ^value and ^dynamics
-          )
-        else
-          dynamic(
-            [q],
-            field(q, ^FatHelper.string_to_existing_atom(key)) <= ^value or ^dynamics
-          )
-        end
-      end
-    end
-  end
-
-  @doc """
-  Builds a dynamic query where field is less than the value.
-  ### Parameters
-
-     - `key`       - Field name.
-     - `value`     - Value of the field.
-     - `dynamics`  - Default or previous dynamic to append to the query.
-     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
-
-  ### Examples
-
-      iex> result = #{__MODULE__}.lt_dynamic("experience_years", 2, true, [dynamic_type: :and, binding: :last])
-      iex> inspect(result)
-      "dynamic([_, _, c], c.experience_years < ^2 and ^true)"
-  """
-  @spec lt_dynamic(any(), any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
-  def lt_dynamic(key, value, dynamics, opts \\ []) do
-    if opts[:binding] == :last do
-      if FatHelper.fat_ecto_reserve_field?(value) do
-        value = String.replace(value, "$", "", global: false)
-
-        if opts[:dynamic_type] == :and do
-          dynamic(
-            [_, _, c],
-            field(c, ^FatHelper.string_to_existing_atom(key)) <
-              field(c, ^FatHelper.string_to_existing_atom(value)) and ^dynamics
-          )
-        else
-          dynamic(
-            [_, _, c],
-            field(c, ^FatHelper.string_to_existing_atom(key)) <
-              field(c, ^FatHelper.string_to_existing_atom(value)) or ^dynamics
-          )
-        end
-      else
-        if opts[:dynamic_type] == :and do
-          dynamic(
-            [_, _, c],
-            field(c, ^FatHelper.string_to_existing_atom(key)) < ^value and ^dynamics
-          )
-        else
-          dynamic(
-            [_, _, c],
-            field(c, ^FatHelper.string_to_existing_atom(key)) < ^value or ^dynamics
-          )
-        end
-      end
-    else
-      if FatHelper.fat_ecto_reserve_field?(value) do
-        value = String.replace(value, "$", "", global: false)
-
-        if opts[:dynamic_type] == :and do
-          dynamic(
-            [q],
-            field(q, ^FatHelper.string_to_existing_atom(key)) <
-              field(q, ^FatHelper.string_to_existing_atom(value)) and ^dynamics
-          )
-        else
-          dynamic(
-            [q],
-            field(q, ^FatHelper.string_to_existing_atom(key)) <
-              field(q, ^FatHelper.string_to_existing_atom(value)) or ^dynamics
-          )
-        end
-      else
-        if opts[:dynamic_type] == :and do
-          dynamic(
-            [q],
-            field(q, ^FatHelper.string_to_existing_atom(key)) < ^value and ^dynamics
-          )
-        else
-          dynamic(
-            [q],
-            field(q, ^FatHelper.string_to_existing_atom(key)) < ^value or ^dynamics
-          )
-        end
-      end
-    end
-  end
-
-  @doc """
-   Builds a dynamic query where field matches the value substring.
-  ### Parameters
-
-     - `key`       - Field name.
-     - `value`     - Value of the field.
-     - `dynamics`  - Default or previous dynamic to append to the query.
-     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
-  """
-  @spec ilike_dynamic(any(), any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
-  def ilike_dynamic(key, value, dynamics, opts \\ []) do
-    if opts[:binding] == :last do
-      if opts[:dynamic_type] == :and do
         dynamic(
-          [_, _, c],
-          ilike(
-            fragment("(?)::TEXT", field(c, ^FatHelper.string_to_existing_atom(key))),
-            ^value
-          ) and ^dynamics
+          [_, ..., c],
+          field(c, ^key) > ^value
         )
       else
         dynamic(
-          [_, _, c],
-          ilike(
-            fragment("(?)::TEXT", field(c, ^FatHelper.string_to_existing_atom(key))),
-            ^value
-          ) or ^dynamics
+          [_, ..., c],
+          field(c, ^key) > ^value
         )
       end
     else
-      if opts[:dynamic_type] == :and do
+      if FatHelper.fat_ecto_reserve_field?(value) do
+        value = String.replace(value, "$", "", global: false)
+
         dynamic(
           [q],
-          ilike(
-            fragment("(?)::TEXT", field(q, ^FatHelper.string_to_existing_atom(key))),
-            ^value
-          ) and ^dynamics
+          field(q, ^key) > ^value
         )
       else
         dynamic(
           [q],
-          ilike(
-            fragment("(?)::TEXT", field(q, ^FatHelper.string_to_existing_atom(key))),
-            ^value
-          ) or ^dynamics
+          field(q, ^key) > ^value
         )
       end
     end
   end
 
-  @spec array_ilike_dynamic(any(), any(), any(), nil | maybe_improper_list() | map()) ::
+  @doc """
+  Builds dynamic condition for field greater than or equal to value.
+
+  Parameters
+   - `key`       - Field name.
+   - `value`     - Comparison value or field reference.
+   - `dynamics`  - Existing dynamic expression.
+   - `opts`      - Options for binding
+  Examples
+    iex> result = #{__MODULE__}.gte_dynamic("experience_years", 2, [binding: :last])
+    iex> inspect(result)
+    "dynamic([_, ..., c], c.experience_years >= ^2)"
+  """
+  @spec gte_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def gte_dynamic(key, value, opts \\ []) do
+    if opts[:binding] == :last do
+      if FatHelper.fat_ecto_reserve_field?(value) do
+        value = String.replace(value, "$", "", global: false)
+
+        dynamic(
+          [_, ..., c],
+          field(c, ^key) >= ^value
+        )
+      else
+        dynamic(
+          [_, ..., c],
+          field(c, ^key) >= ^value
+        )
+      end
+    else
+      if FatHelper.fat_ecto_reserve_field?(value) do
+        value = String.replace(value, "$", "", global: false)
+
+        dynamic(
+          [q],
+          field(q, ^key) >= ^value
+        )
+      else
+        dynamic(
+          [q],
+          field(q, ^key) >= ^value
+        )
+      end
+    end
+  end
+
+  @doc """
+  Builds dynamic condition for field less than or equal to value.
+
+  Parameters
+   - `key`       - Field name.
+   - `value`     - Comparison value or field reference.
+   - `dynamics`  - Existing dynamic expression.
+   - `opts`      - Options for binding
+  Examples
+    iex> result = #{__MODULE__}.lte_dynamic("experience_years", 2)
+    iex> inspect(result)
+    "dynamic([q], q.experience_years <= ^2)"
+  """
+  @spec lte_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def lte_dynamic(key, value, opts \\ []) do
+    if opts[:binding] == :last do
+      if FatHelper.fat_ecto_reserve_field?(value) do
+        value = String.replace(value, "$", "", global: false)
+
+        dynamic(
+          [_, ..., c],
+          field(c, ^key) <= ^value
+        )
+      else
+        dynamic(
+          [c],
+          field(c, ^key) <= ^value
+        )
+      end
+    else
+      if FatHelper.fat_ecto_reserve_field?(value) do
+        value = String.replace(value, "$", "", global: false)
+
+        dynamic(
+          [q],
+          field(q, ^key) <= ^value
+        )
+      else
+        dynamic(
+          [q],
+          field(q, ^key) <= ^value
+        )
+      end
+    end
+  end
+
+  @doc """
+  Builds a dynamic query where a field is less than a given value.
+
+  ### Parameters
+
+    - `key`       - The field name.
+    - `value`     - The value to compare against.
+    - `dynamics`  - The existing dynamic expression to combine with.
+    - `opts`      - Options for binding and logic type (:and/:or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.lt_dynamic("experience_years", 2, [binding: :last])
+      iex> inspect(result)
+      "dynamic([_, ..., c], c.experience_years < ^2)"
+  """
+  @spec lt_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def lt_dynamic(key, value, opts \\ []) do
+    if opts[:binding] == :last do
+      if FatHelper.fat_ecto_reserve_field?(value) do
+        value = String.replace(value, "$", "", global: false)
+
+        dynamic(
+          [_, ..., c],
+          field(c, ^key) < ^value
+        )
+      else
+        dynamic(
+          [_, ..., c],
+          field(c, ^key) < ^value
+        )
+      end
+    else
+      if FatHelper.fat_ecto_reserve_field?(value) do
+        value = String.replace(value, "$", "", global: false)
+
+        dynamic(
+          [q],
+          field(q, ^key) < ^value
+        )
+      else
+        dynamic(
+          [q],
+          field(q, ^key) < ^value
+        )
+      end
+    end
+  end
+
+  @doc """
+  Builds a dynamic query where a field matches a substring (case-insensitive).
+
+  ### Parameters
+
+    - `key`       - The field name.
+    - `value`     - The substring to match.
+    - `dynamics`  - The existing dynamic expression to combine with.
+    - `opts`      - Options for binding and logic type (:and/:or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.ilike_dynamic("name", "%john%")
+      iex> inspect(result)
+      "dynamic([q], ilike(fragment(\"(?)::TEXT\", q.name), ^\"%john%\"))"
+  """
+  @spec ilike_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def ilike_dynamic(key, value, opts \\ []) do
+    if opts[:binding] == :last do
+      dynamic(
+        [_, ..., c],
+        ilike(
+          fragment("(?)::TEXT", field(c, ^key)),
+          ^value
+        )
+      )
+    else
+      dynamic(
+        [q],
+        ilike(
+          fragment("(?)::TEXT", field(q, ^key)),
+          ^value
+        )
+      )
+    end
+  end
+
+  @doc """
+  Builds a dynamic query where any element in an array field matches a substring (case-insensitive).
+
+  ### Parameters
+
+    - `key`       - The field name.
+    - `value`     - The substring to match.
+    - `dynamics`  - The existing dynamic expression to combine with.
+    - `opts`      - Options for binding and logic type (:and/:or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.array_ilike_dynamic("tags", "%elixir%")
+      iex> inspect(result)
+      "dynamic([q], fragment(\"exists (SELECT 1 FROM unnest(?) as value WHERE value ILIKE ?)\", q.tags, ^\"%elixir%\"))"
+  """
+  @spec array_ilike_dynamic(any(), any(), nil | maybe_improper_list() | map()) ::
           %Ecto.Query.DynamicExpr{}
-  def array_ilike_dynamic(key, value, dynamics, opts \\ []) do
+  def array_ilike_dynamic(key, value, opts \\ []) do
     if opts[:binding] == :last do
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [_, _, c],
-          fragment(
-            "exists (SELECT 1 FROM unnest(?) as value WHERE value ILIKE ?)",
-            field(c, ^FatHelper.string_to_existing_atom(key)),
-            ^value
-          ) and ^dynamics
+      dynamic(
+        [_, ..., c],
+        fragment(
+          "exists (SELECT 1 FROM unnest(?) as value WHERE value ILIKE ?)",
+          field(c, ^key),
+          ^value
         )
-      else
-        dynamic(
-          [_, _, c],
-          fragment(
-            "exists (SELECT 1 FROM unnest(?) as value WHERE value ILIKE ?)",
-            field(c, ^FatHelper.string_to_existing_atom(key)),
-            ^value
-          ) or ^dynamics
-        )
-      end
+      )
     else
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [q],
-          fragment(
-            "exists (SELECT 1 FROM unnest(?) as value WHERE value ILIKE ?)",
-            field(q, ^FatHelper.string_to_existing_atom(key)),
-            ^value
-          ) and ^dynamics
+      dynamic(
+        [q],
+        fragment(
+          "exists (SELECT 1 FROM unnest(?) as value WHERE value ILIKE ?)",
+          field(q, ^key),
+          ^value
         )
-      else
-        dynamic(
-          [q],
-          fragment(
-            "exists (SELECT 1 FROM unnest(?) as value WHERE value ILIKE ?)",
-            field(q, ^FatHelper.string_to_existing_atom(key)),
-            ^value
-          ) or ^dynamics
-        )
-      end
+      )
     end
   end
 
   @doc """
-  Builds a dynamic query where field matches matches the value substring.
+  Builds a dynamic query where a field matches a substring (case-sensitive).
+
   ### Parameters
 
-     - `key`       - Field name.
-     - `value`     - Value of the field.
-     - `dynamics`  - Default or previous dynamic to append to the query.
-     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
-  """
-  @spec like_dynamic(any(), any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
-  def like_dynamic(key, value, dynamics, opts \\ []) do
-    if opts[:binding] == :last do
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [_, _, c],
-          like(
-            fragment("(?)::TEXT", field(c, ^FatHelper.string_to_existing_atom(key))),
-            ^value
-          ) and ^dynamics
-        )
-      else
-        dynamic(
-          [_, _, c],
-          like(
-            fragment("(?)::TEXT", field(c, ^FatHelper.string_to_existing_atom(key))),
-            ^value
-          ) or ^dynamics
-        )
-      end
-    else
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [q],
-          like(
-            fragment("(?)::TEXT", field(q, ^FatHelper.string_to_existing_atom(key))),
-            ^value
-          ) and ^dynamics
-        )
-      else
-        dynamic(
-          [q],
-          like(
-            fragment("(?)::TEXT", field(q, ^FatHelper.string_to_existing_atom(key))),
-            ^value
-          ) or ^dynamics
-        )
-      end
-    end
-  end
-
-  @doc """
-  Builds a dynamic query where field is equal to value.
-  ### Parameters
-
-     - `key`       - Field name.
-     - `value`     - Value of the field.
-     - `dynamics`  - Default or previous dynamic to append to the query.
-     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+    - `key`       - The field name.
+    - `value`     - The substring to match.
+    - `dynamics`  - The existing dynamic expression to combine with.
+    - `opts`      - Options for binding and logic type (:and/:or).
 
   ### Examples
 
-       iex> result = #{__MODULE__}.eq_dynamic("experience_years", 2, true, [dynamic_type: :and])
-       iex> inspect(result)
-       "dynamic([q], q.experience_years == ^2 and ^true)"
+      iex> result = #{__MODULE__}.like_dynamic("name", "%John%")
+      iex> inspect(result)
+      "dynamic([q], like(fragment(\"(?)::TEXT\", q.name), ^\"%John%\"))"
   """
-  @spec eq_dynamic(any(), any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
-  def eq_dynamic(key, value, dynamics, opts \\ []) do
+  @spec like_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def like_dynamic(key, value, opts \\ []) do
     if opts[:binding] == :last do
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [_, _, c],
-          field(c, ^FatHelper.string_to_existing_atom(key)) == ^value and ^dynamics
+      dynamic(
+        [_, ..., c],
+        like(
+          fragment("(?)::TEXT", field(c, ^key)),
+          ^value
         )
-      else
-        dynamic(
-          [_, _, c],
-          field(c, ^FatHelper.string_to_existing_atom(key)) == ^value or ^dynamics
-        )
-      end
+      )
     else
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [q],
-          field(q, ^FatHelper.string_to_existing_atom(key)) == ^value and ^dynamics
+      dynamic(
+        [q],
+        like(
+          fragment("(?)::TEXT", field(q, ^key)),
+          ^value
         )
-      else
-        dynamic(
-          [q],
-          field(q, ^FatHelper.string_to_existing_atom(key)) == ^value or ^dynamics
-        )
-      end
+      )
     end
   end
 
-  @spec not_eq_dynamic(any(), any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
-  def not_eq_dynamic(key, value, dynamics, opts \\ []) do
+  @doc """
+  Builds a dynamic query where a field is equal to a value.
+
+  ### Parameters
+
+    - `key`       - The field name.
+    - `value`     - The value to compare against.
+    - `dynamics`  - The existing dynamic expression to combine with.
+    - `opts`      - Options for binding and logic type (:and/:or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.eq_dynamic("experience_years", 2)
+      iex> inspect(result)
+      "dynamic([q], q.experience_years == ^2)"
+  """
+  @spec eq_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def eq_dynamic(key, value, opts \\ []) do
+    if opts[:binding] == :last do
+      dynamic(
+        [_, ..., c],
+        field(c, ^key) == ^value
+      )
+    else
+      dynamic(
+        [q],
+        field(q, ^key) == ^value
+      )
+    end
+  end
+
+  @doc """
+  Builds a dynamic query where a field is not equal to a value.
+
+  ### Parameters
+
+    - `key`       - The field name.
+    - `value`     - The value to compare against.
+    - `dynamics`  - The existing dynamic expression to combine with.
+    - `opts`      - Options for binding and logic type (:and/:or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.not_eq_dynamic("experience_years", 2)
+      iex> inspect(result)
+      "dynamic([q], q.experience_years != ^2)"
+  """
+  @spec not_eq_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def not_eq_dynamic(key, value, opts \\ []) do
     value =
       if is_map(value) do
         %{"$not_equal" => v} = value
@@ -595,245 +415,174 @@ defmodule FatEcto.FatQuery.FatDynamics do
       end
 
     if opts[:binding] == :last do
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [_, _, c],
-          field(c, ^FatHelper.string_to_existing_atom(key)) != ^value and ^dynamics
-        )
-      else
-        dynamic(
-          [_, _, c],
-          field(c, ^FatHelper.string_to_existing_atom(key)) != ^value or ^dynamics
-        )
-      end
+      dynamic(
+        [_, ..., c],
+        field(c, ^key) != ^value
+      )
     else
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [q],
-          field(q, ^FatHelper.string_to_existing_atom(key)) != ^value and ^dynamics
-        )
-      else
-        dynamic(
-          [q],
-          field(q, ^FatHelper.string_to_existing_atom(key)) != ^value or ^dynamics
-        )
-      end
+      dynamic(
+        [q],
+        field(q, ^key) != ^value
+      )
     end
   end
 
   @doc """
-  Builds a dynamic query where value is between the provided attributes.
+  Builds a dynamic query where a field's value is between two provided values.
+
   ### Parameters
 
-     - `key`       - Field name.
-     - `value`     - Values of the field as a list.
-     - `dynamics`  - Default or previous dynamic to append to the query.
-     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+    - `key`       - The field name.
+    - `values`    - A list of two values representing the range.
+    - `dynamics`  - The existing dynamic expression to combine with.
+    - `opts`      - Options for binding and logic type (:and/:or).
 
   ### Examples
 
-      iex> result = #{__MODULE__}.between_dynamic("experience_years", [2, 5], true, [dynamic_type: :and])
+      iex> result = #{__MODULE__}.between_dynamic("experience_years", [2, 5])
       iex> inspect(result)
-      "dynamic([q], q.experience_years > ^2 and q.experience_years < ^5 and ^true)"
+      "dynamic([q], q.experience_years > ^2 and q.experience_years < ^5)"
   """
-  @spec between_dynamic(any(), any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
-  def between_dynamic(key, values, dynamics, opts \\ []) do
+  @spec between_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def between_dynamic(key, values, opts \\ []) do
     if opts[:binding] == :last do
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [_, _, c],
-          field(c, ^FatHelper.string_to_existing_atom(key)) > ^Enum.min(values) and
-            field(c, ^FatHelper.string_to_existing_atom(key)) < ^Enum.max(values) and ^dynamics
-        )
-      else
-        dynamic(
-          [_, _, c],
-          (field(c, ^FatHelper.string_to_existing_atom(key)) > ^Enum.min(values) and
-             field(c, ^FatHelper.string_to_existing_atom(key)) < ^Enum.max(values)) or ^dynamics
-        )
-      end
+      dynamic(
+        [_, ..., c],
+        field(c, ^key) > ^Enum.min(values) and
+          field(c, ^key) < ^Enum.max(values)
+      )
     else
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [q],
-          field(q, ^FatHelper.string_to_existing_atom(key)) > ^Enum.min(values) and
-            field(q, ^FatHelper.string_to_existing_atom(key)) < ^Enum.max(values) and ^dynamics
-        )
-      else
-        dynamic(
-          [q],
-          (field(q, ^FatHelper.string_to_existing_atom(key)) > ^Enum.min(values) and
-             field(q, ^FatHelper.string_to_existing_atom(key)) < ^Enum.max(values)) or ^dynamics
-        )
-      end
+      dynamic(
+        [q],
+        field(q, ^key) > ^Enum.min(values) and
+          field(q, ^key) < ^Enum.max(values)
+      )
     end
   end
 
   @doc """
-  Builds a dynamic query where value is equal and between the provided attributes.
+  Builds a dynamic query where a field's value is between or equal to two provided values.
+
   ### Parameters
 
-     - `key`       - Field name.
-     - `value`     - Values of the field as a list.
-     - `dynamics`  - Default or previous dynamic to append to the query.
-     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+    - `key`       - The field name.
+    - `values`    - A list of two values representing the range.
+    - `dynamics`  - The existing dynamic expression to combine with.
+    - `opts`      - Options for binding and logic type (:and/:or).
 
   ### Examples
 
-      iex> result = #{__MODULE__}.between_equal_dynamic("experience_years", [2, 5], true, [dynamic_type: :and])
+      iex> result = #{__MODULE__}.between_equal_dynamic("experience_years", [2, 5])
       iex> inspect(result)
-      "dynamic([q], q.experience_years >= ^2 and q.experience_years <= ^5 and ^true)"
+      "dynamic([q], q.experience_years >= ^2 and q.experience_years <= ^5)"
   """
-  @spec between_equal_dynamic(any(), any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
-  def between_equal_dynamic(key, values, dynamics, opts \\ []) do
+  @spec between_equal_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def between_equal_dynamic(key, values, opts \\ []) do
     if opts[:binding] == :last do
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [_, _, c],
-          field(c, ^FatHelper.string_to_existing_atom(key)) >= ^Enum.min(values) and
-            field(c, ^FatHelper.string_to_existing_atom(key)) <= ^Enum.max(values) and ^dynamics
-        )
-      else
-        dynamic(
-          [_, _, c],
-          (field(c, ^FatHelper.string_to_existing_atom(key)) >= ^Enum.min(values) and
-             field(c, ^FatHelper.string_to_existing_atom(key)) <= ^Enum.max(values)) or ^dynamics
-        )
-      end
+      dynamic(
+        [_, ..., c],
+        field(c, ^key) >= ^Enum.min(values) and
+          field(c, ^key) <= ^Enum.max(values)
+      )
     else
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [q],
-          field(q, ^FatHelper.string_to_existing_atom(key)) >= ^Enum.min(values) and
-            field(q, ^FatHelper.string_to_existing_atom(key)) <= ^Enum.max(values) and ^dynamics
-        )
-      else
-        dynamic(
-          [q],
-          (field(q, ^FatHelper.string_to_existing_atom(key)) >= ^Enum.min(values) and
-             field(q, ^FatHelper.string_to_existing_atom(key)) <= ^Enum.max(values)) or ^dynamics
-        )
-      end
+      dynamic(
+        [q],
+        field(q, ^key) >= ^Enum.min(values) and
+          field(q, ^key) <= ^Enum.max(values)
+      )
     end
   end
 
   @doc """
-  Builds a dynamic query where value is in the provided list attributes.
+  Builds a dynamic query where a field's value is in a provided list.
+
   ### Parameters
 
-     - `key`       - Field name.
-     - `values`    - Pass a list of values of the field that represent range.
-     - `dynamics`  - Default or previous dynamic to append to the query.
-     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+    - `key`       - The field name.
+    - `values`    - A list of values to match against.
+    - `dynamics`  - The existing dynamic expression to combine with.
+    - `opts`      - Options for binding and logic type (:and/:or).
 
   ### Examples
 
-      iex> result = #{__MODULE__}.in_dynamic("experience_years", [2, 5], true, [dynamic_type: :and])
+      iex> result = #{__MODULE__}.in_dynamic("experience_years", [2, 5])
       iex> inspect(result)
       "dynamic([q], q.experience_years in ^[2, 5] and ^true)"
   """
-  @spec in_dynamic(any(), any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
-  def in_dynamic(key, values, dynamics, opts \\ []) do
+  @spec in_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def in_dynamic(key, values, opts \\ []) do
     if opts[:binding] == :last do
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [_, _, c],
-          field(c, ^FatHelper.string_to_existing_atom(key)) in ^values and ^dynamics
-        )
-      else
-        dynamic(
-          [_, _, c],
-          field(c, ^FatHelper.string_to_existing_atom(key)) in ^values or ^dynamics
-        )
-      end
+      dynamic(
+        [_, ..., c],
+        field(c, ^key) in ^values
+      )
     else
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [q],
-          field(q, ^FatHelper.string_to_existing_atom(key)) in ^values and ^dynamics
-        )
-      else
-        dynamic(
-          [q],
-          field(q, ^FatHelper.string_to_existing_atom(key)) in ^values or ^dynamics
-        )
-      end
+      dynamic(
+        [q],
+        field(q, ^key) in ^values
+      )
     end
   end
 
   @doc """
-  Builds a dynamic query when value of jsonb field is in the list.
+  Builds a dynamic query where a JSONB field contains a specific value.
+
   ### Parameters
 
-     - `key`       - Field name.
-     - `values`    - values of jsonb field.
-     - `dynamics`  - Default or previous dynamic to append to the query.
-     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+    - `key`       - The JSONB field name.
+    - `values`    - The value(s) to check for containment.
+    - `dynamics`  - The existing dynamic expression to combine with.
+    - `opts`      - Options for binding and logic type (:and/:or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.contains_dynamic("metadata", %{"role" => "admin"})
+      iex> inspect(result)
+      "dynamic([q], fragment(\"? @> ?\", q.metadata, ^%{\"role\" => \"admin\"}))"
   """
-  @spec contains_dynamic(any(), any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
-  def contains_dynamic(key, values, dynamics, opts \\ []) do
+  @spec contains_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def contains_dynamic(key, values, opts \\ []) do
     if opts[:binding] == :last do
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [_, _, c],
-          fragment("? @> ?", field(c, ^FatHelper.string_to_existing_atom(key)), ^values) and ^dynamics
-        )
-      else
-        dynamic(
-          [_, _, c],
-          fragment("? @> ?", field(c, ^FatHelper.string_to_existing_atom(key)), ^values) or ^dynamics
-        )
-      end
+      dynamic(
+        [_, ..., c],
+        fragment("? @> ?", field(c, ^key), ^values)
+      )
     else
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [q],
-          fragment("? @> ?", field(q, ^FatHelper.string_to_existing_atom(key)), ^values) and ^dynamics
-        )
-      else
-        dynamic(
-          [q],
-          fragment("? @> ?", field(q, ^FatHelper.string_to_existing_atom(key)), ^values) or ^dynamics
-        )
-      end
+      dynamic(
+        [q],
+        fragment("? @> ?", field(q, ^key), ^values)
+      )
     end
   end
 
   @doc """
-  Builds a dynamic query when value of jsonb matches with any list attribute.
+  Builds a dynamic query where a JSONB field contains any of the provided values.
+
   ### Parameters
 
-     - `key`       - Field name.
-     - `values`    - values of jsonb field.
-     - `dynamics`  - Default or previous dynamic to append to the query.
-     - `opts`      - Options related to query bindings alongwith dynamic type(and/or).
+    - `key`       - The JSONB field name.
+    - `values`    - The values to check for overlap.
+    - `dynamics`  - The existing dynamic expression to combine with.
+    - `opts`      - Options for binding and logic type (:and/:or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.contains_any_dynamic("tags", ["elixir", "erlang"])
+      iex> inspect(result)
+      "dynamic([q], fragment(\"? && ?\", q.tags, ^[\"elixir\", \"erlang\"]))"
   """
-  @spec contains_any_dynamic(any(), any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
-  def contains_any_dynamic(key, values, dynamics, opts \\ []) do
+  @spec contains_any_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def contains_any_dynamic(key, values, opts \\ []) do
     if opts[:binding] == :last do
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [_, _, c],
-          fragment("? && ?", field(c, ^FatHelper.string_to_existing_atom(key)), ^values) and ^dynamics
-        )
-      else
-        dynamic(
-          [_, _, c],
-          fragment("? && ?", field(c, ^FatHelper.string_to_existing_atom(key)), ^values) or ^dynamics
-        )
-      end
+      dynamic(
+        [_, ..., c],
+        fragment("? && ?", field(c, ^key), ^values)
+      )
     else
-      if opts[:dynamic_type] == :and do
-        dynamic(
-          [q],
-          fragment("? && ?", field(q, ^FatHelper.string_to_existing_atom(key)), ^values) and ^dynamics
-        )
-      else
-        dynamic(
-          [q],
-          fragment("? && ?", field(q, ^FatHelper.string_to_existing_atom(key)), ^values) or ^dynamics
-        )
-      end
+      dynamic(
+        [q],
+        fragment("? && ?", field(q, ^key), ^values)
+      )
     end
   end
 end

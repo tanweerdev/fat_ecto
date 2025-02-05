@@ -6,7 +6,7 @@ defmodule Query.FilterableTest do
       opts = %{"email" => %{"$like" => "%test%"}}
 
       expected =
-        from(d in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", d.email), ^"%test%") and ^true)
+        from(d in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", d.email), ^"%test%"))
 
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
@@ -16,7 +16,7 @@ defmodule Query.FilterableTest do
       opts = %{"email" => %{"$ilike" => "%test%"}}
 
       expected =
-        from(d in FatEcto.FatDoctor, where: ilike(fragment("(?)::TEXT", d.email), ^"%test%") and ^true)
+        from(d in FatEcto.FatDoctor, where: ilike(fragment("(?)::TEXT", d.email), ^"%test%"))
 
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
@@ -26,7 +26,7 @@ defmodule Query.FilterableTest do
       opts = %{"email" => %{"$not_like" => "%test%"}}
 
       expected =
-        from(d in FatEcto.FatDoctor, where: not like(fragment("(?)::TEXT", d.email), ^"%test%") and ^true)
+        from(d in FatEcto.FatDoctor, where: not like(fragment("(?)::TEXT", d.email), ^"%test%"))
 
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
@@ -36,7 +36,7 @@ defmodule Query.FilterableTest do
       opts = %{"email" => %{"$not_ilike" => "%test%"}}
 
       expected =
-        from(d in FatEcto.FatDoctor, where: not ilike(fragment("(?)::TEXT", d.email), ^"%test%") and ^true)
+        from(d in FatEcto.FatDoctor, where: not ilike(fragment("(?)::TEXT", d.email), ^"%test%"))
 
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
@@ -44,14 +44,14 @@ defmodule Query.FilterableTest do
 
     test "returns the query where field equal" do
       opts = %{"email" => %{"$equal" => "test@test.com"}}
-      expected = from(d in FatEcto.FatDoctor, where: d.email == ^"test@test.com" and ^true)
+      expected = from(d in FatEcto.FatDoctor, where: d.email == ^"test@test.com")
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
     end
 
     test "returns the query where field not_equal" do
       opts = %{"email" => %{"$not_equal" => "test@test.com"}}
-      expected = from(d in FatEcto.FatDoctor, where: d.email != ^"test@test.com" and ^true)
+      expected = from(d in FatEcto.FatDoctor, where: d.email != ^"test@test.com")
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
     end
@@ -61,7 +61,7 @@ defmodule Query.FilterableTest do
       # TODO: opts = %{"email" => nil} is not supported in the current implementation
       # opts = %{"email" => "$null"} doesnt work either
       opts = %{"email" => nil}
-      expected = from(d in FatEcto.FatDoctor, where: is_nil(d.email) and ^true)
+      expected = from(d in FatEcto.FatDoctor, where: is_nil(d.email))
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
     end
@@ -69,7 +69,7 @@ defmodule Query.FilterableTest do
     test "returns the query where field not_null" do
       # Please note: You can pass operators in array eg %{"email" => "$not_null"} it simply wont work
       opts = %{"email" => "$not_null"}
-      expected = from(f0 in FatEcto.FatDoctor, where: not is_nil(f0.email) and ^true)
+      expected = from(f0 in FatEcto.FatDoctor, where: not is_nil(f0.email))
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
     end
@@ -78,7 +78,7 @@ defmodule Query.FilterableTest do
       opts = %{"email" => %{"$in" => ["test@test.com", "test2@test.com"]}}
 
       expected =
-        from(d in FatEcto.FatDoctor, where: d.email in ^["test@test.com", "test2@test.com"] and ^true)
+        from(d in FatEcto.FatDoctor, where: d.email in ^["test@test.com", "test2@test.com"])
 
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
@@ -88,7 +88,7 @@ defmodule Query.FilterableTest do
       opts = %{"email" => %{"$not_in" => ["test@test.com", "test2@test.com"]}}
 
       expected =
-        from(d in FatEcto.FatDoctor, where: d.email not in ^["test@test.com", "test2@test.com"] and ^true)
+        from(d in FatEcto.FatDoctor, where: d.email not in ^["test@test.com", "test2@test.com"])
 
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
@@ -96,42 +96,42 @@ defmodule Query.FilterableTest do
 
     test "returns the query where field between" do
       opts = %{"rating" => %{"$between" => [3, 5]}}
-      expected = from(d in FatEcto.FatDoctor, where: d.rating > ^3 and d.rating < ^5 and ^true)
+      expected = from(d in FatEcto.FatDoctor, where: d.rating > ^3 and d.rating < ^5)
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
     end
 
     test "returns the query where field not_between" do
       opts = %{"rating" => %{"$not_between" => [3, 5]}}
-      expected = from(d in FatEcto.FatDoctor, where: (d.rating < ^3 or d.rating > ^5) and ^true)
+      expected = from(d in FatEcto.FatDoctor, where: d.rating < ^3 or d.rating > ^5)
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
     end
 
     test "returns the query where field less than" do
       opts = %{"rating" => %{"$lt" => 5}}
-      expected = from(d in FatEcto.FatDoctor, where: d.rating < ^5 and ^true)
+      expected = from(d in FatEcto.FatDoctor, where: d.rating < ^5)
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
     end
 
     test "returns the query where field less than or equal" do
       opts = %{"rating" => %{"$lte" => 5}}
-      expected = from(d in FatEcto.FatDoctor, where: d.rating <= ^5 and ^true)
+      expected = from(d in FatEcto.FatDoctor, where: d.rating <= ^5)
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
     end
 
     test "returns the query where field greater than" do
       opts = %{"rating" => %{"$gt" => 5}}
-      expected = from(d in FatEcto.FatDoctor, where: d.rating > ^5 and ^true)
+      expected = from(d in FatEcto.FatDoctor, where: d.rating > ^5)
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
     end
 
     test "returns the query where field greater than or equal" do
       opts = %{"rating" => %{"$gte" => 5}}
-      expected = from(d in FatEcto.FatDoctor, where: d.rating >= ^5 and ^true)
+      expected = from(d in FatEcto.FatDoctor, where: d.rating >= ^5)
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
     end
@@ -152,7 +152,7 @@ defmodule Query.FilterableTest do
 
       expected =
         from(d in FatEcto.FatDoctor,
-          where: like(fragment("(?)::TEXT", d.name), ^"%John%") and ^true,
+          where: like(fragment("(?)::TEXT", d.name), ^"%John%"),
           where:
             ilike(fragment("(?)::TEXT", d.email), ^"%test%") or like(fragment("(?)::TEXT", d.phone), ^"%123%")
         )
@@ -176,8 +176,8 @@ defmodule Query.FilterableTest do
 
       expected =
         from(f0 in FatEcto.FatDoctor,
-          where: ilike(fragment("(?)::TEXT", f0.email), ^"%test%") or ^false,
-          where: like(fragment("(?)::TEXT", f0.name), ^"%John%") and ^true
+          where: ilike(fragment("(?)::TEXT", f0.email), ^"%test%"),
+          where: like(fragment("(?)::TEXT", f0.name), ^"%John%")
         )
 
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
@@ -196,7 +196,7 @@ defmodule Query.FilterableTest do
     @tag :skip
     test "ignores nil in where params" do
       opts = %{"email" => nil}
-      expected = from(d in FatEcto.FatDoctor, where: is_nil(d.email) and ^true)
+      expected = from(d in FatEcto.FatDoctor, where: is_nil(d.email))
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
     end
@@ -211,7 +211,7 @@ defmodule Query.FilterableTest do
     test "handles DateTime fields correctly" do
       now = DateTime.utc_now()
       opts = %{"start_date" => %{"$equal" => now}}
-      expected = from(d in FatEcto.FatDoctor, where: d.start_date == ^now and ^true)
+      expected = from(d in FatEcto.FatDoctor, where: d.start_date == ^now)
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
     end
@@ -227,7 +227,7 @@ defmodule Query.FilterableTest do
 
     test "applies custom override for name field" do
       opts = %{"name" => %{"$like" => "%John%"}}
-      expected = from(d in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", d.name), ^"%John%") and ^true)
+      expected = from(d in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", d.name), ^"%John%"))
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
     end

@@ -22,6 +22,7 @@ defmodule FatEcto.FatQuery.WhereableHelper do
   defp filter_ignoreable_map(map, ignoreable_fields_values) when is_map(map) do
     Enum.reduce(map, %{}, fn {key, value}, acc ->
       # Handle "$or" key (preserve structure)
+      # TODO: Handle "$not" key and preserve structure
       if key == "$or" do
         filtered_or_value = filter_ignoreable_map(value, ignoreable_fields_values)
         if filtered_or_value != %{}, do: Map.put(acc, key, filtered_or_value), else: acc

@@ -6,7 +6,7 @@ defmodule DoctorFilterTest do
       opts = %{"email" => %{"$like" => "%test%"}}
 
       expected =
-        from(d in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", d.email), ^"%test%") and ^true)
+        from(d in FatEcto.FatDoctor, where: like(fragment("(?)::TEXT", d.email), ^"%test%"))
 
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
@@ -16,7 +16,7 @@ defmodule DoctorFilterTest do
       opts = %{"email" => %{"$ilike" => "%test%"}}
 
       expected =
-        from(d in FatEcto.FatDoctor, where: ilike(fragment("(?)::TEXT", d.email), ^"%test%") and ^true)
+        from(d in FatEcto.FatDoctor, where: ilike(fragment("(?)::TEXT", d.email), ^"%test%"))
 
       query = DoctorFilter.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)

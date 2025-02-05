@@ -132,7 +132,8 @@ defmodule FatEcto.FatHelper do
       iex> FatEcto.FatHelper.string_to_existing_atom("example")
       :example
   """
-  @spec string_to_existing_atom(String.t()) :: atom()
+  @spec string_to_existing_atom(String.t() | atom()) :: atom()
+  def string_to_existing_atom(already_atom) when is_atom(already_atom), do: already_atom
   def string_to_existing_atom(str), do: String.to_existing_atom(str)
 
   @doc """
