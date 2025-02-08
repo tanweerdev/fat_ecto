@@ -54,7 +54,7 @@ defmodule Query.OrderByTest do
     Repo.insert(%FatEcto.FatHospital{rating: 4})
     Repo.insert(%FatEcto.FatHospital{})
 
-    opts = %{"rating" => "$ASC_nulls_last"}
+    opts = %{"rating" => "$ASC_NULLS_LAST"}
 
     expected = from(f0 in FatEcto.FatHospital, order_by: [asc_nulls_last: f0.rating])
 
@@ -65,7 +65,7 @@ defmodule Query.OrderByTest do
   end
 
   test "does not apply order by if field is not configured" do
-    opts = %{"appointments_count" => "$ASC_nulls_last"}
+    opts = %{"appointments_count" => "$ASC_NULLS_LAST"}
 
     expected = FatEcto.FatHospital
 
@@ -78,7 +78,7 @@ defmodule Query.OrderByTest do
     Repo.insert(%FatEcto.FatHospital{rating: 6})
     Repo.insert(%FatEcto.FatHospital{})
 
-    opts = %{"rating" => "$ASC_nulls_first"}
+    opts = %{"rating" => "$ASC_NULLS_FIRST"}
 
     expected = from(p in FatEcto.FatHospital, order_by: [asc_nulls_first: p.rating])
 
@@ -93,7 +93,7 @@ defmodule Query.OrderByTest do
     Repo.insert(%FatEcto.FatHospital{rating: 6})
     Repo.insert(%FatEcto.FatHospital{})
 
-    opts = %{"rating" => "$DESC_nulls_first"}
+    opts = %{"rating" => "$DESC_NULLS_FIRST"}
 
     expected = from(p in FatEcto.FatHospital, order_by: [desc_nulls_first: p.rating])
 
@@ -108,7 +108,7 @@ defmodule Query.OrderByTest do
     Repo.insert(%FatEcto.FatHospital{rating: 6})
     Repo.insert(%FatEcto.FatHospital{})
 
-    opts = %{"rating" => "$DESC_nulls_last"}
+    opts = %{"rating" => "$DESC_NULLS_LAST"}
 
     expected = from(p in FatEcto.FatHospital, order_by: [desc_nulls_last: p.rating])
 

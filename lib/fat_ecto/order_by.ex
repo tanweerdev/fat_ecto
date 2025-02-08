@@ -4,7 +4,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
 
   This module provides functionality to dynamically add `order_by` clauses to Ecto queries
   based on the provided parameters. It supports various order formats, including `$ASC`,
-  `$DESC`, and nulls handling (`$ASC_nulls_first`, `$DESC_nulls_last`, etc.).
+  `$DESC`, and nulls handling (`$ASC_NULLS_FIRST`, `$DESC_NULLS_LAST`, etc.).
   """
 
   import Ecto.Query
@@ -49,16 +49,16 @@ defmodule FatEcto.FatQuery.FatOrderBy do
           "$ASC" ->
             from([q, ..., c] in queryable, order_by: [asc: field(c, ^field)])
 
-          "$ASC_nulls_first" ->
+          "$ASC_NULLS_FIRST" ->
             from([q, ..., c] in queryable, order_by: [asc_nulls_first: field(c, ^field)])
 
-          "$ASC_nulls_last" ->
+          "$ASC_NULLS_LAST" ->
             from([q, ..., c] in queryable, order_by: [asc_nulls_last: field(c, ^field)])
 
-          "$DESC_nulls_first" ->
+          "$DESC_NULLS_FIRST" ->
             from([q, ..., c] in queryable, order_by: [desc_nulls_first: field(c, ^field)])
 
-          "$DESC_nulls_last" ->
+          "$DESC_NULLS_LAST" ->
             from([q, ..., c] in queryable, order_by: [desc_nulls_last: field(c, ^field)])
 
           # Handle unexpected formats gracefully
@@ -70,10 +70,10 @@ defmodule FatEcto.FatQuery.FatOrderBy do
         case format do
           "$DESC" -> from(queryable, order_by: [desc: ^field])
           "$ASC" -> from(queryable, order_by: [asc: ^field])
-          "$ASC_nulls_first" -> from(queryable, order_by: [asc_nulls_first: ^field])
-          "$ASC_nulls_last" -> from(queryable, order_by: [asc_nulls_last: ^field])
-          "$DESC_nulls_first" -> from(queryable, order_by: [desc_nulls_first: ^field])
-          "$DESC_nulls_last" -> from(queryable, order_by: [desc_nulls_last: ^field])
+          "$ASC_NULLS_FIRST" -> from(queryable, order_by: [asc_nulls_first: ^field])
+          "$ASC_NULLS_LAST" -> from(queryable, order_by: [asc_nulls_last: ^field])
+          "$DESC_NULLS_FIRST" -> from(queryable, order_by: [desc_nulls_first: ^field])
+          "$DESC_NULLS_LAST" -> from(queryable, order_by: [desc_nulls_last: ^field])
           # Handle unexpected formats gracefully
           _ -> queryable
         end
