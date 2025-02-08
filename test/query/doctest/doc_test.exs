@@ -8,7 +8,7 @@ defmodule DocTest do
     :ok
   end
 
-  # doctest MyApp.Query, import: true, except: [fetch: 2, paginate: 2]
+  # doctest Fat.Query, import: true, except: [fetch: 2, paginate: 2]
   doctest PaginatorDocs
   doctest SanitizeRecordsDocs
   # doctest FatEcto.FatQuery.FatWhere

@@ -7,20 +7,20 @@ defmodule FatEcto.FatPaginator do
 
   ## Usage
 
-      defmodule MyApp.MyContext do
-        use FatEcto.FatPaginator, repo: MyApp.Repo
+      defmodule Fat.MyContext do
+        use FatEcto.FatPaginator, repo: Fat.Repo
 
         # Custom functions can be added here
       end
 
-  Now you can use the `paginate/2` function within `MyApp.MyContext`.
+  Now you can use the `paginate/2` function within `Fat.MyContext`.
   """
 
   defmacro __using__(options \\ []) do
     quote location: :keep do
       import Ecto.Query
 
-      @options FatEcto.FatHelper.get_module_options(unquote(options), FatEcto.FatPaginator)
+      @options unquote(options)
 
       @doc """
       Paginates the given query with the provided parameters.

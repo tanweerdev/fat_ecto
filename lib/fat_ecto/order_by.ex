@@ -3,8 +3,8 @@ defmodule FatEcto.FatQuery.FatOrderBy do
   Builds query with `asc` or `desc` order.
 
   This module provides functionality to dynamically add `order_by` clauses to Ecto queries
-  based on the provided parameters. It supports various order formats, including `$asc`,
-  `$desc`, and nulls handling (`$asc_nulls_first`, `$desc_nulls_last`, etc.).
+  based on the provided parameters. It supports various order formats, including `$ASC`,
+  `$DESC`, and nulls handling (`$ASC_nulls_first`, `$DESC_nulls_last`, etc.).
   """
 
   import Ecto.Query
@@ -22,13 +22,13 @@ defmodule FatEcto.FatQuery.FatOrderBy do
 
   ### Parameters
     - `queryable`: Ecto Queryable that represents your schema name, table name, or query.
-    - `order_by_params`: A map of fields and their order formats (e.g., `%{"field" => "$asc"}`).
+    - `order_by_params`: A map of fields and their order formats (e.g., `%{"field" => "$ASC"}`).
     - `opts`: Options related to query bindings.
     - `build_options`: Options related to the OTP app (unused in this function).
 
   ### Examples
-      iex> query_opts = %{"$order" => %{"id" => "$asc"}}
-      iex> FatEcto.FatQuery.FatOrderBy.build_order_by(FatEcto.FatHospital, query_opts["$order"], [], [])
+      iex> query_opts = %{"$ORder" => %{"id" => "$ASC"}}
+      iex> FatEcto.FatQuery.FatOrderBy.build_order_by(FatEcto.FatHospital, query_opts["$ORder"], [], [])
       #Ecto.Query<from f0 in FatEcto.FatHospital, order_by: [asc: f0.id]>
   """
   def build_order_by(queryable, order_by_params, _build_options, opts) do
@@ -43,22 +43,22 @@ defmodule FatEcto.FatQuery.FatOrderBy do
     case binding do
       :last ->
         case format do
-          "$desc" ->
+          "$DESC" ->
             from([q, ..., c] in queryable, order_by: [desc: field(c, ^field)])
 
-          "$asc" ->
+          "$ASC" ->
             from([q, ..., c] in queryable, order_by: [asc: field(c, ^field)])
 
-          "$asc_nulls_first" ->
+          "$ASC_nulls_first" ->
             from([q, ..., c] in queryable, order_by: [asc_nulls_first: field(c, ^field)])
 
-          "$asc_nulls_last" ->
+          "$ASC_nulls_last" ->
             from([q, ..., c] in queryable, order_by: [asc_nulls_last: field(c, ^field)])
 
-          "$desc_nulls_first" ->
+          "$DESC_nulls_first" ->
             from([q, ..., c] in queryable, order_by: [desc_nulls_first: field(c, ^field)])
 
-          "$desc_nulls_last" ->
+          "$DESC_nulls_last" ->
             from([q, ..., c] in queryable, order_by: [desc_nulls_last: field(c, ^field)])
 
           # Handle unexpected formats gracefully
@@ -68,12 +68,12 @@ defmodule FatEcto.FatQuery.FatOrderBy do
 
       _ ->
         case format do
-          "$desc" -> from(queryable, order_by: [desc: ^field])
-          "$asc" -> from(queryable, order_by: [asc: ^field])
-          "$asc_nulls_first" -> from(queryable, order_by: [asc_nulls_first: ^field])
-          "$asc_nulls_last" -> from(queryable, order_by: [asc_nulls_last: ^field])
-          "$desc_nulls_first" -> from(queryable, order_by: [desc_nulls_first: ^field])
-          "$desc_nulls_last" -> from(queryable, order_by: [desc_nulls_last: ^field])
+          "$DESC" -> from(queryable, order_by: [desc: ^field])
+          "$ASC" -> from(queryable, order_by: [asc: ^field])
+          "$ASC_nulls_first" -> from(queryable, order_by: [asc_nulls_first: ^field])
+          "$ASC_nulls_last" -> from(queryable, order_by: [asc_nulls_last: ^field])
+          "$DESC_nulls_first" -> from(queryable, order_by: [desc_nulls_first: ^field])
+          "$DESC_nulls_last" -> from(queryable, order_by: [desc_nulls_last: ^field])
           # Handle unexpected formats gracefully
           _ -> queryable
         end

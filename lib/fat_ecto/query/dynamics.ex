@@ -21,7 +21,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
   - `opts`: Options to control the behavior, such `:binding` (`:last` for joins).
 
   ### Example:
-    iex> result = #{__MODULE__}.nil_dynamic?("location")
+    iex> result = #{__MODULE__}.field_is_nil_dynamic("location")
     iex> inspect(result)
     "dynamic([c], is_nil(c.location))"
 
@@ -38,12 +38,12 @@ defmodule FatEcto.FatQuery.FatDynamics do
   - `key`       - Field name.
   - `opts`      - Options for binding.
   Examples
-    iex> result = #{__MODULE__}.nil_dynamic?("location")
+    iex> result = #{__MODULE__}.field_is_nil_dynamic("location")
     iex> inspect(result)
     "dynamic([c], is_nil(c.location))"
   """
-  @spec nil_dynamic?(any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
-  def nil_dynamic?(key, opts \\ []) do
+  @spec field_is_nil_dynamic(any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def field_is_nil_dynamic(key, opts \\ []) do
     if opts[:binding] == :last do
       dynamic(
         [_, ..., c],
@@ -294,7 +294,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
       iex> result = #{__MODULE__}.array_ilike_dynamic("tags", \"%elixir%\")
       iex> inspect(result)
-      "dynamic([q], fragment(\"exists (SELECT 1 FROM unnest(?) as value WHERE value ILIKE ?)\", q.tags, ^\"%elixir%\"))"
+      "dynamic([q], fragment(\"EXISTS (SELECT 1 FROM UNNEST(?) as value WHERE value ILIKE ?)\", q.tags, ^\"%elixir%\"))"
   """
   @spec array_ilike_dynamic(any(), any(), nil | maybe_improper_list() | map()) ::
           %Ecto.Query.DynamicExpr{}
@@ -303,7 +303,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       dynamic(
         [_, ..., c],
         fragment(
-          "exists (SELECT 1 FROM unnest(?) as value WHERE value ILIKE ?)",
+          "EXISTS (SELECT 1 FROM UNNEST(?) as value WHERE value ILIKE ?)",
           field(c, ^key),
           ^value
         )
@@ -312,7 +312,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       dynamic(
         [q],
         fragment(
-          "exists (SELECT 1 FROM unnest(?) as value WHERE value ILIKE ?)",
+          "EXISTS (SELECT 1 FROM UNNEST(?) as value WHERE value ILIKE ?)",
           field(q, ^key),
           ^value
         )
@@ -408,7 +408,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
   def not_eq_dynamic(key, value, opts \\ []) do
     value =
       if is_map(value) do
-        %{"$not_equal" => v} = value
+        %{"$NOT_EQUAL" => v} = value
         v
       else
         value

@@ -36,10 +36,10 @@ Tired of writing repetitive query filters? The `Whereable` module lets you dynam
 #### Usage
 
 ```elixir
-defmodule MyApp.HospitalFilter do
+defmodule FatEcto.FatHospitalFilter do
   use FatEcto.FatQuery.Whereable,
     filterable_fields: %{
-      "id" => ["$eq", "$neq"]
+      "id" => ["$EQUAL", "$NOT_EQUAL"]
     },
     overrideable_fields: ["name", "phone"],
     ignoreable_fields_values: %{
@@ -50,7 +50,7 @@ defmodule MyApp.HospitalFilter do
   import Ecto.Query
 
   # You can implement override_whereable for your custom filters
-  def override_whereable(query, "name", "$ilike", value) do
+  def override_whereable(query, "name", "$ILIKE", value) do
     where(query, [r], ilike(fragment("(?)::TEXT", r.name), ^value))
   end
 
@@ -61,7 +61,7 @@ end
 ##### Example Usage
 
 ```elixir
-opts = %{"name" => %{"$like" => "%St. Mary%"}}
+opts = %{"name" => %{"$LIKE" => "%St. Mary%"}}
 query = HospitalFilter.build(FatEcto.FatHospital, opts)
 
 result = from(h in FatEcto.FatHospital, where: like(fragment("(?)::TEXT", h.name), ^"%St. Mary%"))
@@ -74,16 +74,16 @@ Sorting should be simple—and with `Sortable`, it is! Your frontend can send so
 #### Usage
 
 ```elixir
-defmodule MyApp.SortQuery do
+defmodule Fat.SortQuery do
   import Ecto.Query
   use FatEcto.FatQuery.Sortable,
-    sortable_fields: %{"id" => "$asc", "name" => ["$asc", "$desc"]},
+    sortable_fields: %{"id" => "$ASC", "name" => ["$ASC", "$DESC"]},
     overrideable_fields: ["custom_field"]
 
   @impl true
   def override_sortable(query, field, operator) do
     case {field, operator} do
-      {"custom_field", "$asc"} ->
+      {"custom_field", "$ASC"} ->
         from(q in query, order_by: [asc: fragment("?::jsonb->>'custom_field'", q)])
       _ ->
         query
@@ -99,8 +99,8 @@ No more hassle with pagination! FatPaginator helps you paginate Ecto queries eff
 #### Usage
 
 ```elixir
-defmodule MyApp.MyPaginator do
-  use FatEcto.FatPaginator, repo: MyApp.Repo
+defmodule Fat.MyPaginator do
+  use FatEcto.FatPaginator, repo: Fat.Repo
   # Add custom pagination functions here
 end
 ```
@@ -112,7 +112,7 @@ Messy data? Not anymore! `DataSanitizer` helps you sanitize records and transfor
 #### Usage
 
 ```elixir
-defmodule MyApp.MySanitizer do
+defmodule Fat.MySanitizer do
   use FatEcto.DataSanitizer
   # Define your custom sanitization functions here
 end

@@ -9,7 +9,7 @@ defmodule FatEcto.FatQuery.FatNotDynamics do
 
   ### Examples
 
-    iex> result = #{__MODULE__}.not_nil_dynamic?("location")
+    iex> result = #{__MODULE__}.not_field_is_nil_dynamic("location")
     iex> inspect(result)
     "dynamic([c], not is_nil(c.location))"
 
@@ -30,12 +30,12 @@ defmodule FatEcto.FatQuery.FatNotDynamics do
     - `opts`      - Options related to query bindings
 
   ### Examples
-      iex> result = #{__MODULE__}.not_nil_dynamic?("location")
+      iex> result = #{__MODULE__}.not_field_is_nil_dynamic("location")
       iex> inspect(result)
       "dynamic([c], not is_nil(c.location))"
   """
-  @spec not_nil_dynamic?(any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
-  def not_nil_dynamic?(key, opts \\ []) do
+  @spec not_field_is_nil_dynamic(any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def not_field_is_nil_dynamic(key, opts \\ []) do
     if opts[:binding] == :last do
       dynamic(
         [_, ..., c],

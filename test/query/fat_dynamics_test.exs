@@ -3,21 +3,21 @@ defmodule FatEcto.FatQuery.FatDynamicsTest do
   import Ecto.Query
   alias FatEcto.FatQuery.FatDynamics
 
-  describe "nil_dynamic?/3" do
+  describe "field_is_nil_dynamic/3" do
     test "builds a dynamic query for nil field with :and logic" do
-      result = FatDynamics.nil_dynamic?(:location)
+      result = FatDynamics.field_is_nil_dynamic(:location)
       expected = dynamic([c], is_nil(c.location))
       assert inspect(result) == inspect(expected)
     end
 
     test "builds a dynamic query for nil field with :or logic" do
-      result = FatDynamics.nil_dynamic?(:location)
+      result = FatDynamics.field_is_nil_dynamic(:location)
       expected = dynamic([c], is_nil(c.location))
       assert inspect(result) == inspect(expected)
     end
 
     test "builds a dynamic query for nil field with :last binding" do
-      result = FatDynamics.nil_dynamic?(:location, binding: :last)
+      result = FatDynamics.field_is_nil_dynamic(:location, binding: :last)
       expected = dynamic([_, ..., c], is_nil(c.location))
       assert inspect(result) == inspect(expected)
     end

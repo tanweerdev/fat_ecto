@@ -1,4 +1,4 @@
-defmodule MyApp.HospitalFilter do
+defmodule FatEcto.FatHospitalFilter do
   use FatEcto.FatQuery.Whereable,
     filterable_fields: %{},
     overrideable_fields: ["name", "phone"],
@@ -10,23 +10,23 @@ defmodule MyApp.HospitalFilter do
   import Ecto.Query
 
   @impl true
-  def override_whereable(query, "name", "$ilike", value) do
-    where(query, [r], ilike(fragment("(?)::TEXT", r.name), ^value))
+  def override_whereable(dynamics, "name", "$ILIKE", value) do
+    (dynamics || true) and dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
   end
 
-  def override_whereable(query, "name", "$like", value) do
-    where(query, [r], like(fragment("(?)::TEXT", r.name), ^value))
+  def override_whereable(dynamics, "name", "$LIKE", value) do
+    (dynamics || true) and dynamic([q], like(fragment("(?)::TEXT", q.name), ^value))
   end
 
-  def override_whereable(query, "phone", "$ilike", value) do
-    where(query, [r], ilike(fragment("(?)::TEXT", r.phone), ^value))
+  def override_whereable(dynamics, "phone", "$ILIKE", value) do
+    (dynamics || true) and dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
   end
 
-  def override_whereable(query, "phone", "$like", value) do
-    where(query, [r], like(fragment("(?)::TEXT", r.phone), ^value))
+  def override_whereable(dynamics, "phone", "$LIKE", value) do
+    (dynamics || true) and dynamic([q], like(fragment("(?)::TEXT", q.phone), ^value))
   end
 
-  def override_whereable(query, _, _, _) do
-    query
+  def override_whereable(dynamics, _, _, _) do
+    dynamics
   end
 end

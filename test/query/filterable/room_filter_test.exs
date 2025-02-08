@@ -1,36 +1,60 @@
-defmodule RoomFilterTest do
+defmodule FatEcto.FatRoomTest do
   use FatEcto.ConnCase
+  import Ecto.Query
 
-  describe "RoomFilter" do
-    test "returns the query where field like" do
-      opts = %{"name" => %{"$like" => "%Room 1%"}}
-      expected = from(r in FatEcto.FatRoom, where: like(fragment("(?)::TEXT", r.name), ^"%Room 1%"))
-      query = RoomFilter.build(FatEcto.FatRoom, opts)
-      assert inspect(query) == inspect(expected)
+  describe "build/2" do
+    test "filters by name with custom $LIKE operator" do
+      query = RoomFilter.build(%{"name" => %{"$LIKE" => "%ICU%"}})
+      expected_query = dynamic([q], like(fragment("(?)::TEXT", q.name), ^"%ICU%"))
+      assert inspect(query) == inspect(expected_query)
     end
 
-    test "returns the query where field ilike is built with override_whereable" do
-      opts = %{"name" => %{"$ilike" => "%room 1%"}}
-
-      expected =
-        from(r in FatEcto.FatRoom, where: ilike(fragment("(?)::TEXT", r.name), ^"%room 1%"))
-
-      query = RoomFilter.build(FatEcto.FatRoom, opts)
-      assert inspect(query) == inspect(expected)
+    test "filters by name with custom $ILIKE operator" do
+      query = RoomFilter.build(%{"name" => %{"$ILIKE" => "%ICU%"}})
+      expected_query = dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^"%ICU%"))
+      assert inspect(query) == inspect(expected_query)
     end
 
-    test "applies custom override for phone field" do
-      opts = %{"phone" => %{"$ilike" => "%123%"}}
-      expected = from(r in FatEcto.FatRoom, where: ilike(fragment("(?)::TEXT", r.phone), ^"%123%"))
-      query = RoomFilter.build(FatEcto.FatRoom, opts)
-      assert inspect(query) == inspect(expected)
+    test "ignores name with ignoreable value" do
+      query = RoomFilter.build(%{"name" => "%%"})
+      expected_query = nil
+      assert inspect(query) == inspect(expected_query)
     end
 
-    test "ignores empty list in where params" do
-      opts = %{"purpose" => %{"$in" => []}}
-      expected = from(r in FatEcto.FatRoom)
-      query = RoomFilter.build(FatEcto.FatRoom, opts)
-      assert inspect(query) == inspect(expected)
+    test "filters by phone with custom $ILIKE operator" do
+      query = RoomFilter.build(%{"phone" => %{"$ILIKE" => "%123%"}})
+      expected_query = dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^"%123%"))
+      assert inspect(query) == inspect(expected_query)
+    end
+
+    test "ignores phone with ignoreable value" do
+      query = RoomFilter.build(%{"phone" => "%%"})
+      expected_query = nil
+      assert inspect(query) == inspect(expected_query)
+    end
+
+    test "filters by purpose with $IN operator" do
+      query = RoomFilter.build(%{"purpose" => %{"$IN" => ["Surgery", "ICU"]}})
+      expected_query = dynamic([q], q.purpose in ^["Surgery", "ICU"])
+      assert inspect(query) == inspect(expected_query)
+    end
+
+    test "ignores purpose with ignoreable value" do
+      query = RoomFilter.build(%{"purpose" => []})
+      expected_query = nil
+      assert inspect(query) == inspect(expected_query)
+    end
+
+    test "filters by description with $EQUAL operator" do
+      query = RoomFilter.build(%{"description" => "Private Room"})
+      expected_query = dynamic([q], q.description == ^"Private Room")
+      assert inspect(query) == inspect(expected_query)
+    end
+
+    test "ignores description with ignoreable value" do
+      query = RoomFilter.build(%{"description" => nil})
+      expected_query = nil
+      assert inspect(query) == inspect(expected_query)
     end
   end
 end

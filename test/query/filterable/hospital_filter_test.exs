@@ -1,39 +1,48 @@
-defmodule HospitalFilterTest do
+defmodule FatEcto.FatHospitalFilterTest do
   use FatEcto.ConnCase
+  import Ecto.Query
+  alias FatEcto.FatHospitalFilter
 
-  describe "HospitalFilter" do
-    test "returns the query where field like" do
-      opts = %{"name" => %{"$like" => "%St. Mary%"}}
+  describe "build/2" do
+    test "filters by name with custom $ILIKE operator" do
+      query = FatHospitalFilter.build(%{"name" => %{"$ILIKE" => "%General%"}})
 
-      expected =
-        from(h in FatEcto.FatHospital, where: like(fragment("(?)::TEXT", h.name), ^"%St. Mary%"))
+      expected_query = dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^"%General%"))
 
-      query = HospitalFilter.build(FatEcto.FatHospital, opts)
-      assert inspect(query) == inspect(expected)
+      assert inspect(query) == inspect(expected_query)
     end
 
-    test "returns the query where field ilike" do
-      opts = %{"name" => %{"$ilike" => "%st. mary%"}}
+    @tag :dev
+    test "filters by name with custom $LIKE operator" do
+      query = FatHospitalFilter.build(%{"name" => %{"$LIKE" => "%General%"}})
 
-      expected =
-        from(h in FatEcto.FatHospital, where: ilike(fragment("(?)::TEXT", h.name), ^"%st. mary%"))
+      expected_query = dynamic([q], like(fragment("(?)::TEXT", q.name), ^"%General%"))
 
-      query = HospitalFilter.build(FatEcto.FatHospital, opts)
-      assert inspect(query) == inspect(expected)
+      assert inspect(query) == inspect(expected_query)
     end
 
-    test "applies custom override for phone field" do
-      opts = %{"phone" => %{"$like" => "%123%"}}
-      expected = from(h in FatEcto.FatHospital, where: like(fragment("(?)::TEXT", h.phone), ^"%123%"))
-      query = HospitalFilter.build(FatEcto.FatHospital, opts)
-      assert inspect(query) == inspect(expected)
+    test "ignores name with ignoreable value" do
+      query = FatHospitalFilter.build(%{"name" => ""})
+      expected_query = nil
+      assert inspect(query) == inspect(expected_query)
     end
 
-    test "ignores empty string in where params" do
-      opts = %{"name" => %{"$like" => ""}}
-      expected = from(h in FatEcto.FatHospital)
-      query = HospitalFilter.build(FatEcto.FatHospital, opts)
-      assert inspect(query) == inspect(expected)
+    test "filters by phone with custom $ILIKE operator" do
+      query = FatHospitalFilter.build(%{"phone" => %{"$ILIKE" => "%123%"}})
+      expected_query = dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^"%123%"))
+      assert inspect(query) == inspect(expected_query)
+    end
+
+    test "ignores phone with ignoreable value" do
+      query = FatHospitalFilter.build(%{"phone" => nil})
+      expected_query = nil
+      assert inspect(query) == inspect(expected_query)
+    end
+
+    test "does not filter by non-overrideable fields" do
+      query = FatHospitalFilter.build(%{"email" => "test@example.com"})
+      expected_query = nil
+      assert inspect(query) == inspect(expected_query)
     end
   end
 end
