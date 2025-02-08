@@ -135,7 +135,7 @@ defmodule FatEcto.FatPaginatorTest do
                inspect(
                  from(f0 in FatEcto.FatPaginatorTest.FatHospitalWithPrimaryKeys,
                    distinct: true,
-                   select: fragment("COUNT(DISTINCT ROW(?, ?, ?))::int", f0.id, f0.id1, f0.id2)
+                   select: fragment("COUNT(DISTINCT ROW(?, ?, ?))::INT", f0.id, f0.id1, f0.id2)
                  )
                )
     end

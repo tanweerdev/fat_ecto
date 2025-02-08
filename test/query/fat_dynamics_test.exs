@@ -121,6 +121,19 @@ defmodule FatEcto.FatQuery.FatDynamicsTest do
       expected = dynamic([_, ..., c], c.experience_years == ^2)
       assert inspect(result) == inspect(expected)
     end
+
+    test "builds a dynamic cast_to_date_eq_dynamic for equality" do
+      result = FatDynamics.cast_to_date_eq_dynamic(:end_date, ~D[2025-02-08])
+      expected = dynamic([q], fragment("?::date", q.end_date == ^~D[2025-02-08]))
+      assert inspect(result) == inspect(expected)
+    end
+
+    test "builds a dynamic cast_to_date_eq_dynamic for equality with string date" do
+      string_date = "2022-01-06"
+      result = FatDynamics.cast_to_date_eq_dynamic(:end_date, string_date)
+      expected = dynamic([q], fragment("?::date", q.end_date == ^"2022-01-06"))
+      assert inspect(result) == inspect(expected)
+    end
   end
 
   describe "not_eq_dynamic/4" do

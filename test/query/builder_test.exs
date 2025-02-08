@@ -84,7 +84,7 @@ defmodule FatEcto.FatQuery.BuilderTest do
               "status" => "active",
               "$AND" => [
                 %{"rating" => %{"$GT" => 4}},
-                %{"created_at" => %{"$GTe" => "2023-01-01"}}
+                %{"total_staff" => %{"$GTE" => 20}}
               ]
             }
           ]
@@ -93,7 +93,7 @@ defmodule FatEcto.FatQuery.BuilderTest do
       expected_query =
         dynamic(
           [q],
-          (^nil and q.rating > ^4 and q.status == ^"active") or
+          (q.total_staff >= ^20 and q.rating > ^4 and q.status == ^"active") or
             ((q.city == ^"New York" or q.age > ^18) and ilike(fragment("(?)::TEXT", q.name), ^"%John%"))
         )
 

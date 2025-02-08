@@ -61,6 +61,7 @@ defmodule FatEcto.FatQuery.OperatorHelper do
       "$NOT_ILIKE",
       "$NULL",
       "$NOT_NULL",
+      "$CAST_TO_DATE_EQUAL",
       "$LT",
       "$LTE",
       "$GT",
@@ -161,6 +162,11 @@ defmodule FatEcto.FatQuery.OperatorHelper do
   def apply_operator("$EQUAL", field, value, opts) do
     field = FatHelper.string_to_existing_atom(field)
     FatDynamics.eq_dynamic(field, value, opts)
+  end
+
+  def apply_operator("$CAST_TO_DATE_EQUAL", field, value, opts) do
+    field = FatHelper.string_to_existing_atom(field)
+    FatDynamics.cast_to_date_eq_dynamic(field, value, opts)
   end
 
   def apply_operator("$NOT_EQUAL", field, value, opts) do

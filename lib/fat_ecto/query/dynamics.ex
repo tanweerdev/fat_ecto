@@ -108,7 +108,6 @@ defmodule FatEcto.FatQuery.FatDynamics do
   Parameters
    - `key`       - Field name.
    - `value`     - Comparison value or field reference.
-   - `dynamics`  - Existing dynamic expression.
    - `opts`      - Options for binding
   Examples
     iex> result = #{__MODULE__}.gte_dynamic("experience_years", 2, [binding: :last])
@@ -154,7 +153,6 @@ defmodule FatEcto.FatQuery.FatDynamics do
   Parameters
    - `key`       - Field name.
    - `value`     - Comparison value or field reference.
-   - `dynamics`  - Existing dynamic expression.
    - `opts`      - Options for binding
   Examples
     iex> result = #{__MODULE__}.lte_dynamic("experience_years", 2)
@@ -201,7 +199,6 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
     - `key`       - The field name.
     - `value`     - The value to compare against.
-    - `dynamics`  - The existing dynamic expression to combine with.
     - `opts`      - Options for binding and logic type (:and/:or).
 
   ### Examples
@@ -250,7 +247,6 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
     - `key`       - The field name.
     - `value`     - The substring to match.
-    - `dynamics`  - The existing dynamic expression to combine with.
     - `opts`      - Options for binding and logic type (:and/:or).
 
   ### Examples
@@ -287,7 +283,6 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
     - `key`       - The field name.
     - `value`     - The substring to match.
-    - `dynamics`  - The existing dynamic expression to combine with.
     - `opts`      - Options for binding and logic type (:and/:or).
 
   ### Examples
@@ -327,7 +322,6 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
     - `key`       - The field name.
     - `value`     - The substring to match.
-    - `dynamics`  - The existing dynamic expression to combine with.
     - `opts`      - Options for binding and logic type (:and/:or).
 
   ### Examples
@@ -364,7 +358,6 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
     - `key`       - The field name.
     - `value`     - The value to compare against.
-    - `dynamics`  - The existing dynamic expression to combine with.
     - `opts`      - Options for binding and logic type (:and/:or).
 
   ### Examples
@@ -389,13 +382,42 @@ defmodule FatEcto.FatQuery.FatDynamics do
   end
 
   @doc """
+  Builds a dynamic query where a field casted to date is equal to a value.
+
+  ### Parameters
+
+    - `key`       - The field name to cast into date.
+    - `value`     - The value to compare against.
+    - `opts`      - Options for binding and logic type (:and/:or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.cast_to_date_eq_dynamic("end_date", ~D[2025-02-08])
+      iex> inspect(result)
+      "dynamic([q], q.experience_years == ^2)"
+  """
+  @spec cast_to_date_eq_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def cast_to_date_eq_dynamic(key, value, opts \\ []) do
+    if opts[:binding] == :last do
+      dynamic(
+        [_, ..., q],
+        fragment("?::date", field(q, ^key) == ^value)
+      )
+    else
+      dynamic(
+        [q],
+        fragment("?::date", field(q, ^key) == ^value)
+      )
+    end
+  end
+
+  @doc """
   Builds a dynamic query where a field is not equal to a value.
 
   ### Parameters
 
     - `key`       - The field name.
     - `value`     - The value to compare against.
-    - `dynamics`  - The existing dynamic expression to combine with.
     - `opts`      - Options for binding and logic type (:and/:or).
 
   ### Examples
@@ -434,7 +456,6 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
     - `key`       - The field name.
     - `values`    - A list of two values representing the range.
-    - `dynamics`  - The existing dynamic expression to combine with.
     - `opts`      - Options for binding and logic type (:and/:or).
 
   ### Examples
@@ -467,7 +488,6 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
     - `key`       - The field name.
     - `values`    - A list of two values representing the range.
-    - `dynamics`  - The existing dynamic expression to combine with.
     - `opts`      - Options for binding and logic type (:and/:or).
 
   ### Examples
@@ -500,7 +520,6 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
     - `key`       - The field name.
     - `values`    - A list of values to match against.
-    - `dynamics`  - The existing dynamic expression to combine with.
     - `opts`      - Options for binding and logic type (:and/:or).
 
   ### Examples
@@ -531,7 +550,6 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
     - `key`       - The JSONB field name.
     - `values`    - The value(s) to check for containment.
-    - `dynamics`  - The existing dynamic expression to combine with.
     - `opts`      - Options for binding and logic type (:and/:or).
 
   ### Examples
@@ -562,7 +580,6 @@ defmodule FatEcto.FatQuery.FatDynamics do
 
     - `key`       - The JSONB field name.
     - `values`    - The values to check for overlap.
-    - `dynamics`  - The existing dynamic expression to combine with.
     - `opts`      - Options for binding and logic type (:and/:or).
 
   ### Examples
