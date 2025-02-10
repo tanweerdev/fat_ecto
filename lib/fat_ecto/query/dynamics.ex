@@ -412,6 +412,126 @@ defmodule FatEcto.FatQuery.FatDynamics do
   end
 
   @doc """
+  Builds a dynamic query where a field casted to date is greater than a value.
+
+  ### Parameters
+
+    - `key`       - The field name to cast into date.
+    - `value`     - The value to compare against.
+    - `opts`      - Options for binding and logic type (:and/:or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.cast_to_date_gt_dynamic("end_date", ~D[2025-02-08])
+      iex> inspect(result)
+      "dynamic([q], q.experience_years > ^2)"
+  """
+  @spec cast_to_date_gt_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def cast_to_date_gt_dynamic(key, value, opts \\ []) do
+    if opts[:binding] == :last do
+      dynamic(
+        [_, ..., q],
+        fragment("?::date", field(q, ^key) > ^value)
+      )
+    else
+      dynamic(
+        [q],
+        fragment("?::date", field(q, ^key) > ^value)
+      )
+    end
+  end
+
+  @doc """
+  Builds a dynamic query where a field casted to date is great than or equal to a value.
+
+  ### Parameters
+
+    - `key`       - The field name to cast into date.
+    - `value`     - The value to compare against.
+    - `opts`      - Options for binding and logic type (:and/:or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.cast_to_date_gte_dynamic("end_date", ~D[2025-02-08])
+      iex> inspect(result)
+      "dynamic([q], q.experience_years >= ^2)"
+  """
+  @spec cast_to_date_gte_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def cast_to_date_gte_dynamic(key, value, opts \\ []) do
+    if opts[:binding] == :last do
+      dynamic(
+        [_, ..., q],
+        fragment("?::date", field(q, ^key) >= ^value)
+      )
+    else
+      dynamic(
+        [q],
+        fragment("?::date", field(q, ^key) >= ^value)
+      )
+    end
+  end
+
+  @doc """
+  Builds a dynamic query where a field casted to date is less than a value.
+
+  ### Parameters
+
+    - `key`       - The field name to cast into date.
+    - `value`     - The value to compare against.
+    - `opts`      - Options for binding and logic type (:and/:or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.cast_to_date_lt_dynamic("end_date", ~D[2025-02-08])
+      iex> inspect(result)
+      "dynamic([q], q.experience_years < ^2)"
+  """
+  @spec cast_to_date_lt_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def cast_to_date_lt_dynamic(key, value, opts \\ []) do
+    if opts[:binding] == :last do
+      dynamic(
+        [_, ..., q],
+        fragment("?::date", field(q, ^key) < ^value)
+      )
+    else
+      dynamic(
+        [q],
+        fragment("?::date", field(q, ^key) < ^value)
+      )
+    end
+  end
+
+  @doc """
+  Builds a dynamic query where a field casted to date is less than or equal to a value.
+
+  ### Parameters
+
+    - `key`       - The field name to cast into date.
+    - `value`     - The value to compare against.
+    - `opts`      - Options for binding and logic type (:and/:or).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.cast_to_date_lte_dynamic("end_date", ~D[2025-02-08])
+      iex> inspect(result)
+      "dynamic([q], q.experience_years == ^2)"
+  """
+  @spec cast_to_date_lte_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  def cast_to_date_lte_dynamic(key, value, opts \\ []) do
+    if opts[:binding] == :last do
+      dynamic(
+        [_, ..., q],
+        fragment("?::date", field(q, ^key) <= ^value)
+      )
+    else
+      dynamic(
+        [q],
+        fragment("?::date", field(q, ^key) <= ^value)
+      )
+    end
+  end
+
+  @doc """
   Builds a dynamic query where a field is not equal to a value.
 
   ### Parameters

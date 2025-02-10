@@ -164,6 +164,26 @@ defmodule FatEcto.FatQuery.OperatorHelper do
     FatDynamics.eq_dynamic(field, value, opts)
   end
 
+  def apply_operator("$CAST_TO_DATE_LT", field, value, opts) do
+    field = FatHelper.string_to_existing_atom(field)
+    FatDynamics.cast_to_date_lt_dynamic(field, value, opts)
+  end
+
+  def apply_operator("$CAST_TO_DATE_LTE", field, value, opts) do
+    field = FatHelper.string_to_existing_atom(field)
+    FatDynamics.cast_to_date_lte_dynamic(field, value, opts)
+  end
+
+  def apply_operator("$CAST_TO_DATE_GT", field, value, opts) do
+    field = FatHelper.string_to_existing_atom(field)
+    FatDynamics.cast_to_date_gt_dynamic(field, value, opts)
+  end
+
+  def apply_operator("$CAST_TO_DATE_GTE", field, value, opts) do
+    field = FatHelper.string_to_existing_atom(field)
+    FatDynamics.cast_to_date_gte_dynamic(field, value, opts)
+  end
+
   def apply_operator("$CAST_TO_DATE_EQUAL", field, value, opts) do
     field = FatHelper.string_to_existing_atom(field)
     FatDynamics.cast_to_date_eq_dynamic(field, value, opts)
