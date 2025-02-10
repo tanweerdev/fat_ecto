@@ -19,6 +19,10 @@ defmodule FatEcto.FatContext do
     quote location: :keep do
       @options unquote(options)
       @repo @options[:repo] || raise("Please define :repo when using FatEcto.FatContext")
+      def repo_option, do: @repo
+
+      # Defer the repo check to runtime
+      @after_compile FatEcto.FatContext
 
       import Ecto.Query, warn: false
 
@@ -461,6 +465,20 @@ defmodule FatEcto.FatContext do
       defp has_field?(schema, field) do
         Enum.member?(schema.__schema__(:fields), field) && schema.__schema__(:field_source, field) == field
       end
+    end
+  end
+
+  @doc """
+  Callback function that runs after the module is compiled.
+  """
+  def __after_compile__(%{module: module}, _bytecode) do
+    repo = module.repo_option()
+
+    unless FatEcto.FatHelper.implements_behaviour?(repo, Ecto.Repo) do
+      raise ArgumentError, """
+      The provided :repo option is not a valid Ecto.Repo.
+      Expected a module that implements the Ecto.Repo behaviour, got: #{inspect(repo)}
+      """
     end
   end
 end

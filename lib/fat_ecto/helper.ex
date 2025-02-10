@@ -11,6 +11,30 @@ defmodule FatEcto.FatHelper do
   @default_skip 0
 
   @doc """
+  Checks if a module implements the given behaviour by inspecting its `__info__/1` metadata.
+
+  ## Parameters
+  - `module`: The module to check.
+  - `behaviour`: The behaviour to validate against.
+
+  ## Examples
+      iex> implements_behaviour?(MyApp.Repo, Ecto.Repo)
+      true
+
+      iex> implements_behaviour?(NotARepo, Ecto.Repo)
+      false
+  """
+  @spec implements_behaviour?(module(), module()) :: boolean()
+  def implements_behaviour?(module, behaviour) do
+    is_atom(module) &&
+      Code.ensure_compiled(module) &&
+      function_exported?(module, :__info__, 1) &&
+      module.__info__(:attributes)
+      |> Keyword.get(:behaviour, [])
+      |> Enum.member?(behaviour)
+  end
+
+  @doc """
   Returns the maximum and default limit values based on the provided options.
 
   ## Parameters
