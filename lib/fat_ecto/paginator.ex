@@ -16,9 +16,16 @@ defmodule FatEcto.FatPaginator do
   Now you can use the `paginate/2` function within `Fat.MyContext`.
   """
 
+  @callback data_query(Ecto.Query.t(), integer(), integer()) :: Ecto.Query.t()
+  @callback count_query(Ecto.Query.t()) :: Ecto.Query.t()
+  @callback aggregate(Ecto.Query.t()) :: Ecto.Query.t()
+
   defmacro __using__(options \\ []) do
     quote location: :keep do
+      @behaviour FatEcto.FatPaginator
+
       import Ecto.Query
+      # import Ecto.Query.API
 
       @options unquote(options)
 
@@ -63,13 +70,15 @@ defmodule FatEcto.FatPaginator do
         }
       end
 
-      defp data_query(query, skip, limit) do
+      @impl true
+      def data_query(query, skip, limit) do
         query
         |> limit(^limit)
         |> offset(^skip)
       end
 
-      defp count_query(query) do
+      @impl true
+      def count_query(query) do
         query
         |> exclude(:order_by)
         |> exclude(:preload)
@@ -78,29 +87,32 @@ defmodule FatEcto.FatPaginator do
         |> distinct(true)
       end
 
-      defp aggregate(%{distinct: %{expr: [_ | _]}} = query) do
+      @impl true
+      def aggregate(%{distinct: %{expr: [_ | _]}} = query) do
         query
         |> exclude(:select)
         |> count()
       end
 
-      defp aggregate(
-             %{
-               group_bys: [
-                 %Ecto.Query.QueryExpr{
-                   expr: [{{:., [], [{:&, [], [source_index]}, field]}, [], []} | _]
-                 }
-                 | _
-               ]
-             } = query
-           ) do
+      @impl true
+      def aggregate(
+            %{
+              group_bys: [
+                %Ecto.Query.QueryExpr{
+                  expr: [{{:., [], [{:&, [], [source_index]}, field]}, [], []} | _]
+                }
+                | _
+              ]
+            } = query
+          ) do
         query
         |> exclude(:select)
         |> select([{x, source_index}], struct(x, ^[field]))
         |> count()
       end
 
-      defp aggregate(query) do
+      @impl true
+      def aggregate(query) do
         primary_keys = FatEcto.FatHelper.get_primary_keys(query)
 
         case primary_keys do
@@ -110,69 +122,73 @@ defmodule FatEcto.FatPaginator do
             |> select(count("*"))
 
           keys when is_list(keys) ->
-            case length(keys) do
-              1 ->
-                exclude(query, :select)
+            handle_primary_keys(query, keys)
+        end
+      end
 
-              2 ->
-                query
-                |> exclude(:select)
-                |> select(
-                  [q],
-                  fragment(
-                    "COUNT(DISTINCT ROW(?, ?))::INT",
-                    field(q, ^Enum.at(keys, 0)),
-                    field(q, ^Enum.at(keys, 1))
-                  )
-                )
+      defp handle_primary_keys(query, keys) do
+        case length(keys) do
+          1 ->
+            exclude(query, :select)
 
-              3 ->
-                query
-                |> exclude(:select)
-                |> select(
-                  [q],
-                  fragment(
-                    "COUNT(DISTINCT ROW(?, ?, ?))::INT",
-                    field(q, ^Enum.at(keys, 0)),
-                    field(q, ^Enum.at(keys, 1)),
-                    field(q, ^Enum.at(keys, 2))
-                  )
-                )
+          # |> select([q], fragment("COUNT(DISTINCT ?)::INT", field(q, ^Enum.at(keys, 0))))
 
-              4 ->
-                query
-                |> exclude(:select)
-                |> select(
-                  [q],
-                  fragment(
-                    "COUNT(DISTINCT ROW(?, ?, ?, ?))::INT",
-                    field(q, ^Enum.at(keys, 0)),
-                    field(q, ^Enum.at(keys, 1)),
-                    field(q, ^Enum.at(keys, 2)),
-                    field(q, ^Enum.at(keys, 3))
-                  )
-                )
+          2 ->
+            query
+            |> exclude(:select)
+            |> select(
+              [q],
+              fragment(
+                "COUNT(DISTINCT ROW(?, ?))::INT",
+                field(q, ^Enum.at(keys, 0)),
+                field(q, ^Enum.at(keys, 1))
+              )
+            )
 
-              5 ->
-                query
-                |> exclude(:select)
-                |> select(
-                  [q],
-                  fragment(
-                    "COUNT(DISTINCT ROW(?, ?, ?, ?, ?))::INT",
-                    field(q, ^Enum.at(keys, 0)),
-                    field(q, ^Enum.at(keys, 1)),
-                    field(q, ^Enum.at(keys, 2)),
-                    field(q, ^Enum.at(keys, 3)),
-                    field(q, ^Enum.at(keys, 4))
-                  )
-                )
+          3 ->
+            query
+            |> exclude(:select)
+            |> select(
+              [q],
+              fragment(
+                "COUNT(DISTINCT ROW(?, ?, ?))::INT",
+                field(q, ^Enum.at(keys, 0)),
+                field(q, ^Enum.at(keys, 1)),
+                field(q, ^Enum.at(keys, 2))
+              )
+            )
 
-              _ ->
-                query
-                |> exclude(:select)
-                |> select(count("*"))
-            end
+          4 ->
+            query
+            |> exclude(:select)
+            |> select(
+              [q],
+              fragment(
+                "COUNT(DISTINCT ROW(?, ?, ?, ?))::INT",
+                field(q, ^Enum.at(keys, 0)),
+                field(q, ^Enum.at(keys, 1)),
+                field(q, ^Enum.at(keys, 2)),
+                field(q, ^Enum.at(keys, 3))
+              )
+            )
+
+          5 ->
+            query
+            |> exclude(:select)
+            |> select(
+              [q],
+              fragment(
+                "COUNT(DISTINCT ROW(?, ?, ?, ?, ?))::INT",
+                field(q, ^Enum.at(keys, 0)),
+                field(q, ^Enum.at(keys, 1)),
+                field(q, ^Enum.at(keys, 2)),
+                field(q, ^Enum.at(keys, 3)),
+                field(q, ^Enum.at(keys, 4))
+              )
+            )
+
+          _ ->
+            raise "Unsupported number of primary keys: #{length(keys)}"
         end
       end
 
@@ -183,6 +199,8 @@ defmodule FatEcto.FatPaginator do
         |> subquery()
         |> select(count("*"))
       end
+
+      defoverridable data_query: 3, count_query: 1, aggregate: 1
     end
   end
 end
