@@ -70,6 +70,9 @@ defmodule FatEcto.FatQuery.Whereable do
       @overrideable_fields @options[:overrideable_fields] || []
       @ignoreable_fields_values @options[:ignoreable_fields_values] || %{}
       alias FatEcto.FatQuery.WhereableHelper
+      # def using_options, do: @options
+      # # Defer the repo check to runtime
+      # @after_compile FatEcto.FatQuery.Whereable
 
       # Ensure at least one of `filterable_fields` or `overrideable_fields` is provided.
       if @filterable_fields == %{} and @overrideable_fields == [] do
@@ -82,21 +85,6 @@ defmodule FatEcto.FatQuery.Whereable do
               overrideable_fields: ["name", "phone"]
           """
       end
-
-      # Ensure `override_whereable/4` is implemented if `overrideable_fields` are provided.
-      # if @overrideable_fields != [] do
-      #   unless Module.defines?(__MODULE__, {:override_whereable, 4}) do
-      #     raise CompileError,
-      #       description: """
-      #       You must implement the `override_whereable/4` callback when `overrideable_fields` are provided.
-      #       Example:
-      #         def override_whereable(query, field, operator, value) do
-      #           # Your custom logic here
-      #           query
-      #         end
-      #       """
-      #   end
-      # end
 
       @doc """
       Builds a query after filtering fields based on the provided parameters.
@@ -152,4 +140,28 @@ defmodule FatEcto.FatQuery.Whereable do
       defoverridable override_whereable: 4
     end
   end
+
+  # TODO: This callback doesnt really work as we have default implementation already provided
+  # @doc """
+  # Callback function that runs after the module is compiled.
+  # """
+  # def __after_compile__(%{module: module}, _bytecode) do
+  #   options = module.using_options()
+
+  #   # Ensure `override_whereable/4` is implemented if `overrideable_fields` are provided.
+  #   IO.inspect("options: #{inspect(options)}")
+  #   if options[:overrideable_fields] != [] do
+  #     unless Module.defines?(module, {:override_whereable, 4}) do
+  #       raise CompileError,
+  #         description: """
+  #         You must implement the `override_whereable/4` callback when `overrideable_fields` are provided.
+  #         Example:
+  #           def override_whereable(query, field, operator, value) do
+  #             # Your custom logic here
+  #             query
+  #           end
+  #         """
+  #     end
+  #   end
+  # end
 end

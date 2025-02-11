@@ -29,7 +29,8 @@ defmodule FatEcto.FatHelper do
     is_atom(module) &&
       Code.ensure_compiled(module) &&
       function_exported?(module, :__info__, 1) &&
-      module.__info__(:attributes)
+      :attributes
+      |> module.__info__()
       |> Keyword.get(:behaviour, [])
       |> Enum.member?(behaviour)
   end

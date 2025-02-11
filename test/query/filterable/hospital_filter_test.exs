@@ -12,7 +12,6 @@ defmodule FatEcto.FatHospitalFilterTest do
       assert inspect(query) == inspect(expected_query)
     end
 
-    @tag :dev
     test "filters by name with custom $LIKE operator" do
       query = FatHospitalFilter.build(%{"name" => %{"$LIKE" => "%General%"}})
 

@@ -471,6 +471,7 @@ defmodule FatEcto.FatContext do
   @doc """
   Callback function that runs after the module is compiled.
   """
+  @spec __after_compile__(%{:module => atom()}, any()) :: nil
   def __after_compile__(%{module: module}, _bytecode) do
     repo = module.repo_option()
 

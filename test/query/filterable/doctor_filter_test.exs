@@ -33,7 +33,6 @@ defmodule FatDoctor.FilterTest do
       assert inspect(query) == inspect(expected_query)
     end
 
-    @tag :dev
     test "filters by phone with custom $ILIKE operator" do
       query = DoctorFilter.build(%{"phone" => %{"$ILIKE" => "%123%"}})
       expected_query = dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^"%123%"))
