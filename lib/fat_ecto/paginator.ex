@@ -8,12 +8,12 @@ defmodule FatEcto.FatPaginator do
   ## Usage
 
       defmodule Fat.MyContext do
-        use FatEcto.FatPaginator, repo: Fat.Repo
+        use FatEcto.FatPaginator, repo: Fat.Repo, default_limit: 10, max_limit: 100
 
         # Custom functions can be added here
       end
 
-  Now you can use the `paginate/2` function within `Fat.MyContext`.
+  Now you can use the `paginate/2`, `paginator/3`, and `paginate_get_records/3` functions within `Fat.MyContext`.
   """
 
   @callback data_query(Ecto.Query.t(), integer(), integer()) :: Ecto.Query.t()
@@ -25,9 +25,15 @@ defmodule FatEcto.FatPaginator do
       @behaviour FatEcto.FatPaginator
 
       import Ecto.Query
-      # import Ecto.Query.API
 
       @options unquote(options)
+      @default_limit Keyword.get(@options, :default_limit, 10)
+      @repo @options[:repo]
+      @max_limit Keyword.get(@options, :max_limit, 100)
+      def repo_option, do: @repo
+
+      # Defer the repo check to runtime
+      @after_compile FatEcto.FatPaginator
 
       @doc """
       Paginates the given query with the provided parameters.
@@ -68,6 +74,54 @@ defmodule FatEcto.FatPaginator do
           limit: limit,
           count_query: count_query(query)
         }
+      end
+
+      @doc """
+      Applies pagination to the query and returns the query along with pagination metadata.
+      """
+      def paginator(query, params) do
+        limit = params["limit"] || @default_limit
+        skip = params["skip"] || 0
+
+        %{
+          data_query: data_query,
+          skip: skip,
+          limit: limit,
+          count_query: count_query
+        } = paginate(query, skip: skip, limit: limit)
+
+        total_records = count_records(count_query)
+
+        pages = (total_records / limit) |> Float.ceil() |> trunc()
+
+        meta = %{
+          skip: skip,
+          limit: limit,
+          total_records: total_records,
+          pages: pages
+        }
+
+        {data_query, meta}
+      end
+
+      @doc """
+      Paginates the query, fetches records, and returns the records along with pagination metadata.
+      """
+      def paginate_get_records(query, params) do
+        {query, meta} = paginator(query, params)
+        records = @repo.all(query)
+        {records, meta}
+      end
+
+      @doc """
+      Counts the total number of records for the given count query.
+      """
+      def count_records(%{select: nil} = count_query) do
+        @repo.aggregate(count_query, :count, count_query |> FatEcto.FatHelper.get_primary_keys() |> hd())
+      end
+
+      def count_records(count_query) do
+        @repo.one(count_query)
       end
 
       @impl true
@@ -201,6 +255,21 @@ defmodule FatEcto.FatPaginator do
       end
 
       defoverridable data_query: 3, count_query: 1, aggregate: 1
+    end
+  end
+
+  @doc """
+  Callback function that runs after the module is compiled.
+  """
+  @spec __after_compile__(%{:module => atom()}, any()) :: nil
+  def __after_compile__(%{module: module}, _bytecode) do
+    repo = module.repo_option()
+
+    unless FatEcto.FatHelper.implements_behaviour?(repo, Ecto.Repo) do
+      raise ArgumentError, """
+      The provided :repo option is not a valid Ecto.Repo.
+      Expected a module that implements the Ecto.Repo behaviour, got: #{inspect(repo)}
+      """
     end
   end
 end

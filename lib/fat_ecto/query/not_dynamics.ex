@@ -9,7 +9,7 @@ defmodule FatEcto.FatQuery.FatNotDynamics do
 
   ### Examples
 
-    iex> result = #{__MODULE__}.not_field_is_nil_dynamic("location")
+    iex> result = #{__MODULE__}.not_field_is_nil_dynamic(:location)
     iex> inspect(result)
     "dynamic([c], not is_nil(c.location))"
 
@@ -30,7 +30,7 @@ defmodule FatEcto.FatQuery.FatNotDynamics do
     - `opts`      - Options related to query bindings
 
   ### Examples
-      iex> result = #{__MODULE__}.not_field_is_nil_dynamic("location")
+      iex> result = #{__MODULE__}.not_field_is_nil_dynamic(:location)
       iex> inspect(result)
       "dynamic([c], not is_nil(c.location))"
   """
@@ -59,7 +59,7 @@ defmodule FatEcto.FatQuery.FatNotDynamics do
 
   ### Examples
 
-      iex> result = #{__MODULE__}.not_gt_dynamic("experience_years", 2, [binding: :last])
+      iex> result = #{__MODULE__}.not_gt_dynamic(:experience_years, 2, [binding: :last])
       iex> inspect(result)
       "dynamic([_, ..., c], c.experience_years < ^2)"
   """
@@ -107,7 +107,7 @@ defmodule FatEcto.FatQuery.FatNotDynamics do
 
   ### Examples
 
-      iex> result = #{__MODULE__}.not_gte_dynamic("experience_years", 2, [binding: :last])
+      iex> result = #{__MODULE__}.not_gte_dynamic(:experience_years, 2, [binding: :last])
       iex> inspect(result)
       "dynamic([_, ..., c], c.experience_years < ^2)"
   """
@@ -155,7 +155,7 @@ defmodule FatEcto.FatQuery.FatNotDynamics do
 
   ### Examples
 
-      iex> result = #{__MODULE__}.not_lte_dynamic("experience_years", 2, [binding: :last])
+      iex> result = #{__MODULE__}.not_lte_dynamic(:experience_years, 2, [binding: :last])
       iex> inspect(result)
       "dynamic([c], c.experience_years > ^2)"
   """
@@ -203,7 +203,7 @@ defmodule FatEcto.FatQuery.FatNotDynamics do
 
   ### Examples
 
-      iex> result = #{__MODULE__}.not_lt_dynamic("experience_years", 2, [binding: :last])
+      iex> result = #{__MODULE__}.not_lt_dynamic(:experience_years, 2, [binding: :last])
       iex> inspect(result)
       "dynamic([_, ..., c], c.experience_years > ^2)"
   """
@@ -312,7 +312,7 @@ defmodule FatEcto.FatQuery.FatNotDynamics do
 
   ### Examples
 
-       iex> result = #{__MODULE__}.not_eq_dynamic("experience_years", 2)
+       iex> result = #{__MODULE__}.not_eq_dynamic(:experience_years, 2)
        iex> inspect(result)
        "dynamic([q], q.experience_years != ^2)"
   """
@@ -342,7 +342,7 @@ defmodule FatEcto.FatQuery.FatNotDynamics do
 
   ### Examples
 
-       iex> result = #{__MODULE__}.eq_dynamic("experience_years", 2)
+       iex> result = #{__MODULE__}.eq_dynamic(:experience_years, 2)
        iex> inspect(result)
        "dynamic([q], q.experience_years == ^2)"
   """
@@ -372,9 +372,9 @@ defmodule FatEcto.FatQuery.FatNotDynamics do
 
   ### Examples
 
-      iex> result = #{__MODULE__}.not_between_dynamic("experience_years", [2, 5])
+      iex> result = #{__MODULE__}.not_between_dynamic(:experience_years, [2, 5])
       iex> inspect(result)
-      "dynamic([q], (q.experience_years < ^2 or q.experience_years > ^5))"
+      "dynamic([q], q.experience_years < ^2 or q.experience_years > ^5)"
   """
 
   @spec not_between_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
@@ -404,9 +404,9 @@ defmodule FatEcto.FatQuery.FatNotDynamics do
 
   ### Examples
 
-      iex> result = #{__MODULE__}.not_between_equal_dynamic("experience_years", [2, 5])
+      iex> result = #{__MODULE__}.not_between_equal_dynamic(:experience_years, [2, 5])
       iex> inspect(result)
-      "dynamic([q], (q.experience_years <= ^2 or q.experience_years >= ^5))"
+      "dynamic([q], q.experience_years <= ^2 or q.experience_years >= ^5)"
 
   """
 
@@ -438,7 +438,7 @@ defmodule FatEcto.FatQuery.FatNotDynamics do
 
   ### Examples
 
-      iex> result = #{__MODULE__}.not_in_dynamic("experience_years", [2, 5])
+      iex> result = #{__MODULE__}.not_in_dynamic(:experience_years, [2, 5])
       iex> inspect(result)
       "dynamic([q], q.experience_years not in ^[2, 5])"
 
