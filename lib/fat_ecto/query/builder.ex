@@ -12,14 +12,16 @@ defmodule FatEcto.FatQuery.Builder do
 
   ## Examples
 
-      iex> query = FatEcto.FatQuery.Builder.build_query(%{
+      iex> import Ecto.Query
+      ...> query = FatEcto.FatQuery.Builder.build_query(%{
       ...>   "$OR" => [
       ...>     %{"name" => "John"},
       ...>     %{"phone" => nil},
       ...>     %{"age" => %{"$GT" => 30}}
       ...>   ]
       ...> })
-      iex> Ecto.Query.where(User, ^query)
+      iex> inspect(query)
+      "dynamic([q], q.age > ^30 or (is_nil(q.phone) or q.name == ^\\\"John\\\"))"
   """
   @spec build_query(map(), keyword()) :: %Ecto.Query.DynamicExpr{}
   def build_query(query_map, opts \\ []) when is_map(query_map) do

@@ -8,9 +8,9 @@ defmodule DocTest do
     :ok
   end
 
-  # doctest FatEcto.FatQuery.FatDynamics
+  doctest FatEcto.FatQuery.FatDynamics
   doctest FatEcto.FatQuery.FatNotDynamics
-  # doctest FatEcto.FatQuery.Builder
+  doctest FatEcto.FatQuery.Builder
   doctest FatEcto.FatQuery.OperatorHelper
   # doctest FatUtils.Changeset
   doctest FatUtils.DateTime
