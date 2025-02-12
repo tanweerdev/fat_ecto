@@ -7,18 +7,18 @@ defmodule FatEcto.FatQuery.Sortable do
 
   ## Usage
 
-      defmodule MyApp.SortQuery do
+      defmodule Fat.SortQuery do
         <!-- needed if you are writing queries in override_sortable -->
         import Ecto.Query
         use FatEcto.FatQuery.Sortable,
-          sortable_fields: %{"id" => "$asc", "name" => ["$asc", "$desc"]},
+          sortable_fields: %{"id" => "$ASC", "name" => ["$ASC", "$DESC"]},
           overrideable_fields: ["custom_field"]
 
         @impl true
         def override_sortable(query, field, operator) do
           case {field, operator} do
-            {"custom_field", "$asc"} ->
-              from(q in query, order_by: [asc: fragment("?::jsonb->>'custom_field'", q)])
+            {"custom_field", "$ASC"} ->
+              from(q in query, order_by: [asc: fragment("?::JSONB->>'custom_field'", q)])
             _ ->
               query
           end
@@ -28,8 +28,8 @@ defmodule FatEcto.FatQuery.Sortable do
   ## Example
 
       query = from(u in User)
-      sort_params = %{"id" => "$asc", "name" => "$desc", "custom_field" => "$asc"}
-      MyApp.SortQuery.build(query, sort_params)
+      sort_params = %{"id" => "$ASC", "name" => "$DESC", "custom_field" => "$ASC"}
+      Fat.SortQuery.build(query, sort_params)
 
   This will sort the query by `id` in ascending order, `name` in descending order, and apply custom sorting for `custom_field`.
   """
@@ -62,7 +62,7 @@ defmodule FatEcto.FatQuery.Sortable do
         At least one of `sortable_fields` or `overrideable_fields` must be provided.
         Example:
           use FatEcto.FatQuery.Sortable,
-            sortable_fields: %{"id" => "$asc"},
+            sortable_fields: %{"id" => "$ASC"},
             overrideable_fields: ["custom_field"]
         """
       end
@@ -87,7 +87,7 @@ defmodule FatEcto.FatQuery.Sortable do
 
       ### Parameters
         - `queryable`: The Ecto query to which sorting will be applied.
-        - `sort_params`: A map of fields and their sorting operators (e.g., `%{"field" => "$asc"}`).
+        - `sort_params`: A map of fields and their sorting operators (e.g., `%{"field" => "$ASC"}`).
         - `options`: Additional options for query building (passed to `FatOrderBy`).
 
       ### Returns
@@ -103,7 +103,7 @@ defmodule FatEcto.FatQuery.Sortable do
 
         # Step 3: Apply custom sorting for overrideable_fields
         # Filter sort_params to only include fields in @overrideable_fields
-        # TODO: we need to fix this to allow for multiple operators inside $or
+        # TODO: we need to fix this to allow for multiple operators inside $OR
         override_params =
           Enum.filter(sort_params, fn {field, _operator} -> field in @overrideable_fields end)
 

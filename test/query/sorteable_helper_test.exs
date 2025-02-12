@@ -4,26 +4,26 @@ defmodule FatEcto.FatQuery.SortableHelperTest do
 
   describe "filter_sortable_fields/2" do
     test "filters fields based on sortable_fields" do
-      sort_params = %{"id" => "$asc", "name" => "$desc", "invalid_field" => "$asc"}
-      sortable_fields = %{"id" => "$asc", "name" => ["$asc", "$desc"]}
+      sort_params = %{"id" => "$ASC", "name" => "$DESC", "invalid_field" => "$ASC"}
+      sortable_fields = %{"id" => "$ASC", "name" => ["$ASC", "$DESC"]}
 
       result = SortableHelper.filter_sortable_fields(sort_params, sortable_fields)
 
-      assert result == %{"id" => "$asc", "name" => "$desc"}
+      assert result == %{"id" => "$ASC", "name" => "$DESC"}
     end
 
     test "handles wildcard operator (*)" do
-      sort_params = %{"id" => "$asc", "name" => "$desc"}
+      sort_params = %{"id" => "$ASC", "name" => "$DESC"}
       sortable_fields = %{"id" => "*", "name" => "*"}
 
       result = SortableHelper.filter_sortable_fields(sort_params, sortable_fields)
 
-      assert result == %{"id" => "$asc", "name" => "$desc"}
+      assert result == %{"id" => "$ASC", "name" => "$DESC"}
     end
 
     test "ignores invalid operators" do
-      sort_params = %{"id" => "$desc", "name" => "$invalid"}
-      sortable_fields = %{"id" => "$asc", "name" => ["$asc", "$desc"]}
+      sort_params = %{"id" => "$DESC", "name" => "$INvalid"}
+      sortable_fields = %{"id" => "$ASC", "name" => ["$ASC", "$DESC"]}
 
       result = SortableHelper.filter_sortable_fields(sort_params, sortable_fields)
 

@@ -31,7 +31,7 @@ defmodule FatEcto.MixProject do
         "coveralls.github": :test
       ],
       coveralls: [
-        minimum_coverage: 35
+        minimum_coverage: 60
       ]
     ]
   end

@@ -18,8 +18,9 @@ defmodule FatUtils.Changeset do
   - `options`: Additional options (currently unused).
 
   ## Examples
-      iex> changeset = cast(%User{}, %{field1: "value1", field2: "value2"}, [:field1, :field2])
-      iex> FatUtils.Changeset.validate_xor_fields(changeset, %User{}, [:field1, :field2])
+      iex> import Ecto.Changeset
+      iex> changeset = cast(%FatEcto.FatUser{}, %{field1: "value1", field2: "value2"}, [:field1, :field2])
+      iex> FatUtils.Changeset.validate_xor_fields(changeset, %FatEcto.FatUser{}, [:field1, :field2])
       #Ecto.Changeset<...>
   """
   @spec validate_xor_fields(Ecto.Changeset.t(), map(), list(atom()), keyword()) :: Ecto.Changeset.t()
@@ -51,8 +52,9 @@ defmodule FatUtils.Changeset do
   - `options`: Additional options (currently unused).
 
   ## Examples
-      iex> changeset = cast(%User{}, %{field1: "value1"}, [:field1, :field2])
-      iex> FatUtils.Changeset.validate_only_one_field(changeset, %User{}, [:field1, :field2])
+      iex> import Ecto.Changeset
+      iex> changeset = cast(%FatEcto.FatUser{}, %{field1: "value1"}, [:field1, :field2])
+      iex> FatUtils.Changeset.validate_only_one_field(changeset, %FatEcto.FatUser{}, [:field1, :field2])
       #Ecto.Changeset<...>
   """
   @spec validate_only_one_field(Ecto.Changeset.t(), map(), list(atom()), keyword()) :: Ecto.Changeset.t()
@@ -77,8 +79,9 @@ defmodule FatUtils.Changeset do
   - `options`: Additional options (currently unused).
 
   ## Examples
-      iex> changeset = cast(%User{}, %{}, [:field1, :field2])
-      iex> FatUtils.Changeset.validate_at_least_one_field(changeset, %User{}, [:field1, :field2])
+      iex> import Ecto.Changeset
+      iex> changeset = cast(%FatEcto.FatUser{}, %{}, [:field1, :field2])
+      iex> FatUtils.Changeset.validate_at_least_one_field(changeset, %FatEcto.FatUser{}, [:field1, :field2])
       #Ecto.Changeset<...>
   """
   @spec validate_at_least_one_field(Ecto.Changeset.t(), map(), list(atom()), keyword()) :: Ecto.Changeset.t()
@@ -100,7 +103,8 @@ defmodule FatUtils.Changeset do
   - `require_key`: The key to make required.
 
   ## Examples
-      iex> changeset = cast(%User{}, %{field1: "value1"}, [:field1, :field2])
+      iex> import Ecto.Changeset
+      iex> changeset = cast(%FatEcto.FatUser{}, %{field1: "value1"}, [:field1, :field2])
       iex> FatUtils.Changeset.require_field_if_present(changeset, if_change_key: :field1, require_key: :field2)
       #Ecto.Changeset<...>
   """
@@ -123,7 +127,8 @@ defmodule FatUtils.Changeset do
   - `options`: Options to customize the error message or specify comparison type (`:time` or `:datetime`).
 
   ## Examples
-      iex> changeset = cast(%User{}, %{start_time: ~T[10:00:00], end_time: ~T[09:00:00]}, [:start_time, :end_time])
+      iex> import Ecto.Changeset
+      iex> changeset = cast(%FatEcto.FatUser{}, %{start_time: ~T[10:00:00], end_time: ~T[09:00:00]}, [:start_time, :end_time])
       iex> FatUtils.Changeset.validate_start_before_end(changeset, :start_time, :end_time, compare_type: :time)
       #Ecto.Changeset<...>
   """
@@ -152,7 +157,8 @@ defmodule FatUtils.Changeset do
   - `options`: Options to customize the error message or specify comparison type (`:time` or `:datetime`).
 
   ## Examples
-      iex> changeset = cast(%User{}, %{start_time: ~T[10:00:00], end_time: ~T[10:00:00]}, [:start_time, :end_time])
+      iex> import Ecto.Changeset
+      iex> changeset = cast(%FatEcto.FatUser{}, %{start_time: ~T[10:00:00], end_time: ~T[10:00:00]}, [:start_time, :end_time])
       iex> FatUtils.Changeset.validate_start_before_or_equal_end(changeset, :start_time, :end_time, compare_type: :time)
       #Ecto.Changeset<...>
   """
@@ -181,7 +187,8 @@ defmodule FatUtils.Changeset do
   - `error_message`: The error message (default: "is invalid").
 
   ## Examples
-      iex> changeset = cast(%User{}, %{}, [])
+      iex> import Ecto.Changeset
+      iex> changeset = cast(%FatEcto.FatUser{}, %{}, [])
       iex> FatUtils.Changeset.add_custom_error(changeset, :field, "custom error")
       #Ecto.Changeset<...>
   """

@@ -5,103 +5,132 @@ defmodule FatEcto.FatQuery.WhereableHelperTest do
   describe "remove_ignoreable_fields/2" do
     test "removes fields with ignoreable values" do
       where_params = %{
-        "name" => %{"$not_ilike" => "%DJ%"},
-        "$or" => %{
-          "location" => %{"$like" => "%main%"},
-          "address" => %{"$ilike" => "%123%"},
-          "rating" => %{"$lt" => 3},
-          "total_staff" => %{"$gt" => 2}
-        }
+        "name" => "John",
+        "email" => "",
+        "phone" => nil,
+        "age" => %{"$GT" => 18}
       }
 
       ignoreable_fields_values = %{
-        "email" => ["%%", "", [], nil],
-        "phone" => ["%%", "", [], nil],
-        "location" => ""
+        "email" => ["", "%%", nil],
+        "phone" => [nil]
       }
 
-      assert WhereableHelper.remove_ignoreable_fields(where_params, ignoreable_fields_values) == %{
-               "name" => %{"$not_ilike" => "%DJ%"},
-               "$or" => %{
-                 "address" => %{"$ilike" => "%123%"},
-                 "rating" => %{"$lt" => 3},
-                 "total_staff" => %{"$gt" => 2},
-                 "location" => %{"$like" => "%main%"}
-               }
+      result = WhereableHelper.remove_ignoreable_fields(where_params, ignoreable_fields_values)
+
+      assert result == %{
+               "name" => "John",
+               "age" => %{"$GT" => 18}
              }
     end
 
-    test "handles nested $or structures" do
+    test "does not remove fields with non-ignoreable values" do
       where_params = %{
-        "$or" => %{
-          "email" => %{"$like" => "%%"},
-          "name" => %{"$eq" => "John"},
-          "phone" => %{"$eq" => nil}
-        }
+        "name" => "John",
+        "email" => "test@example.com",
+        "age" => %{"$GT" => 18}
       }
 
       ignoreable_fields_values = %{
-        "email" => ["%%", "", [], nil],
-        "phone" => ["%%", "", [], nil],
-        "location" => ""
+        "email" => ["", "%%", nil]
       }
 
-      assert WhereableHelper.remove_ignoreable_fields(where_params, ignoreable_fields_values) == %{
-               "$or" => %{
-                 "name" => %{"$eq" => "John"}
-               }
+      result = WhereableHelper.remove_ignoreable_fields(where_params, ignoreable_fields_values)
+
+      assert result == %{
+               "name" => "John",
+               "email" => "test@example.com",
+               "age" => %{"$GT" => 18}
              }
     end
   end
 
   describe "filter_filterable_fields/2" do
-    test "filters fields based on filterable_fields" do
-      params = %{
-        "name" => %{"$not_ilike" => "%DJ%"},
-        "$or" => %{
-          "location" => %{"$like" => "%main%"},
-          "address" => %{"$ilike" => "%123%"},
-          "rating" => %{"$lt" => 3},
-          "total_staff" => %{"$gt" => 2}
-        }
+    test "filters fields based on allowed operators" do
+      where_params = %{
+        "name" => %{"$ILIKE" => "%John%"},
+        "age" => %{"$GT" => 18},
+        "email" => %{"$EQUAL" => "test@example.com"}
       }
 
       filterable_fields = %{
-        "email" => ["$equal", "$like"],
-        "name" => "*",
-        "location" => "*"
+        "name" => ["$ILIKE"],
+        "age" => "*"
       }
 
-      assert WhereableHelper.filter_filterable_fields(params, filterable_fields) == %{
-               "name" => %{"$not_ilike" => "%DJ%"},
-               "$or" => %{
-                 "location" => %{"$like" => "%main%"}
-               }
+      result = WhereableHelper.filter_filterable_fields(where_params, filterable_fields)
+
+      assert result == %{
+               "name" => %{"$ILIKE" => "%John%"},
+               "age" => %{"$GT" => 18}
+             }
+    end
+
+    test "handles direct comparisons" do
+      where_params = %{
+        "name" => "John",
+        "age" => 25
+      }
+
+      filterable_fields = %{
+        "name" => ["$EQUAL"],
+        "age" => "*"
+      }
+
+      result = WhereableHelper.filter_filterable_fields(where_params, filterable_fields)
+
+      assert result == %{
+               "name" => %{"$EQUAL" => "John"},
+               "age" => %{"$EQUAL" => 25}
              }
     end
   end
 
   describe "filter_overrideable_fields/3" do
     test "filters overrideable fields and ignores ignoreable values" do
-      params = %{
-        "email" => %{"$like" => "test@example.com"},
-        "phone" => %{"$eq" => "1234567890"},
-        "location" => %{"$ilike" => ""}
+      where_params = %{
+        "name" => "John",
+        "phone" => "",
+        "email" => %{"$EQUAL" => "test@example.com"}
       }
 
-      overrideable_fields = ["email", "phone"]
+      overrideable_fields = ["phone", "email"]
 
       ignoreable_fields_values = %{
-        "email" => ["%%", "", [], nil],
-        "phone" => ["%%", "", [], nil],
-        "location" => ""
+        "phone" => [""]
       }
 
-      assert WhereableHelper.filter_overrideable_fields(params, overrideable_fields, ignoreable_fields_values) ==
-               [
-                 %{field: "phone", operator: "$eq", value: "1234567890"},
-                 %{field: "email", operator: "$like", value: "test@example.com"}
-               ]
+      result =
+        WhereableHelper.filter_overrideable_fields(
+          where_params,
+          overrideable_fields,
+          ignoreable_fields_values
+        )
+
+      assert result == [
+               %{field: "email", operator: "$EQUAL", value: "test@example.com"}
+             ]
+    end
+
+    test "handles direct comparisons for overrideable fields" do
+      where_params = %{
+        "name" => "John",
+        "phone" => "1234567890"
+      }
+
+      overrideable_fields = ["phone"]
+      ignoreable_fields_values = %{}
+
+      result =
+        WhereableHelper.filter_overrideable_fields(
+          where_params,
+          overrideable_fields,
+          ignoreable_fields_values
+        )
+
+      assert result == [
+               %{field: "phone", operator: "$EQUAL", value: "1234567890"}
+             ]
     end
   end
 end

@@ -1,4 +1,4 @@
-# FatEcto
+# FatEcto: Supercharge Your Ecto Queries with Ease! 🚀
 
 
 [![Build Status](https://github.com/tanweerdev/fat_ecto/actions/workflows/fat_ecto.yml/badge.svg)](https://github.com/tanweerdev/fat_ecto/actions)
@@ -10,36 +10,36 @@
 
 ## Description
 
-FatEcto is an Elixir package designed to simplify and enhance Ecto query building, pagination, sorting, and data sanitization. It provides a set of utilities and modules that make it easier to work with Ecto in your Elixir applications.
+FatEcto is an Elixir package designed to make your life easier when working with Ecto. It simplifies query building, filtering, sorting, pagination, and data sanitization—so you can focus on what truly matters: building amazing applications. With FatEcto, writing complex queries becomes effortless, flexible, and powerful! 💪
 
 ## Installation
 
-Add `fat_ecto` to your list of dependencies in `mix.exs`:
+Getting started is simple! Add `fat_ecto` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    # Check https://hexdocs.pm/fat_ecto for latest version
+    # Check https://hexdocs.pm/fat_ecto for the latest version
     {:fat_ecto, "~> 1.0.0"}
   ]
 end
 ```
 
-Then, run mix deps.get to install the package.
+Then, run `mix deps.get` to install the package.
 
-## Modules
+## Features & Modules
 
-### FatEcto.FatQuery.Whereable
+### 🛠 FatEcto.FatQuery.Whereable – Dynamic Filtering Made Easy
 
-The Whereable module provides functionality to filter Ecto queries using predefined filterable and overrideable fields.
+Tired of writing repetitive query filters? The `Whereable` module lets you dynamically filter records using flexible conditions passed from your web or mobile clients—with little to no effort! And the best part? You stay in control. 🚀
 
 #### Usage
 
 ```elixir
-defmodule MyApp.HospitalFilter do
+defmodule FatEcto.FatHospitalFilter do
   use FatEcto.FatQuery.Whereable,
     filterable_fields: %{
-      "id" => ["$eq", "$neq"]
+      "id" => ["$EQUAL", "$NOT_EQUAL"]
     },
     overrideable_fields: ["name", "phone"],
     ignoreable_fields_values: %{
@@ -49,37 +49,42 @@ defmodule MyApp.HospitalFilter do
 
   import Ecto.Query
 
-  def override_whereable(query, "name", "$ilike", value) do
-    where(query, [r], ilike(fragment("(?)::TEXT", r.name), ^value))
+  # You can implement override_whereable for your custom filters
+  def override_whereable(dynamics, "name", "$ILIKE", value) do
+    # dynamics returned can be null so lets add extra check
+    (dynamics || true) and dynamic([r], ilike(fragment("(?)::TEXT", r.name), ^value))
   end
 
-  def override_whereable(query, "phone", "$ilike", value) do
-    where(query, [r], ilike(fragment("(?)::TEXT", r.phone), ^value))
-  end
-
-  def override_whereable(query, _, _, _) do
-    query
-  end
+  def override_whereable(query, _, _, _), do: query
 end
 ```
 
-### FatEcto.FatQuery.Sortable
+##### Example Usage
 
-The Sortable module allows sorting Ecto queries based on user-defined rules.
+```elixir
+opts = %{"name" => %{"$LIKE" => "%St. Mary%"}}
+query = HospitalFilter.build(FatEcto.FatHospital, opts)
+
+result = from(h in FatEcto.FatHospital, where: like(fragment("(?)::TEXT", h.name), ^"%St. Mary%"))
+```
+
+### 🔄 FatEcto.FatQuery.Sortable – Effortless Sorting
+
+Sorting should be simple—and with `Sortable`, it is! Your frontend can send sorting parameters, and FatEcto will seamlessly generate the right sorting queries, allowing you to build powerful, customizable sorting logic without breaking a sweat. 😎
 
 #### Usage
 
 ```elixir
-defmodule MyApp.SortQuery do
+defmodule Fat.SortQuery do
   import Ecto.Query
   use FatEcto.FatQuery.Sortable,
-    sortable_fields: %{"id" => "$asc", "name" => ["$asc", "$desc"]},
+    sortable_fields: %{"id" => "$ASC", "name" => ["$ASC", "$DESC"]},
     overrideable_fields: ["custom_field"]
 
   @impl true
   def override_sortable(query, field, operator) do
     case {field, operator} do
-      {"custom_field", "$asc"} ->
+      {"custom_field", "$ASC"} ->
         from(q in query, order_by: [asc: fragment("?::jsonb->>'custom_field'", q)])
       _ ->
         query
@@ -88,72 +93,50 @@ defmodule MyApp.SortQuery do
 end
 ```
 
-### FatEcto.FatPaginator
+### 📌 FatEcto.FatPaginator – Paginate Like a Pro
 
-The FatPaginator module provides pagination functionality for Ecto queries.
+No more hassle with pagination! FatPaginator helps you paginate Ecto queries efficiently, keeping your APIs snappy and responsive.
 
 #### Usage
 
 ```elixir
-defmodule MyApp.MyContext do
-  use FatEcto.FatPaginator, repo: MyApp.Repo
-
-  # Custom functions can be added here
+defmodule Fat.MyPaginator do
+  use FatEcto.FatPaginator, repo: Fat.Repo
+  # Add custom pagination functions here
 end
 ```
 
-### FatEcto.DataSanitizer
+### 🔍 FatEcto.DataSanitizer – Clean & Structured Data
 
-The DataSanitizer module provides functionality to sanitize records and convert data into views.
+Messy data? Not anymore! `DataSanitizer` helps you sanitize records and transform them into structured, clean views effortlessly. Keep your data tidy and consistent. 🎯
 
 #### Usage
 
 ```elixir
-defmodule MyApp.MyContext do
+defmodule Fat.MySanitizer do
   use FatEcto.DataSanitizer
-
-  # Custom functions can be added here
+  # Define your custom sanitization functions here
 end
 ```
 
-### Utilities
+### ⚡ FatEcto Utilities – Small Helpers, Big Impact
 
-FatEcto also includes a set of utility functions for various purposes, such as changeset validation, datetime handling, map manipulation, and table operations. These utilities are designed to make common tasks easier and more consistent.
-
-Example Usage
+FatEcto also comes with a set of handy utility functions to streamline your workflow:
 
 ```elixir
-# Example of using a utility function
+# Check if a map contains all required keys
 FatUtils.Map.has_all_keys?(%{a: 1, b: 2}, [:a, :b])
 
+# Ensure a map contains only allowed keys
 FatUtils.Map.contain_only_allowed_keys?(%{a: 1, c: 3}, [:a, :b])
 ```
 
-### Contributing
+## 🚀 Contributing
 
-Contributions are welcome! Please feel free to submit issues or pull requests.
+We love contributions! If you’d like to improve FatEcto, submit an issue or pull request. Let’s build something amazing together! 🔥
 
-License
-MIT License
+## 📜 License
 
-Copyright (c) 2023 Muhammad Tanweer
+FatEcto is released under the MIT License.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-see [Docs](https://hexdocs.pm/fat_ecto/) for more details.
+📖 See the full documentation at [HexDocs](https://hexdocs.pm/fat_ecto/) for more details.

@@ -1,37 +1,37 @@
-defmodule MyApp.RoomFilter do
+defmodule Fat.RoomFilter do
   use FatEcto.FatQuery.Whereable,
     filterable_fields: %{},
     overrideable_fields: ["name", "phone", "purpose", "description"],
     ignoreable_fields_values: %{
       "name" => "%%",
       "phone" => "%%",
-      "purpose" => [[], %{"$in" => []}],
-      "description" => [nil, %{"$equal" => nil}]
+      "purpose" => [[], %{"$IN" => []}],
+      "description" => [nil, %{"$EQUAL" => nil}]
     }
 
   import Ecto.Query
   @impl FatEcto.FatQuery.Whereable
-  def override_whereable(query, "phone", "$ilike", value) do
-    where(query, [r], ilike(fragment("(?)::TEXT", r.phone), ^value))
+  def override_whereable(dynamics, "phone", "$ILIKE", value) do
+    (dynamics || true) and dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
   end
 
-  def override_whereable(query, "name", "$like", value) do
-    where(query, [r], like(fragment("(?)::TEXT", r.name), ^value))
+  def override_whereable(dynamics, "name", "$LIKE", value) do
+    (dynamics || true) and dynamic([q], like(fragment("(?)::TEXT", q.name), ^value))
   end
 
-  def override_whereable(query, "name", "$ilike", value) do
-    where(query, [r], ilike(fragment("(?)::TEXT", r.name), ^value))
+  def override_whereable(dynamics, "name", "$ILIKE", value) do
+    (dynamics || true) and dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
   end
 
-  def override_whereable(query, "description", "$equal", value) do
-    where(query, [r], r.description == ^value)
+  def override_whereable(dynamics, "description", "$EQUAL", value) do
+    (dynamics || true) and dynamic([q], q.description == ^value)
   end
 
-  def override_whereable(query, "purpose", "$in", value) when is_list(value) do
-    where(query, [r], r.purpose in ^value)
+  def override_whereable(dynamics, "purpose", "$IN", values) when is_list(values) do
+    (dynamics || true) and dynamic([q], q.purpose in ^values)
   end
 
-  def override_whereable(query, _, _, _) do
-    query
+  def override_whereable(dynamics, _, _, _) do
+    dynamics
   end
 end
