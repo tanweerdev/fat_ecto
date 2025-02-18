@@ -28,14 +28,14 @@ defmodule Fat.DoctorFilter do
   @impl FatEcto.FatQuery.Whereable
 
   def override_whereable(dynamics, "phone", "$ILIKE", value) do
-    (dynamics || true) and dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
+    dynamics and dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
   end
 
   def override_whereable(dynamics, "phone", "$LIKE", value) do
-    (dynamics || true) and dynamic([q], like(fragment("(?)::TEXT", q.phone), ^value))
+    dynamics and dynamic([q], like(fragment("(?)::TEXT", q.phone), ^value))
   end
 
-  def override_whereable(query, _, _, _) do
-    query
+  def override_whereable(dynamics, _, _, _) do
+    dynamics
   end
 end

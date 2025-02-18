@@ -11,24 +11,25 @@ defmodule Fat.RoomFilter do
 
   import Ecto.Query
   @impl FatEcto.FatQuery.Whereable
+
   def override_whereable(dynamics, "phone", "$ILIKE", value) do
-    (dynamics || true) and dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
+    dynamics and dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
   end
 
   def override_whereable(dynamics, "name", "$LIKE", value) do
-    (dynamics || true) and dynamic([q], like(fragment("(?)::TEXT", q.name), ^value))
+    dynamics and dynamic([q], like(fragment("(?)::TEXT", q.name), ^value))
   end
 
   def override_whereable(dynamics, "name", "$ILIKE", value) do
-    (dynamics || true) and dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
+    dynamics and dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
   end
 
   def override_whereable(dynamics, "description", "$EQUAL", value) do
-    (dynamics || true) and dynamic([q], q.description == ^value)
+    dynamics and dynamic([q], q.description == ^value)
   end
 
   def override_whereable(dynamics, "purpose", "$IN", values) when is_list(values) do
-    (dynamics || true) and dynamic([q], q.purpose in ^values)
+    dynamics and dynamic([q], q.purpose in ^values)
   end
 
   def override_whereable(dynamics, _, _, _) do

@@ -11,19 +11,19 @@ defmodule FatEcto.FatHospitalFilter do
 
   @impl true
   def override_whereable(dynamics, "name", "$ILIKE", value) do
-    (dynamics || true) and dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
+    dynamics and dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
   end
 
   def override_whereable(dynamics, "name", "$LIKE", value) do
-    (dynamics || true) and dynamic([q], like(fragment("(?)::TEXT", q.name), ^value))
+    dynamics and dynamic([q], like(fragment("(?)::TEXT", q.name), ^value))
   end
 
   def override_whereable(dynamics, "phone", "$ILIKE", value) do
-    (dynamics || true) and dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
+    dynamics and dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
   end
 
   def override_whereable(dynamics, "phone", "$LIKE", value) do
-    (dynamics || true) and dynamic([q], like(fragment("(?)::TEXT", q.phone), ^value))
+    dynamics and dynamic([q], like(fragment("(?)::TEXT", q.phone), ^value))
   end
 
   def override_whereable(dynamics, _, _, _) do

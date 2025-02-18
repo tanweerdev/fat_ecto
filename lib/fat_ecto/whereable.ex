@@ -33,16 +33,16 @@ defmodule FatEcto.FatQuery.Whereable do
 
         import Ecto.Query
 
-        def override_whereable(query, "name", "$ILIKE", value) do
-          where(query, [r], ilike(fragment("(?)::TEXT", r.name), ^value))
+        def override_whereable(dynamics, "name", "$ILIKE", value) do
+          dynamics and dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
         end
 
-        def override_whereable(query, "phone", "$ILIKE", value) do
-          where(query, [r], ilike(fragment("(?)::TEXT", r.phone), ^value))
+        def override_whereable(dynamics, "phone", "$ILIKE", value) do
+          dynamics and dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
         end
 
-        def override_whereable(query, _, _, _) do
-          query
+        def override_whereable(dynamics, _, _, _) do
+          dynamics
         end
       end
   """
@@ -129,17 +129,21 @@ defmodule FatEcto.FatQuery.Whereable do
 
       This function can be overridden by the using module to implement custom filtering logic.
       """
-      def override_whereable(query, _field, _operator, _value), do: query
+      def override_whereable(dynamics, _field, _operator, _value), do: dynamics
 
       # Applies custom filtering for overrideable fields using the fallback function.
-      defp apply_overrideable_filters(query, overrideable_params) do
-        Enum.reduce(overrideable_params, query, fn %{
-                                                     field: field,
-                                                     operator: operator,
-                                                     value: value
-                                                   },
-                                                   query ->
-          override_whereable(query, field, operator, value)
+      defp apply_overrideable_filters(dynamics, overrideable_params) do
+        # FatEcto will return true if dynamics were nil from Whereable
+        # So that you can implement override_whereable without checking nil case
+        dynamics = if Enum.empty?(overrideable_params), do: dynamics, else: dynamics || true
+
+        Enum.reduce(overrideable_params, dynamics, fn %{
+                                                        field: field,
+                                                        operator: operator,
+                                                        value: value
+                                                      },
+                                                      dynamics ->
+          override_whereable(dynamics, field, operator, value)
         end)
       end
 
@@ -162,9 +166,9 @@ defmodule FatEcto.FatQuery.Whereable do
   #         description: """
   #         You must implement the `override_whereable/4` callback when `overrideable_fields` are provided.
   #         Example:
-  #           def override_whereable(query, field, operator, value) do
+  #           def override_whereable(dynamics, field, operator, value) do
   #             # Your custom logic here
-  #             query
+  #             dynamics
   #           end
   #         """
   #     end

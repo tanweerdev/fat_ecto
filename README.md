@@ -56,11 +56,10 @@ defmodule FatEcto.FatHospitalFilter do
 
   # You can implement override_whereable for your custom filters
   def override_whereable(dynamics, "name", "$ILIKE", value) do
-    # dynamics returned can be null so lets add extra check
-    (dynamics || true) and dynamic([r], ilike(fragment("(?)::TEXT", r.name), ^value))
+    dynamics and dynamic([r], ilike(fragment("(?)::TEXT", r.name), ^value))
   end
 
-  def override_whereable(query, _, _, _), do: query
+  def override_whereable(dynamics, _, _, _), do: dynamics
 end
 ```
 
