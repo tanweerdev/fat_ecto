@@ -6,13 +6,13 @@ defmodule FatEcto.FatContext do
 
   ## Usage
 
-      defmodule FatEcto.FatUserContext do
-        use FatEcto.FatContext, repo: Fat.Repo
+      defmodule FatEcto.FatAppContext do
+        use FatEcto.FatContext, repo: FatEcto.Repo
 
         # Custom functions can be added here
       end
 
-  Now you can use the functions provided by `FatEcto.FatContext` within `FatEcto.FatUserContext`.
+  Now you can use the functions provided by `FatEcto.FatContext` within `FatEcto.FatAppContext`.
   """
 
   defmacro __using__(options \\ []) do
@@ -34,11 +34,14 @@ defmodule FatEcto.FatContext do
       - `preloads`: A list of associations to preload (default: []).
 
       ## Examples
-          iex> first(FatEcto.FatUser)
-          %FatEcto.FatUser{}
 
-          iex> first(FatEcto.FatUser, [:posts])
-          %FatEcto.FatUser{posts: [%Fat.Post{}]}
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.first(FatHospital)
+          %FatEcto.FatHospital{}
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.first(FatHospital, [:fat_rooms])
+          %FatEcto.FatHospital{fat_rooms: [%FatEcto.FatRoom{}]}
       """
       def first(schema, preloads \\ []) do
         query =
@@ -59,11 +62,14 @@ defmodule FatEcto.FatContext do
       - `preloads`: A list of associations to preload (default: []).
 
       ## Examples
-          iex> last(FatEcto.FatUser)
-          %FatEcto.FatUser{}
 
-          iex> last(FatEcto.FatUser, [:posts])
-          %FatEcto.FatUser{posts: [%Fat.Post{}]}
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.last(FatHospital)
+          %FatEcto.FatHospital{}
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.last(FatHospital, [:fat_rooms])
+          %FatEcto.FatHospital{fat_rooms: [%FatEcto.FatRoom{}]}
       """
       def last(schema, preloads \\ []) do
         query =
@@ -83,7 +89,9 @@ defmodule FatEcto.FatContext do
       - `schema`: The Ecto schema module.
 
       ## Examples
-          iex> count(FatEcto.FatUser)
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.count(FatHospital)
           42
       """
       def count(schema) do
@@ -99,7 +107,9 @@ defmodule FatEcto.FatContext do
       - `conditions`: A keyword list of conditions.
 
       ## Examples
-          iex> count(FatEcto.FatUser, name: "John Doe")
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.count(FatHospital, name: "John Doe")
           1
       """
       def count(schema, conditions) do
@@ -117,11 +127,14 @@ defmodule FatEcto.FatContext do
       - `preloads`: A list of associations to preload (default: []).
 
       ## Examples
-          iex> list(FatEcto.FatUser)
-          [%FatEcto.FatUser{}, %FatEcto.FatUser{}]
 
-          iex> list(FatEcto.FatUser, [:posts])
-          [%FatEcto.FatUser{posts: [%Fat.Post{}]}, %FatEcto.FatUser{posts: []}]
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.list(FatHospital)
+          [%FatEcto.FatHospital{}, %FatEcto.FatHospital{}]
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.list(FatHospital, [:fat_rooms])
+          [%FatEcto.FatHospital{fat_rooms: [%FatEcto.FatRoom{}]}, %FatEcto.FatHospital{fat_rooms: []}]
       """
       def list(schema, preloads \\ []) do
         schema |> @repo.all() |> @repo.preload(preloads)
@@ -136,11 +149,14 @@ defmodule FatEcto.FatContext do
       - `preloads`: A list of associations to preload (default: []).
 
       ## Examples
-          iex> list_by(FatEcto.FatUser, name: "John Doe")
-          [%FatEcto.FatUser{name: "John Doe"}]
 
-          iex> list_by(FatEcto.FatUser, name: "John Doe", [:posts])
-          [%FatEcto.FatUser{name: "John Doe", posts: [%Fat.Post{}]}]
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.list_by(FatHospital, name: "John Doe")
+          [%FatEcto.FatHospital{name: "John Doe"}]
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.list_by(FatHospital, name: "John Doe", [:fat_rooms])
+          [%FatEcto.FatHospital{name: "John Doe", fat_rooms: [%FatEcto.FatRoom{}]}]
       """
       def list_by(schema, conditions, preloads \\ []) do
         schema
@@ -157,10 +173,13 @@ defmodule FatEcto.FatContext do
       - `id`: The ID of the record.
 
       ## Examples
-          iex> get!(FatEcto.FatUser, 1)
-          %FatEcto.FatUser{id: 1}
 
-          iex> get!(FatEcto.FatUser, 999)
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.get!(FatHospital, 1)
+          %FatEcto.FatHospital{id: 1}
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.get!(FatHospital, 999)
           ** (Ecto.NoResultsError)
       """
       def get!(schema, id), do: @repo.get!(schema, id)
@@ -174,14 +193,18 @@ defmodule FatEcto.FatContext do
       - `preloads`: A list of associations to preload (default: []).
 
       ## Examples
-          iex> get(FatEcto.FatUser, 1)
-          {:ok, %FatEcto.FatUser{id: 1}}
 
-          iex> get(FatEcto.FatUser, 999)
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.get(FatHospital, 1)
+          {:ok, %FatEcto.FatHospital{id: 1}}
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.get(FatHospital, 999)
           {:error, :not_found}
 
-          iex> get(FatEcto.FatUser, 1, [:posts])
-          {:ok, %FatEcto.FatUser{id: 1, posts: [%Fat.Post{}]}}
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.get(FatHospital, 1, [:fat_rooms])
+          {:ok, %FatEcto.FatHospital{id: 1, fat_rooms: [%FatEcto.FatRoom{}]}}
       """
       def get(schema, id, preloads \\ []) do
         case @repo.get(schema, id) do
@@ -199,14 +222,18 @@ defmodule FatEcto.FatContext do
       - `preloads`: A list of associations to preload (default: []).
 
       ## Examples
-          iex> get_by(FatEcto.FatUser, name: "John Doe")
-          {:ok, %FatEcto.FatUser{name: "John Doe"}}
 
-          iex> get_by(FatEcto.FatUser, name: "Non-existent")
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.get_by(FatHospital, name: "John Doe")
+          {:ok, %FatEcto.FatHospital{name: "John Doe"}}
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.get_by(FatHospital, name: "Non-existent")
           {:error, :not_found}
 
-          iex> get_by(FatEcto.FatUser, name: "John Doe", [:posts])
-          {:ok, %FatEcto.FatUser{name: "John Doe", posts: [%Fat.Post{}]}}
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.get_by(FatHospital, name: "John Doe", [:fat_rooms])
+          {:ok, %FatEcto.FatHospital{name: "John Doe", fat_rooms: [%FatEcto.FatRoom{}]}}
       """
       def get_by(schema, conditions, preloads \\ []) do
         case @repo.get_by(schema, conditions) do
@@ -224,11 +251,14 @@ defmodule FatEcto.FatContext do
       - `opts`: Options to pass to the repository (default: []).
 
       ## Examples
-          iex> create(FatEcto.FatUser, %{name: "John Doe"})
-          {:ok, %FatEcto.FatUser{name: "John Doe"}}
 
-          iex> create(FatEcto.FatUser, %{name: "John Doe"}, [returning: true])
-          {:ok, %FatEcto.FatUser{name: "John Doe"}}
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.create(FatHospital, %{name: "John Doe"})
+          {:ok, %FatEcto.FatHospital{name: "John Doe"}}
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.create(FatHospital, %{name: "John Doe"}, [returning: true])
+          {:ok, %FatEcto.FatHospital{name: "John Doe"}}
       """
       def create(schema, attrs, opts \\ []) do
         schema.__struct__()
@@ -246,8 +276,10 @@ defmodule FatEcto.FatContext do
       - `opts`: Options to pass to the repository (default: []).
 
       ## Examples
-          iex> create_by(%FatEcto.FatUser{}, &FatEcto.FatUser.changeset/2, %{name: "John Doe"})
-          {:ok, %FatEcto.FatUser{name: "John Doe"}}
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.create_by(%FatHospital{}, &FatHospital.changeset/2, %{name: "John Doe"})
+          {:ok, %FatEcto.FatHospital{name: "John Doe"}}
       """
       def create_by(struct, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn, 2) do
         struct
@@ -264,10 +296,13 @@ defmodule FatEcto.FatContext do
       - `opts`: Options to pass to the repository (default: []).
 
       ## Examples
-          iex> create!(FatEcto.FatUser, %{name: "John Doe"})
-          %FatEcto.FatUser{name: "John Doe"}
 
-          iex> create!(FatEcto.FatUser, %{name: nil})
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.create!(FatHospital, %{name: "John Doe"})
+          %FatEcto.FatHospital{name: "John Doe"}
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.create!(FatHospital, %{name: nil})
           ** (Ecto.InvalidChangesetError)
       """
       def create!(schema, attrs, opts \\ []) do
@@ -286,8 +321,10 @@ defmodule FatEcto.FatContext do
       - `opts`: Options to pass to the repository (default: []).
 
       ## Examples
-          iex> create_by!(%FatEcto.FatUser{}, &FatEcto.FatUser.changeset/2, %{name: "John Doe"})
-          %FatEcto.FatUser{name: "John Doe"}
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.create_by!(%FatHospital{}, &FatHospital.changeset/2, %{name: "John Doe"})
+          %FatEcto.FatHospital{name: "John Doe"}
       """
       def create_by!(struct, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn, 2) do
         struct
@@ -305,8 +342,10 @@ defmodule FatEcto.FatContext do
       - `opts`: Options to pass to the repository (default: []).
 
       ## Examples
-          iex> update_by(%FatEcto.FatUser{name: "Old Name"}, &FatEcto.FatUser.changeset/2, %{name: "New Name"})
-          {:ok, %FatEcto.FatUser{name: "New Name"}}
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.update_by(%FatHospital{name: "Old Name"}, &FatHospital.changeset/2, %{name: "New Name"})
+          {:ok, %FatEcto.FatHospital{name: "New Name"}}
       """
       def update_by(record, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn, 2) do
         record
@@ -324,8 +363,10 @@ defmodule FatEcto.FatContext do
       - `opts`: Options to pass to the repository (default: []).
 
       ## Examples
-          iex> update(%FatEcto.FatUser{name: "Old Name"}, FatEcto.FatUser, %{name: "New Name"})
-          {:ok, %FatEcto.FatUser{name: "New Name"}}
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.update(%FatHospital{name: "Old Name"}, FatHospital, %{name: "New Name"})
+          {:ok, %FatEcto.FatHospital{name: "New Name"}}
       """
       def update(record, schema, attrs, opts \\ []) do
         record
@@ -343,8 +384,10 @@ defmodule FatEcto.FatContext do
       - `opts`: Options to pass to the repository (default: []).
 
       ## Examples
-          iex> update_by!(%FatEcto.FatUser{name: "Old Name"}, &FatEcto.FatUser.changeset/2, %{name: "New Name"})
-          %FatEcto.FatUser{name: "New Name"}
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.update_by!(%FatHospital{name: "Old Name"}, &FatHospital.changeset/2, %{name: "New Name"})
+          %FatEcto.FatHospital{name: "New Name"}
       """
       def update_by!(record, changeset_fn, attrs, opts \\ []) when is_function(changeset_fn, 2) do
         record
@@ -362,8 +405,10 @@ defmodule FatEcto.FatContext do
       - `opts`: Options to pass to the repository (default: []).
 
       ## Examples
-          iex> update!(%FatEcto.FatUser{name: "Old Name"}, FatEcto.FatUser, %{name: "New Name"})
-          %FatEcto.FatUser{name: "New Name"}
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.update!(%FatHospital{name: "Old Name"}, FatHospital, %{name: "New Name"})
+          %FatEcto.FatHospital{name: "New Name"}
       """
       def update!(record, schema, attrs, opts \\ []) do
         record
@@ -382,15 +427,13 @@ defmodule FatEcto.FatContext do
       - `opts`: Options to pass to the repository (default: []).
 
       ## Examples
-          iex> upsert(FatEcto.FatUser, [get_by_clauses: [name: "John Doe"], update_params: %{name: "John Doe Updated"}, create_params: %{name: "John Doe"}])
-          {:ok, %FatEcto.FatUser{name: "John Doe Updated"}}
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.upsert(FatHospital, [name: "John Doe"], %{name: "John Doe Updated"}, %{name: "John Doe"})
+          {:ok, %FatEcto.FatHospital{name: "John Doe Updated"}}
       """
-      def upsert(
-            schema,
-            [get_by_clauses: get_by_clauses, update_params: update_params, create_params: create_params],
-            opts \\ []
-          ) do
-        case get_by(schema, get_by_clauses, opts[:preloads] || []) do
+      def upsert(schema, conditions, update_params, create_params, opts \\ []) do
+        case get_by(schema, conditions) do
           {:ok, record} -> update(record, schema, update_params, opts)
           {:error, :not_found} -> create(schema, create_params, opts)
         end
@@ -403,8 +446,10 @@ defmodule FatEcto.FatContext do
       - `record`: The record to delete.
 
       ## Examples
-          iex> delete(%FatEcto.FatUser{id: 1})
-          {:ok, %FatEcto.FatUser{}}
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.delete(%FatHospital{id: 1})
+          {:ok, %FatEcto.FatHospital{}}
       """
       def delete(record) do
         @repo.delete(record)
@@ -417,7 +462,9 @@ defmodule FatEcto.FatContext do
       - `schema`: The Ecto schema module.
 
       ## Examples
-          iex> delete_all(FatEcto.FatUser)
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.delete_all(FatHospital)
           {2, nil}
       """
       def delete_all(schema) do
@@ -433,7 +480,9 @@ defmodule FatEcto.FatContext do
       - `attrs`: A map of attributes.
 
       ## Examples
-          iex> changeset(FatEcto.FatUser, %FatEcto.FatUser{}, %{name: "John Doe"})
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.changeset(FatHospital, %FatHospital{}, %{name: "John Doe"})
           #Ecto.Changeset<...>
       """
       def changeset(schema, record, attrs \\ %{}) do
@@ -449,11 +498,14 @@ defmodule FatEcto.FatContext do
       - `preloads`: A list of associations to preload (default: []).
 
       ## Examples
-          iex> get_all_by(FatEcto.FatUser, name: "John Doe")
-          [%FatEcto.FatUser{name: "John Doe"}]
 
-          iex> get_all_by(FatEcto.FatUser, name: "John Doe", [:posts])
-          [%FatEcto.FatUser{name: "John Doe", posts: [%Fat.Post{}]}]
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.get_all_by(FatHospital, name: "John Doe")
+          [%FatEcto.FatHospital{name: "John Doe"}]
+
+          iex> alias FatEcto.FatHospital
+          iex> FatEcto.FatAppContext.get_all_by(FatHospital, name: "John Doe", [:fat_rooms])
+          [%FatEcto.FatHospital{name: "John Doe", fat_rooms: [%FatEcto.FatRoom{}]}]
       """
       def get_all_by(schema, conditions, preloads \\ []) do
         schema

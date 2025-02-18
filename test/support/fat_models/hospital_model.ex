@@ -25,5 +25,6 @@ defmodule FatEcto.FatHospital do
       :total_staff,
       :rating
     ])
+    |> validate_required([:name])
   end
 end

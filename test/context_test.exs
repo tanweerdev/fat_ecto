@@ -1,7 +1,7 @@
 defmodule Fat.ContextTest do
   use FatEcto.ConnCase
   import FatEcto.Factory
-  alias Fat.TestContext
+  alias FatEcto.FatAppContext
   alias FatEcto.{FatRoom, Repo}
 
   setup do
@@ -16,7 +16,7 @@ defmodule Fat.ContextTest do
     insert(:bed, fat_room_id: room1.id)
 
     # Fetch the first room with preloaded beds
-    record = TestContext.first(FatRoom, [:fat_beds])
+    record = FatAppContext.first(FatRoom, [:fat_beds])
 
     # Assertions
     assert record.is_active == true, "Expected the first room to be active"
@@ -32,7 +32,7 @@ defmodule Fat.ContextTest do
     insert(:bed, fat_room_id: room2.id)
 
     # Fetch the last room with preloaded beds
-    record = TestContext.last(FatRoom, [:fat_beds])
+    record = FatAppContext.last(FatRoom, [:fat_beds])
 
     # Assertions
     assert record.is_active == false, "Expected the last room to be inactive"
@@ -48,7 +48,7 @@ defmodule Fat.ContextTest do
     insert(:room, name: "Jane")
 
     # Assert the total count
-    assert TestContext.count(FatRoom) == 3, "Expected 3 rooms in the table"
+    assert FatAppContext.count(FatRoom) == 3, "Expected 3 rooms in the table"
   end
 
   test "count/2 returns the number of records matching a condition" do
@@ -57,7 +57,7 @@ defmodule Fat.ContextTest do
     insert(:room, name: "Doe")
 
     # Assert the count of rooms with the name "Doe"
-    assert TestContext.count(FatRoom, name: "Doe") == 2, "Expected 2 rooms with the name 'Doe'"
+    assert FatAppContext.count(FatRoom, name: "Doe") == 2, "Expected 2 rooms with the name 'Doe'"
   end
 
   test "list/2 returns all records with preloaded associations" do
@@ -68,7 +68,7 @@ defmodule Fat.ContextTest do
     insert(:bed, fat_room_id: room2.id)
 
     # Fetch all rooms with preloaded beds
-    list = TestContext.list(FatRoom, [:fat_beds])
+    list = FatAppContext.list(FatRoom, [:fat_beds])
 
     # Assertions
     assert Enum.count(list) == 2, "Expected 2 rooms in the list"
@@ -81,14 +81,14 @@ defmodule Fat.ContextTest do
     room = insert(:room)
 
     # Fetch the room by ID
-    record = TestContext.get!(FatRoom, room.id)
+    record = FatAppContext.get!(FatRoom, room.id)
 
     # Assertions
     assert record.id == room.id, "Expected the fetched room to match the inserted room"
 
     # Test raising an error for a non-existent ID
     assert_raise Ecto.NoResultsError, fn ->
-      TestContext.get!(FatRoom, -1)
+      FatAppContext.get!(FatRoom, -1)
     end
   end
 
@@ -98,7 +98,7 @@ defmodule Fat.ContextTest do
     insert(:bed, fat_room_id: room.id)
 
     # Fetch the room by ID with preloaded beds
-    {:ok, record} = TestContext.get(FatRoom, room.id, [:fat_beds])
+    {:ok, record} = FatAppContext.get(FatRoom, room.id, [:fat_beds])
 
     # Assertions
     assert record.id == room.id, "Expected the fetched room to match the inserted room"
@@ -106,7 +106,7 @@ defmodule Fat.ContextTest do
     assert sibling.fat_room_id == room.id, "Expected the bed to be associated with the room"
 
     # Test error tuple for a non-existent ID
-    assert TestContext.get(FatRoom, -1) == {:error, :not_found}
+    assert FatAppContext.get(FatRoom, -1) == {:error, :not_found}
   end
 
   test "get_by/3 returns a record by conditions with preloaded associations or an error tuple if not found" do
@@ -115,7 +115,7 @@ defmodule Fat.ContextTest do
     insert(:bed, fat_room_id: room.id)
 
     # Fetch the room by name with preloaded beds
-    {:ok, record} = TestContext.get_by(FatRoom, [name: "Doe"], [:fat_beds])
+    {:ok, record} = FatAppContext.get_by(FatRoom, [name: "Doe"], [:fat_beds])
 
     # Assertions
     assert record.name == "Doe", "Expected the fetched room to have the name 'Doe'"
@@ -123,12 +123,12 @@ defmodule Fat.ContextTest do
     assert sibling.fat_room_id == room.id, "Expected the bed to be associated with the room"
 
     # Test error tuple for a non-existent condition
-    assert TestContext.get_by(FatRoom, name: "Non-existent") == {:error, :not_found}
+    assert FatAppContext.get_by(FatRoom, name: "Non-existent") == {:error, :not_found}
   end
 
   test "create/2 creates a new record" do
     # Create a new room
-    {:ok, record} = TestContext.create(FatRoom, %{name: "Doe", purpose: "Testing"})
+    {:ok, record} = FatAppContext.create(FatRoom, %{name: "Doe", purpose: "Testing"})
 
     # Assertions
     assert record.name == "Doe", "Expected the created room to have the name 'Doe'"
@@ -139,7 +139,7 @@ defmodule Fat.ContextTest do
     room = insert(:room)
 
     # Update the room's name
-    {:ok, record} = TestContext.update(room, FatRoom, %{name: "John"})
+    {:ok, record} = FatAppContext.update(room, FatRoom, %{name: "John"})
 
     # Assertions
     assert record.name == "John", "Expected the updated room to have the name 'John'"
@@ -150,7 +150,7 @@ defmodule Fat.ContextTest do
     room = insert(:room)
 
     # Delete the room
-    TestContext.delete(room)
+    FatAppContext.delete(room)
 
     # Assertions
     assert Repo.get(FatRoom, room.id) == nil, "Expected the room to be deleted"
@@ -162,7 +162,7 @@ defmodule Fat.ContextTest do
     insert(:room)
 
     # Delete all rooms
-    TestContext.delete_all(FatRoom)
+    FatAppContext.delete_all(FatRoom)
 
     # Assertions
     assert Repo.all(FatRoom) == [], "Expected all rooms to be deleted"
@@ -173,7 +173,7 @@ defmodule Fat.ContextTest do
     room = insert(:room)
 
     # Create a changeset
-    changeset = TestContext.changeset(FatRoom, room, %{name: "Doe", purpose: "Testing"})
+    changeset = FatAppContext.changeset(FatRoom, room, %{name: "Doe", purpose: "Testing"})
 
     # Assertions
     assert changeset.valid?, "Expected the changeset to be valid"
@@ -187,7 +187,7 @@ defmodule Fat.ContextTest do
     insert(:bed, fat_room_id: room2.id)
 
     # Fetch all rooms with the name "Doe" and preloaded beds
-    records = TestContext.get_all_by(FatRoom, [name: "Doe"], [:fat_beds])
+    records = FatAppContext.get_all_by(FatRoom, [name: "Doe"], [:fat_beds])
 
     # Assertions
     assert Enum.count(records) == 2, "Expected 2 rooms with the name 'Doe'"

@@ -20,7 +20,7 @@ defmodule DocTest do
   # doctest FatUtils.String
   # doctest FatUtils.Table
   doctest FatUtils.UUID
-  # doctest Fat.TestContext
+  # doctest FatEcto.FatAppContext
   doctest FatEcto.TestRecordUtils
   # doctest FatEcto.FatHelper
   doctest FatEcto.FatQuery.FatOrderBy

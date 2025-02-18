@@ -1,4 +1,4 @@
-defmodule Fat.TestContext do
+defmodule FatEcto.FatAppContext do
   @moduledoc false
   use FatEcto.FatContext, repo: FatEcto.Repo
 end
