@@ -72,8 +72,12 @@ Here are some practical examples of how to use `FatEcto.FatHospitalFilter` to dy
 ##### Example 1: Basic Filtering by ID
 ```elixir
 # Filter hospitals with ID equal to 1
-opts = %{"id" => %{"$EQUAL" => 1}}
-query = FatEcto.FatHospitalFilter.build(FatEcto.FatHospital, opts)
+params = %{"id" => %{"$EQUAL" => 1}}
+dynamics = FatEcto.FatHospitalFilter.build(params)
+
+# Use the dynamics in a query
+import Ecto.Query
+query = where(FatEcto.FatHospital, ^dynamics)
 
 # Resulting query:
 # from(h in FatEcto.FatHospital, where: h.id == 1)
@@ -82,8 +86,12 @@ query = FatEcto.FatHospitalFilter.build(FatEcto.FatHospital, opts)
 ##### Example 2: Case-Insensitive Name Search
 ```elixir
 # Filter hospitals with names containing "St. Mary"
-opts = %{"name" => %{"$ILIKE" => "%St. Mary%"}}
-query = FatEcto.FatHospitalFilter.build(FatEcto.FatHospital, opts)
+params = %{"name" => %{"$ILIKE" => "%St. Mary%"}}
+dynamics = FatEcto.FatHospitalFilter.build(params)
+
+# Use the dynamics in a query
+import Ecto.Query
+query = where(FatEcto.FatHospital, ^dynamics)
 
 # Resulting query:
 # from(h in FatEcto.FatHospital, where: ilike(fragment("(?)::TEXT", h.name), ^"%St. Mary%"))
@@ -92,11 +100,15 @@ query = FatEcto.FatHospitalFilter.build(FatEcto.FatHospital, opts)
 ##### Example 3: Combining Multiple Filters
 ```elixir
 # Filter hospitals with ID not equal to 2 AND name containing "General"
-opts = %{
+params = %{
   "id" => %{"$NOT_EQUAL" => 2},
   "name" => %{"$ILIKE" => "%General%"}
 }
-query = FatEcto.FatHospitalFilter.build(FatEcto.FatHospital, opts)
+dynamics = FatEcto.FatHospitalFilter.build(params)
+
+# Use the dynamics in a query
+import Ecto.Query
+query = where(FatEcto.FatHospital, ^dynamics)
 
 # Resulting query:
 # from(h in FatEcto.FatHospital, where: h.id != 2 and ilike(fragment("(?)::TEXT", h.name), ^"%General%"))
@@ -105,8 +117,12 @@ query = FatEcto.FatHospitalFilter.build(FatEcto.FatHospital, opts)
 ##### Example 4: Ignoring Empty or Invalid Values
 ```elixir
 # Filter hospitals with a name, but ignore empty or invalid values
-opts = %{"name" => %{"$ILIKE" => "%%"}}  # Empty value is ignored
-query = FatEcto.FatHospitalFilter.build(FatEcto.FatHospital, opts)
+params = %{"name" => %{"$ILIKE" => "%%"}}  # Empty value is ignored
+dynamics = FatEcto.FatHospitalFilter.build(params)
+
+# Use the dynamics in a query
+import Ecto.Query
+query = where(FatEcto.FatHospital, ^dynamics)
 
 # Resulting query:
 # from(h in FatEcto.FatHospital)  # No filtering applied for name
