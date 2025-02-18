@@ -1,5 +1,6 @@
 defmodule Query.OrderByTest do
   use FatEcto.ConnCase
+  alias MyApp.HospitalOrderby
 
   setup do
     hospital = insert(:hospital, rating: 5)
@@ -12,10 +13,10 @@ defmodule Query.OrderByTest do
     Repo.insert(%FatEcto.FatHospital{name: "Doe", phone: "1234", rating: 10})
     Repo.insert(%FatEcto.FatHospital{name: "Doe", phone: "1234", rating: 6})
 
-    opts = %{"rating" => "$desc"}
+    opts = %{"rating" => "$DESC"}
 
     expected = from(h in FatEcto.FatHospital, order_by: [desc: h.rating])
-    query = MyApp.HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
     results = Repo.all(query)
 
     assert inspect(query) == inspect(expected)
@@ -26,11 +27,11 @@ defmodule Query.OrderByTest do
     Repo.insert(%FatEcto.FatHospital{name: "Doe", phone: "1234", rating: 10})
     Repo.insert(%FatEcto.FatHospital{name: "Doe", phone: "1234", rating: 6})
 
-    opts = %{"phone" => "$desc"}
+    opts = %{"phone" => "$DESC"}
 
     expected = from(p in FatEcto.FatHospital, order_by: [desc: p.phone])
 
-    query = MyApp.HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
   end
 
@@ -38,11 +39,11 @@ defmodule Query.OrderByTest do
     Repo.insert(%FatEcto.FatHospital{rating: 4})
     Repo.insert(%FatEcto.FatHospital{rating: 6})
 
-    opts = %{"rating" => "$asc"}
+    opts = %{"rating" => "$ASC"}
 
     expected = from(p in FatEcto.FatHospital, order_by: [asc: p.rating])
 
-    query = MyApp.HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     results = Repo.all(query)
     assert Enum.map(results, fn map -> map.rating end) == [4, 5, 6]
@@ -53,22 +54,22 @@ defmodule Query.OrderByTest do
     Repo.insert(%FatEcto.FatHospital{rating: 4})
     Repo.insert(%FatEcto.FatHospital{})
 
-    opts = %{"rating" => "$asc_nulls_last"}
+    opts = %{"rating" => "$ASC_NULLS_LAST"}
 
     expected = from(f0 in FatEcto.FatHospital, order_by: [asc_nulls_last: f0.rating])
 
-    query = MyApp.HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     results = Repo.all(query)
     assert Enum.map(results, fn map -> map.rating end) == [4, 5, 6, nil]
   end
 
   test "does not apply order by if field is not configured" do
-    opts = %{"appointments_count" => "$asc_nulls_last"}
+    opts = %{"appointments_count" => "$ASC_NULLS_LAST"}
 
     expected = FatEcto.FatHospital
 
-    query = MyApp.HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
   end
 
@@ -77,11 +78,11 @@ defmodule Query.OrderByTest do
     Repo.insert(%FatEcto.FatHospital{rating: 6})
     Repo.insert(%FatEcto.FatHospital{})
 
-    opts = %{"rating" => "$asc_nulls_first"}
+    opts = %{"rating" => "$ASC_NULLS_FIRST"}
 
     expected = from(p in FatEcto.FatHospital, order_by: [asc_nulls_first: p.rating])
 
-    query = MyApp.HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     results = Repo.all(query)
     assert Enum.map(results, fn map -> map.rating end) == [nil, 4, 5, 6]
@@ -92,11 +93,11 @@ defmodule Query.OrderByTest do
     Repo.insert(%FatEcto.FatHospital{rating: 6})
     Repo.insert(%FatEcto.FatHospital{})
 
-    opts = %{"rating" => "$desc_nulls_first"}
+    opts = %{"rating" => "$DESC_NULLS_FIRST"}
 
     expected = from(p in FatEcto.FatHospital, order_by: [desc_nulls_first: p.rating])
 
-    query = MyApp.HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     results = Repo.all(query)
     assert Enum.map(results, fn map -> map.rating end) == [nil, 6, 5, 4]
@@ -107,11 +108,11 @@ defmodule Query.OrderByTest do
     Repo.insert(%FatEcto.FatHospital{rating: 6})
     Repo.insert(%FatEcto.FatHospital{})
 
-    opts = %{"rating" => "$desc_nulls_last"}
+    opts = %{"rating" => "$DESC_NULLS_LAST"}
 
     expected = from(p in FatEcto.FatHospital, order_by: [desc_nulls_last: p.rating])
 
-    query = MyApp.HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     results = Repo.all(query)
     assert Enum.map(results, fn map -> map.rating end) == [6, 5, 4, nil]
@@ -121,10 +122,10 @@ defmodule Query.OrderByTest do
     Repo.insert(%FatEcto.FatHospital{rating: 4})
     Repo.insert(%FatEcto.FatHospital{rating: 6})
 
-    opts = %{"date_of_birth" => "$asc"}
+    opts = %{"date_of_birth" => "$ASC"}
 
     expected = from(p in FatEcto.FatHospital, order_by: [asc: p.date_of_birth])
-    query = MyApp.HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
   end
 end

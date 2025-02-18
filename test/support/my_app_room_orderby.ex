@@ -1,14 +1,14 @@
-defmodule MyApp.RoomOrderby do
+defmodule Fat.RoomOrderby do
   use FatEcto.FatQuery.Sortable,
     overrideable_fields: ["phone", "name"]
 
   import Ecto.Query
 
-  def override_sortable(query, "name", "$asc") do
+  def override_sortable(query, "name", "$ASC") do
     order_by(query, [r], asc: r.name)
   end
 
-  def override_sortable(query, "phone", "$desc") do
+  def override_sortable(query, "phone", "$DESC") do
     order_by(query, [r], desc: r.phone)
   end
 

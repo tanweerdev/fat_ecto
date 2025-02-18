@@ -1,17 +1,17 @@
-defmodule MyApp.DoctorFilter do
+defmodule Fat.DoctorFilter do
   use FatEcto.FatQuery.Whereable,
     filterable_fields: %{
       "email" => [
-        "$equal",
-        "$like",
-        "$not_equal",
-        "$not_like",
-        "$ilike",
-        "$in",
-        "$not_ilike",
-        "$not_in",
-        "$not_null",
-        "$null"
+        "$EQUAL",
+        "$LIKE",
+        "$NOT_EQUAL",
+        "$NOT_LIKE",
+        "$ILIKE",
+        "$IN",
+        "$NOT_ILIKE",
+        "$NOT_IN",
+        "$NOT_NULL",
+        "$NULL"
       ],
       "name" => "*",
       "rating" => "*",
@@ -27,12 +27,12 @@ defmodule MyApp.DoctorFilter do
   import Ecto.Query
   @impl FatEcto.FatQuery.Whereable
 
-  def override_whereable(query, "phone", "$ilike", value) do
-    where(query, [r], ilike(fragment("(?)::TEXT", r.phone), ^value))
+  def override_whereable(dynamics, "phone", "$ILIKE", value) do
+    (dynamics || true) and dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
   end
 
-  def override_whereable(query, "phone", "$like", value) do
-    where(query, [r], like(fragment("(?)::TEXT", r.phone), ^value))
+  def override_whereable(dynamics, "phone", "$LIKE", value) do
+    (dynamics || true) and dynamic([q], like(fragment("(?)::TEXT", q.phone), ^value))
   end
 
   def override_whereable(query, _, _, _) do

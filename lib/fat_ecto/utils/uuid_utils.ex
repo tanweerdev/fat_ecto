@@ -28,7 +28,7 @@ defmodule FatUtils.UUID do
   ## Examples
       iex> params = %{user_id: "123e4567-e89b-12d3-a456-426614174000", post_id: "invalid-uuid"}
       iex> FatUtils.UUID.parse(params, [:user_id, :post_id])
-      {[:post_id], %{user_id: "123e4567-e89b-12d3-a456-426614174000", post_id: "invalid-uuid"}}
+      {[:post_id], %{user_id: "123e4567-e89b-12d3-a456-426614174000"}}
 
       iex> params = %{user_id: "123e4567-e89b-12d3-a456-426614174000", role: "admin"}
       iex> FatUtils.UUID.parse(params, [:user_id], valid_values: ["admin"])
