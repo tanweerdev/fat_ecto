@@ -96,8 +96,10 @@ defmodule FatEcto.FatQuery.Whereable do
       ### Returns
         - The query with filtering applied.
       """
-      @spec build(map(), keyword()) :: %Ecto.Query.DynamicExpr{} | nil
-      def build(where_params, build_options \\ []) do
+      @spec build(map() | nil, keyword()) :: %Ecto.Query.DynamicExpr{} | nil
+      def build(where_params \\ nil, build_options \\ [])
+
+      def build(where_params, build_options) when is_map(where_params) do
         filtered_where_params =
           WhereableHelper.remove_ignoreable_fields(where_params, @ignoreable_fields_values)
 
@@ -116,6 +118,10 @@ defmodule FatEcto.FatQuery.Whereable do
         combined_params
         |> Builder.build_query(build_options)
         |> apply_overrideable_filters(overrideable_params)
+      end
+
+      def build(_where_params, _build_options) do
+        nil
       end
 
       @doc """
