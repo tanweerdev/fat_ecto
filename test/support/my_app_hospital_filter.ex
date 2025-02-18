@@ -10,10 +10,6 @@ defmodule FatEcto.FatHospitalFilter do
   import Ecto.Query
 
   @impl true
-  def override_whereable(nil, field, operator, value) do
-    override_whereable(true, field, operator, value)
-  end
-
   def override_whereable(dynamics, "name", "$ILIKE", value) do
     dynamics and dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
   end

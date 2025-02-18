@@ -33,11 +33,6 @@ defmodule FatEcto.FatQuery.Whereable do
 
         import Ecto.Query
 
-        # Handle the edge case if dynamics were nil
-        def override_whereable(nil, field, operator, value) do
-          override_whereable(true, field, operator, value)
-        end
-
         def override_whereable(dynamics, "name", "$ILIKE", value) do
           dynamics and dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
         end
@@ -138,6 +133,10 @@ defmodule FatEcto.FatQuery.Whereable do
 
       # Applies custom filtering for overrideable fields using the fallback function.
       defp apply_overrideable_filters(dynamics, overrideable_params) do
+        # FatEcto will return true if dynamics were nil from Whereable
+        # So that you can implement override_whereable without checking nil case
+        dynamics = if Enum.empty?(overrideable_params), do: dynamics, else: dynamics || true
+
         Enum.reduce(overrideable_params, dynamics, fn %{
                                                         field: field,
                                                         operator: operator,

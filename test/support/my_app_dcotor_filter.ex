@@ -27,10 +27,6 @@ defmodule Fat.DoctorFilter do
   import Ecto.Query
   @impl FatEcto.FatQuery.Whereable
 
-  def override_whereable(nil, field, operator, value) do
-    override_whereable(true, field, operator, value)
-  end
-
   def override_whereable(dynamics, "phone", "$ILIKE", value) do
     dynamics and dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
   end
