@@ -1,6 +1,5 @@
 # FatEcto: Supercharge Your Ecto Queries with Ease! 🚀
 
-
 [![Build Status](https://github.com/tanweerdev/fat_ecto/actions/workflows/fat_ecto.yml/badge.svg)](https://github.com/tanweerdev/fat_ecto/actions)
 [![Coverage Status](https://coveralls.io/repos/github/tanweerdev/fat_ecto/badge.svg)](https://coveralls.io/github/tanweerdev/fat_ecto)
 [![hex.pm version](https://img.shields.io/hexpm/v/fat_ecto.svg)](https://hex.pm/packages/fat_ecto)
@@ -8,9 +7,13 @@
 [![hex.pm license](https://img.shields.io/hexpm/l/fat_ecto.svg)](https://github.com/tanweerdev/fat_ecto/blob/master/LICENSE)
 [![Last Updated](https://img.shields.io/github/last-commit/tanweerdev/fat_ecto.svg)](https://github.com/tanweerdev/fat_ecto/commits/master)
 
+---
+
 ## Description
 
 FatEcto is an Elixir package designed to make your life easier when working with Ecto. It simplifies query building, filtering, sorting, pagination, and data sanitization—so you can focus on what truly matters: building amazing applications. With FatEcto, writing complex queries becomes effortless, flexible, and powerful! 💪
+
+---
 
 ## Installation
 
@@ -26,6 +29,8 @@ end
 ```
 
 Then, run `mix deps.get` to install the package.
+
+---
 
 ## Features & Modules
 
@@ -59,14 +64,56 @@ defmodule FatEcto.FatHospitalFilter do
 end
 ```
 
-##### Example Usage
+---
 
+#### Example Usage
+
+Here are some practical examples of how to use `FatEcto.FatHospitalFilter` to dynamically build queries:
+
+##### Example 1: Basic Filtering by ID
 ```elixir
-opts = %{"name" => %{"$LIKE" => "%St. Mary%"}}
-query = HospitalFilter.build(FatEcto.FatHospital, opts)
+# Filter hospitals with ID equal to 1
+opts = %{"id" => %{"$EQUAL" => 1}}
+query = FatEcto.FatHospitalFilter.build(FatEcto.FatHospital, opts)
 
-result = from(h in FatEcto.FatHospital, where: like(fragment("(?)::TEXT", h.name), ^"%St. Mary%"))
+# Resulting query:
+# from(h in FatEcto.FatHospital, where: h.id == 1)
 ```
+
+##### Example 2: Case-Insensitive Name Search
+```elixir
+# Filter hospitals with names containing "St. Mary"
+opts = %{"name" => %{"$ILIKE" => "%St. Mary%"}}
+query = FatEcto.FatHospitalFilter.build(FatEcto.FatHospital, opts)
+
+# Resulting query:
+# from(h in FatEcto.FatHospital, where: ilike(fragment("(?)::TEXT", h.name), ^"%St. Mary%"))
+```
+
+##### Example 3: Combining Multiple Filters
+```elixir
+# Filter hospitals with ID not equal to 2 AND name containing "General"
+opts = %{
+  "id" => %{"$NOT_EQUAL" => 2},
+  "name" => %{"$ILIKE" => "%General%"}
+}
+query = FatEcto.FatHospitalFilter.build(FatEcto.FatHospital, opts)
+
+# Resulting query:
+# from(h in FatEcto.FatHospital, where: h.id != 2 and ilike(fragment("(?)::TEXT", h.name), ^"%General%"))
+```
+
+##### Example 4: Ignoring Empty or Invalid Values
+```elixir
+# Filter hospitals with a name, but ignore empty or invalid values
+opts = %{"name" => %{"$ILIKE" => "%%"}}  # Empty value is ignored
+query = FatEcto.FatHospitalFilter.build(FatEcto.FatHospital, opts)
+
+# Resulting query:
+# from(h in FatEcto.FatHospital)  # No filtering applied for name
+```
+
+---
 
 ### 🔄 FatEcto.FatQuery.Sortable – Effortless Sorting
 
@@ -93,6 +140,8 @@ defmodule Fat.SortQuery do
 end
 ```
 
+---
+
 ### 📌 FatEcto.FatPaginator – Paginate Like a Pro
 
 No more hassle with pagination! FatPaginator helps you paginate Ecto queries efficiently, keeping your APIs snappy and responsive.
@@ -105,6 +154,8 @@ defmodule Fat.MyPaginator do
   # Add custom pagination functions here
 end
 ```
+
+---
 
 ### 🔍 FatEcto.DataSanitizer – Clean & Structured Data
 
@@ -119,6 +170,8 @@ defmodule Fat.MySanitizer do
 end
 ```
 
+---
+
 ### ⚡ FatEcto Utilities – Small Helpers, Big Impact
 
 FatEcto also comes with a set of handy utility functions to streamline your workflow:
@@ -131,9 +184,13 @@ FatUtils.Map.has_all_keys?(%{a: 1, b: 2}, [:a, :b])
 FatUtils.Map.contain_only_allowed_keys?(%{a: 1, c: 3}, [:a, :b])
 ```
 
+---
+
 ## 🚀 Contributing
 
 We love contributions! If you’d like to improve FatEcto, submit an issue or pull request. Let’s build something amazing together! 🔥
+
+---
 
 ## 📜 License
 
