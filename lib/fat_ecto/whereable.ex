@@ -44,6 +44,12 @@ defmodule FatEcto.FatQuery.Whereable do
         def override_whereable(dynamics, _, _, _) do
           dynamics
         end
+
+        # Optional: Override after_whereable to perform custom processing on the final dynamics
+        def after_whereable(dynamics) do
+          IO.puts("Do something on final Dynamics")
+          dynamics
+        end
       end
   """
 
@@ -61,6 +67,14 @@ defmodule FatEcto.FatQuery.Whereable do
               operator :: String.t(),
               value :: any()
             ) :: Ecto.Query.t()
+
+  @doc """
+  Callback for performing custom processing on the final query.
+
+  This function is called at the end of the `build/2` function. The default behavior is to return the query,
+  but it can be overridden by the using module.
+  """
+  @callback after_whereable(query :: Ecto.Query.t()) :: Ecto.Query.t()
 
   defmacro __using__(options \\ []) do
     quote do
@@ -118,6 +132,7 @@ defmodule FatEcto.FatQuery.Whereable do
         combined_params
         |> Builder.build_query(build_options)
         |> apply_overrideable_filters(overrideable_params)
+        |> after_whereable()
       end
 
       def build(_where_params, _build_options) do
@@ -130,6 +145,13 @@ defmodule FatEcto.FatQuery.Whereable do
       This function can be overridden by the using module to implement custom filtering logic.
       """
       def override_whereable(dynamics, _field, _operator, _value), do: dynamics
+
+      @doc """
+      Default implementation of after_whereable/1.
+
+      This function can be overridden by the using module to perform custom processing on the final query.
+      """
+      def after_whereable(query), do: query
 
       # Applies custom filtering for overrideable fields using the fallback function.
       defp apply_overrideable_filters(dynamics, overrideable_params) do
@@ -148,6 +170,7 @@ defmodule FatEcto.FatQuery.Whereable do
       end
 
       defoverridable override_whereable: 4
+      defoverridable after_whereable: 1
     end
   end
 
