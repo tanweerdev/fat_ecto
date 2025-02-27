@@ -58,23 +58,23 @@ defmodule FatEcto.FatQuery.Whereable do
   @doc """
   Callback for handling custom filtering logic for overrideable fields.
 
-  This function acts as a fallback for overrideable fields. The default behavior is to return the query,
+  This function acts as a fallback for overrideable fields. The default behavior is to return the dynamics,
   but it can be overridden by the using module.
   """
   @callback override_whereable(
-              query :: Ecto.Query.t(),
+              dynamics :: %Ecto.Query.DynamicExpr{},
               field :: String.t() | atom(),
               operator :: String.t(),
               value :: any()
-            ) :: Ecto.Query.t()
+            ) :: %Ecto.Query.DynamicExpr{}
 
   @doc """
-  Callback for performing custom processing on the final query.
+  Callback for performing custom processing on the final dynamics.
 
-  This function is called at the end of the `build/2` function. The default behavior is to return the query,
+  This function is called at the end of the `build/2` function. The default behavior is to return the dynamics,
   but it can be overridden by the using module.
   """
-  @callback after_whereable(query :: Ecto.Query.t()) :: Ecto.Query.t()
+  @callback after_whereable(dynamics :: %Ecto.Query.DynamicExpr{}) :: %Ecto.Query.DynamicExpr{}
 
   defmacro __using__(options \\ []) do
     quote do
@@ -101,14 +101,14 @@ defmodule FatEcto.FatQuery.Whereable do
       end
 
       @doc """
-      Builds a query after filtering fields based on the provided parameters.
+      Builds dynamics after filtering fields based on the provided parameters.
 
       ### Parameters
         - `where_params`: A map of fields and their filtering operators (e.g., `%{"field" => %{"$EQUAL" => "value"}}`).
-        - `build_options`: Additional options for query building (passed to `Builder`).
+        - `build_options`: Additional options for dynamics building (passed to `Builder`).
 
       ### Returns
-        - The query with filtering applied.
+        - The dynamics with filtering applied.
       """
       @spec build(map() | nil, keyword()) :: %Ecto.Query.DynamicExpr{} | nil
       def build(where_params \\ nil, build_options \\ [])
@@ -136,7 +136,7 @@ defmodule FatEcto.FatQuery.Whereable do
       end
 
       def build(_where_params, _build_options) do
-        nil
+        after_whereable(nil)
       end
 
       @doc """
@@ -149,9 +149,9 @@ defmodule FatEcto.FatQuery.Whereable do
       @doc """
       Default implementation of after_whereable/1.
 
-      This function can be overridden by the using module to perform custom processing on the final query.
+      This function can be overridden by the using module to perform custom processing on the final dynamics.
       """
-      def after_whereable(query), do: query
+      def after_whereable(dynamics), do: dynamics
 
       # Applies custom filtering for overrideable fields using the fallback function.
       defp apply_overrideable_filters(dynamics, overrideable_params) do
