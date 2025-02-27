@@ -33,12 +33,12 @@ defmodule FatEcto.FatQuery.Whereable do
 
         import Ecto.Query
 
-        def override_whereable(dynamics, "name", "$ILIKE", value) do
-          dynamics and dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
+        def override_whereable(_dynamics, "name", "$ILIKE", value) do
+          dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
         end
 
-        def override_whereable(dynamics, "phone", "$ILIKE", value) do
-          dynamics and dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
+        def override_whereable(_dynamics, "phone", "$ILIKE", value) do
+          dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
         end
 
         def override_whereable(dynamics, _, _, _) do
