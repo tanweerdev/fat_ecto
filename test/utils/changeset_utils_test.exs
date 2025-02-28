@@ -1,7 +1,7 @@
 defmodule Utils.ChangesetTest do
   use FatEcto.ConnCase
   import FatEcto.Factory
-  alias FatUtils.Changeset, as: Change
+  alias FatEcto.Utils.Changeset, as: Change
 
   describe "validate_xor_fields/4" do
     test "returns errors when both XOR fields are present" do

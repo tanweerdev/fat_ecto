@@ -1,4 +1,4 @@
-defmodule FatEcto.FatQuery.FatNotDynamics do
+defmodule FatEcto.Dynamics.FatNotDynamics do
   @moduledoc """
   Builds a `where query` using dynamics and not condition.
 

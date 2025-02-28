@@ -1,4 +1,4 @@
-defmodule FatEcto.FatQuery.OperatorHelper do
+defmodule FatEcto.Dynamics.FatOperatorHelper do
   @moduledoc """
   Provides helper functions to apply dynamic query operators for Ecto queries.
 
@@ -43,14 +43,14 @@ defmodule FatEcto.FatQuery.OperatorHelper do
   ### Example
 
       # Applying a `$LIKE` operator
-      OperatorHelper.apply_operator("$LIKE", :name, "%John%", [])
+      FatOperatorHelper.apply_operator("$LIKE", :name, "%John%", [])
 
       # Applying a negated `$EQUAL` operator
-      OperatorHelper.apply_not_condition("$EQUAL", :age, 30, [])
+      FatOperatorHelper.apply_not_condition("$EQUAL", :age, 30, [])
   """
   alias FatEcto.FatHelper
-  alias FatEcto.FatQuery.FatDynamics
-  alias FatEcto.FatQuery.FatNotDynamics
+  alias FatEcto.Dynamics.FatDynamics
+  alias FatEcto.Dynamics.FatNotDynamics
 
   @spec allowed_operators() :: [String.t(), ...]
   def allowed_operators,

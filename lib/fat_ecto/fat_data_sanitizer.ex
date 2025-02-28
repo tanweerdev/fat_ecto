@@ -1,4 +1,4 @@
-defmodule FatEcto.DataSanitizer do
+defmodule FatEcto.FatDataSanitizer do
   @moduledoc """
   Provides functionality to sanitize records and convert data into views.
 

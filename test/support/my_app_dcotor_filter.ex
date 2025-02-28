@@ -1,5 +1,5 @@
 defmodule Fat.DoctorFilter do
-  use FatEcto.FatQuery.Whereable,
+  use FatEcto.Dynamics.FatBuildable,
     filterable_fields: %{
       "email" => [
         "$EQUAL",
@@ -25,7 +25,7 @@ defmodule Fat.DoctorFilter do
     }
 
   import Ecto.Query
-  @impl FatEcto.FatQuery.Whereable
+  @impl FatEcto.Dynamics.FatBuildable
 
   def override_whereable(_dynamics, "phone", "$ILIKE", value) do
     dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))

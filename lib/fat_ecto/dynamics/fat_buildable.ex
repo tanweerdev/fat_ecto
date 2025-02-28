@@ -1,4 +1,4 @@
-defmodule FatEcto.FatQuery.Whereable do
+defmodule FatEcto.Dynamics.FatBuildable do
   @moduledoc """
   Builds queries after filtering fields based on user-provided filterable and overrideable fields.
 
@@ -21,7 +21,7 @@ defmodule FatEcto.FatQuery.Whereable do
 
   ## Example Usage
       defmodule FatEcto.FatHospitalFilter do
-        use FatEcto.FatQuery.Whereable,
+        use FatEcto.Dynamics.FatBuildable,
           filterable_fields: %{
             "id" => ["$EQUAL", "$NOT_EQUAL"]
           },
@@ -53,7 +53,7 @@ defmodule FatEcto.FatQuery.Whereable do
       end
   """
 
-  alias FatEcto.FatQuery.Builder
+  alias FatEcto.Dynamics.FatDynamicsBuilder
 
   @doc """
   Callback for handling custom filtering logic for overrideable fields.
@@ -78,15 +78,15 @@ defmodule FatEcto.FatQuery.Whereable do
 
   defmacro __using__(options \\ []) do
     quote do
-      @behaviour FatEcto.FatQuery.Whereable
+      @behaviour FatEcto.Dynamics.FatBuildable
       @options unquote(options)
       @filterable_fields @options[:filterable_fields] || %{}
       @overrideable_fields @options[:overrideable_fields] || []
       @ignoreable_fields_values @options[:ignoreable_fields_values] || %{}
-      alias FatEcto.FatQuery.WhereableHelper
+      alias FatEcto.Dynamics.FatBuildableHelper
       # def using_options, do: @options
       # # Defer the repo check to runtime
-      # @after_compile FatEcto.FatQuery.Whereable
+      # @after_compile FatEcto.Dynamics.FatBuildable
 
       # Ensure at least one of `filterable_fields` or `overrideable_fields` is provided.
       if @filterable_fields == %{} and @overrideable_fields == [] do
@@ -94,7 +94,7 @@ defmodule FatEcto.FatQuery.Whereable do
           description: """
           You must provide at least one of `filterable_fields` or `overrideable_fields`.
           Example:
-            use FatEcto.FatQuery.Whereable,
+            use FatEcto.Dynamics.FatBuildable,
               filterable_fields: %{"id" => ["$EQUAL", "$NOT_EQUAL"]},
               overrideable_fields: ["name", "phone"]
           """
@@ -115,22 +115,22 @@ defmodule FatEcto.FatQuery.Whereable do
 
       def build(where_params, build_options) when is_map(where_params) do
         filtered_where_params =
-          WhereableHelper.remove_ignoreable_fields(where_params, @ignoreable_fields_values)
+          FatBuildableHelper.remove_ignoreable_fields(where_params, @ignoreable_fields_values)
 
         # Filter filterable fields
         combined_params =
-          WhereableHelper.filter_filterable_fields(filtered_where_params, @filterable_fields)
+          FatBuildableHelper.filter_filterable_fields(filtered_where_params, @filterable_fields)
 
         # Filter overrideable fields
         overrideable_params =
-          WhereableHelper.filter_overrideable_fields(
+          FatBuildableHelper.filter_overrideable_fields(
             where_params,
             @overrideable_fields,
             @ignoreable_fields_values
           )
 
         combined_params
-        |> Builder.build_query(build_options)
+        |> FatDynamicsBuilder.build(build_options)
         |> apply_overrideable_filters(overrideable_params)
         |> after_whereable()
       end

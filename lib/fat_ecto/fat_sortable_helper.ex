@@ -1,4 +1,4 @@
-defmodule FatEcto.FatQuery.SortableHelper do
+defmodule FatEcto.FatSortableHelper do
   @moduledoc """
   Provides helper functions for sorting query parameters.
   """

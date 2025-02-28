@@ -1,4 +1,4 @@
-defmodule FatUtils.Changeset do
+defmodule FatEcto.Utils.Changeset do
   @moduledoc """
   Provides utility functions for validating Ecto changesets.
 
@@ -20,21 +20,21 @@ defmodule FatUtils.Changeset do
   ## Examples
       iex> import Ecto.Changeset
       iex> changeset = cast(%FatEcto.FatUser{}, %{field1: "value1", field2: "value2"}, [:field1, :field2])
-      iex> FatUtils.Changeset.validate_xor_fields(changeset, %FatEcto.FatUser{}, [:field1, :field2])
+      iex> FatEcto.Utils.Changeset.validate_xor_fields(changeset, %FatEcto.FatUser{}, [:field1, :field2])
       #Ecto.Changeset<...>
   """
   @spec validate_xor_fields(Ecto.Changeset.t(), map(), list(atom()), keyword()) :: Ecto.Changeset.t()
   def validate_xor_fields(changeset, record, xor_keys, _options \\ []) do
     changeset =
-      if FatUtils.Map.has_all_keys?(changeset.changes, xor_keys) do
+      if FatEcto.Utils.Map.has_all_keys?(changeset.changes, xor_keys) do
         error_msg = Enum.join(xor_keys, " XOR ")
         Enum.reduce(xor_keys, changeset, &add_error(&2, &1, error_msg))
       else
         changeset
       end
 
-    if !FatUtils.Map.has_any_of_keys?(changeset.changes, xor_keys) &&
-         FatUtils.Map.has_all_val_equal_to?(record, xor_keys, nil) do
+    if !FatEcto.Utils.Map.has_any_of_keys?(changeset.changes, xor_keys) &&
+         FatEcto.Utils.Map.has_all_val_equal_to?(record, xor_keys, nil) do
       require_msg = Enum.join(xor_keys, " XOR ") <> " fields cannot be empty at the same time"
       Enum.reduce(xor_keys, changeset, &validate_required(&2, [&1], message: require_msg))
     else
@@ -54,7 +54,7 @@ defmodule FatUtils.Changeset do
   ## Examples
       iex> import Ecto.Changeset
       iex> changeset = cast(%FatEcto.FatUser{}, %{field1: "value1"}, [:field1, :field2])
-      iex> FatUtils.Changeset.validate_only_one_field(changeset, %FatEcto.FatUser{}, [:field1, :field2])
+      iex> FatEcto.Utils.Changeset.validate_only_one_field(changeset, %FatEcto.FatUser{}, [:field1, :field2])
       #Ecto.Changeset<...>
   """
   @spec validate_only_one_field(Ecto.Changeset.t(), map(), list(atom()), keyword()) :: Ecto.Changeset.t()
@@ -81,12 +81,12 @@ defmodule FatUtils.Changeset do
   ## Examples
       iex> import Ecto.Changeset
       iex> changeset = cast(%FatEcto.FatUser{}, %{}, [:field1, :field2])
-      iex> FatUtils.Changeset.validate_at_least_one_field(changeset, %FatEcto.FatUser{}, [:field1, :field2])
+      iex> FatEcto.Utils.Changeset.validate_at_least_one_field(changeset, %FatEcto.FatUser{}, [:field1, :field2])
       #Ecto.Changeset<...>
   """
   @spec validate_at_least_one_field(Ecto.Changeset.t(), map(), list(atom()), keyword()) :: Ecto.Changeset.t()
   def validate_at_least_one_field(changeset, _record, or_keys, _options \\ []) do
-    if FatUtils.Map.has_any_of_keys?(changeset.changes, or_keys) do
+    if FatEcto.Utils.Map.has_any_of_keys?(changeset.changes, or_keys) do
       changeset
     else
       error_msg = Enum.join(or_keys, " OR ")
@@ -105,7 +105,7 @@ defmodule FatUtils.Changeset do
   ## Examples
       iex> import Ecto.Changeset
       iex> changeset = cast(%FatEcto.FatUser{}, %{field1: "value1"}, [:field1, :field2])
-      iex> FatUtils.Changeset.require_field_if_present(changeset, if_change_key: :field1, require_key: :field2)
+      iex> FatEcto.Utils.Changeset.require_field_if_present(changeset, if_change_key: :field1, require_key: :field2)
       #Ecto.Changeset<...>
   """
   @spec require_field_if_present(Ecto.Changeset.t(), keyword()) :: Ecto.Changeset.t()
@@ -129,7 +129,7 @@ defmodule FatUtils.Changeset do
   ## Examples
       iex> import Ecto.Changeset
       iex> changeset = cast(%FatEcto.FatUser{}, %{start_time: ~T[10:00:00], end_time: ~T[09:00:00]}, [:start_time, :end_time])
-      iex> FatUtils.Changeset.validate_start_before_end(changeset, :start_time, :end_time, compare_type: :time)
+      iex> FatEcto.Utils.Changeset.validate_start_before_end(changeset, :start_time, :end_time, compare_type: :time)
       #Ecto.Changeset<...>
   """
   @spec validate_start_before_end(Ecto.Changeset.t(), atom(), atom(), keyword()) :: Ecto.Changeset.t()
@@ -159,7 +159,7 @@ defmodule FatUtils.Changeset do
   ## Examples
       iex> import Ecto.Changeset
       iex> changeset = cast(%FatEcto.FatUser{}, %{start_time: ~T[10:00:00], end_time: ~T[10:00:00]}, [:start_time, :end_time])
-      iex> FatUtils.Changeset.validate_start_before_or_equal_end(changeset, :start_time, :end_time, compare_type: :time)
+      iex> FatEcto.Utils.Changeset.validate_start_before_or_equal_end(changeset, :start_time, :end_time, compare_type: :time)
       #Ecto.Changeset<...>
   """
   @spec validate_start_before_or_equal_end(Ecto.Changeset.t(), atom(), atom(), keyword()) ::
@@ -189,7 +189,7 @@ defmodule FatUtils.Changeset do
   ## Examples
       iex> import Ecto.Changeset
       iex> changeset = cast(%FatEcto.FatUser{}, %{}, [])
-      iex> FatUtils.Changeset.add_custom_error(changeset, :field, "custom error")
+      iex> FatEcto.Utils.Changeset.add_custom_error(changeset, :field, "custom error")
       #Ecto.Changeset<...>
   """
   @spec add_custom_error(Ecto.Changeset.t(), atom(), String.t()) :: Ecto.Changeset.t()

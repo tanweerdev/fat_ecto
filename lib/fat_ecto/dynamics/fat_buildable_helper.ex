@@ -1,6 +1,6 @@
-defmodule FatEcto.FatQuery.WhereableHelper do
+defmodule FatEcto.Dynamics.FatBuildableHelper do
   @moduledoc """
-  Provides helper functions for filtering and processing query parameters in `FatEcto.FatQuery.Whereable`.
+  Provides helper functions for filtering and processing query parameters in `FatEcto.Dynamics.FatBuildable`.
   """
 
   @doc """

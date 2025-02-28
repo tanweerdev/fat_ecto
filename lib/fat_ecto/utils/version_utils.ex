@@ -1,4 +1,4 @@
-defmodule FatUtils.Version do
+defmodule FatEcto.Utils.Version do
   @moduledoc """
   Provides utilities for retrieving and parsing Git version information.
 
@@ -11,7 +11,7 @@ defmodule FatUtils.Version do
 
   ## Example Usage
 
-      iex> FatUtils.Version.get_version_info()
+      iex> FatEcto.Utils.Version.get_version_info()
       %{
         commit_hash: "a1b2c3d",
         commit_message: "Add new feature",
@@ -35,7 +35,7 @@ defmodule FatUtils.Version do
 
   ## Example
 
-      iex> FatUtils.Version.get_version_info()
+      iex> FatEcto.Utils.Version.get_version_info()
       %{
         commit_hash: "a1b2c3d",
         commit_message: "Add new feature",
@@ -84,7 +84,7 @@ defmodule FatUtils.Version do
 
   ## Examples
 
-      iex> FatUtils.Version.execute_git_command("show", ["-s", "--pretty=format:%h"])
+      iex> FatEcto.Utils.Version.execute_git_command("show", ["-s", "--pretty=format:%h"])
       {:ok, "a1b2c3d"}
   """
   @spec execute_git_command(String.t(), list(String.t())) :: {:ok, String.t()} | :error

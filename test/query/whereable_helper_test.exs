@@ -1,6 +1,6 @@
-defmodule FatEcto.FatQuery.WhereableHelperTest do
+defmodule FatEcto.Dynamics.FatBuildableHelperTest do
   use FatEcto.ConnCase
-  alias FatEcto.FatQuery.WhereableHelper
+  alias FatEcto.Dynamics.FatBuildableHelper
 
   describe "remove_ignoreable_fields/2" do
     test "removes fields with ignoreable values" do
@@ -16,7 +16,7 @@ defmodule FatEcto.FatQuery.WhereableHelperTest do
         "phone" => [nil]
       }
 
-      result = WhereableHelper.remove_ignoreable_fields(where_params, ignoreable_fields_values)
+      result = FatBuildableHelper.remove_ignoreable_fields(where_params, ignoreable_fields_values)
 
       assert result == %{
                "name" => "John",
@@ -35,7 +35,7 @@ defmodule FatEcto.FatQuery.WhereableHelperTest do
         "email" => ["", "%%", nil]
       }
 
-      result = WhereableHelper.remove_ignoreable_fields(where_params, ignoreable_fields_values)
+      result = FatBuildableHelper.remove_ignoreable_fields(where_params, ignoreable_fields_values)
 
       assert result == %{
                "name" => "John",
@@ -58,7 +58,7 @@ defmodule FatEcto.FatQuery.WhereableHelperTest do
         "age" => "*"
       }
 
-      result = WhereableHelper.filter_filterable_fields(where_params, filterable_fields)
+      result = FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields)
 
       assert result == %{
                "name" => %{"$ILIKE" => "%John%"},
@@ -77,7 +77,7 @@ defmodule FatEcto.FatQuery.WhereableHelperTest do
         "age" => "*"
       }
 
-      result = WhereableHelper.filter_filterable_fields(where_params, filterable_fields)
+      result = FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields)
 
       assert result == %{
                "name" => %{"$EQUAL" => "John"},
@@ -101,7 +101,7 @@ defmodule FatEcto.FatQuery.WhereableHelperTest do
       }
 
       result =
-        WhereableHelper.filter_overrideable_fields(
+        FatBuildableHelper.filter_overrideable_fields(
           where_params,
           overrideable_fields,
           ignoreable_fields_values
@@ -122,7 +122,7 @@ defmodule FatEcto.FatQuery.WhereableHelperTest do
       ignoreable_fields_values = %{}
 
       result =
-        WhereableHelper.filter_overrideable_fields(
+        FatBuildableHelper.filter_overrideable_fields(
           where_params,
           overrideable_fields,
           ignoreable_fields_values

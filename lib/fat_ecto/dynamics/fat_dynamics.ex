@@ -1,4 +1,4 @@
-defmodule FatEcto.FatQuery.FatDynamics do
+defmodule FatEcto.Dynamics.FatDynamics do
   @moduledoc """
   Provides functions to build dynamic `where` conditions for Ecto queries.
 

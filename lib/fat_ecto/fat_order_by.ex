@@ -1,4 +1,4 @@
-defmodule FatEcto.FatQuery.FatOrderBy do
+defmodule FatEcto.FatOrderBy do
   @moduledoc """
   Builds query with `asc` or `desc` order.
 
@@ -28,7 +28,7 @@ defmodule FatEcto.FatQuery.FatOrderBy do
 
   ### Examples
       iex> query_opts = %{"$ORder" => %{"id" => "$ASC"}}
-      iex> FatEcto.FatQuery.FatOrderBy.build_order_by(FatEcto.FatHospital, query_opts["$ORder"], [], [])
+      iex> FatEcto.FatOrderBy.build_order_by(FatEcto.FatHospital, query_opts["$ORder"], [], [])
       #Ecto.Query<from f0 in FatEcto.FatHospital, order_by: [asc: f0.id]>
   """
   def build_order_by(queryable, order_by_params, _build_options, opts) do

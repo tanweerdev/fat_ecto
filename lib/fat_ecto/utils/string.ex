@@ -1,4 +1,4 @@
-defmodule FatUtils.String do
+defmodule FatEcto.Utils.String do
   @moduledoc """
   Provides utility functions for generating random strings.
 
@@ -16,10 +16,10 @@ defmodule FatUtils.String do
   - `length`: The length of the random string (default: 8).
 
   ## Examples
-      iex> FatUtils.String.random()
+      iex> FatEcto.Utils.String.random()
       "aB3dEfG1"
 
-      iex> FatUtils.String.random(12)
+      iex> FatEcto.Utils.String.random(12)
       "xYz1aB2cD3eF"
   """
   @spec random(non_neg_integer()) :: binary()
@@ -38,10 +38,10 @@ defmodule FatUtils.String do
   - `char_set`: A list of characters to use for generating the string (default: A-Z).
 
   ## Examples
-      iex> FatUtils.String.random_of(10)
+      iex> FatEcto.Utils.String.random_of(10)
       "ABCDEFGHIJ"
 
-      iex> FatUtils.String.random_of(5, ["a", "b", "c"])
+      iex> FatEcto.Utils.String.random_of(5, ["a", "b", "c"])
       "abcba"
   """
   @spec random_of(non_neg_integer(), list(String.t())) :: binary()

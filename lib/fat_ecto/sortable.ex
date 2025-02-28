@@ -1,4 +1,4 @@
-defmodule FatEcto.FatQuery.Sortable do
+defmodule FatEcto.FatSortable do
   @moduledoc """
   Provides functionality to sort Ecto queries based on user-defined rules.
 
@@ -10,7 +10,7 @@ defmodule FatEcto.FatQuery.Sortable do
       defmodule Fat.SortQuery do
         <!-- needed if you are writing queries in override_sortable -->
         import Ecto.Query
-        use FatEcto.FatQuery.Sortable,
+        use FatEcto.FatSortable,
           sortable_fields: %{"id" => "$ASC", "name" => ["$ASC", "$DESC"]},
           overrideable_fields: ["custom_field"]
 
@@ -34,7 +34,7 @@ defmodule FatEcto.FatQuery.Sortable do
   This will sort the query by `id` in ascending order, `name` in descending order, and apply custom sorting for `custom_field`.
   """
 
-  alias FatEcto.FatQuery.FatOrderBy
+  alias FatEcto.FatOrderBy
 
   @doc """
   Callback for handling custom sorting logic.
@@ -50,18 +50,18 @@ defmodule FatEcto.FatQuery.Sortable do
 
   defmacro __using__(options \\ []) do
     quote do
-      @behaviour FatEcto.FatQuery.Sortable
+      @behaviour FatEcto.FatSortable
       @options unquote(options)
       @sortable_fields @options[:sortable_fields] || %{}
       @overrideable_fields @options[:overrideable_fields] || []
-      alias FatEcto.FatQuery.SortableHelper
+      alias FatEcto.FatSortableHelper
 
       # Raise a compile-time error if both sortable_fields and overrideable_fields are empty.
       if @sortable_fields == %{} and @overrideable_fields == [] do
         raise ArgumentError, """
         At least one of `sortable_fields` or `overrideable_fields` must be provided.
         Example:
-          use FatEcto.FatQuery.Sortable,
+          use FatEcto.FatSortable,
             sortable_fields: %{"id" => "$ASC"},
             overrideable_fields: ["custom_field"]
         """
@@ -96,7 +96,7 @@ defmodule FatEcto.FatQuery.Sortable do
       @spec build(Ecto.Query.t(), map(), keyword()) :: Ecto.Query.t()
       def build(queryable, sort_params, options \\ []) do
         # Step 1: Filter sortable_fields and prepare params for FatOrderBy
-        order_by_params = SortableHelper.filter_sortable_fields(sort_params, @sortable_fields)
+        order_by_params = FatSortableHelper.filter_sortable_fields(sort_params, @sortable_fields)
 
         # Step 2: Apply sorting using FatOrderBy
         queryable = FatOrderBy.build_order_by(queryable, order_by_params, options)

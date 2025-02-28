@@ -1,6 +1,6 @@
 defmodule Utils.DateTimeTest do
   use FatEcto.ConnCase
-  import FatUtils.DateTime
+  import FatEcto.Utils.DateTime
 
   test "parse! integer datetime" do
     assert inspect(parse!(1_464_096_368)) == "~U[2016-05-24 13:26:08Z]"

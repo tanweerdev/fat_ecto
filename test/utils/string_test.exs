@@ -1,6 +1,6 @@
 defmodule Utils.StringTest do
   use FatEcto.ConnCase
-  import FatUtils.String
+  import FatEcto.Utils.String
 
   test "Generate random strings of different lengths" do
     assert String.length(random(9)) == 9

@@ -34,7 +34,7 @@ Then, run `mix deps.get` to install the package.
 
 ## Features & Modules
 
-### 🛠 FatEcto.FatQuery.Whereable – Dynamic Filtering Made Easy
+### 🛠 FatEcto.Dynamics.FatBuildable – Dynamic Filtering Made Easy
 
 Tired of writing repetitive query filters? The `Whereable` module lets you dynamically filter records using flexible conditions passed from your web or mobile clients—with little to no effort! And the best part? You stay in control. 🚀
 
@@ -42,7 +42,7 @@ Tired of writing repetitive query filters? The `Whereable` module lets you dynam
 
 ```elixir
 defmodule FatEcto.FatHospitalFilter do
-  use FatEcto.FatQuery.Whereable,
+  use FatEcto.Dynamics.FatBuildable,
     filterable_fields: %{
       "id" => ["$EQUAL", "$NOT_EQUAL"]
     },
@@ -136,7 +136,7 @@ query = where(FatEcto.FatHospital, ^dynamics)
 
 ---
 
-### 🔄 FatEcto.FatQuery.Sortable – Effortless Sorting
+### 🔄 FatEcto.FatSortable – Effortless Sorting
 
 Sorting should be simple—and with `Sortable`, it is! Your frontend can send sorting parameters, and FatEcto will seamlessly generate the right sorting queries, allowing you to build powerful, customizable sorting logic without breaking a sweat. 😎
 
@@ -145,7 +145,7 @@ Sorting should be simple—and with `Sortable`, it is! Your frontend can send so
 ```elixir
 defmodule Fat.SortQuery do
   import Ecto.Query
-  use FatEcto.FatQuery.Sortable,
+  use FatEcto.FatSortable,
     sortable_fields: %{"id" => "$ASC", "name" => ["$ASC", "$DESC"]},
     overrideable_fields: ["custom_field"]
 
@@ -178,7 +178,7 @@ end
 
 ---
 
-### 🔍 FatEcto.DataSanitizer – Clean & Structured Data
+### 🔍 FatEcto.FatDataSanitizer – Clean & Structured Data
 
 Messy data? Not anymore! `DataSanitizer` helps you sanitize records and transform them into structured, clean views effortlessly. Keep your data tidy and consistent. 🎯
 
@@ -186,7 +186,7 @@ Messy data? Not anymore! `DataSanitizer` helps you sanitize records and transfor
 
 ```elixir
 defmodule Fat.MySanitizer do
-  use FatEcto.DataSanitizer
+  use FatEcto.FatDataSanitizer
   # Define your custom sanitization functions here
 end
 ```
@@ -199,10 +199,10 @@ FatEcto also comes with a set of handy utility functions to streamline your work
 
 ```elixir
 # Check if a map contains all required keys
-FatUtils.Map.has_all_keys?(%{a: 1, b: 2}, [:a, :b])
+FatEcto.Utils.Map.has_all_keys?(%{a: 1, b: 2}, [:a, :b])
 
 # Ensure a map contains only allowed keys
-FatUtils.Map.contain_only_allowed_keys?(%{a: 1, c: 3}, [:a, :b])
+FatEcto.Utils.Map.contain_only_allowed_keys?(%{a: 1, c: 3}, [:a, :b])
 ```
 
 ---

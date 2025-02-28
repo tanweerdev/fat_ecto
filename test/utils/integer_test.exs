@@ -1,6 +1,6 @@
 defmodule Utils.IntegerTest do
   use FatEcto.ConnCase
-  import FatUtils.Integer
+  import FatEcto.Utils.Integer
 
   test "parse integer/integer string with returning tuple" do
     assert parse(12) == {:ok, 12}

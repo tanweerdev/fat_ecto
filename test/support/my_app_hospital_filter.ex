@@ -1,5 +1,5 @@
 defmodule FatEcto.FatHospitalFilter do
-  use FatEcto.FatQuery.Whereable,
+  use FatEcto.Dynamics.FatBuildable,
     filterable_fields: %{},
     overrideable_fields: ["name", "phone"],
     ignoreable_fields_values: %{

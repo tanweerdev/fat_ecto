@@ -1,11 +1,11 @@
-defmodule FatEcto.FatQuery.Builder do
+defmodule FatEcto.Dynamics.FatDynamicsBuilder do
   @moduledoc """
   This module builds Ecto dynamic queries from a JSON-like structure.
-  It uses the `FatEcto.FatQuery.OperatorHelper` module to apply operators and construct the query.
+  It uses the `FatEcto.Dynamics.FatOperatorHelper` module to apply operators and construct the query.
   """
 
   import Ecto.Query
-  alias FatEcto.FatQuery.OperatorHelper
+  alias FatEcto.Dynamics.FatOperatorHelper
 
   @doc """
   Builds an Ecto dynamic query from a JSON-like structure.
@@ -13,7 +13,7 @@ defmodule FatEcto.FatQuery.Builder do
   ## Examples
 
       iex> import Ecto.Query
-      ...> query = FatEcto.FatQuery.Builder.build_query(%{
+      ...> query = FatEcto.Dynamics.FatDynamicsBuilder.build(%{
       ...>   "$OR" => [
       ...>     %{"name" => "John"},
       ...>     %{"phone" => nil},
@@ -23,8 +23,8 @@ defmodule FatEcto.FatQuery.Builder do
       iex> inspect(query)
       "dynamic([q], q.age > ^30 or (is_nil(q.phone) or q.name == ^\\\"John\\\"))"
   """
-  @spec build_query(map(), keyword()) :: %Ecto.Query.DynamicExpr{}
-  def build_query(query_map, opts \\ []) when is_map(query_map) do
+  @spec build(map(), keyword()) :: %Ecto.Query.DynamicExpr{}
+  def build(query_map, opts \\ []) when is_map(query_map) do
     Enum.reduce(query_map, nil, fn {key, value}, dynamic_query ->
       case key do
         "$OR" ->
@@ -44,8 +44,8 @@ defmodule FatEcto.FatQuery.Builder do
     or_dynamic =
       Enum.reduce(conditions, nil, fn condition, acc ->
         case acc do
-          nil -> build_query(condition, opts)
-          _ -> dynamic([q], ^build_query(condition, opts) or ^acc)
+          nil -> build(condition, opts)
+          _ -> dynamic([q], ^build(condition, opts) or ^acc)
         end
       end)
 
@@ -61,8 +61,8 @@ defmodule FatEcto.FatQuery.Builder do
     and_dynamic =
       Enum.reduce(conditions, nil, fn condition, acc ->
         case acc do
-          nil -> build_query(condition, opts)
-          _ -> dynamic([q], ^build_query(condition, opts) and ^acc)
+          nil -> build(condition, opts)
+          _ -> dynamic([q], ^build(condition, opts) and ^acc)
         end
       end)
 
@@ -77,7 +77,7 @@ defmodule FatEcto.FatQuery.Builder do
   defp build_field_query(field, conditions, dynamic_query, opts) when is_map(conditions) do
     field_dynamic =
       Enum.reduce(conditions, nil, fn {operator, value}, acc ->
-        case OperatorHelper.apply_operator(operator, field, value, opts) do
+        case FatOperatorHelper.apply_operator(operator, field, value, opts) do
           nil ->
             acc
 
@@ -100,8 +100,8 @@ defmodule FatEcto.FatQuery.Builder do
   defp build_field_query(field, value, dynamic_query, opts) do
     field_dynamic =
       case value do
-        nil -> OperatorHelper.apply_nil_operator("$NULL", field, opts)
-        _ -> OperatorHelper.apply_operator("$EQUAL", field, value, opts)
+        nil -> FatOperatorHelper.apply_nil_operator("$NULL", field, opts)
+        _ -> FatOperatorHelper.apply_operator("$EQUAL", field, value, opts)
       end
 
     case {dynamic_query, field_dynamic} do

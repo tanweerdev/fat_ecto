@@ -1,4 +1,4 @@
-defmodule FatUtils.Map do
+defmodule FatEcto.Utils.Map do
   @moduledoc """
   Provides utility functions for working with maps and structs.
 
@@ -13,9 +13,9 @@ defmodule FatUtils.Map do
   - `keys`: A list of keys to check for.
 
   ## Examples
-      iex> FatUtils.Map.has_all_keys?(%{a: 1, b: 2}, [:a, :b])
+      iex> FatEcto.Utils.Map.has_all_keys?(%{a: 1, b: 2}, [:a, :b])
       true
-      iex> FatUtils.Map.has_all_keys?(%{a: 1}, [:a, :b])
+      iex> FatEcto.Utils.Map.has_all_keys?(%{a: 1}, [:a, :b])
       false
   """
   @spec has_all_keys?(map(), list(any())) :: boolean()
@@ -31,9 +31,9 @@ defmodule FatUtils.Map do
   - `keys`: A list of allowed keys.
 
   ## Examples
-      iex> FatUtils.Map.has_all_keys_exclusive?(%{a: 1, b: 2}, [:a, :b])
+      iex> FatEcto.Utils.Map.has_all_keys_exclusive?(%{a: 1, b: 2}, [:a, :b])
       true
-      iex> FatUtils.Map.has_all_keys_exclusive?(%{a: 1, c: 3}, [:a, :b])
+      iex> FatEcto.Utils.Map.has_all_keys_exclusive?(%{a: 1, c: 3}, [:a, :b])
       false
   """
   @spec has_all_keys_exclusive?(map(), list(any())) :: boolean()
@@ -49,9 +49,9 @@ defmodule FatUtils.Map do
   - `keys`: A list of allowed keys.
 
   ## Examples
-      iex> FatUtils.Map.contain_only_allowed_keys?(%{a: 1, b: 2}, [:a, :b])
+      iex> FatEcto.Utils.Map.contain_only_allowed_keys?(%{a: 1, b: 2}, [:a, :b])
       true
-      iex> FatUtils.Map.contain_only_allowed_keys?(%{a: 1, c: 3}, [:a, :b])
+      iex> FatEcto.Utils.Map.contain_only_allowed_keys?(%{a: 1, c: 3}, [:a, :b])
       false
   """
   @spec contain_only_allowed_keys?(map(), list(any())) :: boolean()
@@ -68,9 +68,9 @@ defmodule FatUtils.Map do
   - `equal_to`: The value to compare against.
 
   ## Examples
-      iex> FatUtils.Map.has_all_val_equal_to?(%{a: 1, b: 1}, [:a, :b], 1)
+      iex> FatEcto.Utils.Map.has_all_val_equal_to?(%{a: 1, b: 1}, [:a, :b], 1)
       true
-      iex> FatUtils.Map.has_all_val_equal_to?(%{a: 1, b: 2}, [:a, :b], 1)
+      iex> FatEcto.Utils.Map.has_all_val_equal_to?(%{a: 1, b: 2}, [:a, :b], 1)
       false
   """
   @spec has_all_val_equal_to?(map(), list(any()), any()) :: boolean()
@@ -86,9 +86,9 @@ defmodule FatUtils.Map do
   - `keys`: A list of keys to check for.
 
   ## Examples
-      iex> FatUtils.Map.has_any_of_keys?(%{a: 1}, [:a, :b])
+      iex> FatEcto.Utils.Map.has_any_of_keys?(%{a: 1}, [:a, :b])
       true
-      iex> FatUtils.Map.has_any_of_keys?(%{c: 3}, [:a, :b])
+      iex> FatEcto.Utils.Map.has_any_of_keys?(%{c: 3}, [:a, :b])
       false
   """
   @spec has_any_of_keys?(map(), list(any())) :: boolean()
@@ -104,7 +104,7 @@ defmodule FatUtils.Map do
   - `keys`: A list of keys to count.
 
   ## Examples
-      iex> FatUtils.Map.get_keys_count(%{a: 1, b: 2}, [:a, :b, :c])
+      iex> FatEcto.Utils.Map.get_keys_count(%{a: 1, b: 2}, [:a, :b, :c])
       2
   """
   @spec get_keys_count(map(), list(any())) :: non_neg_integer()
@@ -120,7 +120,7 @@ defmodule FatUtils.Map do
   - `right`: The second map.
 
   ## Examples
-      iex> FatUtils.Map.deep_merge(%{a: %{b: 1}}, %{a: %{c: 2}})
+      iex> FatEcto.Utils.Map.deep_merge(%{a: %{b: 1}}, %{a: %{c: 2}})
       %{a: %{b: 1, c: 2}}
   """
   @spec deep_merge(map(), map()) :: map()

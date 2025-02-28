@@ -1,4 +1,4 @@
-defmodule FatUtils.Table do
+defmodule FatEcto.Utils.Table do
   @moduledoc """
   Provides utility functions for working with database tables.
 
@@ -14,10 +14,10 @@ defmodule FatUtils.Table do
     - `id`: The name of the ID column as a string or atom. Defaults to `"id"`.
 
   ## Examples
-      iex> FatUtils.Table.reset_id_seq_query("users")
+      iex> FatEcto.Utils.Table.reset_id_seq_query("users")
       "SELECT setval('users_id_seq', (SELECT MAX(id) from \"users\"));"
 
-      iex> FatUtils.Table.reset_id_seq_query("posts", "post_id")
+      iex> FatEcto.Utils.Table.reset_id_seq_query("posts", "post_id")
       "SELECT setval('posts_post_id_seq', (SELECT MAX(post_id) from \"posts\"));"
 
   ## Notes

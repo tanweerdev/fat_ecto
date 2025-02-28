@@ -1,12 +1,12 @@
-defmodule FatEcto.FatQuery.BuilderTest do
+defmodule FatEcto.Dynamics.FatDynamicsBuilderTest do
   use FatEcto.ConnCase
   import Ecto.Query
-  alias FatEcto.FatQuery.Builder
+  alias FatEcto.Dynamics.FatDynamicsBuilder
 
-  describe "build_query/1" do
+  describe "build/1" do
     test "handles simple field comparisons" do
       query =
-        Builder.build_query(%{
+        FatDynamicsBuilder.build(%{
           "name" => %{"$ILIKE" => "%John%"},
           "age" => %{"$GT" => 18, "$LT" => 30}
         })
@@ -19,7 +19,7 @@ defmodule FatEcto.FatQuery.BuilderTest do
 
     test "handles direct field comparisons" do
       query =
-        Builder.build_query(%{
+        FatDynamicsBuilder.build(%{
           "name" => "John",
           "age" => 25
         })
@@ -31,7 +31,7 @@ defmodule FatEcto.FatQuery.BuilderTest do
 
     test "handles nil values" do
       query =
-        Builder.build_query(%{
+        FatDynamicsBuilder.build(%{
           "name" => nil,
           "age" => %{"$GT" => 18}
         })
@@ -43,7 +43,7 @@ defmodule FatEcto.FatQuery.BuilderTest do
 
     test "handles nested $OR conditions" do
       query =
-        Builder.build_query(%{
+        FatDynamicsBuilder.build(%{
           "$OR" => [
             %{"name" => %{"$ILIKE" => "%John%"}},
             %{"age" => %{"$GT" => 30}}
@@ -57,7 +57,7 @@ defmodule FatEcto.FatQuery.BuilderTest do
 
     test "handles nested $AND conditions" do
       query =
-        Builder.build_query(%{
+        FatDynamicsBuilder.build(%{
           "$AND" => [
             %{"name" => %{"$ILIKE" => "%John%"}},
             %{"age" => %{"$GT" => 18}}
@@ -71,7 +71,7 @@ defmodule FatEcto.FatQuery.BuilderTest do
 
     test "handles deeply nested conditions" do
       query =
-        Builder.build_query(%{
+        FatDynamicsBuilder.build(%{
           "$OR" => [
             %{
               "name" => %{"$ILIKE" => "%John%"},
@@ -102,7 +102,7 @@ defmodule FatEcto.FatQuery.BuilderTest do
 
     test "handles boolean fields" do
       query =
-        Builder.build_query(%{
+        FatDynamicsBuilder.build(%{
           "is_active" => true
         })
 
@@ -113,7 +113,7 @@ defmodule FatEcto.FatQuery.BuilderTest do
 
     test "handles multiple operators for the same field" do
       query =
-        Builder.build_query(%{
+        FatDynamicsBuilder.build(%{
           "age" => %{"$GT" => 18, "$LT" => 30}
         })
 
@@ -124,7 +124,7 @@ defmodule FatEcto.FatQuery.BuilderTest do
 
     test "handles $IN operator for list values" do
       query =
-        Builder.build_query(%{
+        FatDynamicsBuilder.build(%{
           "city" => %{"$IN" => ["New York", "London"]}
         })
 
@@ -135,7 +135,7 @@ defmodule FatEcto.FatQuery.BuilderTest do
 
     test "handles $NOT_IN operator for list values" do
       query =
-        Builder.build_query(%{
+        FatDynamicsBuilder.build(%{
           "city" => %{"$NOT_IN" => ["New York", "London"]}
         })
 
