@@ -23,7 +23,7 @@ defmodule FatEcto.Dynamics.FatDynamicsBuilder do
       iex> inspect(query)
       "dynamic([q], q.age > ^30 or (is_nil(q.phone) or q.name == ^\\\"John\\\"))"
   """
-  @spec build(map(), keyword()) :: %Ecto.Query.DynamicExpr{}
+  @spec build(map(), keyword()) :: Ecto.Query.dynamic_expr()
   def build(query_map, opts \\ []) when is_map(query_map) do
     Enum.reduce(query_map, nil, fn {key, value}, dynamic_query ->
       case key do

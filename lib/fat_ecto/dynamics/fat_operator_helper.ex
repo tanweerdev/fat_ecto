@@ -48,9 +48,9 @@ defmodule FatEcto.Dynamics.FatOperatorHelper do
       # Applying a negated `$EQUAL` operator
       FatOperatorHelper.apply_not_condition("$EQUAL", :age, 30, [])
   """
-  alias FatEcto.FatHelper
   alias FatEcto.Dynamics.FatDynamics
   alias FatEcto.Dynamics.FatNotDynamics
+  alias FatEcto.FatHelper
 
   @spec allowed_operators() :: [String.t(), ...]
   def allowed_operators,
@@ -80,7 +80,7 @@ defmodule FatEcto.Dynamics.FatOperatorHelper do
       "$NOT_EQUAL"
     ]
 
-  @spec apply_nil_operator(String.t(), atom(), Keyword.t()) :: nil | %Ecto.Query.DynamicExpr{}
+  @spec apply_nil_operator(String.t(), atom(), Keyword.t()) :: nil | Ecto.Query.dynamic_expr()
   def apply_nil_operator("$NULL", field, opts) do
     field = FatHelper.string_to_existing_atom(field)
     FatDynamics.field_is_nil_dynamic(field, opts)
@@ -92,7 +92,7 @@ defmodule FatEcto.Dynamics.FatOperatorHelper do
   end
 
   # Helper function to apply the appropriate operator to the field and value.
-  @spec apply_operator(String.t(), atom(), any(), Keyword.t()) :: nil | %Ecto.Query.DynamicExpr{}
+  @spec apply_operator(String.t(), atom(), any(), Keyword.t()) :: nil | Ecto.Query.dynamic_expr()
   def apply_operator("$LIKE", field, value, opts) do
     field = FatHelper.string_to_existing_atom(field)
     FatDynamics.like_dynamic(field, value, opts)
@@ -203,7 +203,7 @@ defmodule FatEcto.Dynamics.FatOperatorHelper do
   @spec allowed_not_operators() :: [String.t(), ...]
   def allowed_not_operators, do: ["$LIKE", "$ILIKE", "$ILIKE", "$LT", "$LTE", "$GT", "$GTE", "$EQUAL"]
   # Pattern matching for apply_not_condition
-  @spec apply_not_condition(String.t(), atom(), any(), Keyword.t()) :: nil | %Ecto.Query.DynamicExpr{}
+  @spec apply_not_condition(String.t(), atom(), any(), Keyword.t()) :: nil | Ecto.Query.dynamic_expr()
   def apply_not_condition("$LIKE", field, value, opts) do
     field = FatHelper.string_to_existing_atom(field)
     FatNotDynamics.not_like_dynamic(field, value, opts)

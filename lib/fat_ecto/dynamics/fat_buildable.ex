@@ -62,11 +62,11 @@ defmodule FatEcto.Dynamics.FatBuildable do
   but it can be overridden by the using module.
   """
   @callback override_whereable(
-              dynamics :: %Ecto.Query.DynamicExpr{},
+              dynamics :: Ecto.Query.dynamic_expr(),
               field :: String.t() | atom(),
               operator :: String.t(),
               value :: any()
-            ) :: %Ecto.Query.DynamicExpr{}
+            ) :: Ecto.Query.dynamic_expr()
 
   @doc """
   Callback for performing custom processing on the final dynamics.
@@ -74,7 +74,7 @@ defmodule FatEcto.Dynamics.FatBuildable do
   This function is called at the end of the `build/2` function. The default behavior is to return the dynamics,
   but it can be overridden by the using module.
   """
-  @callback after_whereable(dynamics :: %Ecto.Query.DynamicExpr{}) :: %Ecto.Query.DynamicExpr{}
+  @callback after_whereable(dynamics :: Ecto.Query.dynamic_expr()) :: Ecto.Query.dynamic_expr()
 
   defmacro __using__(options \\ []) do
     quote do
@@ -110,7 +110,7 @@ defmodule FatEcto.Dynamics.FatBuildable do
       ### Returns
         - The dynamics with filtering applied.
       """
-      @spec build(map() | nil, keyword()) :: %Ecto.Query.DynamicExpr{} | nil
+      @spec build(map() | nil, keyword()) :: Ecto.Query.dynamic_expr() | nil
       def build(where_params \\ nil, build_options \\ [])
 
       def build(where_params, build_options) when is_map(where_params) do

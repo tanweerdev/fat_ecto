@@ -47,7 +47,8 @@ defmodule FatEcto.Query.FatBuildable do
       end
   """
 
-  alias FatEcto.FatQuery.FatWhere
+  import Ecto.Query
+  alias FatEcto.Dynamics.FatDynamicsBuilder
 
   @doc """
   Callback for handling custom filtering logic for overrideable fields.
@@ -62,6 +63,13 @@ defmodule FatEcto.Query.FatBuildable do
               value :: any()
             ) :: Ecto.Query.t()
 
+  @doc """
+  Callback for performing custom processing on the final query.
+
+  This function is called at the end of the `build/2` function. The default behavior is to return the query,
+  but it can be overridden by the using module.
+  """
+  @callback after_whereable(dynamics :: Ecto.Query.dynamic_expr()) :: Ecto.Query.dynamic_expr()
   defmacro __using__(options \\ []) do
     quote do
       @behaviour FatEcto.Query.FatBuildable
@@ -70,6 +78,7 @@ defmodule FatEcto.Query.FatBuildable do
       @overrideable_fields @options[:overrideable_fields] || []
       @ignoreable_fields_values @options[:ignoreable_fields_values] || %{}
       @all_operators "*"
+      alias FatEcto.Dynamics.FatBuildableHelper
       alias FatEcto.Query.FatBuildable
 
       # Ensure at least one of `filterable_fields` or `overrideable_fields` is provided.
@@ -110,25 +119,42 @@ defmodule FatEcto.Query.FatBuildable do
       ### Returns
         - The query with filtering applied.
       """
-      def build(queryable, where_params, build_options \\ []) do
+      def build(queryable, where_params \\ nil, build_options \\ [])
+
+      def build(queryable, where_params, build_options) when is_map(where_params) do
         filtered_where_params =
-          WhereableHelper.remove_ignoreable_fields(where_params, @ignoreable_fields_values)
+          FatBuildableHelper.remove_ignoreable_fields(where_params, @ignoreable_fields_values)
 
         # Filter filterable fields
-        combined_params = WhereableHelper.filter_filterable_fields(filtered_where_params, @filterable_fields)
+        combined_params =
+          FatBuildableHelper.filter_filterable_fields(filtered_where_params, @filterable_fields)
 
         # Filter overrideable fields
         overrideable_params =
-          WhereableHelper.filter_overrideable_fields(
+          FatBuildableHelper.filter_overrideable_fields(
             where_params,
             @overrideable_fields,
             @ignoreable_fields_values
           )
 
+        dynamics = FatDynamicsBuilder.build(combined_params, build_options)
+
         queryable
-        |> FatWhere.build_where(combined_params, build_options)
+        |> where(queryable, ^dynamics)
         |> apply_overrideable_filters(overrideable_params)
+        |> after_whereable()
       end
+
+      def build(queryable, _where_params, _build_options) do
+        after_whereable(queryable)
+      end
+
+      @doc """
+      Default implementation of after_whereable/1.
+
+      This function can be overridden by the using module to perform custom processing on the final query.
+      """
+      def after_whereable(query), do: query
 
       @doc """
       Default implementation of `override_whereable/4`.
@@ -150,6 +176,7 @@ defmodule FatEcto.Query.FatBuildable do
       end
 
       defoverridable override_whereable: 4
+      defoverridable after_whereable: 1
     end
   end
 end
