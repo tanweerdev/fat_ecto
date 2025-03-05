@@ -52,9 +52,9 @@ defmodule FatEcto.MixProject do
     [
       {:ecto, "~> 3.2 or ~> 3.5 or ~> 3.8 or ~> 3.10 or ~> 3.12"},
       {:ecto_sql, "~> 3.2 or ~> 3.5 or ~> 3.8 or ~> 3.10 or ~> 3.12"},
-      {:postgrex, "~> 0.15 or ~> 0.16 or ~> 0.17 or ~> 0.19"},
+      {:postgrex, "~> 0.15 or ~> 0.16 or ~> 0.17 or ~> 0.19 or ~> 0.20"},
       {:earmark, "~> 1.4", only: [:dev, :test], optional: true},
-      {:ex_doc, "~> 0.19 or ~> 0.28 or ~> 0.30 or ~> 0.31 or ~> 0.32 or ~> 0.36",
+      {:ex_doc, "~> 0.19 or ~> 0.28 or ~> 0.30 or ~> 0.31 or ~> 0.32 or ~> 0.36 or ~> 0.37",
        only: [:dev, :test], runtime: false, optional: true},
       {:ex_machina, "~> 2.3 or ~> 2.7 or ~> 2.8", only: [:dev, :test], optional: true},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false, optional: true},

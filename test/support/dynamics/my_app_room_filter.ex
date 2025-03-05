@@ -1,4 +1,4 @@
-defmodule Fat.RoomFilter do
+defmodule FatEcto.Dynamics.MyApp.RoomFilter do
   use FatEcto.Dynamics.FatBuildable,
     filterable_fields: %{},
     overrideable_fields: ["name", "phone", "purpose", "description"],

@@ -1,47 +1,46 @@
-defmodule FatEcto.FatHospitalFilterTest do
+defmodule FatEcto.Dynamics.MyApp.HospitalFilterTest do
   use FatEcto.ConnCase
   import Ecto.Query
-  alias FatEcto.FatHospitalFilter
 
   describe "build/2" do
     test "filters by name with custom $ILIKE operator" do
-      query = FatHospitalFilter.build(%{"name" => %{"$ILIKE" => "%General%"}})
+      dynamics = HospitalFilter.build(%{"name" => %{"$ILIKE" => "%General%"}})
 
-      expected_query = dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^"%General%"))
+      expected_dynamics = dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^"%General%"))
 
-      assert inspect(query) == inspect(expected_query)
+      assert inspect(dynamics) == inspect(expected_dynamics)
     end
 
     test "filters by name with custom $LIKE operator" do
-      query = FatHospitalFilter.build(%{"name" => %{"$LIKE" => "%General%"}})
+      dynamics = HospitalFilter.build(%{"name" => %{"$LIKE" => "%General%"}})
 
-      expected_query = dynamic([q], like(fragment("(?)::TEXT", q.name), ^"%General%"))
+      expected_dynamics = dynamic([q], like(fragment("(?)::TEXT", q.name), ^"%General%"))
 
-      assert inspect(query) == inspect(expected_query)
+      assert inspect(dynamics) == inspect(expected_dynamics)
     end
 
     test "ignores name with ignoreable value" do
-      query = FatHospitalFilter.build(%{"name" => ""})
-      expected_query = nil
-      assert inspect(query) == inspect(expected_query)
+      dynamics = HospitalFilter.build(%{"name" => ""})
+      expected_dynamics = nil
+      assert inspect(dynamics) == inspect(expected_dynamics)
     end
 
     test "filters by phone with custom $ILIKE operator" do
-      query = FatHospitalFilter.build(%{"phone" => %{"$ILIKE" => "%123%"}})
-      expected_query = dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^"%123%"))
-      assert inspect(query) == inspect(expected_query)
+      dynamics = HospitalFilter.build(%{"phone" => %{"$ILIKE" => "%123%"}})
+      expected_dynamics = dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^"%123%"))
+      assert inspect(dynamics) == inspect(expected_dynamics)
     end
 
     test "ignores phone with ignoreable value" do
-      query = FatHospitalFilter.build(%{"phone" => nil})
-      expected_query = nil
-      assert inspect(query) == inspect(expected_query)
+      dynamics = HospitalFilter.build(%{"phone" => nil})
+      expected_dynamics = nil
+      assert inspect(dynamics) == inspect(expected_dynamics)
     end
 
     test "does not filter by non-overrideable fields" do
-      query = FatHospitalFilter.build(%{"email" => "test@example.com"})
-      expected_query = nil
-      assert inspect(query) == inspect(expected_query)
+      dynamics = HospitalFilter.build(%{"email" => "test@example.com"})
+      expected_dynamics = nil
+      assert inspect(dynamics) == inspect(expected_dynamics)
     end
   end
 end

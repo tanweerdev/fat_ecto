@@ -41,7 +41,7 @@ Tired of writing repetitive query filters? The `Whereable` module lets you dynam
 #### Usage
 
 ```elixir
-defmodule FatEcto.FatHospitalFilter do
+defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
   use FatEcto.Dynamics.FatBuildable,
     filterable_fields: %{
       "id" => ["$EQUAL", "$NOT_EQUAL"]
@@ -73,13 +73,13 @@ end
 
 #### Example Usage
 
-Here are some practical examples of how to use `FatEcto.FatHospitalFilter` to dynamically build queries:
+Here are some practical examples of how to use `FatEcto.Dynamics.MyApp.HospitalFilter` to dynamically build queries:
 
 ##### Example 1: Basic Filtering by ID
 ```elixir
 # Filter hospitals with ID equal to 1
 params = %{"id" => %{"$EQUAL" => 1}}
-dynamics = FatEcto.FatHospitalFilter.build(params)
+dynamics = FatEcto.Dynamics.MyApp.HospitalFilter.build(params)
 
 # Use the dynamics in a query
 import Ecto.Query
@@ -93,7 +93,7 @@ query = where(FatEcto.FatHospital, ^dynamics)
 ```elixir
 # Filter hospitals with names containing "St. Mary"
 params = %{"name" => %{"$ILIKE" => "%St. Mary%"}}
-dynamics = FatEcto.FatHospitalFilter.build(params)
+dynamics = FatEcto.Dynamics.MyApp.HospitalFilter.build(params)
 
 # Use the dynamics in a query
 import Ecto.Query
@@ -110,7 +110,7 @@ params = %{
   "id" => %{"$NOT_EQUAL" => 2},
   "name" => %{"$ILIKE" => "%General%"}
 }
-dynamics = FatEcto.FatHospitalFilter.build(params)
+dynamics = FatEcto.Dynamics.MyApp.HospitalFilter.build(params)
 
 # Use the dynamics in a query
 import Ecto.Query
@@ -124,7 +124,7 @@ query = where(FatEcto.FatHospital, ^dynamics)
 ```elixir
 # Filter hospitals with a name, but ignore empty or invalid values
 params = %{"name" => %{"$ILIKE" => "%%"}}  # Empty value is ignored
-dynamics = FatEcto.FatHospitalFilter.build(params)
+dynamics = FatEcto.Dynamics.MyApp.HospitalFilter.build(params)
 
 # Use the dynamics in a query
 import Ecto.Query

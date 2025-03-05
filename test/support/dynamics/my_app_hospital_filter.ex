@@ -1,4 +1,4 @@
-defmodule FatEcto.FatHospitalFilter do
+defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
   use FatEcto.Dynamics.FatBuildable,
     filterable_fields: %{},
     overrideable_fields: ["name", "phone"],

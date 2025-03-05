@@ -28,5 +28,5 @@ defmodule DocTest do
   doctest FatEcto.FatSortableHelper
   doctest Fat.DoctorOrderby
   doctest FatEcto.Dynamics.FatBuildableHelper
-  doctest Fat.DoctorFilter
+  doctest FatEcto.Dynamics.MyApp.DoctorFilter
 end

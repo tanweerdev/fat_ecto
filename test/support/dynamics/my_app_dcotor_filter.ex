@@ -1,4 +1,4 @@
-defmodule Fat.DoctorFilter do
+defmodule FatEcto.Dynamics.MyApp.DoctorFilter do
   use FatEcto.Dynamics.FatBuildable,
     filterable_fields: %{
       "email" => [
