@@ -58,7 +58,10 @@ defmodule FatEcto.Dynamics.FatBuildableHelperTest do
         "age" => "*"
       }
 
-      result = FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields)
+      overideable_fields = []
+
+      result =
+        FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
 
       assert result == %{
                "name" => %{"$ILIKE" => "%John%"},
@@ -77,60 +80,15 @@ defmodule FatEcto.Dynamics.FatBuildableHelperTest do
         "age" => "*"
       }
 
-      result = FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields)
+      overideable_fields = []
+
+      result =
+        FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
 
       assert result == %{
                "name" => %{"$EQUAL" => "John"},
                "age" => %{"$EQUAL" => 25}
              }
-    end
-  end
-
-  describe "filter_overrideable_fields/3" do
-    test "filters overrideable fields and ignores ignoreable values" do
-      where_params = %{
-        "name" => "John",
-        "phone" => "",
-        "email" => %{"$EQUAL" => "test@example.com"}
-      }
-
-      overrideable_fields = ["phone", "email"]
-
-      ignoreable_fields_values = %{
-        "phone" => [""]
-      }
-
-      result =
-        FatBuildableHelper.filter_overrideable_fields(
-          where_params,
-          overrideable_fields,
-          ignoreable_fields_values
-        )
-
-      assert result == [
-               %{field: "email", operator: "$EQUAL", value: "test@example.com"}
-             ]
-    end
-
-    test "handles direct comparisons for overrideable fields" do
-      where_params = %{
-        "name" => "John",
-        "phone" => "1234567890"
-      }
-
-      overrideable_fields = ["phone"]
-      ignoreable_fields_values = %{}
-
-      result =
-        FatBuildableHelper.filter_overrideable_fields(
-          where_params,
-          overrideable_fields,
-          ignoreable_fields_values
-        )
-
-      assert result == [
-               %{field: "phone", operator: "$EQUAL", value: "1234567890"}
-             ]
     end
   end
 end

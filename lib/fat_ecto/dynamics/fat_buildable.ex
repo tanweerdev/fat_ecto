@@ -114,25 +114,28 @@ defmodule FatEcto.Dynamics.FatBuildable do
       def build(where_params \\ nil, build_options \\ [])
 
       def build(where_params, build_options) when is_map(where_params) do
+        # Remove ignoreable fields from the params
         filtered_where_params =
           FatBuildableHelper.remove_ignoreable_fields(where_params, @ignoreable_fields_values)
 
-        # Filter filterable fields
-        combined_params =
-          FatBuildableHelper.filter_filterable_fields(filtered_where_params, @filterable_fields)
-
-        # Filter overrideable fields
-        overrideable_params =
-          FatBuildableHelper.filter_overrideable_fields(
-            where_params,
-            @overrideable_fields,
-            @ignoreable_fields_values
+        # Only keep filterable fields in params
+        filterable_params =
+          FatBuildableHelper.filter_filterable_fields(
+            filtered_where_params,
+            @filterable_fields,
+            @overrideable_fields
           )
 
-        combined_params
-        |> FatDynamicsBuilder.build(build_options)
-        |> apply_overrideable_filters(overrideable_params)
-        |> after_whereable()
+        # Build dynamics with the override_whereable function as the callback
+        dynamics =
+          FatDynamicsBuilder.build(
+            filterable_params,
+            build_options,
+            &override_whereable/4
+          )
+
+        # Apply after_whereable callback
+        after_whereable(dynamics)
       end
 
       def build(_where_params, _build_options) do
@@ -152,22 +155,6 @@ defmodule FatEcto.Dynamics.FatBuildable do
       This function can be overridden by the using module to perform custom processing on the final dynamics.
       """
       def after_whereable(dynamics), do: dynamics
-
-      # Applies custom filtering for overrideable fields using the fallback function.
-      defp apply_overrideable_filters(dynamics, overrideable_params) do
-        # FatEcto will return true if dynamics were nil from Whereable
-        # So that you can implement override_whereable without checking nil case
-        dynamics = if Enum.empty?(overrideable_params), do: dynamics, else: dynamics || true
-
-        Enum.reduce(overrideable_params, dynamics, fn %{
-                                                        field: field,
-                                                        operator: operator,
-                                                        value: value
-                                                      },
-                                                      dynamics ->
-          override_whereable(dynamics, field, operator, value)
-        end)
-      end
 
       defoverridable override_whereable: 4
       defoverridable after_whereable: 1

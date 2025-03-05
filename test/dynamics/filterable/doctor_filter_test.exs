@@ -39,6 +39,12 @@ defmodule FatDoctor.FilterTest do
       assert inspect(dynamics) == inspect(expected_dynamics)
     end
 
+    test "filters by phone with custom $ILIKE operator and name with standard buildable" do
+      dynamics = DoctorFilter.build(%{"phone" => %{"$ILIKE" => "%123%"}, "name" => %{"$EQUAL" => "John"}})
+      expected_dynamics = dynamic([q], q.name == ^"John" and ilike(fragment("(?)::TEXT", q.phone), ^"%123%"))
+      assert inspect(dynamics) == inspect(expected_dynamics)
+    end
+
     test "ignores phone with ignoreable value" do
       dynamics = DoctorFilter.build(%{"phone" => nil})
       expected_dynamics = nil

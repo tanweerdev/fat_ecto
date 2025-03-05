@@ -60,15 +60,20 @@ defmodule FatEcto.Dynamics.FatBuildableHelper do
   ### Returns
     - The filtered query parameters.
   """
-  @spec filter_filterable_fields(map(), map()) :: map()
-  def filter_filterable_fields(where_params, filterable_fields) do
+  @spec filter_filterable_fields(map(), map(), list()) :: map()
+  def filter_filterable_fields(where_params, filterable_fields, overrideable_fields) do
     Enum.reduce(where_params, %{}, fn {field, value}, acc ->
-      case Map.get(filterable_fields, field) do
-        nil ->
-          # Field is not in filterable_fields, so ignore it
-          acc
+      # Check if the field is either filterable or overrideable
+      cond do
+        # Field is overrideable
+        field in overrideable_fields ->
+          # Include the field and its value as-is
+          Map.put(acc, field, value)
 
-        allowed_operators ->
+        # Field is filterable
+        Map.has_key?(filterable_fields, field) ->
+          allowed_operators = Map.get(filterable_fields, field)
+
           if is_map(value) do
             # Handle nested operators (e.g., %{"$EQUAL" => "value"})
             filtered_value =
@@ -93,51 +98,10 @@ defmodule FatEcto.Dynamics.FatBuildableHelper do
               acc
             end
           end
-      end
-    end)
-  end
 
-  @doc """
-  Filters fields based on the `overrideable_fields` configuration.
-
-  ### Parameters
-    - `where_params`: The query parameters (e.g., `%{"field" => %{"$EQUAL" => "value"}}`).
-    - `overrideable_fields`: A list of fields that can be overridden (e.g., `["phone"]`).
-    - `ignoreable_fields_values`: A map of fields and their ignoreable values (e.g., `%{"phone" => ["%%", "", [], nil]}`).
-
-  ### Returns
-    - A list of maps containing the field, operator, and value for overrideable fields.
-  """
-  @spec filter_overrideable_fields(map(), list(), map()) :: list(map())
-  def filter_overrideable_fields(where_params, overrideable_fields, ignoreable_fields_values) do
-    Enum.reduce(where_params, [], fn {field, value}, acc ->
-      if field in overrideable_fields do
-        case Map.get(ignoreable_fields_values, field) do
-          nil ->
-            # Field is not in ignoreable_fields_values, so process it
-            process_overrideable_field(field, value, acc)
-
-          ignoreable_values ->
-            if is_map(value) do
-              # Handle nested operators (e.g., %{"$EQUAL" => "value"})
-              Enum.reduce(value, acc, fn {operator, val}, inner_acc ->
-                if should_ignore_value?(val, ignoreable_values) do
-                  inner_acc
-                else
-                  [%{field: field, operator: operator, value: val} | inner_acc]
-                end
-              end)
-            else
-              # Handle direct comparisons (e.g., "field" => "value")
-              if should_ignore_value?(value, ignoreable_values) do
-                acc
-              else
-                [%{field: field, operator: "$EQUAL", value: value} | acc]
-              end
-            end
-        end
-      else
-        acc
+        # Field is neither filterable nor overrideable
+        true ->
+          acc
       end
     end)
   end
@@ -164,16 +128,5 @@ defmodule FatEcto.Dynamics.FatBuildableHelper do
 
   defp operator_allowed?(_operator, _allowed_operators) do
     false
-  end
-
-  # Processes an overrideable field and adds it to the accumulator.
-  defp process_overrideable_field(field, value, acc) do
-    if is_map(value) do
-      Enum.reduce(value, acc, fn {operator, val}, inner_acc ->
-        [%{field: field, operator: operator, value: val} | inner_acc]
-      end)
-    else
-      [%{field: field, operator: "$EQUAL", value: value} | acc]
-    end
   end
 end
