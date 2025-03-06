@@ -50,7 +50,7 @@ defmodule FatEcto.Dynamics.FatDynamicsBuilderTest do
           ]
         })
 
-      expected_dynamics = dynamic([q], q.age > ^30 or ilike(fragment("(?)::TEXT", q.name), ^"%John%"))
+      expected_dynamics = dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^"%John%") or q.age > ^30)
 
       assert inspect(dynamics) == inspect(expected_dynamics)
     end
@@ -64,7 +64,7 @@ defmodule FatEcto.Dynamics.FatDynamicsBuilderTest do
           ]
         })
 
-      expected_dynamics = dynamic([q], q.age > ^18 and ilike(fragment("(?)::TEXT", q.name), ^"%John%"))
+      expected_dynamics = dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^"%John%") and q.age > ^18)
 
       assert inspect(dynamics) == inspect(expected_dynamics)
     end
@@ -93,8 +93,39 @@ defmodule FatEcto.Dynamics.FatDynamicsBuilderTest do
       expected_dynamics =
         dynamic(
           [q],
-          (q.total_staff >= ^20 and q.rating > ^4 and q.status == ^"active") or
-            ((q.city == ^"New York" or q.age > ^18) and ilike(fragment("(?)::TEXT", q.name), ^"%John%"))
+          ((q.age > ^18 or q.city == ^"New York") and ilike(fragment("(?)::TEXT", q.name), ^"%John%")) or
+            (q.rating > ^4 and q.total_staff >= ^20 and q.status == ^"active")
+        )
+
+      assert inspect(dynamics) == inspect(expected_dynamics)
+    end
+
+    test "handles deeply nested conditions with $OR as map" do
+      dynamics =
+        FatDynamicsBuilder.build(%{
+          "$OR" => [
+            %{
+              "name" => %{"$ILIKE" => "%John%"},
+              "$OR" => %{
+                "rating" => %{"$GT" => 18},
+                "location" => "New York"
+              }
+            },
+            %{
+              "start_date" => "2023-01-01",
+              "$AND" => [
+                %{"rating" => %{"$GT" => 4}},
+                %{"email" => "fat_ecto@example.com"}
+              ]
+            }
+          ]
+        })
+
+      expected_dynamics =
+        dynamic(
+          [q],
+          ((q.location == ^"New York" or q.rating > ^18) and ilike(fragment("(?)::TEXT", q.name), ^"%John%")) or
+            (q.rating > ^4 and q.email == ^"fat_ecto@example.com" and q.start_date == ^"2023-01-01")
         )
 
       assert inspect(dynamics) == inspect(expected_dynamics)

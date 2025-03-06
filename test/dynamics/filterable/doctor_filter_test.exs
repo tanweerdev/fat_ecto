@@ -70,8 +70,40 @@ defmodule FatDoctor.FilterTest do
       expected_dynamics =
         dynamic(
           [q],
-          (q.email == ^"fat_ecto@example.com" and q.rating > ^4 and q.start_date == ^"2023-01-01") or
-            ((q.location == ^"New York" or q.rating > ^18) and ilike(fragment("(?)::TEXT", q.name), ^"%John%"))
+          ((q.rating > ^18 or q.location == ^"New York") and ilike(fragment("(?)::TEXT", q.name), ^"%John%")) or
+            (q.rating > ^4 and q.email == ^"fat_ecto@example.com" and q.start_date == ^"2023-01-01")
+        )
+
+      assert inspect(dynamics) == inspect(expected_dynamics)
+    end
+
+    test "filters with complex params but with $OR as map" do
+      params = %{
+        "$OR" => [
+          %{
+            "name" => %{"$ILIKE" => "%John%"},
+            "$OR" => %{
+              "rating" => %{"$GT" => 18},
+              "location" => "New York"
+            }
+          },
+          %{
+            "start_date" => "2023-01-01",
+            "$AND" => [
+              %{"rating" => %{"$GT" => 4}},
+              %{"email" => "fat_ecto@example.com"}
+            ]
+          }
+        ]
+      }
+
+      dynamics = DoctorFilter.build(params)
+
+      expected_dynamics =
+        dynamic(
+          [q],
+          ((q.location == ^"New York" or q.rating > ^18) and ilike(fragment("(?)::TEXT", q.name), ^"%John%")) or
+            (q.rating > ^4 and q.email == ^"fat_ecto@example.com" and q.start_date == ^"2023-01-01")
         )
 
       assert inspect(dynamics) == inspect(expected_dynamics)

@@ -62,11 +62,7 @@ defmodule FatEcto.Dynamics.FatBuildableHelper do
   """
   @spec filter_filterable_fields(map(), map(), list()) :: map()
   def filter_filterable_fields(where_params, filterable_fields, overrideable_fields) do
-    # Start processing the input
-    result = do_filter_filterable_fields(where_params, filterable_fields, overrideable_fields, %{})
-
-    # Remove empty maps and arrays from the result
-    clean_result(result)
+    do_filter_filterable_fields(where_params, filterable_fields, overrideable_fields, %{})
   end
 
   # Private helper method to process the input recursively
@@ -96,7 +92,19 @@ defmodule FatEcto.Dynamics.FatBuildableHelper do
   end
 
   # Private helper method to process conditions in "$OR" and "$AND"
+  defp process_conditions(conditions, filterable_fields, overrideable_fields) when is_map(conditions) do
+    # Handle direct map (e.g., "$OR" => %{"rating" => %{"$GT" => 18}})
+    processed_map = do_filter_filterable_fields(conditions, filterable_fields, overrideable_fields, %{})
+
+    if map_size(processed_map) > 0 do
+      processed_map
+    else
+      %{}
+    end
+  end
+
   defp process_conditions(conditions, filterable_fields, overrideable_fields) do
+    # Handle array (e.g., "$OR" => [%{"rating" => %{"$GT" => 18}}])
     conditions
     |> Enum.map(&do_filter_filterable_fields(&1, filterable_fields, overrideable_fields, %{}))
     |> Enum.reject(&(&1 == %{}))
@@ -142,13 +150,6 @@ defmodule FatEcto.Dynamics.FatBuildableHelper do
       true ->
         nil
     end
-  end
-
-  # Private helper method to clean the result by removing empty maps and arrays
-  defp clean_result(result) when is_map(result) do
-    result
-    |> Enum.reject(fn {_, value} -> value == %{} or value == [] end)
-    |> Enum.into(%{})
   end
 
   # Checks if a value should be ignored based on the ignoreable values.

@@ -21,7 +21,7 @@ defmodule FatEcto.Dynamics.FatDynamicsBuilder do
       ...>   ]
       ...> })
       iex> inspect(query)
-      "dynamic([q], q.age > ^30 or (is_nil(q.phone) or q.name == ^\\\"John\\\"))"
+      "dynamic([q], q.name == ^\\\"John\\\" or is_nil(q.phone) or q.age > ^30)"
   """
   @spec build(map(), keyword(), function() | nil) :: Ecto.Query.dynamic_expr()
   def build(query_map, opts \\ [], override_callback \\ nil) when is_map(query_map) do
@@ -40,37 +40,41 @@ defmodule FatEcto.Dynamics.FatDynamicsBuilder do
   end
 
   # Handles "$OR" conditions
-  defp build_or_query(conditions, dynamic_query, opts, override_callback) do
+  defp build_or_query(conditions, dynamic_query, opts, override_callback) when is_map(conditions) do
+    # Handle direct map (e.g., "$OR" => %{"rating" => %{"$GT" => 18}})
     or_dynamic =
-      Enum.reduce(conditions, nil, fn condition, acc ->
-        case acc do
-          nil -> build(condition, opts, override_callback)
-          _ -> dynamic([q], ^build(condition, opts, override_callback) or ^acc)
-        end
+      Enum.reduce(conditions, nil, fn {field, value}, acc ->
+        field_dynamic = build_field_query(field, value, nil, opts, override_callback)
+        combine_dynamics(acc, field_dynamic, :or)
       end)
 
-    case {dynamic_query, or_dynamic} do
-      {nil, _} -> or_dynamic
-      {_, nil} -> dynamic_query
-      _ -> dynamic([q], ^dynamic_query and ^or_dynamic)
-    end
+    combine_dynamics(dynamic_query, or_dynamic, :and)
+  end
+
+  defp build_or_query(conditions, dynamic_query, opts, override_callback) do
+    # Handle array (e.g., "$OR" => [%{"rating" => %{"$GT" => 18}}])
+    conditions_list = ensure_list(conditions)
+
+    or_dynamic =
+      Enum.reduce(conditions_list, nil, fn condition, acc ->
+        condition_dynamic = build(condition, opts, override_callback)
+        combine_dynamics(acc, condition_dynamic, :or)
+      end)
+
+    combine_dynamics(dynamic_query, or_dynamic, :and)
   end
 
   # Handles "$AND" conditions
   defp build_and_query(conditions, dynamic_query, opts, override_callback) do
+    conditions_list = ensure_list(conditions)
+
     and_dynamic =
-      Enum.reduce(conditions, nil, fn condition, acc ->
-        case acc do
-          nil -> build(condition, opts, override_callback)
-          _ -> dynamic([q], ^build(condition, opts, override_callback) and ^acc)
-        end
+      Enum.reduce(conditions_list, nil, fn condition, acc ->
+        condition_dynamic = build(condition, opts, override_callback)
+        combine_dynamics(acc, condition_dynamic, :and)
       end)
 
-    case {dynamic_query, and_dynamic} do
-      {nil, _} -> and_dynamic
-      {_, nil} -> dynamic_query
-      _ -> dynamic([q], ^dynamic_query and ^and_dynamic)
-    end
+    combine_dynamics(dynamic_query, and_dynamic, :and)
   end
 
   # Handles individual field conditions
@@ -82,7 +86,7 @@ defmodule FatEcto.Dynamics.FatDynamicsBuilder do
             # If no callback is provided, apply the standard operator logic
             case FatOperatorHelper.apply_operator(operator, field, value, opts) do
               nil -> acc
-              operator_dynamic -> combine_dynamics(acc, operator_dynamic)
+              operator_dynamic -> combine_dynamics(acc, operator_dynamic, :and)
             end
 
           callback ->
@@ -92,16 +96,16 @@ defmodule FatEcto.Dynamics.FatDynamicsBuilder do
                 # If the callback returns nil, apply the standard operator logic
                 case FatOperatorHelper.apply_operator(operator, field, value, opts) do
                   nil -> acc
-                  operator_dynamic -> combine_dynamics(acc, operator_dynamic)
+                  operator_dynamic -> combine_dynamics(acc, operator_dynamic, :and)
                 end
 
               override_dynamic ->
-                combine_dynamics(acc, override_dynamic)
+                combine_dynamics(acc, override_dynamic, :and)
             end
         end
       end)
 
-    combine_dynamics(dynamic_query, field_dynamic)
+    combine_dynamics(dynamic_query, field_dynamic, :and)
   end
 
   # Handles direct field comparisons (e.g., "field" => "value" or "field" => nil)
@@ -130,15 +134,28 @@ defmodule FatEcto.Dynamics.FatDynamicsBuilder do
           end
       end
 
-    combine_dynamics(dynamic_query, field_dynamic)
+    combine_dynamics(dynamic_query, field_dynamic, :and)
   end
 
-  # Combines two dynamics, handling nil values
-  defp combine_dynamics(dynamic1, dynamic2) do
+  # Combines two dynamics with a specified operator (:and or :or)
+  defp combine_dynamics(dynamic1, dynamic2, operator) do
     case {dynamic1, dynamic2} do
-      {nil, _} -> dynamic2
-      {_, nil} -> dynamic1
-      _ -> dynamic([q], ^dynamic1 and ^dynamic2)
+      {nil, _} ->
+        dynamic2
+
+      {_, nil} ->
+        dynamic1
+
+      _ ->
+        case operator do
+          :and -> dynamic([q], ^dynamic1 and ^dynamic2)
+          :or -> dynamic([q], ^dynamic1 or ^dynamic2)
+        end
     end
   end
+
+  # Ensures the input is a list (converts maps to a list of one element)
+  defp ensure_list(input) when is_map(input), do: [input]
+  defp ensure_list(input) when is_list(input), do: input
+  defp ensure_list(_), do: []
 end

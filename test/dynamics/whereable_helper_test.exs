@@ -164,6 +164,46 @@ defmodule FatEcto.Dynamics.FatBuildableHelperTest do
       assert result == expected
     end
 
+    test "filters fields for complex params with $OR as map" do
+      where_params = %{
+        "$OR" => [
+          %{
+            "name" => %{"$ILIKE" => "%John%"},
+            "$OR" => %{
+              "rating" => %{"$GT" => 18},
+              "location" => "New York"
+            }
+          },
+          %{
+            "start_date" => "2023-01-01",
+            "$AND" => [
+              %{"rating" => %{"$GT" => 4}},
+              %{"email" => "fat_ecto@example.com"}
+            ]
+          }
+        ]
+      }
+
+      expected = %{
+        "$OR" => [
+          %{"name" => %{"$ILIKE" => "%John%"}},
+          %{"$AND" => [%{"email" => %{"$EQUAL" => "fat_ecto@example.com"}}]}
+        ]
+      }
+
+      filterable_fields = %{
+        "email" => "*",
+        "name" => "*"
+      }
+
+      overideable_fields = ["phone"]
+
+      result =
+        FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
+
+      assert result == expected
+    end
+
     test "handles direct comparisons" do
       where_params = %{
         "name" => "John",
