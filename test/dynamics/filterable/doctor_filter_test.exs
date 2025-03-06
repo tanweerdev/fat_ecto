@@ -39,6 +39,76 @@ defmodule FatDoctor.FilterTest do
       assert inspect(dynamics) == inspect(expected_dynamics)
     end
 
+    test "filters by phone with custom $ILIKE operator and name with standard buildable" do
+      dynamics = DoctorFilter.build(%{"phone" => %{"$ILIKE" => "%123%"}, "name" => %{"$EQUAL" => "John"}})
+      expected_dynamics = dynamic([q], q.name == ^"John" and ilike(fragment("(?)::TEXT", q.phone), ^"%123%"))
+      assert inspect(dynamics) == inspect(expected_dynamics)
+    end
+
+    test "filters with complex params" do
+      params = %{
+        "$OR" => [
+          %{
+            "name" => %{"$ILIKE" => "%John%"},
+            "$OR" => [
+              %{"rating" => %{"$GT" => 18}},
+              %{"location" => "New York"}
+            ]
+          },
+          %{
+            "start_date" => "2023-01-01",
+            "$AND" => [
+              %{"rating" => %{"$GT" => 4}},
+              %{"email" => "fat_ecto@example.com"}
+            ]
+          }
+        ]
+      }
+
+      dynamics = DoctorFilter.build(params)
+
+      expected_dynamics =
+        dynamic(
+          [q],
+          ((q.rating > ^18 or q.location == ^"New York") and ilike(fragment("(?)::TEXT", q.name), ^"%John%")) or
+            (q.rating > ^4 and q.email == ^"fat_ecto@example.com" and q.start_date == ^"2023-01-01")
+        )
+
+      assert inspect(dynamics) == inspect(expected_dynamics)
+    end
+
+    test "filters with complex params but with $OR as map" do
+      params = %{
+        "$OR" => [
+          %{
+            "name" => %{"$ILIKE" => "%John%"},
+            "$OR" => %{
+              "rating" => %{"$GT" => 18},
+              "location" => "New York"
+            }
+          },
+          %{
+            "start_date" => "2023-01-01",
+            "$AND" => [
+              %{"rating" => %{"$GT" => 4}},
+              %{"email" => "fat_ecto@example.com"}
+            ]
+          }
+        ]
+      }
+
+      dynamics = DoctorFilter.build(params)
+
+      expected_dynamics =
+        dynamic(
+          [q],
+          ((q.location == ^"New York" or q.rating > ^18) and ilike(fragment("(?)::TEXT", q.name), ^"%John%")) or
+            (q.rating > ^4 and q.email == ^"fat_ecto@example.com" and q.start_date == ^"2023-01-01")
+        )
+
+      assert inspect(dynamics) == inspect(expected_dynamics)
+    end
+
     test "ignores phone with ignoreable value" do
       dynamics = DoctorFilter.build(%{"phone" => nil})
       expected_dynamics = nil

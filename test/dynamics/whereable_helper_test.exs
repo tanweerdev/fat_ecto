@@ -58,12 +58,150 @@ defmodule FatEcto.Dynamics.FatBuildableHelperTest do
         "age" => "*"
       }
 
-      result = FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields)
+      overideable_fields = []
+
+      result =
+        FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
 
       assert result == %{
                "name" => %{"$ILIKE" => "%John%"},
                "age" => %{"$GT" => 18}
              }
+    end
+
+    test "filters fields for complex params" do
+      where_params = %{
+        "$OR" => [
+          %{
+            "name" => %{"$ILIKE" => "%John%"},
+            "$OR" => [
+              %{"rating" => %{"$GT" => 18}},
+              %{"location" => "New York"}
+            ]
+          },
+          %{
+            "start_date" => "2023-01-01",
+            "$AND" => [
+              %{"rating" => %{"$GT" => 4}},
+              %{"email" => "fat_ecto@example.com"}
+            ]
+          }
+        ]
+      }
+
+      expected = %{
+        "$OR" => [
+          %{
+            "$OR" => [
+              %{"rating" => %{"$GT" => 18}},
+              %{"location" => %{"$EQUAL" => "New York"}}
+            ],
+            "name" => %{"$ILIKE" => "%John%"}
+          },
+          %{
+            "$AND" => [
+              %{"rating" => %{"$GT" => 4}},
+              %{"email" => %{"$EQUAL" => "fat_ecto@example.com"}}
+            ],
+            "start_date" => %{"$EQUAL" => "2023-01-01"}
+          }
+        ]
+      }
+
+      filterable_fields = %{
+        "email" => "*",
+        "name" => "*",
+        "rating" => "*",
+        "start_date" => "*",
+        "location" => "*"
+      }
+
+      overideable_fields = ["phone"]
+
+      result =
+        FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
+
+      assert result == expected
+    end
+
+    test "filters fields for complex params with some fields not allowed" do
+      where_params = %{
+        "$OR" => [
+          %{
+            "name" => %{"$ILIKE" => "%John%"},
+            "$OR" => [
+              %{"rating" => %{"$GT" => 18}},
+              %{"location" => "New York"}
+            ]
+          },
+          %{
+            "start_date" => "2023-01-01",
+            "$AND" => [
+              %{"rating" => %{"$GT" => 4}},
+              %{"email" => "fat_ecto@example.com"}
+            ]
+          }
+        ]
+      }
+
+      expected = %{
+        "$OR" => [
+          %{"name" => %{"$ILIKE" => "%John%"}},
+          %{"$AND" => [%{"email" => %{"$EQUAL" => "fat_ecto@example.com"}}]}
+        ]
+      }
+
+      filterable_fields = %{
+        "email" => "*",
+        "name" => "*"
+      }
+
+      overideable_fields = ["phone"]
+
+      result =
+        FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
+
+      assert result == expected
+    end
+
+    test "filters fields for complex params with $OR as map" do
+      where_params = %{
+        "$OR" => [
+          %{
+            "name" => %{"$ILIKE" => "%John%"},
+            "$OR" => %{
+              "rating" => %{"$GT" => 18},
+              "location" => "New York"
+            }
+          },
+          %{
+            "start_date" => "2023-01-01",
+            "$AND" => [
+              %{"rating" => %{"$GT" => 4}},
+              %{"email" => "fat_ecto@example.com"}
+            ]
+          }
+        ]
+      }
+
+      expected = %{
+        "$OR" => [
+          %{"name" => %{"$ILIKE" => "%John%"}},
+          %{"$AND" => [%{"email" => %{"$EQUAL" => "fat_ecto@example.com"}}]}
+        ]
+      }
+
+      filterable_fields = %{
+        "email" => "*",
+        "name" => "*"
+      }
+
+      overideable_fields = ["phone"]
+
+      result =
+        FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
+
+      assert result == expected
     end
 
     test "handles direct comparisons" do
@@ -77,60 +215,15 @@ defmodule FatEcto.Dynamics.FatBuildableHelperTest do
         "age" => "*"
       }
 
-      result = FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields)
+      overideable_fields = []
+
+      result =
+        FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
 
       assert result == %{
                "name" => %{"$EQUAL" => "John"},
                "age" => %{"$EQUAL" => 25}
              }
-    end
-  end
-
-  describe "filter_overrideable_fields/3" do
-    test "filters overrideable fields and ignores ignoreable values" do
-      where_params = %{
-        "name" => "John",
-        "phone" => "",
-        "email" => %{"$EQUAL" => "test@example.com"}
-      }
-
-      overrideable_fields = ["phone", "email"]
-
-      ignoreable_fields_values = %{
-        "phone" => [""]
-      }
-
-      result =
-        FatBuildableHelper.filter_overrideable_fields(
-          where_params,
-          overrideable_fields,
-          ignoreable_fields_values
-        )
-
-      assert result == [
-               %{field: "email", operator: "$EQUAL", value: "test@example.com"}
-             ]
-    end
-
-    test "handles direct comparisons for overrideable fields" do
-      where_params = %{
-        "name" => "John",
-        "phone" => "1234567890"
-      }
-
-      overrideable_fields = ["phone"]
-      ignoreable_fields_values = %{}
-
-      result =
-        FatBuildableHelper.filter_overrideable_fields(
-          where_params,
-          overrideable_fields,
-          ignoreable_fields_values
-        )
-
-      assert result == [
-               %{field: "phone", operator: "$EQUAL", value: "1234567890"}
-             ]
     end
   end
 end

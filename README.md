@@ -76,6 +76,7 @@ end
 Here are some practical examples of how to use `FatEcto.Dynamics.MyApp.HospitalFilter` to dynamically build queries:
 
 ##### Example 1: Basic Filtering by ID
+
 ```elixir
 # Filter hospitals with ID equal to 1
 params = %{"id" => %{"$EQUAL" => 1}}
@@ -90,6 +91,7 @@ query = where(FatEcto.FatHospital, ^dynamics)
 ```
 
 ##### Example 2: Case-Insensitive Name Search
+
 ```elixir
 # Filter hospitals with names containing "St. Mary"
 params = %{"name" => %{"$ILIKE" => "%St. Mary%"}}
@@ -104,6 +106,7 @@ query = where(FatEcto.FatHospital, ^dynamics)
 ```
 
 ##### Example 3: Combining Multiple Filters
+
 ```elixir
 # Filter hospitals with ID not equal to 2 AND name containing "General"
 params = %{
@@ -121,6 +124,7 @@ query = where(FatEcto.FatHospital, ^dynamics)
 ```
 
 ##### Example 4: Ignoring Empty or Invalid Values
+
 ```elixir
 # Filter hospitals with a name, but ignore empty or invalid values
 params = %{"name" => %{"$ILIKE" => "%%"}}  # Empty value is ignored
@@ -134,13 +138,45 @@ query = where(FatEcto.FatHospital, ^dynamics)
 # from(h in FatEcto.FatHospital)  # No filtering applied for name
 ```
 
+##### Example 5: Even Complex Nested conditions
+
+```elixir
+# Filter hospitals with a name, but ignore empty or invalid values
+params = %{
+  "$OR" => [
+    %{
+      "name" => %{"$ILIKE" => "%John%"},
+      "$OR" => %{"rating" => %{"$GT" => 18}, "location" => "New York"}
+    },
+    %{
+      "start_date" => "2023-01-01",
+      "$AND" => [
+        %{"rating" => %{"$GT" => 4}},
+        %{"email" => "fat_ecto@example.com"}
+      ]
+    }
+  ]
+}
+
+dynamics = DoctorFilter.build(params)
+
+# Resulting dynamic:
+dynamic(
+  [q],
+  ((q.location == ^"New York" or q.rating > ^18) and ilike(fragment("(?)::TEXT", q.name), ^"%John%")) or
+    (q.rating > ^4 and q.email == ^"fat_ecto@example.com" and q.start_date == ^"2023-01-01")
+)
+
+# You can now apply the result on where just like above examples
+```
+
 ---
 
 ### 🔄 FatEcto.FatSortable – Effortless Sorting
 
 Sorting should be simple—and with `Sortable`, it is! Your frontend can send sorting parameters, and FatEcto will seamlessly generate the right sorting queries, allowing you to build powerful, customizable sorting logic without breaking a sweat. 😎
 
-#### Usage
+#### Usage of FatSortable
 
 ```elixir
 defmodule Fat.SortQuery do
@@ -167,7 +203,7 @@ end
 
 No more hassle with pagination! FatPaginator helps you paginate Ecto queries efficiently, keeping your APIs snappy and responsive.
 
-#### Usage
+#### Usage of FatPaginator
 
 ```elixir
 defmodule Fat.MyPaginator do
@@ -182,7 +218,7 @@ end
 
 Messy data? Not anymore! `DataSanitizer` helps you sanitize records and transform them into structured, clean views effortlessly. Keep your data tidy and consistent. 🎯
 
-#### Usage
+#### Usage of FatDataSanitizer
 
 ```elixir
 defmodule Fat.MySanitizer do
