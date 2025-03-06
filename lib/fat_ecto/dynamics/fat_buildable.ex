@@ -115,13 +115,13 @@ defmodule FatEcto.Dynamics.FatBuildable do
 
       def build(where_params, build_options) when is_map(where_params) do
         # Remove ignoreable fields from the params
-        filtered_where_params =
+        where_params_ignoreables_removed =
           FatBuildableHelper.remove_ignoreable_fields(where_params, @ignoreable_fields_values)
 
         # Only keep filterable fields in params
         filterable_params =
           FatBuildableHelper.filter_filterable_fields(
-            filtered_where_params,
+            where_params_ignoreables_removed,
             @filterable_fields,
             @overrideable_fields
           )

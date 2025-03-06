@@ -62,48 +62,93 @@ defmodule FatEcto.Dynamics.FatBuildableHelper do
   """
   @spec filter_filterable_fields(map(), map(), list()) :: map()
   def filter_filterable_fields(where_params, filterable_fields, overrideable_fields) do
-    Enum.reduce(where_params, %{}, fn {field, value}, acc ->
-      # Check if the field is either filterable or overrideable
-      cond do
-        # Field is overrideable
-        field in overrideable_fields ->
-          # Include the field and its value as-is
-          Map.put(acc, field, value)
+    # Start processing the input
+    result = do_filter_filterable_fields(where_params, filterable_fields, overrideable_fields, %{})
 
-        # Field is filterable
-        Map.has_key?(filterable_fields, field) ->
-          allowed_operators = Map.get(filterable_fields, field)
+    # Remove empty maps and arrays from the result
+    clean_result(result)
+  end
 
-          if is_map(value) do
-            # Handle nested operators (e.g., %{"$EQUAL" => "value"})
-            filtered_value =
-              Enum.reduce(value, %{}, fn {operator, val}, inner_acc ->
-                if operator_allowed?(operator, allowed_operators) do
-                  Map.put(inner_acc, operator, val)
-                else
-                  inner_acc
-                end
-              end)
+  # Private helper method to process the input recursively
+  defp do_filter_filterable_fields(params, filterable_fields, overrideable_fields, acc) when is_map(params) do
+    Enum.reduce(params, acc, fn {field, value}, inner_acc ->
+      # Handle "$OR" and "$AND" conditions recursively
+      if field in ["$OR", "$AND"] do
+        processed_conditions = process_conditions(value, filterable_fields, overrideable_fields)
 
-            if map_size(filtered_value) > 0 do
-              Map.put(acc, field, filtered_value)
-            else
-              acc
-            end
-          else
-            # Handle direct comparisons (e.g., "field" => "value")
-            if operator_allowed?("$EQUAL", allowed_operators) do
-              Map.put(acc, field, %{"$EQUAL" => value})
-            else
-              acc
-            end
-          end
+        if Enum.empty?(processed_conditions) do
+          inner_acc
+        else
+          Map.put(inner_acc, field, processed_conditions)
+        end
 
-        # Field is neither filterable nor overrideable
-        true ->
-          acc
+        # Handle individual fields
+      else
+        case filter_field(field, value, filterable_fields, overrideable_fields) do
+          {filtered_field, filtered_value} ->
+            Map.put(inner_acc, filtered_field, filtered_value)
+
+          nil ->
+            inner_acc
+        end
       end
     end)
+  end
+
+  # Private helper method to process conditions in "$OR" and "$AND"
+  defp process_conditions(conditions, filterable_fields, overrideable_fields) do
+    conditions
+    |> Enum.map(&do_filter_filterable_fields(&1, filterable_fields, overrideable_fields, %{}))
+    |> Enum.reject(&(&1 == %{}))
+  end
+
+  # Private helper method to filter individual fields
+  defp filter_field(field, value, filterable_fields, overrideable_fields) do
+    cond do
+      # Field is overrideable
+      field in overrideable_fields ->
+        {field, value}
+
+      # Field is filterable
+      Map.has_key?(filterable_fields, field) ->
+        allowed_operators = Map.get(filterable_fields, field)
+
+        if is_map(value) do
+          # Handle nested operators (e.g., %{"$EQUAL" => "value"})
+          filtered_value =
+            Enum.reduce(value, %{}, fn {operator, val}, inner_acc ->
+              if operator_allowed?(operator, allowed_operators) do
+                Map.put(inner_acc, operator, val)
+              else
+                inner_acc
+              end
+            end)
+
+          if map_size(filtered_value) > 0 do
+            {field, filtered_value}
+          else
+            nil
+          end
+        else
+          # Handle direct comparisons (e.g., "field" => "value")
+          if operator_allowed?("$EQUAL", allowed_operators) do
+            {field, %{"$EQUAL" => value}}
+          else
+            nil
+          end
+        end
+
+      # Field is neither filterable nor overrideable
+      true ->
+        nil
+    end
+  end
+
+  # Private helper method to clean the result by removing empty maps and arrays
+  defp clean_result(result) when is_map(result) do
+    result
+    |> Enum.reject(fn {_, value} -> value == %{} or value == [] end)
+    |> Enum.into(%{})
   end
 
   # Checks if a value should be ignored based on the ignoreable values.
