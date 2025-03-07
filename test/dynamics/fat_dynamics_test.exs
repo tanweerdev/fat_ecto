@@ -1,7 +1,7 @@
-defmodule FatEcto.FatQuery.FatDynamicsTest do
+defmodule FatEcto.Dynamics.FatDynamicsTest do
   use ExUnit.Case, async: true
   import Ecto.Query
-  alias FatEcto.FatQuery.FatDynamics
+  alias FatEcto.Dynamics.FatDynamics
 
   describe "field_is_nil_dynamic/3" do
     test "builds a dynamic query for nil field with :and logic" do

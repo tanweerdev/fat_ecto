@@ -1,4 +1,4 @@
-defmodule FatUtils.Integer do
+defmodule FatEcto.Utils.Integer do
   @moduledoc """
   Provides utility functions for parsing integers from strings.
 

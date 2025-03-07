@@ -1,6 +1,6 @@
 defmodule Utils.MapTest do
   use FatEcto.ConnCase
-  import FatUtils.Map
+  import FatEcto.Utils.Map
 
   test "has all keys" do
     map = %{name: "John", phone: "123456", address: "123 main bullavord"}

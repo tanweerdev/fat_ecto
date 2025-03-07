@@ -1,4 +1,4 @@
-defmodule FatUtils.UUID do
+defmodule FatEcto.Utils.UUID do
   @moduledoc """
   Provides utility functions for working with UUIDs.
 
@@ -27,11 +27,11 @@ defmodule FatUtils.UUID do
 
   ## Examples
       iex> params = %{user_id: "123e4567-e89b-12d3-a456-426614174000", post_id: "invalid-uuid"}
-      iex> FatUtils.UUID.parse(params, [:user_id, :post_id])
+      iex> FatEcto.Utils.UUID.parse(params, [:user_id, :post_id])
       {[:post_id], %{user_id: "123e4567-e89b-12d3-a456-426614174000"}}
 
       iex> params = %{user_id: "123e4567-e89b-12d3-a456-426614174000", role: "admin"}
-      iex> FatUtils.UUID.parse(params, [:user_id], valid_values: ["admin"])
+      iex> FatEcto.Utils.UUID.parse(params, [:user_id], valid_values: ["admin"])
       {[], %{user_id: "123e4567-e89b-12d3-a456-426614174000", role: "admin"}}
   """
   @spec parse(params :: map(), list_of_uuid_fields :: [atom()], options :: keyword()) ::

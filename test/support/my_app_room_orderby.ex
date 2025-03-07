@@ -1,5 +1,5 @@
 defmodule Fat.RoomOrderby do
-  use FatEcto.FatQuery.Sortable,
+  use FatEcto.FatSortable,
     overrideable_fields: ["phone", "name"]
 
   import Ecto.Query

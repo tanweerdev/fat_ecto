@@ -34,15 +34,15 @@ Then, run `mix deps.get` to install the package.
 
 ## Features & Modules
 
-### 🛠 FatEcto.FatQuery.Whereable – Dynamic Filtering Made Easy
+### 🛠 FatEcto.Dynamics.FatBuildable – Dynamic Filtering Made Easy
 
 Tired of writing repetitive query filters? The `Whereable` module lets you dynamically filter records using flexible conditions passed from your web or mobile clients—with little to no effort! And the best part? You stay in control. 🚀
 
 #### Usage
 
 ```elixir
-defmodule FatEcto.FatHospitalFilter do
-  use FatEcto.FatQuery.Whereable,
+defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
+  use FatEcto.Dynamics.FatBuildable,
     filterable_fields: %{
       "id" => ["$EQUAL", "$NOT_EQUAL"]
     },
@@ -54,12 +54,18 @@ defmodule FatEcto.FatHospitalFilter do
 
   import Ecto.Query
 
+  @impl true
   # You can implement override_whereable for your custom filters
-  def override_whereable(dynamics, "name", "$ILIKE", value) do
-    dynamics and dynamic([r], ilike(fragment("(?)::TEXT", r.name), ^value))
+  def override_whereable(_dynamics, "name", "$ILIKE", value) do
+    dynamic([r], ilike(fragment("(?)::TEXT", r.name), ^value))
   end
 
   def override_whereable(dynamics, _, _, _), do: dynamics
+
+  # You can do some custom processing if needed eg
+  def after_whereable(dynamics) do
+    if dynamics, do: dynamics, else: true
+  end
 end
 ```
 
@@ -67,13 +73,14 @@ end
 
 #### Example Usage
 
-Here are some practical examples of how to use `FatEcto.FatHospitalFilter` to dynamically build queries:
+Here are some practical examples of how to use `FatEcto.Dynamics.MyApp.HospitalFilter` to dynamically build queries:
 
 ##### Example 1: Basic Filtering by ID
+
 ```elixir
 # Filter hospitals with ID equal to 1
 params = %{"id" => %{"$EQUAL" => 1}}
-dynamics = FatEcto.FatHospitalFilter.build(params)
+dynamics = FatEcto.Dynamics.MyApp.HospitalFilter.build(params)
 
 # Use the dynamics in a query
 import Ecto.Query
@@ -84,10 +91,11 @@ query = where(FatEcto.FatHospital, ^dynamics)
 ```
 
 ##### Example 2: Case-Insensitive Name Search
+
 ```elixir
 # Filter hospitals with names containing "St. Mary"
 params = %{"name" => %{"$ILIKE" => "%St. Mary%"}}
-dynamics = FatEcto.FatHospitalFilter.build(params)
+dynamics = FatEcto.Dynamics.MyApp.HospitalFilter.build(params)
 
 # Use the dynamics in a query
 import Ecto.Query
@@ -98,13 +106,14 @@ query = where(FatEcto.FatHospital, ^dynamics)
 ```
 
 ##### Example 3: Combining Multiple Filters
+
 ```elixir
 # Filter hospitals with ID not equal to 2 AND name containing "General"
 params = %{
   "id" => %{"$NOT_EQUAL" => 2},
   "name" => %{"$ILIKE" => "%General%"}
 }
-dynamics = FatEcto.FatHospitalFilter.build(params)
+dynamics = FatEcto.Dynamics.MyApp.HospitalFilter.build(params)
 
 # Use the dynamics in a query
 import Ecto.Query
@@ -115,10 +124,11 @@ query = where(FatEcto.FatHospital, ^dynamics)
 ```
 
 ##### Example 4: Ignoring Empty or Invalid Values
+
 ```elixir
 # Filter hospitals with a name, but ignore empty or invalid values
 params = %{"name" => %{"$ILIKE" => "%%"}}  # Empty value is ignored
-dynamics = FatEcto.FatHospitalFilter.build(params)
+dynamics = FatEcto.Dynamics.MyApp.HospitalFilter.build(params)
 
 # Use the dynamics in a query
 import Ecto.Query
@@ -128,18 +138,50 @@ query = where(FatEcto.FatHospital, ^dynamics)
 # from(h in FatEcto.FatHospital)  # No filtering applied for name
 ```
 
+##### Example 5: Even Complex Nested conditions
+
+```elixir
+# Filter hospitals with a name, but ignore empty or invalid values
+params = %{
+  "$OR" => [
+    %{
+      "name" => %{"$ILIKE" => "%John%"},
+      "$OR" => %{"rating" => %{"$GT" => 18}, "location" => "New York"}
+    },
+    %{
+      "start_date" => "2023-01-01",
+      "$AND" => [
+        %{"rating" => %{"$GT" => 4}},
+        %{"email" => "fat_ecto@example.com"}
+      ]
+    }
+  ]
+}
+
+dynamics = DoctorFilter.build(params)
+
+# Resulting dynamic:
+dynamic(
+  [q],
+  ((q.location == ^"New York" or q.rating > ^18) and ilike(fragment("(?)::TEXT", q.name), ^"%John%")) or
+    (q.rating > ^4 and q.email == ^"fat_ecto@example.com" and q.start_date == ^"2023-01-01")
+)
+
+# You can now apply the result on where just like above examples
+```
+
 ---
 
-### 🔄 FatEcto.FatQuery.Sortable – Effortless Sorting
+### 🔄 FatEcto.FatSortable – Effortless Sorting
 
 Sorting should be simple—and with `Sortable`, it is! Your frontend can send sorting parameters, and FatEcto will seamlessly generate the right sorting queries, allowing you to build powerful, customizable sorting logic without breaking a sweat. 😎
 
-#### Usage
+#### Usage of FatSortable
 
 ```elixir
 defmodule Fat.SortQuery do
   import Ecto.Query
-  use FatEcto.FatQuery.Sortable,
+  use FatEcto.FatSortable,
     sortable_fields: %{"id" => "$ASC", "name" => ["$ASC", "$DESC"]},
     overrideable_fields: ["custom_field"]
 
@@ -161,7 +203,7 @@ end
 
 No more hassle with pagination! FatPaginator helps you paginate Ecto queries efficiently, keeping your APIs snappy and responsive.
 
-#### Usage
+#### Usage of FatPaginator
 
 ```elixir
 defmodule Fat.MyPaginator do
@@ -172,15 +214,15 @@ end
 
 ---
 
-### 🔍 FatEcto.DataSanitizer – Clean & Structured Data
+### 🔍 FatEcto.FatDataSanitizer – Clean & Structured Data
 
 Messy data? Not anymore! `DataSanitizer` helps you sanitize records and transform them into structured, clean views effortlessly. Keep your data tidy and consistent. 🎯
 
-#### Usage
+#### Usage of FatDataSanitizer
 
 ```elixir
 defmodule Fat.MySanitizer do
-  use FatEcto.DataSanitizer
+  use FatEcto.FatDataSanitizer
   # Define your custom sanitization functions here
 end
 ```
@@ -193,10 +235,10 @@ FatEcto also comes with a set of handy utility functions to streamline your work
 
 ```elixir
 # Check if a map contains all required keys
-FatUtils.Map.has_all_keys?(%{a: 1, b: 2}, [:a, :b])
+FatEcto.Utils.Map.has_all_keys?(%{a: 1, b: 2}, [:a, :b])
 
 # Ensure a map contains only allowed keys
-FatUtils.Map.contain_only_allowed_keys?(%{a: 1, c: 3}, [:a, :b])
+FatEcto.Utils.Map.contain_only_allowed_keys?(%{a: 1, c: 3}, [:a, :b])
 ```
 
 ---

@@ -65,7 +65,7 @@ defmodule FatEcto.FatHelper do
   @spec get_skip_value(keyword()) :: {integer(), keyword()}
   def get_skip_value(params) do
     {skip, params} = Keyword.pop(params, :skip, @min_skip)
-    skip = FatUtils.Integer.parse!(skip)
+    skip = FatEcto.Utils.Integer.parse!(skip)
     skip = if skip > @default_skip, do: skip, else: @default_skip
     {skip, params}
   end
@@ -85,7 +85,7 @@ defmodule FatEcto.FatHelper do
   def get_limit_value(params, options \\ []) do
     {max_limit, default_limit} = get_limit_bounds(options)
     {limit, params} = Keyword.pop(params, :limit, default_limit)
-    limit = FatUtils.Integer.parse!(limit)
+    limit = FatEcto.Utils.Integer.parse!(limit)
 
     if is_nil(limit) do
       {default_limit, params}

@@ -1,4 +1,4 @@
-defmodule FatEcto.FatQuery.FatDynamics do
+defmodule FatEcto.Dynamics.FatDynamics do
   @moduledoc """
   Provides functions to build dynamic `where` conditions for Ecto queries.
 
@@ -42,7 +42,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
     iex> inspect(result)
     "dynamic([c], is_nil(c.location))"
   """
-  @spec field_is_nil_dynamic(any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec field_is_nil_dynamic(any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def field_is_nil_dynamic(key, opts \\ []) do
     if opts[:binding] == :last do
       dynamic(
@@ -69,7 +69,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
     iex> inspect(result)
     "dynamic([_, ..., c], c.experience_years > ^2)"
   """
-  @spec gt_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec gt_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def gt_dynamic(key, value, opts \\ []) do
     if opts[:binding] == :last do
       if FatHelper.fat_ecto_reserve_field?(value) do
@@ -114,7 +114,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
     iex> inspect(result)
     "dynamic([_, ..., c], c.experience_years >= ^2)"
   """
-  @spec gte_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec gte_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def gte_dynamic(key, value, opts \\ []) do
     if opts[:binding] == :last do
       if FatHelper.fat_ecto_reserve_field?(value) do
@@ -159,7 +159,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
     iex> inspect(result)
     "dynamic([q], q.experience_years <= ^2)"
   """
-  @spec lte_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec lte_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def lte_dynamic(key, value, opts \\ []) do
     if opts[:binding] == :last do
       if FatHelper.fat_ecto_reserve_field?(value) do
@@ -207,7 +207,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       iex> inspect(result)
       "dynamic([_, ..., c], c.experience_years < ^2)"
   """
-  @spec lt_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec lt_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def lt_dynamic(key, value, opts \\ []) do
     if opts[:binding] == :last do
       if FatHelper.fat_ecto_reserve_field?(value) do
@@ -255,7 +255,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       iex> inspect(result)
       "dynamic([q], ilike(fragment(\\\"(?)::TEXT\\\", q.name), ^\\\"%john%\\\"))"
   """
-  @spec ilike_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec ilike_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def ilike_dynamic(key, value, opts \\ []) do
     if opts[:binding] == :last do
       dynamic(
@@ -292,7 +292,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       "dynamic([q], fragment(\\\"EXISTS (SELECT 1 FROM UNNEST(?) as value WHERE value ILIKE ?)\\\", q.tags, ^\\\"%elixir%\\\"))"
   """
   @spec array_ilike_dynamic(any(), any(), nil | maybe_improper_list() | map()) ::
-          %Ecto.Query.DynamicExpr{}
+          Ecto.Query.dynamic_expr()
   def array_ilike_dynamic(key, value, opts \\ []) do
     if opts[:binding] == :last do
       dynamic(
@@ -330,7 +330,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       iex> inspect(result)
       "dynamic([q], like(fragment(\\\"(?)::TEXT\\\", q.name), ^\\\"%John%\\\"))"
   """
-  @spec like_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec like_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def like_dynamic(key, value, opts \\ []) do
     if opts[:binding] == :last do
       dynamic(
@@ -366,7 +366,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       iex> inspect(result)
       "dynamic([q], q.experience_years == ^2)"
   """
-  @spec eq_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec eq_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def eq_dynamic(key, value, opts \\ []) do
     if opts[:binding] == :last do
       dynamic(
@@ -396,7 +396,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       iex> inspect(result)
       "dynamic([q], fragment(\\\"?::date\\\", q.end_date == ^~D[2025-02-08]))"
   """
-  @spec cast_to_date_eq_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec cast_to_date_eq_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def cast_to_date_eq_dynamic(key, value, opts \\ []) do
     if opts[:binding] == :last do
       dynamic(
@@ -426,7 +426,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       iex> inspect(result)
       "dynamic([q], fragment(\\\"?::date\\\", q.end_date > ^~D[2025-02-08]))"
   """
-  @spec cast_to_date_gt_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec cast_to_date_gt_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def cast_to_date_gt_dynamic(key, value, opts \\ []) do
     if opts[:binding] == :last do
       dynamic(
@@ -456,7 +456,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       iex> inspect(result)
       "dynamic([q], fragment(\\\"?::date\\\", q.end_date >= ^~D[2025-02-08]))"
   """
-  @spec cast_to_date_gte_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec cast_to_date_gte_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def cast_to_date_gte_dynamic(key, value, opts \\ []) do
     if opts[:binding] == :last do
       dynamic(
@@ -486,7 +486,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       iex> inspect(result)
       "dynamic([q], fragment(\\\"?::date\\\", q.end_date < ^~D[2025-02-08]))"
   """
-  @spec cast_to_date_lt_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec cast_to_date_lt_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def cast_to_date_lt_dynamic(key, value, opts \\ []) do
     if opts[:binding] == :last do
       dynamic(
@@ -516,7 +516,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       iex> inspect(result)
       "dynamic([q], fragment(\\\"?::date\\\", q.end_date <= ^~D[2025-02-08]))"
   """
-  @spec cast_to_date_lte_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec cast_to_date_lte_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def cast_to_date_lte_dynamic(key, value, opts \\ []) do
     if opts[:binding] == :last do
       dynamic(
@@ -546,7 +546,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       iex> inspect(result)
       "dynamic([q], q.experience_years != ^2)"
   """
-  @spec not_eq_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec not_eq_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def not_eq_dynamic(key, value, opts \\ []) do
     value =
       if is_map(value) do
@@ -584,7 +584,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       iex> inspect(result)
       "dynamic([q], q.experience_years > ^2 and q.experience_years < ^5)"
   """
-  @spec between_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec between_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def between_dynamic(key, values, opts \\ []) do
     if opts[:binding] == :last do
       dynamic(
@@ -616,7 +616,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       iex> inspect(result)
       "dynamic([q], q.experience_years >= ^2 and q.experience_years <= ^5)"
   """
-  @spec between_equal_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec between_equal_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def between_equal_dynamic(key, values, opts \\ []) do
     if opts[:binding] == :last do
       dynamic(
@@ -648,7 +648,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       iex> inspect(result)
       "dynamic([q], q.experience_years in ^[2, 5])"
   """
-  @spec in_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec in_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def in_dynamic(key, values, opts \\ []) do
     if opts[:binding] == :last do
       dynamic(
@@ -678,7 +678,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       iex> inspect(result)
       "dynamic([q], fragment(\\\"? @> ?\\\", q.metadata, ^%{\\\"role\\\" => \\\"admin\\\"}))"
   """
-  @spec contains_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec contains_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def contains_dynamic(key, values, opts \\ []) do
     if opts[:binding] == :last do
       dynamic(
@@ -708,7 +708,7 @@ defmodule FatEcto.FatQuery.FatDynamics do
       iex> inspect(result)
       "dynamic([q], fragment(\\\"? && ?\\\", q.tags, ^[\\\"elixir\\\", \\\"erlang\\\"]))"
   """
-  @spec contains_any_dynamic(any(), any(), nil | keyword() | map()) :: %Ecto.Query.DynamicExpr{}
+  @spec contains_any_dynamic(any(), any(), nil | keyword() | map()) :: Ecto.Query.dynamic_expr()
   def contains_any_dynamic(key, values, opts \\ []) do
     if opts[:binding] == :last do
       dynamic(

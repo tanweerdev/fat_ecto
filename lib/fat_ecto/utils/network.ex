@@ -1,4 +1,4 @@
-defmodule FatUtils.Network do
+defmodule FatEcto.Utils.Network do
   @moduledoc """
   Provides utility functions for working with network-related tasks.
 
@@ -9,7 +9,7 @@ defmodule FatUtils.Network do
   Retrieves the local network address.
 
   ## Examples
-      iex> FatUtils.Network.local_address()
+      iex> FatEcto.Utils.Network.local_address()
       "192.168.1.100"
 
   ## Returns

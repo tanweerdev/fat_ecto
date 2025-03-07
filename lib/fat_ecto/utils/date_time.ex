@@ -1,4 +1,4 @@
-defmodule FatUtils.DateTime do
+defmodule FatEcto.Utils.DateTime do
   @moduledoc """
   Provides utility functions for parsing and converting date-time values.
 
