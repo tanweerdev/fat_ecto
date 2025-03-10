@@ -6,42 +6,42 @@ defmodule FatEcto.Dynamics.FatBuildable do
   and overrideable fields (handled by a fallback function).
 
   ## Options
-  - `filterable_fields`: A map of fields and their allowed operators. Example:
-      %{
-        "id" => ["$EQUAL", "$NOT_EQUAL"],
-        "name" => ["$ILIKE"]
-      }
-  - `overrideable_fields`: A list of fields that can be overridden. Example:
+  - `filterable`: A map of fields and their allowed operators. Example:
+      [
+        id: ["$EQUAL", "$NOT_EQUAL"],
+        name: ["$ILIKE"]
+      ]
+  - `overrideable`: A list of fields that can be overridden. Example:
       ["name", "phone"]
-  - `ignoreable_fields_values`: A map of fields and their ignoreable values. Example:
-      %{
+  - `ignoreable`: A map of fields and their ignoreable values. Example:
+      [
         "name" => ["%%", "", [], nil],
         "phone" => ["%%", "", [], nil]
-      }
+      ]
 
   ## Example Usage
       defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
         use FatEcto.Dynamics.FatBuildable,
-          filterable_fields: %{
-            "id" => ["$EQUAL", "$NOT_EQUAL"]
-          },
-          overrideable_fields: ["name", "phone"],
-          ignoreable_fields_values: %{
-            "name" => ["%%", "", [], nil],
-            "phone" => ["%%", "", [], nil]
-          }
+          filterable: [
+            id: ["$EQUAL", "$NOT_EQUAL"]
+          ],
+          overrideable: ["name", "phone"],
+          ignoreable: [
+            name: ["%%", "", [], nil],
+            phone: ["%%", "", [], nil]
+          ]
 
         import Ecto.Query
 
-        def override_whereable(_dynamics, "name", "$ILIKE", value) do
+        def override_buildable("name", "$ILIKE", value) do
           dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
         end
 
-        def override_whereable(_dynamics, "phone", "$ILIKE", value) do
+        def override_buildable("phone", "$ILIKE", value) do
           dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
         end
 
-        def override_whereable(dynamics, _, _, _) do
+        def override_buildable(dynamics, _, _, _) do
           dynamics
         end
 
@@ -61,7 +61,7 @@ defmodule FatEcto.Dynamics.FatBuildable do
   This function acts as a fallback for overrideable fields. The default behavior is to return the dynamics,
   but it can be overridden by the using module.
   """
-  @callback override_whereable(
+  @callback override_buildable(
               dynamics :: Ecto.Query.dynamic_expr(),
               field :: String.t() | atom(),
               operator :: String.t(),
@@ -80,23 +80,35 @@ defmodule FatEcto.Dynamics.FatBuildable do
     quote do
       @behaviour FatEcto.Dynamics.FatBuildable
       @options unquote(options)
-      @filterable_fields @options[:filterable_fields] || %{}
-      @overrideable_fields @options[:overrideable_fields] || []
-      @ignoreable_fields_values @options[:ignoreable_fields_values] || %{}
+      @filterable_fields @options[:filterable] || []
+      @overrideable_fields @options[:overrideable] || []
+      @ignoreable_fields_values @options[:ignoreable] || []
       alias FatEcto.Dynamics.FatBuildableHelper
       # def using_options, do: @options
       # # Defer the repo check to runtime
       # @after_compile FatEcto.Dynamics.FatBuildable
 
       # Ensure at least one of `filterable_fields` or `overrideable_fields` is provided.
-      if @filterable_fields == %{} and @overrideable_fields == [] do
+      if @filterable_fields == [] and @overrideable_fields == [] do
         raise CompileError,
           description: """
-          You must provide at least one of `filterable_fields` or `overrideable_fields`.
+          You must provide at least one of `filterable` or `overrideable` option.
           Example:
             use FatEcto.Dynamics.FatBuildable,
-              filterable_fields: %{"id" => ["$EQUAL", "$NOT_EQUAL"]},
-              overrideable_fields: ["name", "phone"]
+              filterable: [id: ["$EQUAL", "$NOT_EQUAL"]],
+              overrideable: [:name, :phone]
+          """
+      end
+
+      unless (is_list(@filterable_fields) || is_nil(@filterable_fields)) and
+               (is_list(@overrideable_fields) || is_nil(@overrideable_fields)) do
+        raise CompileError,
+          description: """
+          Format for `filterable_fields` or `overrideable_fields` should be in expected format.
+          Example:
+            use FatEcto.Dynamics.FatBuildable,
+              filterable: [id: ["$EQUAL", "$NOT_EQUAL"]],
+              overrideable: [:name, :phone]
           """
       end
 
@@ -126,12 +138,12 @@ defmodule FatEcto.Dynamics.FatBuildable do
             @overrideable_fields
           )
 
-        # Build dynamics with the override_whereable function as the callback
+        # Build dynamics with the override_buildable function as the callback
         dynamics =
           FatDynamicsBuilder.build(
             filterable_params,
             build_options,
-            &override_whereable/4
+            &override_buildable/4
           )
 
         # Apply after_whereable callback
@@ -143,11 +155,11 @@ defmodule FatEcto.Dynamics.FatBuildable do
       end
 
       @doc """
-      Default implementation of `override_whereable/4`.
+      Default implementation of `override_buildable/4`.
 
       This function can be overridden by the using module to implement custom filtering logic.
       """
-      def override_whereable(dynamics, _field, _operator, _value), do: dynamics
+      def override_buildable(dynamics, _field, _operator, _value), do: dynamics
 
       @doc """
       Default implementation of after_whereable/1.
@@ -156,7 +168,7 @@ defmodule FatEcto.Dynamics.FatBuildable do
       """
       def after_whereable(dynamics), do: dynamics
 
-      defoverridable override_whereable: 4
+      defoverridable override_buildable: 4
       defoverridable after_whereable: 1
     end
   end
@@ -168,15 +180,15 @@ defmodule FatEcto.Dynamics.FatBuildable do
   # def __after_compile__(%{module: module}, _bytecode) do
   #   options = module.using_options()
 
-  #   # Ensure `override_whereable/4` is implemented if `overrideable_fields` are provided.
+  #   # Ensure `override_buildable/4` is implemented if `overrideable_fields` are provided.
   #   IO.inspect("options: #{inspect(options)}")
   #   if options[:overrideable_fields] != [] do
-  #     unless Module.defines?(module, {:override_whereable, 4}) do
+  #     unless Module.defines?(module, {:override_buildable, 4}) do
   #       raise CompileError,
   #         description: """
-  #         You must implement the `override_whereable/4` callback when `overrideable_fields` are provided.
+  #         You must implement the `override_buildable/4` callback when `overrideable_fields` are provided.
   #         Example:
-  #           def override_whereable(dynamics, field, operator, value) do
+  #           def override_buildable(dynamics, field, operator, value) do
   #             # Your custom logic here
   #             dynamics
   #           end

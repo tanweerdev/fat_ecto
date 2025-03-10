@@ -53,10 +53,10 @@ defmodule FatEcto.Dynamics.FatBuildableHelperTest do
         "email" => %{"$EQUAL" => "test@example.com"}
       }
 
-      filterable_fields = %{
-        "name" => ["$ILIKE"],
-        "age" => "*"
-      }
+      filterable_fields = [
+        :name,
+        :age
+      ]
 
       overideable_fields = []
 
@@ -108,13 +108,13 @@ defmodule FatEcto.Dynamics.FatBuildableHelperTest do
         ]
       }
 
-      filterable_fields = %{
-        "email" => "*",
-        "name" => "*",
-        "rating" => "*",
-        "start_date" => "*",
-        "location" => "*"
-      }
+      filterable_fields = [
+        email: "*",
+        name: "*",
+        rating: "*",
+        start_date: "*",
+        location: "*"
+      ]
 
       overideable_fields = ["phone"]
 
@@ -151,10 +151,10 @@ defmodule FatEcto.Dynamics.FatBuildableHelperTest do
         ]
       }
 
-      filterable_fields = %{
-        "email" => "*",
-        "name" => "*"
-      }
+      filterable_fields = [
+        email: "*",
+        name: "*"
+      ]
 
       overideable_fields = ["phone"]
 
@@ -191,10 +191,10 @@ defmodule FatEcto.Dynamics.FatBuildableHelperTest do
         ]
       }
 
-      filterable_fields = %{
-        "email" => "*",
-        "name" => "*"
-      }
+      filterable_fields = [
+        email: "*",
+        name: "*"
+      ]
 
       overideable_fields = ["phone"]
 
@@ -210,10 +210,10 @@ defmodule FatEcto.Dynamics.FatBuildableHelperTest do
         "age" => 25
       }
 
-      filterable_fields = %{
-        "name" => ["$EQUAL"],
-        "age" => "*"
-      }
+      filterable_fields = [
+        name: ["$EQUAL"],
+        age: "*"
+      ]
 
       overideable_fields = []
 

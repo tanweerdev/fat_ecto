@@ -43,11 +43,11 @@ Tired of writing repetitive query filters? The `Whereable` module lets you dynam
 ```elixir
 defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
   use FatEcto.Dynamics.FatBuildable,
-    filterable_fields: %{
+    filterable: %{
       "id" => ["$EQUAL", "$NOT_EQUAL"]
     },
-    overrideable_fields: ["name", "phone"],
-    ignoreable_fields_values: %{
+    overrideable: ["name", "phone"],
+    ignoreable: %{
       "name" => ["%%", "", [], nil],
       "phone" => ["%%", "", [], nil]
     }
@@ -55,8 +55,9 @@ defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
   import Ecto.Query
 
   @impl true
-  # You can implement override_whereable for your custom filters
-  def override_whereable(_dynamics, "name", "$ILIKE", value) do
+  # You can implement override_buildable for your custom filters
+  ## TODO: lets
+  def override_buildable(_dynamics, "name", "$ILIKE", value) do
     dynamic([r], ilike(fragment("(?)::TEXT", r.name), ^value))
   end
 
@@ -182,8 +183,8 @@ Sorting should be simple—and with `Sortable`, it is! Your frontend can send so
 defmodule Fat.SortQuery do
   import Ecto.Query
   use FatEcto.FatSortable,
-    sortable_fields: %{"id" => "$ASC", "name" => ["$ASC", "$DESC"]},
-    overrideable_fields: ["custom_field"]
+    sortable: [id: "$ASC", name: ["$ASC", "$DESC"]],
+    overrideable: ["custom_field"]
 
   @impl true
   def override_sortable(query, field, operator) do
