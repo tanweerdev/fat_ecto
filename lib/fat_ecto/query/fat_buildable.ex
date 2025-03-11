@@ -22,26 +22,26 @@ defmodule FatEcto.Query.FatBuildable do
   ## Example Usage
       defmodule MyApp.HospitalFilter do
         use FatEcto.Query.FatBuildable,
-          filterable_fields: %{
+          filterable: %{
             "id" => ["$eq", "$neq"]
           },
-          overrideable_fields: ["name", "phone"],
-          ignoreable_fields_values: %{
+          overrideable: ["name", "phone"],
+          ignoreable: %{
             "name" => ["%%", "", [], nil],
             "phone" => ["%%", "", [], nil]
           }
 
         import Ecto.Query
 
-        def override_whereable(query, "name", "$ilike", value) do
+        def override_buildable(query, "name", "$ilike", value) do
           where(query, [r], ilike(fragment("(?)::TEXT", r.name), ^value))
         end
 
-        def override_whereable(query, "phone", "$ilike", value) do
+        def override_buildable(query, "phone", "$ilike", value) do
           where(query, [r], ilike(fragment("(?)::TEXT", r.phone), ^value))
         end
 
-        def override_whereable(query, _, _, _) do
+        def override_buildable(query, _, _, _) do
           query
         end
       end
@@ -56,7 +56,7 @@ defmodule FatEcto.Query.FatBuildable do
   This function acts as a fallback for overrideable fields. The default behavior is to return the query,
   but it can be overridden by the using module.
   """
-  @callback override_whereable(
+  @callback override_buildable(
               query :: Ecto.Query.t(),
               field :: String.t() | atom(),
               operator :: String.t(),
@@ -74,9 +74,9 @@ defmodule FatEcto.Query.FatBuildable do
     quote do
       @behaviour FatEcto.Query.FatBuildable
       @options unquote(options)
-      @filterable_fields @options[:filterable_fields] || %{}
-      @overrideable_fields @options[:overrideable_fields] || []
-      @ignoreable_fields_values @options[:ignoreable_fields_values] || %{}
+      @filterable_fields @options[:filterable] || []
+      @overrideable_fields @options[:overrideable] || []
+      @ignoreable_fields_values @options[:ignoreable] || []
       @all_operators "*"
       alias FatEcto.Dynamics.FatBuildableHelper
       alias FatEcto.Query.FatBuildable
@@ -88,19 +88,19 @@ defmodule FatEcto.Query.FatBuildable do
           You must provide at least one of `filterable_fields` or `overrideable_fields`.
           Example:
             use FatEcto.Query.FatBuildable,
-              filterable_fields: %{"id" => ["$eq", "$neq"]},
-              overrideable_fields: ["name", "phone"]
+              filterable: %{"id" => ["$eq", "$neq"]},
+              overrideable: ["name", "phone"]
           """
       end
 
-      # Ensure `override_whereable/4` is implemented if `overrideable_fields` are provided.
+      # Ensure `override_buildable/4` is implemented if `overrideable_fields` are provided.
       # if @overrideable_fields != [] do
-      #   unless Module.defines?(__MODULE__, {:override_whereable, 4}) do
+      #   unless Module.defines?(__MODULE__, {:override_buildable, 4}) do
       #     raise CompileError,
       #       description: """
-      #       You must implement the `override_whereable/4` callback when `overrideable_fields` are provided.
+      #       You must implement the `override_buildable/4` callback when `overrideable_fields` are provided.
       #       Example:
-      #         def override_whereable(query, field, operator, value) do
+      #         def override_buildable(query, field, operator, value) do
       #           # Your custom logic here
       #           query
       #         end
@@ -157,11 +157,11 @@ defmodule FatEcto.Query.FatBuildable do
       def after_whereable(query), do: query
 
       @doc """
-      Default implementation of `override_whereable/4`.
+      Default implementation of `override_buildable/4`.
 
       This function can be overridden by the using module to implement custom filtering logic.
       """
-      def override_whereable(query, _field, _operator, _value), do: query
+      def override_buildable(query, _field, _operator, _value), do: query
 
       # Applies custom filtering for overrideable fields using the fallback function.
       defp apply_overrideable_filters(query, overrideable_params) do
@@ -171,11 +171,11 @@ defmodule FatEcto.Query.FatBuildable do
                                                      value: value
                                                    },
                                                    query ->
-          override_whereable(query, field, operator, value)
+          override_buildable(query, field, operator, value)
         end)
       end
 
-      defoverridable override_whereable: 4
+      defoverridable override_buildable: 4
       defoverridable after_whereable: 1
     end
   end

@@ -1,7 +1,7 @@
 defmodule FatEcto.Dynamics.MyApp.DoctorFilter do
   use FatEcto.Dynamics.FatBuildable,
-    filterable_fields: %{
-      "email" => [
+    filterable: [
+      email: [
         "$EQUAL",
         "$LIKE",
         "$NOT_EQUAL",
@@ -13,25 +13,27 @@ defmodule FatEcto.Dynamics.MyApp.DoctorFilter do
         "$NOT_NULL",
         "$NULL"
       ],
-      "name" => "*",
-      "rating" => "*",
-      "start_date" => "*",
-      "location" => "*"
-    },
-    overrideable_fields: ["phone"],
-    ignoreable_fields_values: %{
-      "email" => ["%%", "", [], nil],
-      "phone" => ["%%", "", [], nil]
-    }
+      name: "*",
+      rating: "*",
+      start_date: "*",
+      location: "*"
+    ],
+    overrideable: ["phone"],
+    ignoreable: [
+      email: ["%%", "", [], nil],
+      phone: ["%%", "", [], nil]
+    ]
 
   import Ecto.Query
   @impl FatEcto.Dynamics.FatBuildable
+  # TODO: also support `field.EQUAL => value` instead of accepting just map eg `field => {"$EQUAL" => value}`
+  # You can use either dot . or colon : to separate field and operator
 
-  def override_whereable(_dynamics, "phone", "$ILIKE", value) do
+  def override_buildable(_dynamics, "phone", "$ILIKE", value) do
     dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
   end
 
-  def override_whereable(_dynamics, "phone", "$LIKE", value) do
+  def override_buildable(_dynamics, "phone", "$LIKE", value) do
     dynamic([q], like(fragment("(?)::TEXT", q.phone), ^value))
   end
 

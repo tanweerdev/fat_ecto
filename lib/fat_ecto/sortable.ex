@@ -11,8 +11,8 @@ defmodule FatEcto.FatSortable do
         <!-- needed if you are writing queries in override_sortable -->
         import Ecto.Query
         use FatEcto.FatSortable,
-          sortable_fields: %{"id" => "$ASC", "name" => ["$ASC", "$DESC"]},
-          overrideable_fields: ["custom_field"]
+          sortable: [id: "$ASC", name: ["$ASC", "$DESC"]],
+          overrideable: ["custom_field"]
 
         @impl true
         def override_sortable(query, field, operator) do
@@ -52,18 +52,29 @@ defmodule FatEcto.FatSortable do
     quote do
       @behaviour FatEcto.FatSortable
       @options unquote(options)
-      @sortable_fields @options[:sortable_fields] || %{}
-      @overrideable_fields @options[:overrideable_fields] || []
+      @sortable_fields @options[:sortable] || []
+      @overrideable_fields @options[:overrideable] || []
       alias FatEcto.FatSortableHelper
 
       # Raise a compile-time error if both sortable_fields and overrideable_fields are empty.
-      if @sortable_fields == %{} and @overrideable_fields == [] do
+      if @sortable_fields == [] and @overrideable_fields == [] do
         raise ArgumentError, """
         At least one of `sortable_fields` or `overrideable_fields` must be provided.
         Example:
           use FatEcto.FatSortable,
-            sortable_fields: %{"id" => "$ASC"},
-            overrideable_fields: ["custom_field"]
+            sortable: [id: "$ASC"],
+            overrideable: ["custom_field"]
+        """
+      end
+
+      unless (is_list(@sortable_fields) || is_nil(@sortable_fields)) and
+               (is_list(@overrideable_fields) || is_nil(@overrideable_fields)) do
+        raise ArgumentError, """
+        Please send `sortable` and `overrideable` in expected format see below example.
+        Example:
+          use FatEcto.FatSortable,
+            sortable: [id: "$ASC"],
+            overrideable: ["custom_field"]
         """
       end
 
