@@ -1,5 +1,5 @@
 defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
-  use FatEcto.Dynamics.FatBuildable,
+  use FatEcto.Builder.FatDynamicsBuildable,
     overrideable: ["name", "phone"],
     ignoreable: [
       name: ["%%", "", [], nil],
@@ -25,7 +25,7 @@ defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
     dynamic([q], like(fragment("(?)::TEXT", q.phone), ^value))
   end
 
-  def override_whereable(dynamics, _, _, _) do
+  def override_buildable(dynamics, _, _, _) do
     dynamics
   end
 end

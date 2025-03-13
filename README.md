@@ -34,7 +34,7 @@ Then, run `mix deps.get` to install the package.
 
 ## Features & Modules
 
-### 🛠 FatEcto.Dynamics.FatBuildable – Dynamic Filtering Made Easy
+### 🛠 FatEcto.Builder.FatDynamicsBuildable – Dynamic Filtering Made Easy
 
 Tired of writing repetitive query filters? The `Whereable` module lets you dynamically filter records using flexible conditions passed from your web or mobile clients—with little to no effort! And the best part? You stay in control. 🚀
 
@@ -42,7 +42,7 @@ Tired of writing repetitive query filters? The `Whereable` module lets you dynam
 
 ```elixir
 defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
-  use FatEcto.Dynamics.FatBuildable,
+  use FatEcto.Builder.FatDynamicsBuildable,
     filterable: %{
       "id" => ["$EQUAL", "$NOT_EQUAL"]
     },

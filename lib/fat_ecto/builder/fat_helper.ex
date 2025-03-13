@@ -1,6 +1,6 @@
-defmodule FatEcto.Dynamics.FatBuildableHelper do
+defmodule FatEcto.Builder.FatHelper do
   @moduledoc """
-  Provides helper functions for filtering and processing query parameters in `FatEcto.Dynamics.FatBuildable`.
+  Provides helper functions for filtering and processing query parameters in `FatEcto.Builder.FatDynamicsBuildable`.
   """
 
   @doc """
@@ -8,13 +8,16 @@ defmodule FatEcto.Dynamics.FatBuildableHelper do
 
   ### Parameters
     - `where_params`: The query parameters (e.g., `%{"field" => %{"$EQUAL" => "value"}}`).
-    - `ignoreable_fields_values`: A map of fields and their ignoreable values (e.g., `%{"email" => ["%%", "", [], nil]}`).
+    - `ignoreable_fields_values`: A keyword list of fields and their ignoreable values (e.g., `[email: ["", "%%", nil], phone: [nil]]`).
 
   ### Returns
     - The filtered query parameters.
   """
-  @spec remove_ignoreable_fields(map(), map()) :: map()
+  alias FatEcto.FatHelper
+  @spec remove_ignoreable_fields(map(), keyword()) :: map()
   def remove_ignoreable_fields(where_params, ignoreable_fields_values) do
+    ignoreable_fields_values = FatHelper.keyword_list_to_map(ignoreable_fields_values)
+
     Enum.reduce(where_params, %{}, fn {field, value}, acc ->
       case Map.get(ignoreable_fields_values, field) do
         nil ->
@@ -55,13 +58,15 @@ defmodule FatEcto.Dynamics.FatBuildableHelper do
 
   ### Parameters
     - `where_params`: The query parameters (e.g., `%{"field" => %{"$EQUAL" => "value"}}`).
-    - `filterable_fields`: A map of fields and their allowed operators (e.g., `%{"email" => ["$EQUAL", "$LIKE"]}`).
+    - `filterable_fields`: A keyword list of fields and their allowed operators (e.g., `[name: ["$EQUAL"], age: "*"]`).
+    - `overrideable_fields`: A list of fields that can be overridden (e.g., `["phone"]`).
 
   ### Returns
     - The filtered query parameters.
   """
-  @spec filter_filterable_fields(map(), map(), list()) :: map()
+  @spec filter_filterable_fields(map(), keyword(), list()) :: map()
   def filter_filterable_fields(where_params, filterable_fields, overrideable_fields) do
+    filterable_fields = FatHelper.filterable_opt_to_map(filterable_fields)
     do_filter_filterable_fields(where_params, filterable_fields, overrideable_fields, %{})
   end
 

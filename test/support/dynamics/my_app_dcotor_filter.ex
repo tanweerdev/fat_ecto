@@ -1,5 +1,5 @@
 defmodule FatEcto.Dynamics.MyApp.DoctorFilter do
-  use FatEcto.Dynamics.FatBuildable,
+  use FatEcto.Builder.FatDynamicsBuildable,
     filterable: [
       email: [
         "$EQUAL",
@@ -25,7 +25,7 @@ defmodule FatEcto.Dynamics.MyApp.DoctorFilter do
     ]
 
   import Ecto.Query
-  @impl FatEcto.Dynamics.FatBuildable
+  @impl FatEcto.Builder.FatDynamicsBuildable
   # TODO: also support `field.EQUAL => value` instead of accepting just map eg `field => {"$EQUAL" => value}`
   # You can use either dot . or colon : to separate field and operator
 
@@ -37,7 +37,7 @@ defmodule FatEcto.Dynamics.MyApp.DoctorFilter do
     dynamic([q], like(fragment("(?)::TEXT", q.phone), ^value))
   end
 
-  def override_whereable(dynamics, _, _, _) do
+  def override_buildable(dynamics, _, _, _) do
     dynamics
   end
 end

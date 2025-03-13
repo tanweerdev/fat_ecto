@@ -1,5 +1,5 @@
 defmodule FatEcto.Dynamics.MyApp.RoomFilter do
-  use FatEcto.Dynamics.FatBuildable,
+  use FatEcto.Builder.FatDynamicsBuildable,
     filterable: [],
     overrideable: ["name", "phone", "purpose", "description"],
     ignoreable: [
@@ -10,7 +10,7 @@ defmodule FatEcto.Dynamics.MyApp.RoomFilter do
     ]
 
   import Ecto.Query
-  @impl FatEcto.Dynamics.FatBuildable
+  @impl FatEcto.Builder.FatDynamicsBuildable
 
   def override_buildable(_dynamics, "phone", "$ILIKE", value) do
     dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
@@ -32,7 +32,7 @@ defmodule FatEcto.Dynamics.MyApp.RoomFilter do
     dynamic([q], q.purpose in ^values)
   end
 
-  def override_whereable(dynamics, _, _, _) do
+  def override_buildable(dynamics, _, _, _) do
     dynamics
   end
 end

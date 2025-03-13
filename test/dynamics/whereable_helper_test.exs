@@ -1,6 +1,6 @@
-defmodule FatEcto.Dynamics.FatBuildableHelperTest do
+defmodule FatEcto.Builder.FatHelperTest do
   use FatEcto.ConnCase
-  alias FatEcto.Dynamics.FatBuildableHelper
+  alias FatEcto.Builder.FatHelper
 
   describe "remove_ignoreable_fields/2" do
     test "removes fields with ignoreable values" do
@@ -11,12 +11,12 @@ defmodule FatEcto.Dynamics.FatBuildableHelperTest do
         "age" => %{"$GT" => 18}
       }
 
-      ignoreable_fields_values = %{
-        "email" => ["", "%%", nil],
-        "phone" => [nil]
-      }
+      ignoreable_fields_values = [
+        email: ["", "%%", nil],
+        phone: [nil]
+      ]
 
-      result = FatBuildableHelper.remove_ignoreable_fields(where_params, ignoreable_fields_values)
+      result = FatHelper.remove_ignoreable_fields(where_params, ignoreable_fields_values)
 
       assert result == %{
                "name" => "John",
@@ -31,11 +31,9 @@ defmodule FatEcto.Dynamics.FatBuildableHelperTest do
         "age" => %{"$GT" => 18}
       }
 
-      ignoreable_fields_values = %{
-        "email" => ["", "%%", nil]
-      }
+      ignoreable_fields_values = [email: ["", "%%", nil]]
 
-      result = FatBuildableHelper.remove_ignoreable_fields(where_params, ignoreable_fields_values)
+      result = FatHelper.remove_ignoreable_fields(where_params, ignoreable_fields_values)
 
       assert result == %{
                "name" => "John",
@@ -53,15 +51,11 @@ defmodule FatEcto.Dynamics.FatBuildableHelperTest do
         "email" => %{"$EQUAL" => "test@example.com"}
       }
 
-      filterable_fields = [
-        :name,
-        :age
-      ]
-
+      filterable_fields = [:name, :age]
       overideable_fields = []
 
       result =
-        FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
+        FatHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
 
       assert result == %{
                "name" => %{"$ILIKE" => "%John%"},
@@ -108,18 +102,11 @@ defmodule FatEcto.Dynamics.FatBuildableHelperTest do
         ]
       }
 
-      filterable_fields = [
-        email: "*",
-        name: "*",
-        rating: "*",
-        start_date: "*",
-        location: "*"
-      ]
-
+      filterable_fields = [email: "*", name: "*", rating: "*", start_date: "*", location: "*"]
       overideable_fields = ["phone"]
 
       result =
-        FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
+        FatHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
 
       assert result == expected
     end
@@ -151,15 +138,11 @@ defmodule FatEcto.Dynamics.FatBuildableHelperTest do
         ]
       }
 
-      filterable_fields = [
-        email: "*",
-        name: "*"
-      ]
-
+      filterable_fields = [email: "*", name: "*"]
       overideable_fields = ["phone"]
 
       result =
-        FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
+        FatHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
 
       assert result == expected
     end
@@ -191,15 +174,11 @@ defmodule FatEcto.Dynamics.FatBuildableHelperTest do
         ]
       }
 
-      filterable_fields = [
-        email: "*",
-        name: "*"
-      ]
-
+      filterable_fields = [email: "*", name: "*"]
       overideable_fields = ["phone"]
 
       result =
-        FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
+        FatHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
 
       assert result == expected
     end
@@ -210,15 +189,11 @@ defmodule FatEcto.Dynamics.FatBuildableHelperTest do
         "age" => 25
       }
 
-      filterable_fields = [
-        name: ["$EQUAL"],
-        age: "*"
-      ]
-
+      filterable_fields = [name: ["$EQUAL"], age: "*"]
       overideable_fields = []
 
       result =
-        FatBuildableHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
+        FatHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
 
       assert result == %{
                "name" => %{"$EQUAL" => "John"},

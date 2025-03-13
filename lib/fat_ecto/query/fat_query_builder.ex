@@ -1,11 +1,11 @@
 defmodule FatEcto.Query.FatQueryBuilder do
   @moduledoc """
   This module builds Ecto queries from a JSON-like structure.
-  It uses the `FatEcto.Dynamics.FatOperatorHelper` module to apply operators and construct the query.
+  It uses the `FatEcto.Builder.FatOperatorHelper` module to apply operators and construct the query.
   """
 
   import Ecto.Query
-  alias FatEcto.Dynamics.FatOperatorHelper
+  alias FatEcto.Builder.FatOperatorHelper
 
   @doc """
   Builds an Ecto query from a JSON-like structure.
@@ -40,7 +40,7 @@ defmodule FatEcto.Query.FatQueryBuilder do
           build_and_query(acc, value, opts)
 
         _ ->
-          build_field_query(acc, key, value, opts)
+          build_field_query(acc, key, value)
       end
     end)
   end
@@ -78,10 +78,10 @@ defmodule FatEcto.Query.FatQueryBuilder do
   end
 
   # Handles individual field conditions
-  defp build_field_query(query, field, conditions, opts) when is_map(conditions) do
+  defp build_field_query(query, field, conditions) when is_map(conditions) do
     field_dynamic =
       Enum.reduce(conditions, nil, fn {operator, value}, acc ->
-        case FatOperatorHelper.apply_operator(operator, field, value, opts) do
+        case FatOperatorHelper.apply_operator(operator, field, value) do
           nil ->
             acc
 
@@ -100,11 +100,11 @@ defmodule FatEcto.Query.FatQueryBuilder do
   end
 
   # Handles direct field comparisons (e.g., "field" => "value" or "field" => nil)
-  defp build_field_query(query, field, value, opts) do
+  defp build_field_query(query, field, value) do
     field_dynamic =
       case value do
-        nil -> FatOperatorHelper.apply_nil_operator("$NULL", field, opts)
-        _ -> FatOperatorHelper.apply_operator("$EQUAL", field, value, opts)
+        nil -> FatOperatorHelper.apply_nil_operator("$NULL", field)
+        _ -> FatOperatorHelper.apply_operator("$EQUAL", field, value)
       end
 
     case field_dynamic do

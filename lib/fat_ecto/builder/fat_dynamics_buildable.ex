@@ -1,4 +1,4 @@
-defmodule FatEcto.Dynamics.FatBuildable do
+defmodule FatEcto.Builder.FatDynamicsBuildable do
   @moduledoc """
   Builds queries after filtering fields based on user-provided filterable and overrideable fields.
 
@@ -21,7 +21,7 @@ defmodule FatEcto.Dynamics.FatBuildable do
 
   ## Example Usage
       defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
-        use FatEcto.Dynamics.FatBuildable,
+        use FatEcto.Builder.FatDynamicsBuildable,
           filterable: [
             id: ["$EQUAL", "$NOT_EQUAL"]
           ],
@@ -53,7 +53,7 @@ defmodule FatEcto.Dynamics.FatBuildable do
       end
   """
 
-  alias FatEcto.Dynamics.FatDynamicsBuilder
+  alias FatEcto.Builder.FatDynamicsBuilder
 
   @doc """
   Callback for handling custom filtering logic for overrideable fields.
@@ -78,39 +78,42 @@ defmodule FatEcto.Dynamics.FatBuildable do
 
   defmacro __using__(options \\ []) do
     quote do
-      @behaviour FatEcto.Dynamics.FatBuildable
+      @behaviour FatEcto.Builder.FatDynamicsBuildable
       @options unquote(options)
-      @filterable_fields @options[:filterable] || []
+      @filterable @options[:filterable] || []
       @overrideable_fields @options[:overrideable] || []
-      @ignoreable_fields_values @options[:ignoreable] || []
-      alias FatEcto.Dynamics.FatBuildableHelper
+      @ignoreable @options[:ignoreable] || []
+      alias FatEcto.Builder.FatHelper
       # def using_options, do: @options
       # # Defer the repo check to runtime
-      # @after_compile FatEcto.Dynamics.FatBuildable
+      # @after_compile FatEcto.Builder.FatDynamicsBuildable
 
-      # Ensure at least one of `filterable_fields` or `overrideable_fields` is provided.
-      if @filterable_fields == [] and @overrideable_fields == [] do
+      # Ensure at least one of `filterable` or `overrideable` fields option is provided.
+      if @filterable == [] and @overrideable_fields == [] do
         raise CompileError,
           description: """
           You must provide at least one of `filterable` or `overrideable` option.
           Example:
-            use FatEcto.Dynamics.FatBuildable,
+            use FatEcto.Builder.FatDynamicsBuildable,
               filterable: [id: ["$EQUAL", "$NOT_EQUAL"]],
               overrideable: [:name, :phone]
           """
       end
 
-      unless (is_list(@filterable_fields) || is_nil(@filterable_fields)) and
+      unless (is_list(@filterable) || is_nil(@filterable)) and
                (is_list(@overrideable_fields) || is_nil(@overrideable_fields)) do
         raise CompileError,
           description: """
-          Format for `filterable_fields` or `overrideable_fields` should be in expected format.
+          Format for `filterable` or `overrideable` fields should be in expected format.
           Example:
-            use FatEcto.Dynamics.FatBuildable,
+            use FatEcto.Builder.FatDynamicsBuildable,
               filterable: [id: ["$EQUAL", "$NOT_EQUAL"]],
               overrideable: [:name, :phone]
           """
       end
+
+      @filterable_fields FatEcto.FatHelper.filterable_opt_to_map(@filterable)
+      @ignoreable_fields_values FatEcto.FatHelper.keyword_list_to_map(@ignoreable)
 
       @doc """
       Builds dynamics after filtering fields based on the provided parameters.
@@ -128,11 +131,11 @@ defmodule FatEcto.Dynamics.FatBuildable do
       def build(where_params, build_options) when is_map(where_params) do
         # Remove ignoreable fields from the params
         where_params_ignoreables_removed =
-          FatBuildableHelper.remove_ignoreable_fields(where_params, @ignoreable_fields_values)
+          FatHelper.remove_ignoreable_fields(where_params, @ignoreable_fields_values)
 
         # Only keep filterable fields in params
         filterable_params =
-          FatBuildableHelper.filter_filterable_fields(
+          FatHelper.filter_filterable_fields(
             where_params_ignoreables_removed,
             @filterable_fields,
             @overrideable_fields
@@ -142,7 +145,6 @@ defmodule FatEcto.Dynamics.FatBuildable do
         dynamics =
           FatDynamicsBuilder.build(
             filterable_params,
-            build_options,
             &override_buildable/4
           )
 

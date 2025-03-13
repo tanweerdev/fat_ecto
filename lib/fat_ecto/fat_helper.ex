@@ -97,21 +97,6 @@ defmodule FatEcto.FatHelper do
   end
 
   @doc """
-  Determines if a value is a reserved field in FatEcto.
-
-  ## Parameters
-  - `value`: The value to check.
-
-  ## Examples
-      iex> FatEcto.FatHelper.fat_ecto_reserve_field?("$INCLUDE")
-      true
-  """
-  @spec fat_ecto_reserve_field?(any()) :: boolean()
-  def fat_ecto_reserve_field?(value) do
-    is_binary(value) && String.starts_with?(value, "$")
-  end
-
-  @doc """
   Converts a string to an atom.
 
   ## Parameters
@@ -159,4 +144,31 @@ defmodule FatEcto.FatHelper do
       nil
     end
   end
+
+  @spec filterable_opt_to_map(maybe_improper_list() | any()) :: maybe_improper_list() | map()
+  def filterable_opt_to_map(list) when is_list(list) do
+    if Keyword.keyword?(list) do
+      keyword_list_to_map(list)
+    else
+      list
+      |> Enum.map(fn k -> {Atom.to_string(k), "*"} end)
+      |> Map.new()
+    end
+  end
+
+  def filterable_opt_to_map(input), do: input
+
+  # Converts a keyword list to a map with string keys
+  @spec keyword_list_to_map(keyword() | map()) :: map()
+  def keyword_list_to_map(list) when is_list(list) do
+    if Keyword.keyword?(list) do
+      list
+      |> Enum.map(fn {k, v} -> {Atom.to_string(k), v} end)
+      |> Map.new()
+    else
+      list
+    end
+  end
+
+  def keyword_list_to_map(input), do: input
 end

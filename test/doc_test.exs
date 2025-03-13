@@ -8,10 +8,10 @@ defmodule DocTest do
     :ok
   end
 
-  doctest FatEcto.Dynamics.FatDynamics
-  doctest FatEcto.Dynamics.FatNotDynamics
-  doctest FatEcto.Dynamics.FatDynamicsBuilder
-  doctest FatEcto.Dynamics.FatOperatorHelper
+  # doctest FatEcto.Dynamics.FatDynamics
+  # doctest FatEcto.Dynamics.FatNotDynamics
+  doctest FatEcto.Builder.FatDynamicsBuilder
+  doctest FatEcto.Builder.FatOperatorHelper
   # doctest FatEcto.Utils.Changeset
   doctest FatEcto.Utils.DateTime
   doctest FatEcto.Utils.Integer
@@ -27,6 +27,6 @@ defmodule DocTest do
   doctest FatEcto.Sample.Pagination
   doctest FatEcto.FatSortableHelper
   doctest Fat.DoctorOrderby
-  doctest FatEcto.Dynamics.FatBuildableHelper
+  doctest FatEcto.Builder.FatHelper
   doctest FatEcto.Dynamics.MyApp.DoctorFilter
 end

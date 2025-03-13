@@ -1,7 +1,7 @@
-defmodule FatEcto.Dynamics.FatDynamicsBuilderTest do
+defmodule FatEcto.Builder.FatDynamicsBuilderTest do
   use FatEcto.ConnCase
   import Ecto.Query
-  alias FatEcto.Dynamics.FatDynamicsBuilder
+  alias FatEcto.Builder.FatDynamicsBuilder
 
   describe "build/1" do
     test "handles simple field comparisons" do

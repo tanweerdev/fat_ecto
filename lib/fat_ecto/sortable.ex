@@ -35,6 +35,7 @@ defmodule FatEcto.FatSortable do
   """
 
   alias FatEcto.FatOrderBy
+  alias FatEcto.FatHelper
 
   @doc """
   Callback for handling custom sorting logic.
@@ -52,12 +53,12 @@ defmodule FatEcto.FatSortable do
     quote do
       @behaviour FatEcto.FatSortable
       @options unquote(options)
-      @sortable_fields @options[:sortable] || []
+      @sortable @options[:sortable] || []
       @overrideable_fields @options[:overrideable] || []
       alias FatEcto.FatSortableHelper
 
-      # Raise a compile-time error if both sortable_fields and overrideable_fields are empty.
-      if @sortable_fields == [] and @overrideable_fields == [] do
+      # Raise a compile-time error if both sortable and overrideable options are empty.
+      if @sortable == [] and @overrideable_fields == [] do
         raise ArgumentError, """
         At least one of `sortable_fields` or `overrideable_fields` must be provided.
         Example:
@@ -67,7 +68,7 @@ defmodule FatEcto.FatSortable do
         """
       end
 
-      unless (is_list(@sortable_fields) || is_nil(@sortable_fields)) and
+      unless (is_list(@sortable) || is_nil(@sortable)) and
                (is_list(@overrideable_fields) || is_nil(@overrideable_fields)) do
         raise ArgumentError, """
         Please send `sortable` and `overrideable` in expected format see below example.
@@ -77,6 +78,8 @@ defmodule FatEcto.FatSortable do
             overrideable: ["custom_field"]
         """
       end
+
+      @sortable_fields FatHelper.filterable_opt_to_map(@sortable)
 
       # Ensure `override_sortable/3` is implemented if `overrideable_fields` are provided.
       # if @overrideable_fields != [] do
