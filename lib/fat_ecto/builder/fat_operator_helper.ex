@@ -48,9 +48,9 @@ defmodule FatEcto.Builder.FatOperatorHelper do
       # Applying a negated `$EQUAL` operator
       FatOperatorHelper.apply_not_condition("$EQUAL", :age, 30, [])
   """
+  alias FatEcto.Dynamics.FatBtwInContainsDynamics
   alias FatEcto.Dynamics.FatGtLtEqDynamics
   alias FatEcto.Dynamics.FatLikeDynamics
-  alias FatEcto.Dynamics.FatBtwInContainsDynamics
   alias FatEcto.FatHelper
 
   @spec allowed_operators() :: [String.t(), ...]

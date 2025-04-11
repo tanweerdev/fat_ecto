@@ -1,9 +1,9 @@
 defmodule FatEcto.Builder.FatOperatorHelperTest do
   use FatEcto.ConnCase
+  alias FatEcto.Builder.FatOperatorHelper
+  alias FatEcto.Dynamics.FatBtwInContainsDynamics
   alias FatEcto.Dynamics.FatGtLtEqDynamics
   alias FatEcto.Dynamics.FatLikeDynamics
-  alias FatEcto.Dynamics.FatBtwInContainsDynamics
-  alias FatEcto.Builder.FatOperatorHelper
 
   describe "apply_operator/4" do
     test "applies $LIKE operator" do

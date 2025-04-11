@@ -34,8 +34,8 @@ defmodule FatEcto.FatSortable do
   This will sort the query by `id` in ascending order, `name` in descending order, and apply custom sorting for `custom_field`.
   """
 
-  alias FatEcto.FatOrderBy
   alias FatEcto.FatHelper
+  alias FatEcto.FatOrderBy
 
   @doc """
   Callback for handling custom sorting logic.

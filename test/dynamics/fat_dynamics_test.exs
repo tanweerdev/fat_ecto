@@ -1,26 +1,26 @@
 defmodule FatEcto.Dynamics.FatDynamicsTest do
   use ExUnit.Case, async: true
   import Ecto.Query
+  alias FatEcto.Dynamics.FatBtwInContainsDynamics
   alias FatEcto.Dynamics.FatGtLtEqDynamics
   alias FatEcto.Dynamics.FatLikeDynamics
-  alias FatEcto.Dynamics.FatBtwInContainsDynamics
 
   describe "field_is_nil_dynamic/3" do
     test "builds a dynamic query for nil field with :and logic" do
       result = FatGtLtEqDynamics.field_is_nil_dynamic(:location)
-      expected = dynamic([c], is_nil(c.location))
+      expected = dynamic([q], is_nil(q.location))
       assert inspect(result) == inspect(expected)
     end
 
     test "builds a dynamic query for nil field with :or logic" do
       result = FatGtLtEqDynamics.field_is_nil_dynamic(:location)
-      expected = dynamic([c], is_nil(c.location))
+      expected = dynamic([q], is_nil(q.location))
       assert inspect(result) == inspect(expected)
     end
 
     test "builds a dynamic query for nil field with :last binding" do
       result = FatGtLtEqDynamics.field_is_nil_dynamic(:location)
-      expected = dynamic([c], is_nil(c.location))
+      expected = dynamic([q], is_nil(q.location))
       assert inspect(result) == inspect(expected)
     end
   end
@@ -126,38 +126,38 @@ defmodule FatEcto.Dynamics.FatDynamicsTest do
 
     test "builds a dynamic cast_to_date_eq_dynamic for equality" do
       result = FatGtLtEqDynamics.cast_to_date_eq_dynamic(:end_date, ~D[2025-02-08])
-      expected = dynamic([q], fragment("?::date", q.end_date == ^~D[2025-02-08]))
+      expected = dynamic([q], fragment("?::date", q.end_date) == ^~D[2025-02-08])
       assert inspect(result) == inspect(expected)
     end
 
     test "builds a dynamic cast_to_date_eq_dynamic for equality with string date" do
       string_date = "2022-01-06"
       result = FatGtLtEqDynamics.cast_to_date_eq_dynamic(:end_date, string_date)
-      expected = dynamic([q], fragment("?::date", q.end_date == ^"2022-01-06"))
+      expected = dynamic([q], fragment("?::date", q.end_date) == ^"2022-01-06")
       assert inspect(result) == inspect(expected)
     end
 
     test "builds a dynamic cast_to_date_gt_dynamic for equality" do
       result = FatGtLtEqDynamics.cast_to_date_gt_dynamic(:end_date, ~D[2025-02-08])
-      expected = dynamic([q], fragment("?::date", q.end_date > ^~D[2025-02-08]))
+      expected = dynamic([q], fragment("?::date", q.end_date) > ^~D[2025-02-08])
       assert inspect(result) == inspect(expected)
     end
 
     test "builds a dynamic cast_to_date_gte_dynamic for equality" do
       result = FatGtLtEqDynamics.cast_to_date_gte_dynamic(:end_date, ~D[2025-02-08])
-      expected = dynamic([q], fragment("?::date", q.end_date >= ^~D[2025-02-08]))
+      expected = dynamic([q], fragment("?::date", q.end_date) >= ^~D[2025-02-08])
       assert inspect(result) == inspect(expected)
     end
 
     test "builds a dynamic cast_to_date_lt_dynamic for equality" do
       result = FatGtLtEqDynamics.cast_to_date_lt_dynamic(:end_date, ~D[2025-02-08])
-      expected = dynamic([q], fragment("?::date", q.end_date < ^~D[2025-02-08]))
+      expected = dynamic([q], fragment("?::date", q.end_date) < ^~D[2025-02-08])
       assert inspect(result) == inspect(expected)
     end
 
     test "builds a dynamic cast_to_date_lte_dynamic for equality" do
       result = FatGtLtEqDynamics.cast_to_date_lte_dynamic(:end_date, ~D[2025-02-08])
-      expected = dynamic([q], fragment("?::date", q.end_date <= ^~D[2025-02-08]))
+      expected = dynamic([q], fragment("?::date", q.end_date) <= ^~D[2025-02-08])
       assert inspect(result) == inspect(expected)
     end
   end

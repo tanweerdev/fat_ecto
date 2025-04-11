@@ -1,4 +1,17 @@
 defmodule FatEcto.Dynamics.FatLikeDynamics do
+  @moduledoc """
+  Provides dynamic query builders for filtering Ecto queries using `LIKE` and `ILIKE` operators.
+
+  This module is designed to simplify the creation of dynamic queries for Ecto schemas, particularly
+  when dealing with pattern matching on text fields or arrays.
+
+  ## Example Usage
+
+      iex> result = #{__MODULE__}.ilike_dynamic(:name, "%john%")
+      iex> inspect(result)
+      "dynamic([q], ilike(fragment(\\\"(?)::TEXT\\\", q.name), ^\\\"%john%\\\"))"
+  """
+
   import Ecto.Query
 
   @doc """
@@ -6,8 +19,8 @@ defmodule FatEcto.Dynamics.FatLikeDynamics do
 
   ### Parameters
 
-    - `key`       - The field name.
-    - `value`     - The substring to match.
+    - `key` - The field name as an atom.
+    - `value` - The substring to match (e.g., `"%john%"`).
 
   ### Examples
 
@@ -15,8 +28,8 @@ defmodule FatEcto.Dynamics.FatLikeDynamics do
       iex> inspect(result)
       "dynamic([q], ilike(fragment(\\\"(?)::TEXT\\\", q.name), ^\\\"%john%\\\"))"
   """
-  @spec ilike_dynamic(any(), any()) :: Ecto.Query.dynamic_expr()
-  def ilike_dynamic(key, value) do
+  @spec ilike_dynamic(atom(), String.t()) :: Ecto.Query.dynamic_expr()
+  def ilike_dynamic(key, value) when is_atom(key) and is_binary(value) do
     dynamic(
       [q],
       ilike(
@@ -31,8 +44,8 @@ defmodule FatEcto.Dynamics.FatLikeDynamics do
 
   ### Parameters
 
-    - `key`       - The field name.
-    - `value`     - The substring to match.
+    - `key` - The field name as an atom.
+    - `value` - The substring to match (e.g., `"%elixir%"`).
 
   ### Examples
 
@@ -40,9 +53,8 @@ defmodule FatEcto.Dynamics.FatLikeDynamics do
       iex> inspect(result)
       "dynamic([q], fragment(\\\"EXISTS (SELECT 1 FROM UNNEST(?) as value WHERE value ILIKE ?)\\\", q.tags, ^\\\"%elixir%\\\"))"
   """
-  @spec array_ilike_dynamic(any(), any()) ::
-          Ecto.Query.dynamic_expr()
-  def array_ilike_dynamic(key, value) do
+  @spec array_ilike_dynamic(atom(), String.t()) :: Ecto.Query.dynamic_expr()
+  def array_ilike_dynamic(key, value) when is_atom(key) and is_binary(value) do
     dynamic(
       [q],
       fragment(
@@ -58,8 +70,8 @@ defmodule FatEcto.Dynamics.FatLikeDynamics do
 
   ### Parameters
 
-    - `key`       - The field name.
-    - `value`     - The substring to match.
+    - `key` - The field name as an atom.
+    - `value` - The substring to match (e.g., `"%John%"`).
 
   ### Examples
 
@@ -67,8 +79,8 @@ defmodule FatEcto.Dynamics.FatLikeDynamics do
       iex> inspect(result)
       "dynamic([q], like(fragment(\\\"(?)::TEXT\\\", q.name), ^\\\"%John%\\\"))"
   """
-  @spec like_dynamic(any(), any()) :: Ecto.Query.dynamic_expr()
-  def like_dynamic(key, value) do
+  @spec like_dynamic(atom(), String.t()) :: Ecto.Query.dynamic_expr()
+  def like_dynamic(key, value) when is_atom(key) and is_binary(value) do
     dynamic(
       [q],
       like(
@@ -79,16 +91,21 @@ defmodule FatEcto.Dynamics.FatLikeDynamics do
   end
 
   @doc """
+  Builds a dynamic query where a field does not match a substring (case-insensitive).
 
-  Builds a dynamic query where field not matches the value substring.
   ### Parameters
 
-     - `key`       - Field name.
-     - `value`     - Value of the field.
-  """
+    - `key` - The field name as an atom.
+    - `value` - The substring to exclude (e.g., `"%john%"`).
 
-  @spec not_ilike_dynamic(any(), any()) :: Ecto.Query.dynamic_expr()
-  def not_ilike_dynamic(key, value) do
+  ### Examples
+
+      iex> result = #{__MODULE__}.not_ilike_dynamic(:name, "%john%")
+      iex> inspect(result)
+      "dynamic([q], not ilike(fragment(\\\"(?)::TEXT\\\", q.name), ^\\\"%john%\\\"))"
+  """
+  @spec not_ilike_dynamic(atom(), String.t()) :: Ecto.Query.dynamic_expr()
+  def not_ilike_dynamic(key, value) when is_atom(key) and is_binary(value) do
     dynamic(
       [q],
       not ilike(
@@ -99,15 +116,21 @@ defmodule FatEcto.Dynamics.FatLikeDynamics do
   end
 
   @doc """
-  Builds a dynamic query where field not matches the value substring.
+  Builds a dynamic query where a field does not match a substring (case-sensitive).
+
   ### Parameters
 
-     - `key`       - Field name.
-     - `value`     - Value of the field.
-  """
+    - `key` - The field name as an atom.
+    - `value` - The substring to exclude (e.g., `"%John%"`).
 
-  @spec not_like_dynamic(any(), any()) :: Ecto.Query.dynamic_expr()
-  def not_like_dynamic(key, value) do
+  ### Examples
+
+      iex> result = #{__MODULE__}.not_like_dynamic(:name, "%John%")
+      iex> inspect(result)
+      "dynamic([q], not like(fragment(\\\"(?)::TEXT\\\", q.name), ^\\\"%John%\\\"))"
+  """
+  @spec not_like_dynamic(atom(), String.t()) :: Ecto.Query.dynamic_expr()
+  def not_like_dynamic(key, value) when is_atom(key) and is_binary(value) do
     dynamic(
       [q],
       not like(

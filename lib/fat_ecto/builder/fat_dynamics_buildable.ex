@@ -45,8 +45,8 @@ defmodule FatEcto.Builder.FatDynamicsBuildable do
           dynamics
         end
 
-        # Optional: Override after_whereable to perform custom processing on the final dynamics
-        def after_whereable(dynamics) do
+        # Optional: Override after_buildable to perform custom processing on the final dynamics
+        def after_buildable(dynamics) do
           IO.puts("Do something on final Dynamics")
           dynamics
         end
@@ -74,7 +74,7 @@ defmodule FatEcto.Builder.FatDynamicsBuildable do
   This function is called at the end of the `build/2` function. The default behavior is to return the dynamics,
   but it can be overridden by the using module.
   """
-  @callback after_whereable(dynamics :: Ecto.Query.dynamic_expr()) :: Ecto.Query.dynamic_expr()
+  @callback after_buildable(dynamics :: Ecto.Query.dynamic_expr()) :: Ecto.Query.dynamic_expr()
 
   defmacro __using__(options \\ []) do
     quote do
@@ -148,12 +148,12 @@ defmodule FatEcto.Builder.FatDynamicsBuildable do
             &override_buildable/4
           )
 
-        # Apply after_whereable callback
-        after_whereable(dynamics)
+        # Apply after_buildable callback
+        after_buildable(dynamics)
       end
 
       def build(_where_params, _build_options) do
-        after_whereable(nil)
+        after_buildable(nil)
       end
 
       @doc """
@@ -164,14 +164,14 @@ defmodule FatEcto.Builder.FatDynamicsBuildable do
       def override_buildable(dynamics, _field, _operator, _value), do: dynamics
 
       @doc """
-      Default implementation of after_whereable/1.
+      Default implementation of after_buildable/1.
 
       This function can be overridden by the using module to perform custom processing on the final dynamics.
       """
-      def after_whereable(dynamics), do: dynamics
+      def after_buildable(dynamics), do: dynamics
 
       defoverridable override_buildable: 4
-      defoverridable after_whereable: 1
+      defoverridable after_buildable: 1
     end
   end
 

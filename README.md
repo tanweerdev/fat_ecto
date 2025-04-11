@@ -64,7 +64,7 @@ defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
   def override_whereable(dynamics, _, _, _), do: dynamics
 
   # You can do some custom processing if needed eg
-  def after_whereable(dynamics) do
+  def after_buildable(dynamics) do
     if dynamics, do: dynamics, else: true
   end
 end

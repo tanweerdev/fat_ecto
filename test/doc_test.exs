@@ -8,7 +8,9 @@ defmodule DocTest do
     :ok
   end
 
-  # doctest FatEcto.Dynamics.FatDynamics
+  doctest FatEcto.Dynamics.FatBtwInContainsDynamics
+  doctest FatEcto.Dynamics.FatGtLtEqDynamics
+  doctest FatEcto.Dynamics.FatLikeDynamics
   # doctest FatEcto.Dynamics.FatNotDynamics
   doctest FatEcto.Builder.FatDynamicsBuilder
   doctest FatEcto.Builder.FatOperatorHelper
