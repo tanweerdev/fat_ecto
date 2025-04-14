@@ -23,41 +23,42 @@ defmodule FatEcto.Builder.FatDynamicsBuilder do
       iex> inspect(query)
       "dynamic([q], q.name == ^\\\"John\\\" or is_nil(q.phone) or q.age > ^30)"
   """
-  @spec build(map(), function() | nil) :: Ecto.Query.dynamic_expr()
-  def build(query_map, override_callback \\ nil) when is_map(query_map) do
+  @spec build(map(), function() | nil, list() | nil) :: Ecto.Query.dynamic_expr()
+  def build(query_map, override_callback \\ nil, overrideable_fields \\ nil) when is_map(query_map) do
     Enum.reduce(query_map, nil, fn {key, value}, dynamic_query ->
       case key do
         "$OR" ->
-          build_or_query(value, dynamic_query, override_callback)
+          build_or_query(value, dynamic_query, override_callback, overrideable_fields)
 
         "$AND" ->
-          build_and_query(value, dynamic_query, override_callback)
+          build_and_query(value, dynamic_query, override_callback, overrideable_fields)
 
         _ ->
-          build_field_query(key, value, dynamic_query, override_callback)
+          build_field_query(key, value, dynamic_query, override_callback, overrideable_fields)
       end
     end)
   end
 
   # Handles "$OR" conditions
-  defp build_or_query(conditions, dynamic_query, override_callback) when is_map(conditions) do
+  defp build_or_query(conditions, dynamic_query, override_callback, overrideable_fields)
+       when is_map(conditions) do
     # Handle direct map (e.g., "$OR" => %{"rating" => %{"$GT" => 18}})
     or_dynamic =
       Enum.reduce(conditions, nil, fn {field, value}, acc ->
-        field_dynamic = build_field_query(field, value, nil, override_callback)
+        field_dynamic = build_field_query(field, value, nil, override_callback, overrideable_fields)
         combine_dynamics(acc, field_dynamic, :or)
       end)
 
     combine_dynamics(dynamic_query, or_dynamic, :and)
   end
 
-  defp build_or_query(conditions, dynamic_query, override_callback) do
+  defp build_or_query(conditions, dynamic_query, override_callback, overrideable_fields) do
     # Handle array (e.g., "$OR" => [%{"rating" => %{"$GT" => 18}}])
     conditions_list = ensure_list(conditions)
 
     or_dynamic =
       Enum.reduce(conditions_list, nil, fn condition, acc ->
-        condition_dynamic = build(condition, override_callback)
+        condition_dynamic = build(condition, override_callback, overrideable_fields)
         combine_dynamics(acc, condition_dynamic, :or)
       end)
 
@@ -65,12 +66,12 @@ defmodule FatEcto.Builder.FatDynamicsBuilder do
   end
 
   # Handles "$AND" conditions
-  defp build_and_query(conditions, dynamic_query, override_callback) do
+  defp build_and_query(conditions, dynamic_query, override_callback, overrideable_fields) do
     conditions_list = ensure_list(conditions)
 
     and_dynamic =
       Enum.reduce(conditions_list, nil, fn condition, acc ->
-        condition_dynamic = build(condition, override_callback)
+        condition_dynamic = build(condition, override_callback, overrideable_fields)
         combine_dynamics(acc, condition_dynamic, :and)
       end)
 
@@ -78,63 +79,63 @@ defmodule FatEcto.Builder.FatDynamicsBuilder do
   end
 
   # Handles individual field conditions
-  defp build_field_query(field, conditions, dynamic_query, override_callback) when is_map(conditions) do
+  defp build_field_query(field, conditions, dynamic_query, override_callback, overrideable_fields)
+       when is_map(conditions) do
+    IO.inspect("field: #{inspect(field)}")
+    IO.inspect("conditions: #{inspect(conditions)}")
+    IO.inspect("dynamic_query: #{inspect(dynamic_query)}")
+    IO.inspect("overrideable_fields: #{inspect(overrideable_fields)}")
     field_dynamic =
       Enum.reduce(conditions, nil, fn {operator, value}, acc ->
-        case override_callback do
-          nil ->
-            # If no callback is provided, apply the standard operator logic
-            case FatOperatorHelper.apply_operator(operator, field, value) do
-              nil -> acc
-              operator_dynamic -> combine_dynamics(acc, operator_dynamic, :and)
-            end
+        # Call override if field is in filterable_fields or override_callback exists
+        dynamic =
+          if should_override?(field, operator, overrideable_fields) && override_callback do
+            IO.inspect("override_callback: #{inspect(override_callback)}")
+            IO.inspect("yesssss")
+            override_callback.(acc, field, operator, value)
+            # ||
+            # FatOperatorHelper.apply_operator(operator, field, value)
+          else
+            FatOperatorHelper.apply_operator(operator, field, value)
+          end
 
-          callback ->
-            # If a callback is provided, use it to handle the field
-            case callback.(acc, field, operator, value) do
-              nil ->
-                # If the callback returns nil, apply the standard operator logic
-                case FatOperatorHelper.apply_operator(operator, field, value) do
-                  nil -> acc
-                  operator_dynamic -> combine_dynamics(acc, operator_dynamic, :and)
-                end
+          # NOTE: this dynamic returned could actually be a query
 
-              override_dynamic ->
-                combine_dynamics(acc, override_dynamic, :and)
-            end
-        end
+        combine_dynamics(acc, dynamic, :and)
       end)
 
     combine_dynamics(dynamic_query, field_dynamic, :and)
   end
 
   # Handles direct field comparisons (e.g., "field" => "value" or "field" => nil)
-  defp build_field_query(field, value, dynamic_query, override_callback) do
-    field_dynamic =
-      case override_callback do
-        nil ->
-          # If no callback is provided, apply the standard operator logic
-          case value do
-            nil -> FatOperatorHelper.apply_nil_operator("$NULL", field)
-            _ -> FatOperatorHelper.apply_operator("$EQUAL", field, value)
-          end
+  defp build_field_query(field, value, dynamic_query, override_callback, overrideable_fields) do
+    # IO.inspect("value: #{inspect(value)}")
+    operator = if is_nil(value), do: "$NULL", else: "$EQUAL"
 
-        callback ->
-          # If a callback is provided, use it to handle the field
-          case callback.(dynamic_query, field, "$EQUAL", value) do
-            nil ->
-              # If the callback returns nil, apply the standard operator logic
-              case value do
-                nil -> FatOperatorHelper.apply_nil_operator("$NULL", field)
-                _ -> FatOperatorHelper.apply_operator("$EQUAL", field, value)
-              end
-
-            override_dynamic ->
-              override_dynamic
-          end
+    dynamic =
+      if should_override?(field, operator, overrideable_fields) && override_callback do
+        override_callback.(dynamic_query, field, operator, value) ||
+          FatOperatorHelper.apply_operator(operator, field, value)
+      else
+        # IO.inspect("else:::")
+        # IO.inspect("operator: #{inspect(operator)}")
+        # IO.inspect("field: #{inspect(field)}")
+        # IO.inspect("value: #{inspect(value)}")
+        FatOperatorHelper.apply_operator(operator, field, value)
       end
 
-    combine_dynamics(dynamic_query, field_dynamic, :and)
+    # IO.inspect("dynamic: #{inspect(dynamic)}")
+
+    combine_dynamics(dynamic_query, dynamic, :and)
+  end
+
+  defp should_override?(field, _operator, overrideable_fields) do
+    case overrideable_fields do
+      nil -> true
+      fields when is_list(fields) -> field in fields
+      fields when is_map(fields) -> Map.has_key?(fields, field)
+      _ -> true
+    end
   end
 
   # Combines two dynamics with a specified operator (:and or :or)

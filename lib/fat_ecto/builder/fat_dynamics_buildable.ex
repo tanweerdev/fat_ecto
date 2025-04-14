@@ -145,7 +145,8 @@ defmodule FatEcto.Builder.FatDynamicsBuildable do
         dynamics =
           FatDynamicsBuilder.build(
             filterable_params,
-            &override_buildable/4
+            &override_buildable/4,
+            @overrideable_fields
           )
 
         # Apply after_buildable callback

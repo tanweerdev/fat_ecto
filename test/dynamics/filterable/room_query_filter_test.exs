@@ -14,6 +14,19 @@ defmodule FatEcto.Query.MyApp.RoomQueryTest do
       assert inspect(query) == inspect(expected_query)
     end
 
+    test "override_buildable is properly called for overrideable fields" do
+      base_query = from(r in FatRoom)
+
+      # This will call our override_buildable function
+      query = RoomQuery.build(base_query, %{"name" => %{"$LIKE" => "%ICU%"}})
+
+      # Verify the query was modified by our override
+      assert inspect(query) =~ "like(fragment(\"(?)::TEXT\", f0.name), ^\"%ICU%\")"
+
+      # Verify the base query wasn't modified directly
+      refute inspect(base_query) =~ "like(fragment"
+    end
+
     test "filters by name with custom $ILIKE operator" do
       base_query = from(r in FatRoom)
       query = RoomQuery.build(base_query, %{"name" => %{"$ILIKE" => "%ICU%"}})

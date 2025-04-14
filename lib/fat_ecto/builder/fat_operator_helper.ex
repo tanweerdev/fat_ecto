@@ -99,6 +99,11 @@ defmodule FatEcto.Builder.FatOperatorHelper do
     FatLikeDynamics.like_dynamic(field, value)
   end
 
+  def apply_operator("$NULL", field, _value) do
+    field = FatHelper.string_to_existing_atom(field)
+    FatGtLtEqDynamics.field_is_nil_dynamic(field)
+  end
+
   def apply_operator("$NOT_LIKE", field, value) do
     field = FatHelper.string_to_existing_atom(field)
     FatLikeDynamics.not_like_dynamic(field, value)
