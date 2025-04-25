@@ -61,7 +61,7 @@ defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
     dynamic([r], ilike(fragment("(?)::TEXT", r.name), ^value))
   end
 
-  def override_whereable(dynamics, _, _, _), do: dynamics
+  def override_buildable(dynamics, _, _, _), do: dynamics
 
   # You can do some custom processing if needed eg
   def after_buildable(dynamics) do

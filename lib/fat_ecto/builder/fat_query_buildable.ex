@@ -53,8 +53,8 @@ defmodule FatEcto.Builder.FatQueryBuildable do
       end
   """
 
-  alias FatEcto.Builder.FatDynamicsBuilder
   alias FatEcto.Builder.FatHelper
+  alias FatEcto.Builder.FatQueryBuilder
 
   @doc """
   Callback for handling custom filtering logic for overrideable fields with query support.
@@ -132,8 +132,8 @@ defmodule FatEcto.Builder.FatQueryBuildable do
         where_params_ignoreables_removed =
           FatHelper.remove_ignoreable_fields(where_params, @ignoreable_fields_values)
 
-          IO.inspect("query::: #{inspect(query)}")
-          IO.inspect("where_params::: #{inspect(where_params)}")
+        # IO.inspect("query::: #{inspect(query)}")
+        # IO.inspect("where_params::: #{inspect(where_params)}")
         # Only keep filterable fields in params
         filterable_params =
           FatHelper.filter_filterable_fields(
@@ -141,24 +141,19 @@ defmodule FatEcto.Builder.FatQueryBuildable do
             @filterable_fields,
             @overrideable_fields
           )
-          IO.inspect("filterable_params::: #{inspect(filterable_params)}")
+
+        # IO.inspect("filterable_params::: #{inspect(filterable_params)}")
 
         # Build dynamics with the override_buildable function as the callback
-        dynamics =
-          FatDynamicsBuilder.build(
+        query =
+          FatQueryBuilder.build(
+            query,
             filterable_params,
             &dynamics_override_callback(query, &1, &2, &3, &4),
             @overrideable_fields
           )
-          IO.inspect("dynamics::: #{inspect(dynamics)}")
-        # Apply the dynamics to the query
-        query =
-          if dynamics do
-            from(q in query, where: ^dynamics)
-          else
-            query
-          end
-          IO.inspect("query::: #{inspect(query)}")
+
+        # IO.inspect("query::: #{inspect(query)}")
 
         # Apply after_buildable callback
         after_buildable(query)

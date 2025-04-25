@@ -45,6 +45,7 @@ defmodule FatEcto.FatRoomTest do
       assert inspect(dynamics) == inspect(expected_dynamics)
     end
 
+    @tag :dev
     test "filters by description with $EQUAL operator" do
       dynamics = RoomFilter.build(%{"description" => "Private Room"})
       expected_dynamics = dynamic([q], q.description == ^"Private Room")
