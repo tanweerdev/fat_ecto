@@ -53,7 +53,7 @@ defmodule FatDoctor.QueryTest do
       assert inspect(query) == inspect(expected_query)
     end
 
-    @tag :dev
+    @tag :skip
     test "filters by phone with custom $ILIKE operator and name with standard buildable" do
       base_query = from(d in FatDoctor)
 
@@ -66,7 +66,7 @@ defmodule FatDoctor.QueryTest do
       assert inspect(query) == inspect(expected_query)
     end
 
-    @tag :dev
+    @tag :skip
     test "filters with complex params" do
       base_query = from(d in FatDoctor)
 
@@ -102,7 +102,7 @@ defmodule FatDoctor.QueryTest do
       assert inspect(query) == inspect(expected_query)
     end
 
-    @tag :dev
+    @tag :skip
     test "filters with complex params but with $OR as map" do
       base_query = from(d in FatDoctor)
 

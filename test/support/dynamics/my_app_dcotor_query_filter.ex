@@ -28,9 +28,6 @@ defmodule FatEcto.Query.MyApp.DoctorQuery do
 
   @impl FatEcto.Builder.FatQueryBuildable
   def override_buildable(query, "phone", "$ILIKE", value) do
-    IO.inspect("override_buildable callback called")
-    IO.inspect("query: #{inspect(query)}")
-    IO.inspect("value: #{inspect(value)}")
     from(q in query, where: ilike(fragment("(?)::TEXT", q.phone), ^value))
   end
 
@@ -39,7 +36,6 @@ defmodule FatEcto.Query.MyApp.DoctorQuery do
   end
 
   def override_buildable(query, _, _, _) do
-    IO.inspect("override_buildable callback called but not matched")
     query
   end
 end
