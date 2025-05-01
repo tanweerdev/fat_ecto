@@ -98,7 +98,7 @@ defmodule FatEcto.Builder.FatDynamicsBuilder do
   defp build_field_dynamic(field, value, dynamic, override_callback, overrideable_fields) do
     operator = if is_nil(value), do: "$NULL", else: "$EQUAL"
 
-    dynamic =
+    field_dynamic =
       if should_override?(field, overrideable_fields) && override_callback do
         override_callback.(dynamic, field, operator, value) ||
           FatOperatorHelper.apply_operator(operator, field, value)
@@ -106,7 +106,7 @@ defmodule FatEcto.Builder.FatDynamicsBuilder do
         FatOperatorHelper.apply_operator(operator, field, value)
       end
 
-    combine_dynamics(dynamic, dynamic, :and)
+    combine_dynamics(dynamic, field_dynamic, :and)
   end
 
   # Common helpers

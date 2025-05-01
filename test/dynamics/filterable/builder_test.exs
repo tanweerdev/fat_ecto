@@ -17,7 +17,6 @@ defmodule FatEcto.Builder.FatDynamicsBuilderTest do
       assert inspect(dynamics) == inspect(expected_dynamics)
     end
 
-    @tag :dev
     test "handles direct field comparisons" do
       dynamics =
         FatDynamicsBuilder.build(%{
@@ -30,7 +29,6 @@ defmodule FatEcto.Builder.FatDynamicsBuilderTest do
       assert inspect(dynamics) == inspect(expected_dynamics)
     end
 
-    @tag :dev
     test "handles nil values" do
       dynamics =
         FatDynamicsBuilder.build(%{
@@ -71,7 +69,6 @@ defmodule FatEcto.Builder.FatDynamicsBuilderTest do
       assert inspect(dynamics) == inspect(expected_dynamics)
     end
 
-    @tag :dev
     test "handles deeply nested conditions" do
       dynamics =
         FatDynamicsBuilder.build(%{
@@ -103,7 +100,6 @@ defmodule FatEcto.Builder.FatDynamicsBuilderTest do
       assert inspect(dynamics) == inspect(expected_dynamics)
     end
 
-    @tag :dev
     test "handles deeply nested conditions with $OR as map" do
       dynamics =
         FatDynamicsBuilder.build(%{
@@ -135,7 +131,6 @@ defmodule FatEcto.Builder.FatDynamicsBuilderTest do
       assert inspect(dynamics) == inspect(expected_dynamics)
     end
 
-    @tag :dev
     test "handles boolean fields" do
       dynamics =
         FatDynamicsBuilder.build(%{

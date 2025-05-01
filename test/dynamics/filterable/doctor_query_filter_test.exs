@@ -45,7 +45,6 @@ defmodule FatDoctor.QueryTest do
       assert inspect(query) == inspect(expected_query)
     end
 
-    @tag :dev
     test "filters by phone with custom $ILIKE operator" do
       base_query = from(d in FatDoctor)
       query = DoctorQuery.build(base_query, %{"phone" => %{"$ILIKE" => "%123%"}})
