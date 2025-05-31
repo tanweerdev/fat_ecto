@@ -1,11 +1,11 @@
-defmodule FatEcto.Builder.FatQueryBuilder do
+defmodule FatEcto.Query.Builder do
   @moduledoc """
   Builds Ecto queries from a structured query map.
   Used by FatQueryBuildable for query building with query callbacks.
   """
 
   import Ecto.Query
-  alias FatEcto.Builder.FatOperatorHelper
+  alias FatEcto.Query.OperatorApplier
 
   @spec build(Ecto.Queryable.t(), map(), function() | nil, list() | nil) :: Ecto.Query.t()
   def build(queryable, query_map, override_callback \\ nil, overrideable_fields \\ nil)
@@ -71,7 +71,7 @@ defmodule FatEcto.Builder.FatQueryBuilder do
   end
 
   defp apply_operator(query, operator, field, value) do
-    dynamic = FatOperatorHelper.apply_operator(operator, field, value)
+    dynamic = OperatorApplier.apply_operator(operator, field, value)
     from(q in query, where: ^dynamic)
   end
 

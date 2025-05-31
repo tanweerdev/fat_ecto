@@ -1,4 +1,4 @@
-defmodule FatEcto.Dynamics.FatBtwInContainsDynamics do
+defmodule FatEcto.Query.Dynamics.BtwInContains do
   @moduledoc """
   Provides dynamic query builders for common Ecto operations, such as filtering by ranges (`between`),
   membership (`in`), and JSONB containment (`contains`).

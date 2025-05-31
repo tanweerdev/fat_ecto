@@ -34,7 +34,7 @@ Then, run `mix deps.get` to install the package.
 
 ## Features & Modules
 
-### 🛠 FatEcto.Builder.FatDynamicsBuildable – Dynamic Filtering Made Easy
+### 🛠 FatEcto.Query.Dynamics.Buildable – Dynamic Filtering Made Easy
 
 Tired of writing repetitive query filters? The `Whereable` module lets you dynamically filter records using flexible conditions passed from your web or mobile clients—with little to no effort! And the best part? You stay in control. 🚀
 
@@ -42,7 +42,7 @@ Tired of writing repetitive query filters? The `Whereable` module lets you dynam
 
 ```elixir
 defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
-  use FatEcto.Builder.FatDynamicsBuildable,
+  use FatEcto.Query.Dynamics.Buildable,
     filterable: [
       id: ["$EQUAL", "$NOT_EQUAL"]
     ],
@@ -167,7 +167,7 @@ dynamic(
 
 ---
 
-### 🔄 FatEcto.FatSortable – Effortless Sorting
+### 🔄 FatEcto.Sort.Sortable – Effortless Sorting
 
 Sorting should be simple—and with `Sortable`, it is! Your frontend can send sorting parameters, and FatEcto will seamlessly generate the right sorting queries, allowing you to build powerful, customizable sorting logic without breaking a sweat. 😎
 
@@ -176,7 +176,7 @@ Sorting should be simple—and with `Sortable`, it is! Your frontend can send so
 ```elixir
 defmodule Fat.SortQuery do
   import Ecto.Query
-  use FatEcto.FatSortable,
+  use FatEcto.Sort.Sortable,
     sortable: [id: "$ASC", name: ["$ASC", "$DESC"]],
     overrideable: ["custom_field"]
 
@@ -193,7 +193,7 @@ end
 
 ---
 
-### 📌 FatEcto.FatPaginator – Paginate Like a Pro
+### 📌 FatEcto.Pagination.Paginator – Paginate Like a Pro
 
 No more hassle with pagination! FatPaginator helps you paginate Ecto queries efficiently, keeping your APIs snappy and responsive.
 
@@ -201,7 +201,7 @@ No more hassle with pagination! FatPaginator helps you paginate Ecto queries eff
 
 ```elixir
 defmodule Fat.MyPaginator do
-  use FatEcto.FatV2Paginator,
+  use FatEcto.Pagination.V2Paginator,
     default_limit: 10,
     repo: FatEcto.Repo,
     max_limit: 100

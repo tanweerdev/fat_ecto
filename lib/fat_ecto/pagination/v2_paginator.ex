@@ -1,11 +1,11 @@
-defmodule FatEcto.FatV2Paginator do
+defmodule FatEcto.Pagination.V2Paginator do
   @moduledoc """
   Behaviour and implementation for robust Ecto query pagination.
 
   ## Usage
 
       defmodule MyApp.MyPaginator do
-        use FatEcto.FatV2Paginator,
+        use FatEcto.Pagination.V2Paginator,
           repo: MyApp.Repo,
           default_limit: 20,
           max_limit: 100
@@ -30,7 +30,7 @@ defmodule FatEcto.FatV2Paginator do
 
   defmacro __using__(opts \\ []) do
     quote location: :keep do
-      @behaviour FatEcto.FatV2Paginator
+      @behaviour FatEcto.Pagination.V2Paginator
 
       import Ecto.Query
       alias Ecto.Query.Builder
@@ -76,8 +76,8 @@ defmodule FatEcto.FatV2Paginator do
       end
 
       defp get_pagination_params(params) do
-        {skip, params} = FatEcto.FatHelper.get_skip_value(params)
-        {limit, _params} = FatEcto.FatHelper.get_limit_value(params, unquote(opts))
+        {skip, params} = FatEcto.Pagination.Helper.get_skip_value(params)
+        {limit, _params} = FatEcto.Pagination.Helper.get_limit_value(params, unquote(opts))
         {limit, skip}
       end
 
@@ -111,7 +111,7 @@ defmodule FatEcto.FatV2Paginator do
       end
 
       defp maybe_handle_composite_keys(query) do
-        case FatEcto.FatHelper.get_primary_keys(query) do
+        case FatEcto.Pagination.Helper.get_primary_keys(query) do
           nil -> query
           [single_key] -> query
           keys -> apply_composite_key_distinct(query, keys)

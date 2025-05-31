@@ -1,5 +1,5 @@
 defmodule FatEcto.Query.MyApp.RoomQuery do
-  use FatEcto.Builder.FatQueryBuildable,
+  use FatEcto.Query.Buildable,
     filterable: [],
     overrideable: ["name", "phone", "purpose", "description"],
     ignoreable: [
@@ -11,7 +11,7 @@ defmodule FatEcto.Query.MyApp.RoomQuery do
 
   import Ecto.Query
 
-  @impl FatEcto.Builder.FatQueryBuildable
+  @impl FatEcto.Query.Buildable
   def override_buildable(query, "phone", "$ILIKE", value) do
     from(q in query, where: ilike(fragment("(?)::TEXT", q.phone), ^value))
   end

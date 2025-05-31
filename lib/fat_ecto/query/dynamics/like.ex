@@ -1,4 +1,4 @@
-defmodule FatEcto.Dynamics.FatLikeDynamics do
+defmodule FatEcto.Query.Dynamics.Like do
   @moduledoc """
   Provides dynamic query builders for filtering Ecto queries using `LIKE` and `ILIKE` operators.
 

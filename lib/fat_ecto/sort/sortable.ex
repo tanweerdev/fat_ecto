@@ -1,9 +1,9 @@
-defmodule FatEcto.FatSortable do
+defmodule FatEcto.Sort.Sortable do
   # TODO: convert this sortable to use Dynamics and not Querable
   @moduledoc """
   Provides functionality to sort Ecto queries based on user-defined rules.
 
-  This module allows sorting queries using predefined default fields (handled by `FatOrderBy`)
+  This module allows sorting queries using predefined default fields (handled by `Sorter`)
   and custom fields (handled by a fallback function).
 
   ## Usage
@@ -11,7 +11,7 @@ defmodule FatEcto.FatSortable do
       defmodule Fat.SortQuery do
         <!-- needed if you are writing queries in override_sortable -->
         import Ecto.Query
-        use FatEcto.FatSortable,
+        use FatEcto.Sort.Sortable,
           sortable: [id: "$ASC", name: ["$ASC", "$DESC"]],
           overrideable: ["custom_field"]
 
@@ -35,8 +35,8 @@ defmodule FatEcto.FatSortable do
   This will sort the query by `id` in ascending order, `name` in descending order, and apply custom sorting for `custom_field`.
   """
 
-  alias FatEcto.FatHelper
-  alias FatEcto.FatOrderBy
+  alias FatEcto.SharedHelper
+  alias FatEcto.Sort.Sorter
 
   @doc """
   Callback for handling custom sorting logic.
@@ -52,18 +52,18 @@ defmodule FatEcto.FatSortable do
 
   defmacro __using__(options \\ []) do
     quote do
-      @behaviour FatEcto.FatSortable
+      @behaviour FatEcto.Sort.Sortable
       @options unquote(options)
       @sortable @options[:sortable] || []
       @overrideable_fields @options[:overrideable] || []
-      alias FatEcto.FatSortableHelper
+      alias FatEcto.Sort.Helper
 
       # Raise a compile-time error if both sortable and overrideable options are empty.
       if @sortable == [] and @overrideable_fields == [] do
         raise ArgumentError, """
         At least one of `sortable_fields` or `overrideable_fields` must be provided.
         Example:
-          use FatEcto.FatSortable,
+          use FatEcto.Sort.Sortable,
             sortable: [id: "$ASC"],
             overrideable: ["custom_field"]
         """
@@ -74,13 +74,13 @@ defmodule FatEcto.FatSortable do
         raise ArgumentError, """
         Please send `sortable` and `overrideable` in expected format see below example.
         Example:
-          use FatEcto.FatSortable,
+          use FatEcto.Sort.Sortable,
             sortable: [id: "$ASC"],
             overrideable: ["custom_field"]
         """
       end
 
-      @sortable_fields FatHelper.filterable_opt_to_map(@sortable)
+      @sortable_fields SharedHelper.filterable_opt_to_map(@sortable)
 
       # Ensure `override_sortable/3` is implemented if `overrideable_fields` are provided.
       # if @overrideable_fields != [] do
@@ -103,18 +103,18 @@ defmodule FatEcto.FatSortable do
       ### Parameters
         - `queryable`: The Ecto query to which sorting will be applied.
         - `sort_params`: A map of fields and their sorting operators (e.g., `%{"field" => "$ASC"}`).
-        - `options`: Additional options for query building (passed to `FatOrderBy`).
+        - `options`: Additional options for query building (passed to `Sorter`).
 
       ### Returns
         - The query with sorting applied.
       """
       @spec build(Ecto.Query.t(), map(), keyword()) :: Ecto.Query.t()
       def build(queryable, sort_params, options \\ []) do
-        # Step 1: Filter sortable_fields and prepare params for FatOrderBy
-        order_by_params = FatSortableHelper.filter_sortable_fields(sort_params, @sortable_fields)
+        # Step 1: Filter sortable_fields and prepare params for Sorter
+        order_by_params = Helper.filter_sortable_fields(sort_params, @sortable_fields)
 
-        # Step 2: Apply sorting using FatOrderBy
-        queryable = FatOrderBy.build_order_by(queryable, order_by_params, options)
+        # Step 2: Apply sorting using Sorter
+        queryable = Sorter.build_order_by(queryable, order_by_params, options)
 
         # Step 3: Apply custom sorting for overrideable_fields
         # Filter sort_params to only include fields in @overrideable_fields

@@ -1,5 +1,5 @@
 defmodule FatEcto.Dynamics.MyApp.DoctorFilter do
-  use FatEcto.Builder.FatDynamicsBuildable,
+  use FatEcto.Query.Dynamics.Buildable,
     filterable: [
       email: [
         "$EQUAL",
@@ -25,7 +25,7 @@ defmodule FatEcto.Dynamics.MyApp.DoctorFilter do
     ]
 
   import Ecto.Query
-  @impl FatEcto.Builder.FatDynamicsBuildable
+  @impl FatEcto.Query.Dynamics.Buildable
   # TODO: also support `field.EQUAL => value` instead of accepting just map eg `field => {"$EQUAL" => value}`
   # You can use either dot . or colon : to separate field and operator
 

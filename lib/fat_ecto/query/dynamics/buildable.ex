@@ -1,4 +1,4 @@
-defmodule FatEcto.Builder.FatDynamicsBuildable do
+defmodule FatEcto.Query.Dynamics.Buildable do
   @moduledoc """
   Builds queries after filtering fields based on user-provided filterable and overrideable fields.
 
@@ -21,7 +21,7 @@ defmodule FatEcto.Builder.FatDynamicsBuildable do
 
   ## Example Usage
       defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
-        use FatEcto.Builder.FatDynamicsBuildable,
+        use FatEcto.Query.Dynamics.Buildable,
           filterable: [
             id: ["$EQUAL", "$NOT_EQUAL"]
           ],
@@ -53,7 +53,7 @@ defmodule FatEcto.Builder.FatDynamicsBuildable do
       end
   """
 
-  alias FatEcto.Builder.FatDynamicsBuilder
+  alias FatEcto.Query.Dynamics.Builder
 
   @doc """
   Callback for handling custom filtering logic for overrideable fields.
@@ -78,15 +78,15 @@ defmodule FatEcto.Builder.FatDynamicsBuildable do
 
   defmacro __using__(options \\ []) do
     quote do
-      @behaviour FatEcto.Builder.FatDynamicsBuildable
+      @behaviour FatEcto.Query.Dynamics.Buildable
       @options unquote(options)
       @filterable @options[:filterable] || []
       @overrideable_fields @options[:overrideable] || []
       @ignoreable @options[:ignoreable] || []
-      alias FatEcto.Builder.FatHelper
+      alias FatEcto.Query.Helper
       # def using_options, do: @options
       # # Defer the repo check to runtime
-      # @after_compile FatEcto.Builder.FatDynamicsBuildable
+      # @after_compile FatEcto.Query.Dynamics.Buildable
 
       # Ensure at least one of `filterable` or `overrideable` fields option is provided.
       if @filterable == [] and @overrideable_fields == [] do
@@ -94,7 +94,7 @@ defmodule FatEcto.Builder.FatDynamicsBuildable do
           description: """
           You must provide at least one of `filterable` or `overrideable` option.
           Example:
-            use FatEcto.Builder.FatDynamicsBuildable,
+            use FatEcto.Query.Dynamics.Buildable,
               filterable: [id: ["$EQUAL", "$NOT_EQUAL"]],
               overrideable: [:name, :phone]
           """
@@ -106,14 +106,14 @@ defmodule FatEcto.Builder.FatDynamicsBuildable do
           description: """
           Format for `filterable` or `overrideable` fields should be in expected format.
           Example:
-            use FatEcto.Builder.FatDynamicsBuildable,
+            use FatEcto.Query.Dynamics.Buildable,
               filterable: [id: ["$EQUAL", "$NOT_EQUAL"]],
               overrideable: [:name, :phone]
           """
       end
 
-      @filterable_fields FatEcto.FatHelper.filterable_opt_to_map(@filterable)
-      @ignoreable_fields_values FatEcto.FatHelper.keyword_list_to_map(@ignoreable)
+      @filterable_fields FatEcto.SharedHelper.filterable_opt_to_map(@filterable)
+      @ignoreable_fields_values FatEcto.SharedHelper.keyword_list_to_map(@ignoreable)
 
       @doc """
       Builds dynamics after filtering fields based on the provided parameters.
@@ -131,11 +131,11 @@ defmodule FatEcto.Builder.FatDynamicsBuildable do
       def build(where_params, build_options) when is_map(where_params) do
         # Remove ignoreable fields from the params
         where_params_ignoreables_removed =
-          FatHelper.remove_ignoreable_fields(where_params, @ignoreable_fields_values)
+          Helper.remove_ignoreable_fields(where_params, @ignoreable_fields_values)
 
         # Only keep filterable fields in params
         filterable_params =
-          FatHelper.filter_filterable_fields(
+          Helper.filter_filterable_fields(
             where_params_ignoreables_removed,
             @filterable_fields,
             @overrideable_fields
@@ -143,7 +143,7 @@ defmodule FatEcto.Builder.FatDynamicsBuildable do
 
         # Build dynamics with the override_buildable function as the callback
         dynamics =
-          FatDynamicsBuilder.build(
+          Builder.build(
             filterable_params,
             &override_buildable/4,
             @overrideable_fields

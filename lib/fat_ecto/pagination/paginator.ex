@@ -1,4 +1,4 @@
-defmodule FatEcto.FatPaginator do
+defmodule FatEcto.Pagination.Paginator do
   @moduledoc """
   Provides pagination functionality for Ecto queries.
 
@@ -8,7 +8,7 @@ defmodule FatEcto.FatPaginator do
   ## Usage
 
       defmodule Fat.MyContext do
-        use FatEcto.FatPaginator, repo: Fat.Repo, default_limit: 10, max_limit: 100
+        use FatEcto.Pagination.Paginator, repo: Fat.Repo, default_limit: 10, max_limit: 100
 
         # Custom functions can be added here
       end
@@ -22,7 +22,7 @@ defmodule FatEcto.FatPaginator do
 
   defmacro __using__(options \\ []) do
     quote location: :keep do
-      @behaviour FatEcto.FatPaginator
+      @behaviour FatEcto.Pagination.Paginator
 
       import Ecto.Query
 
@@ -33,7 +33,7 @@ defmodule FatEcto.FatPaginator do
       def repo_option, do: @repo
 
       # Defer the repo check to runtime
-      @after_compile FatEcto.FatPaginator
+      @after_compile FatEcto.Pagination.Paginator
 
       @doc """
       Paginates the given query with the provided parameters.
@@ -65,8 +65,8 @@ defmodule FatEcto.FatPaginator do
           #Ecto.Query<from f0 in FatEcto.FatHospital, distinct: true>
       """
       def paginate(query, params) do
-        {skip, params} = FatEcto.FatHelper.get_skip_value(params)
-        {limit, _params} = FatEcto.FatHelper.get_limit_value(params, @options)
+        {skip, params} = FatEcto.Pagination.Helper.get_skip_value(params)
+        {limit, _params} = FatEcto.Pagination.Helper.get_limit_value(params, @options)
 
         %{
           data_query: data_query(query, skip, limit),
@@ -117,7 +117,7 @@ defmodule FatEcto.FatPaginator do
       Counts the total number of records for the given count query.
       """
       def count_records(%{select: nil} = count_query) do
-        @repo.aggregate(count_query, :count, count_query |> FatEcto.FatHelper.get_primary_keys() |> hd())
+        @repo.aggregate(count_query, :count, count_query |> FatEcto.SharedHelper.get_primary_keys() |> hd())
       end
 
       def count_records(count_query) do
@@ -167,7 +167,7 @@ defmodule FatEcto.FatPaginator do
 
       @impl true
       def aggregate(query) do
-        primary_keys = FatEcto.FatHelper.get_primary_keys(query)
+        primary_keys = FatEcto.SharedHelper.get_primary_keys(query)
 
         case primary_keys do
           nil ->
@@ -265,7 +265,7 @@ defmodule FatEcto.FatPaginator do
   def __after_compile__(%{module: module}, _bytecode) do
     repo = module.repo_option()
 
-    unless FatEcto.FatHelper.implements_behaviour?(repo, Ecto.Repo) do
+    unless FatEcto.SharedHelper.implements_behaviour?(repo, Ecto.Repo) do
       raise ArgumentError, """
       The provided :repo option is not a valid Ecto.Repo.
       Expected a module that implements the Ecto.Repo behaviour, got: #{inspect(repo)}

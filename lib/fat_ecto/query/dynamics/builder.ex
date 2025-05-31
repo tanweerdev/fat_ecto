@@ -1,11 +1,11 @@
-defmodule FatEcto.Builder.FatDynamicsBuilder do
+defmodule FatEcto.Query.Dynamics.Builder do
   @moduledoc """
   Builds Ecto dynamic expressions from a structured query map.
   Used by FatDynamicsBuildable for dynamic-only use cases.
   """
 
   import Ecto.Query
-  alias FatEcto.Builder.FatOperatorHelper
+  alias FatEcto.Query.OperatorApplier
 
   @doc """
   Builds an Ecto dynamic query from a JSON-like structure.
@@ -13,7 +13,7 @@ defmodule FatEcto.Builder.FatDynamicsBuilder do
   ## Examples
 
       iex> import Ecto.Query
-      ...> query = FatEcto.Builder.FatDynamicsBuilder.build(%{
+      ...> query = FatEcto.Query.Dynamics.Builder.build(%{
       ...>   "$OR" => [
       ...>     %{"name" => "John"},
       ...>     %{"phone" => nil},
@@ -85,7 +85,7 @@ defmodule FatEcto.Builder.FatDynamicsBuilder do
           if should_override?(field, overrideable_fields) && override_callback do
             override_callback.(acc, field, operator, value)
           else
-            FatOperatorHelper.apply_operator(operator, field, value)
+            OperatorApplier.apply_operator(operator, field, value)
           end
 
         combine_dynamics(acc, dynamic, :and)
@@ -101,9 +101,9 @@ defmodule FatEcto.Builder.FatDynamicsBuilder do
     field_dynamic =
       if should_override?(field, overrideable_fields) && override_callback do
         override_callback.(dynamic, field, operator, value) ||
-          FatOperatorHelper.apply_operator(operator, field, value)
+          OperatorApplier.apply_operator(operator, field, value)
       else
-        FatOperatorHelper.apply_operator(operator, field, value)
+        OperatorApplier.apply_operator(operator, field, value)
       end
 
     combine_dynamics(dynamic, field_dynamic, :and)

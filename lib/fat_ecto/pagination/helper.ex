@@ -1,4 +1,4 @@
-defmodule FatEcto.FatHelper do
+defmodule FatEcto.Pagination.Helper do
   @moduledoc """
   Provides utility functions for FatEcto, including handling pagination limits, skip values,
   dynamic binding, and preloading associations.
@@ -11,38 +11,13 @@ defmodule FatEcto.FatHelper do
   @default_skip 0
 
   @doc """
-  Checks if a module implements the given behaviour by inspecting its `__info__/1` metadata.
-
-  ## Parameters
-  - `module`: The module to check.
-  - `behaviour`: The behaviour to validate against.
-
-  ## Examples
-      iex> implements_behaviour?(MyApp.Repo, Ecto.Repo)
-      true
-
-      iex> implements_behaviour?(NotARepo, Ecto.Repo)
-      false
-  """
-  @spec implements_behaviour?(module(), module()) :: boolean()
-  def implements_behaviour?(module, behaviour) do
-    is_atom(module) &&
-      Code.ensure_compiled(module) &&
-      function_exported?(module, :__info__, 1) &&
-      :attributes
-      |> module.__info__()
-      |> Keyword.get(:behaviour, [])
-      |> Enum.member?(behaviour)
-  end
-
-  @doc """
   Returns the maximum and default limit values based on the provided options.
 
   ## Parameters
   - `options`: A keyword list or map containing `max_limit` and `default_limit`.
 
   ## Examples
-      iex> FatEcto.FatHelper.get_limit_bounds(max_limit: 50, default_limit: 10)
+      iex> FatEcto.SharedHelper.get_limit_bounds(max_limit: 50, default_limit: 10)
       {50, 10}
   """
   @spec get_limit_bounds(nil | keyword() | map()) :: {integer(), integer()}
@@ -59,7 +34,7 @@ defmodule FatEcto.FatHelper do
   - `params`: A keyword list containing the `:skip` value.
 
   ## Examples
-      iex> FatEcto.FatHelper.get_skip_value(skip: 20)
+      iex> FatEcto.Pagination.Helper.get_skip_value(skip: 20)
       {20, []}
   """
   @spec get_skip_value(keyword()) :: {integer(), keyword()}
@@ -78,7 +53,7 @@ defmodule FatEcto.FatHelper do
   - `options`: A keyword list or map containing `max_limit` and `default_limit`.
 
   ## Examples
-      iex> FatEcto.FatHelper.get_limit_value([limit: 15], max_limit: 50, default_limit: 10)
+      iex> FatEcto.SharedHelper.get_limit_value([limit: 15], max_limit: 50, default_limit: 10)
       {15, []}
   """
   @spec get_limit_value(keyword(), nil | keyword() | map()) :: {integer(), keyword()}
@@ -97,41 +72,13 @@ defmodule FatEcto.FatHelper do
   end
 
   @doc """
-  Converts a string to an atom.
-
-  ## Parameters
-  - `str`: The string to convert.
-
-  ## Examples
-      iex> FatEcto.FatHelper.string_to_atom("example")
-      :example
-  """
-  @spec string_to_atom(String.t() | atom()) :: atom()
-  def string_to_atom(already_atom) when is_atom(already_atom), do: already_atom
-  def string_to_atom(str), do: String.to_atom(str)
-
-  @doc """
-  Converts a string to an existing atom.
-
-  ## Parameters
-  - `str`: The string to convert.
-
-  ## Examples
-      iex> FatEcto.FatHelper.string_to_existing_atom("example")
-      :example
-  """
-  @spec string_to_existing_atom(String.t() | atom()) :: atom()
-  def string_to_existing_atom(already_atom) when is_atom(already_atom), do: already_atom
-  def string_to_existing_atom(str), do: String.to_existing_atom(str)
-
-  @doc """
   Retrieves the primary keys for a given query.
 
   ## Parameters
   - `query`: The Ecto query.
 
   ## Examples
-      iex> FatEcto.FatHelper.get_primary_keys(from(u in User))
+      iex> FatEcto.SharedHelper.get_primary_keys(from(u in User))
       [:id]
   """
   @spec get_primary_keys(Ecto.Query.t()) :: list(atom()) | nil
@@ -144,33 +91,6 @@ defmodule FatEcto.FatHelper do
       nil
     end
   end
-
-  @spec filterable_opt_to_map(maybe_improper_list() | any()) :: maybe_improper_list() | map()
-  def filterable_opt_to_map(list) when is_list(list) do
-    if Keyword.keyword?(list) do
-      keyword_list_to_map(list)
-    else
-      list
-      |> Enum.map(fn k -> {Atom.to_string(k), "*"} end)
-      |> Map.new()
-    end
-  end
-
-  def filterable_opt_to_map(input), do: input
-
-  # Converts a keyword list to a map with string keys
-  @spec keyword_list_to_map(keyword() | map()) :: map()
-  def keyword_list_to_map(list) when is_list(list) do
-    if Keyword.keyword?(list) do
-      list
-      |> Enum.map(fn {k, v} -> {Atom.to_string(k), v} end)
-      |> Map.new()
-    else
-      list
-    end
-  end
-
-  def keyword_list_to_map(input), do: input
 
   defp parse_integer!(int_str) do
     cond do

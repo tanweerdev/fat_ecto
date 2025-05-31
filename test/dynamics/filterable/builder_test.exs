@@ -1,12 +1,12 @@
-defmodule FatEcto.Builder.FatDynamicsBuilderTest do
+defmodule FatEcto.Query.Dynamics.BuilderTest do
   use FatEcto.ConnCase
   import Ecto.Query
-  alias FatEcto.Builder.FatDynamicsBuilder
+  alias FatEcto.Query.Dynamics.Builder
 
   describe "build/1" do
     test "handles simple field comparisons" do
       dynamics =
-        FatDynamicsBuilder.build(%{
+        Builder.build(%{
           "name" => %{"$ILIKE" => "%John%"},
           "age" => %{"$GT" => 18, "$LT" => 30}
         })
@@ -19,7 +19,7 @@ defmodule FatEcto.Builder.FatDynamicsBuilderTest do
 
     test "handles direct field comparisons" do
       dynamics =
-        FatDynamicsBuilder.build(%{
+        Builder.build(%{
           "name" => "John",
           "age" => 25
         })
@@ -31,7 +31,7 @@ defmodule FatEcto.Builder.FatDynamicsBuilderTest do
 
     test "handles nil values" do
       dynamics =
-        FatDynamicsBuilder.build(%{
+        Builder.build(%{
           "name" => nil,
           "age" => %{"$GT" => 18}
         })
@@ -43,7 +43,7 @@ defmodule FatEcto.Builder.FatDynamicsBuilderTest do
 
     test "handles nested $OR conditions" do
       dynamics =
-        FatDynamicsBuilder.build(%{
+        Builder.build(%{
           "$OR" => [
             %{"name" => %{"$ILIKE" => "%John%"}},
             %{"age" => %{"$GT" => 30}}
@@ -57,7 +57,7 @@ defmodule FatEcto.Builder.FatDynamicsBuilderTest do
 
     test "handles nested $AND conditions" do
       dynamics =
-        FatDynamicsBuilder.build(%{
+        Builder.build(%{
           "$AND" => [
             %{"name" => %{"$ILIKE" => "%John%"}},
             %{"age" => %{"$GT" => 18}}
@@ -71,7 +71,7 @@ defmodule FatEcto.Builder.FatDynamicsBuilderTest do
 
     test "handles deeply nested conditions" do
       dynamics =
-        FatDynamicsBuilder.build(%{
+        Builder.build(%{
           "$OR" => [
             %{
               "name" => %{"$ILIKE" => "%John%"},
@@ -102,7 +102,7 @@ defmodule FatEcto.Builder.FatDynamicsBuilderTest do
 
     test "handles deeply nested conditions with $OR as map" do
       dynamics =
-        FatDynamicsBuilder.build(%{
+        Builder.build(%{
           "$OR" => [
             %{
               "name" => %{"$ILIKE" => "%John%"},
@@ -133,7 +133,7 @@ defmodule FatEcto.Builder.FatDynamicsBuilderTest do
 
     test "handles boolean fields" do
       dynamics =
-        FatDynamicsBuilder.build(%{
+        Builder.build(%{
           "is_active" => true
         })
 
@@ -144,7 +144,7 @@ defmodule FatEcto.Builder.FatDynamicsBuilderTest do
 
     test "handles multiple operators for the same field" do
       dynamics =
-        FatDynamicsBuilder.build(%{
+        Builder.build(%{
           "age" => %{"$GT" => 18, "$LT" => 30}
         })
 
@@ -155,7 +155,7 @@ defmodule FatEcto.Builder.FatDynamicsBuilderTest do
 
     test "handles $IN operator for list values" do
       dynamics =
-        FatDynamicsBuilder.build(%{
+        Builder.build(%{
           "city" => %{"$IN" => ["New York", "London"]}
         })
 
@@ -166,7 +166,7 @@ defmodule FatEcto.Builder.FatDynamicsBuilderTest do
 
     test "handles $NOT_IN operator for list values" do
       dynamics =
-        FatDynamicsBuilder.build(%{
+        Builder.build(%{
           "city" => %{"$NOT_IN" => ["New York", "London"]}
         })
 

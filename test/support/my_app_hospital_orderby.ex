@@ -1,7 +1,7 @@
 defmodule MyApp.HospitalOrderby do
   import Ecto.Query
 
-  use FatEcto.FatSortable,
+  use FatEcto.Sort.Sortable,
     sortable: [date_of_birth: "$ASC", rating: "*"],
     overrideable: ["name", "phone"]
 

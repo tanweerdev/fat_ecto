@@ -1,6 +1,6 @@
-defmodule FatEcto.Builder.FatHelperTest do
+defmodule FatEcto.Query.HelperTest do
   use FatEcto.ConnCase
-  alias FatEcto.Builder.FatHelper
+  alias FatEcto.Query.Helper
 
   describe "remove_ignoreable_fields/2" do
     test "removes fields with ignoreable values" do
@@ -16,7 +16,7 @@ defmodule FatEcto.Builder.FatHelperTest do
         phone: [nil]
       ]
 
-      result = FatHelper.remove_ignoreable_fields(where_params, ignoreable_fields_values)
+      result = Helper.remove_ignoreable_fields(where_params, ignoreable_fields_values)
 
       assert result == %{
                "name" => "John",
@@ -33,7 +33,7 @@ defmodule FatEcto.Builder.FatHelperTest do
 
       ignoreable_fields_values = [email: ["", "%%", nil]]
 
-      result = FatHelper.remove_ignoreable_fields(where_params, ignoreable_fields_values)
+      result = Helper.remove_ignoreable_fields(where_params, ignoreable_fields_values)
 
       assert result == %{
                "name" => "John",
@@ -55,7 +55,7 @@ defmodule FatEcto.Builder.FatHelperTest do
       overideable_fields = []
 
       result =
-        FatHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
+        Helper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
 
       assert result == %{
                "name" => %{"$ILIKE" => "%John%"},
@@ -106,7 +106,7 @@ defmodule FatEcto.Builder.FatHelperTest do
       overideable_fields = ["phone"]
 
       result =
-        FatHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
+        Helper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
 
       assert result == expected
     end
@@ -142,7 +142,7 @@ defmodule FatEcto.Builder.FatHelperTest do
       overideable_fields = ["phone"]
 
       result =
-        FatHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
+        Helper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
 
       assert result == expected
     end
@@ -178,7 +178,7 @@ defmodule FatEcto.Builder.FatHelperTest do
       overideable_fields = ["phone"]
 
       result =
-        FatHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
+        Helper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
 
       assert result == expected
     end
@@ -193,7 +193,7 @@ defmodule FatEcto.Builder.FatHelperTest do
       overideable_fields = []
 
       result =
-        FatHelper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
+        Helper.filter_filterable_fields(where_params, filterable_fields, overideable_fields)
 
       assert result == %{
                "name" => %{"$EQUAL" => "John"},

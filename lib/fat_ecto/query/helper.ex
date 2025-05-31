@@ -1,6 +1,6 @@
-defmodule FatEcto.Builder.FatHelper do
+defmodule FatEcto.Query.Helper do
   @moduledoc """
-  Provides helper functions for filtering and processing query parameters in `FatEcto.Builder.FatDynamicsBuildable`.
+  Provides helper functions for filtering and processing query parameters in `FatEcto.Query.Dynamics.Buildable`.
   """
 
   @doc """
@@ -13,10 +13,10 @@ defmodule FatEcto.Builder.FatHelper do
   ### Returns
     - The filtered query parameters.
   """
-  alias FatEcto.FatHelper
+  alias FatEcto.SharedHelper
   @spec remove_ignoreable_fields(map(), keyword()) :: map()
   def remove_ignoreable_fields(where_params, ignoreable_fields_values) do
-    ignoreable_fields_values = FatHelper.keyword_list_to_map(ignoreable_fields_values)
+    ignoreable_fields_values = SharedHelper.keyword_list_to_map(ignoreable_fields_values)
 
     Enum.reduce(where_params, %{}, fn {field, value}, acc ->
       case Map.get(ignoreable_fields_values, field) do
@@ -66,7 +66,7 @@ defmodule FatEcto.Builder.FatHelper do
   """
   @spec filter_filterable_fields(map(), keyword(), list()) :: map()
   def filter_filterable_fields(where_params, filterable_fields, overrideable_fields) do
-    filterable_fields = FatHelper.filterable_opt_to_map(filterable_fields)
+    filterable_fields = SharedHelper.filterable_opt_to_map(filterable_fields)
     do_filter_filterable_fields(where_params, filterable_fields, overrideable_fields, %{})
   end
 

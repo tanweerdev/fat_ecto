@@ -1,4 +1,4 @@
-defmodule FatEcto.FatV2PaginatorTest do
+defmodule FatEcto.Pagination.V2PaginatorTest do
   use FatEcto.ConnCase
   import Ecto.Query
   alias FatEcto.FatHospital

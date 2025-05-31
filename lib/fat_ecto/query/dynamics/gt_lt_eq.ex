@@ -1,4 +1,4 @@
-defmodule FatEcto.Dynamics.FatGtLtEqDynamics do
+defmodule FatEcto.Query.Dynamics.GtLtEq do
   @moduledoc """
   Provides dynamic query builders for common Ecto operations, such as filtering by comparison operators
   (`>`, `<`, `>=`, `<=`, `==`, `!=`) and handling `nil` values.

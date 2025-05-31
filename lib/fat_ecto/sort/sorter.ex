@@ -1,4 +1,4 @@
-defmodule FatEcto.FatOrderBy do
+defmodule FatEcto.Sort.Sorter do
   @moduledoc """
   Builds query with `asc` or `desc` order.
 
@@ -8,7 +8,7 @@ defmodule FatEcto.FatOrderBy do
   """
 
   import Ecto.Query
-  alias FatEcto.FatHelper
+  alias FatEcto.SharedHelper
 
   @spec build_order_by(any(), any(), any(), any()) :: any()
   def build_order_by(queryable, order_by_params, _build_options, opts \\ [])
@@ -28,12 +28,12 @@ defmodule FatEcto.FatOrderBy do
 
   ### Examples
       iex> query_opts = %{"$ORder" => %{"id" => "$ASC"}}
-      iex> FatEcto.FatOrderBy.build_order_by(FatEcto.FatHospital, query_opts["$ORder"], [], [])
+      iex> FatEcto.Sort.Sorter.build_order_by(FatEcto.FatHospital, query_opts["$ORder"], [], [])
       #Ecto.Query<from f0 in FatEcto.FatHospital, order_by: [asc: f0.id]>
   """
   def build_order_by(queryable, order_by_params, _build_options, opts) do
     Enum.reduce(order_by_params, queryable, fn {field, format}, queryable ->
-      field_atom = FatHelper.string_to_existing_atom(field)
+      field_atom = SharedHelper.string_to_existing_atom(field)
       apply_order(queryable, field_atom, format, opts[:binding])
     end)
   end

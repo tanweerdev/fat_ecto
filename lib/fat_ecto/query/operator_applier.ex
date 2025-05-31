@@ -1,4 +1,4 @@
-defmodule FatEcto.Builder.FatOperatorHelper do
+defmodule FatEcto.Query.OperatorApplier do
   @moduledoc """
   Provides helper functions to apply dynamic query operators for Ecto queries.
 
@@ -43,15 +43,15 @@ defmodule FatEcto.Builder.FatOperatorHelper do
   ### Example
 
       # Applying a `$LIKE` operator
-      FatOperatorHelper.apply_operator("$LIKE", :name, "%John%", [])
+      OperatorApplier.apply_operator("$LIKE", :name, "%John%", [])
 
       # Applying a negated `$EQUAL` operator
-      FatOperatorHelper.apply_not_condition("$EQUAL", :age, 30, [])
+      OperatorApplier.apply_not_condition("$EQUAL", :age, 30, [])
   """
-  alias FatEcto.Dynamics.FatBtwInContainsDynamics
-  alias FatEcto.Dynamics.FatGtLtEqDynamics
-  alias FatEcto.Dynamics.FatLikeDynamics
-  alias FatEcto.FatHelper
+  alias FatEcto.Query.Dynamics.BtwInContains
+  alias FatEcto.Query.Dynamics.GtLtEq
+  alias FatEcto.Query.Dynamics.Like
+  alias FatEcto.SharedHelper
 
   @spec allowed_operators() :: [String.t(), ...]
   def allowed_operators,
@@ -83,125 +83,125 @@ defmodule FatEcto.Builder.FatOperatorHelper do
 
   @spec apply_nil_operator(String.t(), atom()) :: nil | Ecto.Query.dynamic_expr()
   def apply_nil_operator("$NULL", field) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.field_is_nil_dynamic(field)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.field_is_nil_dynamic(field)
   end
 
   def apply_nil_operator("$NOT_NULL", field) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.not_field_is_nil_dynamic(field)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.not_field_is_nil_dynamic(field)
   end
 
   # Helper function to apply the appropriate operator to the field and value.
   @spec apply_operator(String.t(), atom(), any()) :: nil | Ecto.Query.dynamic_expr()
   def apply_operator("$LIKE", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatLikeDynamics.like_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    Like.like_dynamic(field, value)
   end
 
   def apply_operator("$NULL", field, _value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.field_is_nil_dynamic(field)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.field_is_nil_dynamic(field)
   end
 
   def apply_operator("$NOT_LIKE", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatLikeDynamics.not_like_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    Like.not_like_dynamic(field, value)
   end
 
   def apply_operator("$ILIKE", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatLikeDynamics.ilike_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    Like.ilike_dynamic(field, value)
   end
 
   def apply_operator("$NOT_ILIKE", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatLikeDynamics.not_ilike_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    Like.not_ilike_dynamic(field, value)
   end
 
   def apply_operator("$LT", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.lt_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.lt_dynamic(field, value)
   end
 
   def apply_operator("$LTE", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.lte_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.lte_dynamic(field, value)
   end
 
   def apply_operator("$GT", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.gt_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.gt_dynamic(field, value)
   end
 
   def apply_operator("$GTE", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.gte_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.gte_dynamic(field, value)
   end
 
   def apply_operator("$BETWEEN", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatBtwInContainsDynamics.between_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    BtwInContains.between_dynamic(field, value)
   end
 
   def apply_operator("$BETWEEN_EQUAL", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatBtwInContainsDynamics.between_equal_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    BtwInContains.between_equal_dynamic(field, value)
   end
 
   def apply_operator("$NOT_BETWEEN", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatBtwInContainsDynamics.not_between_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    BtwInContains.not_between_dynamic(field, value)
   end
 
   def apply_operator("$NOT_BETWEEN_EQUAL", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatBtwInContainsDynamics.not_between_equal_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    BtwInContains.not_between_equal_dynamic(field, value)
   end
 
   def apply_operator("$IN", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatBtwInContainsDynamics.in_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    BtwInContains.in_dynamic(field, value)
   end
 
   def apply_operator("$NOT_IN", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatBtwInContainsDynamics.not_in_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    BtwInContains.not_in_dynamic(field, value)
   end
 
   def apply_operator("$EQUAL", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.eq_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.eq_dynamic(field, value)
   end
 
   def apply_operator("$CAST_TO_DATE_LT", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.cast_to_date_lt_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.cast_to_date_lt_dynamic(field, value)
   end
 
   def apply_operator("$CAST_TO_DATE_LTE", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.cast_to_date_lte_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.cast_to_date_lte_dynamic(field, value)
   end
 
   def apply_operator("$CAST_TO_DATE_GT", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.cast_to_date_gt_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.cast_to_date_gt_dynamic(field, value)
   end
 
   def apply_operator("$CAST_TO_DATE_GTE", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.cast_to_date_gte_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.cast_to_date_gte_dynamic(field, value)
   end
 
   def apply_operator("$CAST_TO_DATE_EQUAL", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.cast_to_date_eq_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.cast_to_date_eq_dynamic(field, value)
   end
 
   def apply_operator("$NOT_EQUAL", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.not_eq_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.not_eq_dynamic(field, value)
   end
 
   def apply_operator(_, _field, _value), do: nil
@@ -211,38 +211,38 @@ defmodule FatEcto.Builder.FatOperatorHelper do
   # Pattern matching for apply_not_condition
   @spec apply_not_condition(String.t(), atom(), any()) :: nil | Ecto.Query.dynamic_expr()
   def apply_not_condition("$LIKE", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatLikeDynamics.not_like_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    Like.not_like_dynamic(field, value)
   end
 
   def apply_not_condition("$ILIKE", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatLikeDynamics.not_ilike_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    Like.not_ilike_dynamic(field, value)
   end
 
   def apply_not_condition("$LT", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.not_lt_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.not_lt_dynamic(field, value)
   end
 
   def apply_not_condition("$LTE", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.not_lte_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.not_lte_dynamic(field, value)
   end
 
   def apply_not_condition("$GT", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.not_gt_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.not_gt_dynamic(field, value)
   end
 
   def apply_not_condition("$GTE", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.not_gte_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.not_gte_dynamic(field, value)
   end
 
   def apply_not_condition("$EQUAL", field, value) do
-    field = FatHelper.string_to_existing_atom(field)
-    FatGtLtEqDynamics.not_eq_dynamic(field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    GtLtEq.not_eq_dynamic(field, value)
   end
 
   def apply_not_condition(_operator, _field, _value), do: nil

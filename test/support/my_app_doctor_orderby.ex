@@ -1,5 +1,5 @@
 defmodule Fat.DoctorOrderby do
-  use FatEcto.FatSortable,
+  use FatEcto.Sort.Sortable,
     sortable: [
       email: "*",
       phone: "$ASC"

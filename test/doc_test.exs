@@ -8,17 +8,17 @@ defmodule DocTest do
     :ok
   end
 
-  doctest FatEcto.Dynamics.FatBtwInContainsDynamics
-  doctest FatEcto.Dynamics.FatGtLtEqDynamics
-  doctest FatEcto.Dynamics.FatLikeDynamics
+  doctest FatEcto.Query.Dynamics.BtwInContains
+  doctest FatEcto.Query.Dynamics.GtLtEq
+  doctest FatEcto.Query.Dynamics.Like
   # doctest FatEcto.Dynamics.FatNotDynamics
-  doctest FatEcto.Builder.FatDynamicsBuilder
-  doctest FatEcto.Builder.FatOperatorHelper
-  # doctest FatEcto.FatHelper
-  doctest FatEcto.FatOrderBy
+  doctest FatEcto.Query.Dynamics.Builder
+  doctest FatEcto.Query.OperatorApplier
+  # doctest FatEcto.SharedHelper
+  doctest FatEcto.Sort.Sorter
   doctest FatEcto.Sample.Pagination
-  doctest FatEcto.FatSortableHelper
+  doctest FatEcto.Sort.Helper
   doctest Fat.DoctorOrderby
-  doctest FatEcto.Builder.FatHelper
+  doctest FatEcto.Query.Helper
   doctest FatEcto.Dynamics.MyApp.DoctorFilter
 end

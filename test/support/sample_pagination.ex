@@ -1,5 +1,5 @@
 defmodule FatEcto.Sample.Pagination do
-  use FatEcto.FatPaginator,
+  use FatEcto.Pagination.Paginator,
     default_limit: 10,
     repo: FatEcto.Repo,
     max_limit: 100

@@ -1,5 +1,5 @@
 defmodule FatEcto.Query.MyApp.DoctorQuery do
-  use FatEcto.Builder.FatQueryBuildable,
+  use FatEcto.Query.Buildable,
     filterable: [
       email: [
         "$EQUAL",
@@ -26,7 +26,7 @@ defmodule FatEcto.Query.MyApp.DoctorQuery do
 
   import Ecto.Query
 
-  @impl FatEcto.Builder.FatQueryBuildable
+  @impl FatEcto.Query.Buildable
   def override_buildable(query, "phone", "$ILIKE", value) do
     from(q in query, where: ilike(fragment("(?)::TEXT", q.phone), ^value))
   end

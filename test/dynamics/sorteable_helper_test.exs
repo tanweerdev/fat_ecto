@@ -1,13 +1,13 @@
-defmodule FatEcto.FatSortableHelperTest do
+defmodule FatEcto.Sort.HelperTest do
   use FatEcto.ConnCase
-  alias FatEcto.FatSortableHelper
+  alias FatEcto.Sort.Helper
 
   describe "filter_sortable_fields/2" do
     test "filters fields based on sortable_fields" do
       sort_params = %{"id" => "$ASC", "name" => "$DESC", "invalid_field" => "$ASC"}
       sortable_fields = %{"id" => "$ASC", "name" => ["$ASC", "$DESC"]}
 
-      result = FatSortableHelper.filter_sortable_fields(sort_params, sortable_fields)
+      result = Helper.filter_sortable_fields(sort_params, sortable_fields)
 
       assert result == %{"id" => "$ASC", "name" => "$DESC"}
     end
@@ -16,7 +16,7 @@ defmodule FatEcto.FatSortableHelperTest do
       sort_params = %{"id" => "$ASC", "name" => "$DESC"}
       sortable_fields = %{"id" => "*", "name" => "*"}
 
-      result = FatSortableHelper.filter_sortable_fields(sort_params, sortable_fields)
+      result = Helper.filter_sortable_fields(sort_params, sortable_fields)
 
       assert result == %{"id" => "$ASC", "name" => "$DESC"}
     end
@@ -25,7 +25,7 @@ defmodule FatEcto.FatSortableHelperTest do
       sort_params = %{"id" => "$DESC", "name" => "$INvalid"}
       sortable_fields = %{"id" => "$ASC", "name" => ["$ASC", "$DESC"]}
 
-      result = FatSortableHelper.filter_sortable_fields(sort_params, sortable_fields)
+      result = Helper.filter_sortable_fields(sort_params, sortable_fields)
 
       assert result == %{}
     end

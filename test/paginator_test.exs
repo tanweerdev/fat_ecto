@@ -1,4 +1,4 @@
-defmodule FatEcto.FatPaginatorTest do
+defmodule FatEcto.Pagination.PaginatorTest do
   use FatEcto.ConnCase
   import Ecto.Query
   alias FatEcto.FatHospital
@@ -133,7 +133,7 @@ defmodule FatEcto.FatPaginatorTest do
 
       assert inspect(result.count_query) ==
                inspect(
-                 from(f0 in FatEcto.FatPaginatorTest.FatHospitalWithPrimaryKeys,
+                 from(f0 in FatEcto.Pagination.PaginatorTest.FatHospitalWithPrimaryKeys,
                    distinct: true,
                    select: fragment("COUNT(DISTINCT ROW(?, ?, ?))::INT", f0.id, f0.id1, f0.id2)
                  )
