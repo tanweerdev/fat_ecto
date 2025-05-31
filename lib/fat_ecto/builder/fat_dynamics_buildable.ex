@@ -33,11 +33,11 @@ defmodule FatEcto.Builder.FatDynamicsBuildable do
 
         import Ecto.Query
 
-        def override_buildable("name", "$ILIKE", value) do
+        def override_buildable(dynamics, "name", "$ILIKE", value) do
           dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
         end
 
-        def override_buildable("phone", "$ILIKE", value) do
+        def override_buildable(dynamics, "phone", "$ILIKE", value) do
           dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
         end
 

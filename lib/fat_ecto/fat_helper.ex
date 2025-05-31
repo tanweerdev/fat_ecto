@@ -65,7 +65,7 @@ defmodule FatEcto.FatHelper do
   @spec get_skip_value(keyword()) :: {integer(), keyword()}
   def get_skip_value(params) do
     {skip, params} = Keyword.pop(params, :skip, @min_skip)
-    skip = FatEcto.Utils.Integer.parse!(skip)
+    skip = parse_integer!(skip)
     skip = if skip > @default_skip, do: skip, else: @default_skip
     {skip, params}
   end
@@ -85,7 +85,7 @@ defmodule FatEcto.FatHelper do
   def get_limit_value(params, options \\ []) do
     {max_limit, default_limit} = get_limit_bounds(options)
     {limit, params} = Keyword.pop(params, :limit, default_limit)
-    limit = FatEcto.Utils.Integer.parse!(limit)
+    limit = parse_integer!(limit)
 
     if is_nil(limit) do
       {default_limit, params}
@@ -171,4 +171,20 @@ defmodule FatEcto.FatHelper do
   end
 
   def keyword_list_to_map(input), do: input
+
+  defp parse_integer!(int_str) do
+    cond do
+      is_integer(int_str) -> int_str
+      is_binary(int_str) -> do_parse_integer(int_str)
+      true -> nil
+    end
+  end
+
+  # Helper function to parse an integer from a string
+  defp do_parse_integer(int_str) do
+    case Integer.parse(int_str) do
+      {integer, _} -> integer
+      :error -> nil
+    end
+  end
 end

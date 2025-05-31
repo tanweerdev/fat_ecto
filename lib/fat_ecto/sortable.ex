@@ -1,4 +1,5 @@
 defmodule FatEcto.FatSortable do
+  # TODO: convert this sortable to use Dynamics and not Querable
   @moduledoc """
   Provides functionality to sort Ecto queries based on user-defined rules.
 

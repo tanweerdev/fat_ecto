@@ -11,7 +11,7 @@
 
 ## Description
 
-FatEcto is an Elixir package designed to make your life easier when working with Ecto. It simplifies query building, filtering, sorting, pagination, and data sanitization—so you can focus on what truly matters: building amazing applications. With FatEcto, writing complex queries becomes effortless, flexible, and powerful! 💪
+FatEcto is an Elixir package designed to make your life easier when working with Ecto. It simplifies query building, filtering, sorting, and pagination—so you can focus on what truly matters: building amazing applications. With FatEcto, writing complex repeating queries becomes effortless, flexible, and powerful! 💪
 
 ---
 
@@ -43,30 +43,24 @@ Tired of writing repetitive query filters? The `Whereable` module lets you dynam
 ```elixir
 defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
   use FatEcto.Builder.FatDynamicsBuildable,
-    filterable: %{
-      "id" => ["$EQUAL", "$NOT_EQUAL"]
-    },
+    filterable: [
+      id: ["$EQUAL", "$NOT_EQUAL"]
+    ],
     overrideable: ["name", "phone"],
-    ignoreable: %{
-      "name" => ["%%", "", [], nil],
-      "phone" => ["%%", "", [], nil]
-    }
+    ignoreable: [
+      name: ["%%", "", [], nil],
+      phone: ["%%", "", [], nil]
+    ]
 
   import Ecto.Query
 
   @impl true
   # You can implement override_buildable for your custom filters
-  ## TODO: lets
   def override_buildable(_dynamics, "name", "$ILIKE", value) do
     dynamic([r], ilike(fragment("(?)::TEXT", r.name), ^value))
   end
 
-  def override_buildable(dynamics, _, _, _), do: dynamics
-
-  # You can do some custom processing if needed eg
-  def after_buildable(dynamics) do
-    if dynamics, do: dynamics, else: true
-  end
+  def override_buildable(dynamics, _field, _operator, _value), do: dynamics
 end
 ```
 
@@ -187,13 +181,12 @@ defmodule Fat.SortQuery do
     overrideable: ["custom_field"]
 
   @impl true
-  def override_sortable(query, field, operator) do
-    case {field, operator} do
-      {"custom_field", "$ASC"} ->
-        from(q in query, order_by: [asc: fragment("?::jsonb->>'custom_field'", q)])
-      _ ->
-        query
-    end
+  def override_sortable(query, "custom_field", "$ASC") do
+    from(q in query, order_by: [asc: fragment("?::jsonb->>'custom_field'", q)])
+  end
+
+  def override_sortable(query, _field, _operator) do
+    query
   end
 end
 ```
@@ -208,38 +201,11 @@ No more hassle with pagination! FatPaginator helps you paginate Ecto queries eff
 
 ```elixir
 defmodule Fat.MyPaginator do
-  use FatEcto.FatPaginator, repo: Fat.Repo
-  # Add custom pagination functions here
+  use FatEcto.FatV2Paginator,
+    default_limit: 10,
+    repo: FatEcto.Repo,
+    max_limit: 100
 end
-```
-
----
-
-### 🔍 FatEcto.FatDataSanitizer – Clean & Structured Data
-
-Messy data? Not anymore! `DataSanitizer` helps you sanitize records and transform them into structured, clean views effortlessly. Keep your data tidy and consistent. 🎯
-
-#### Usage of FatDataSanitizer
-
-```elixir
-defmodule Fat.MySanitizer do
-  use FatEcto.FatDataSanitizer
-  # Define your custom sanitization functions here
-end
-```
-
----
-
-### ⚡ FatEcto Utilities – Small Helpers, Big Impact
-
-FatEcto also comes with a set of handy utility functions to streamline your workflow:
-
-```elixir
-# Check if a map contains all required keys
-FatEcto.Utils.Map.has_all_keys?(%{a: 1, b: 2}, [:a, :b])
-
-# Ensure a map contains only allowed keys
-FatEcto.Utils.Map.contain_only_allowed_keys?(%{a: 1, c: 3}, [:a, :b])
 ```
 
 ---

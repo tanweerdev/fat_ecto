@@ -14,16 +14,6 @@ defmodule DocTest do
   # doctest FatEcto.Dynamics.FatNotDynamics
   doctest FatEcto.Builder.FatDynamicsBuilder
   doctest FatEcto.Builder.FatOperatorHelper
-  # doctest FatEcto.Utils.Changeset
-  doctest FatEcto.Utils.DateTime
-  doctest FatEcto.Utils.Integer
-  doctest FatEcto.Utils.Map
-  # doctest FatEcto.Utils.Network
-  # doctest FatEcto.Utils.String
-  # doctest FatEcto.Utils.Table
-  doctest FatEcto.Utils.UUID
-  # doctest FatEcto.FatAppContext
-  doctest FatEcto.TestRecordUtils
   # doctest FatEcto.FatHelper
   doctest FatEcto.FatOrderBy
   doctest FatEcto.Sample.Pagination
