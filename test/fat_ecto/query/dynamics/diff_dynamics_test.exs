@@ -301,7 +301,13 @@ defmodule FatEcto.Dynamics.FatDynamicsTest do
 
     test "array_ilike_dynamic/2 builds a dynamic for array field ilike" do
       result = Like.array_ilike_dynamic(:tags, "%elixir%")
-      expected = dynamic([q], fragment("EXISTS (SELECT 1 FROM UNNEST(?) as value WHERE value ILIKE ?)", q.tags, ^"%elixir%"))
+
+      expected =
+        dynamic(
+          [q],
+          fragment("EXISTS (SELECT 1 FROM UNNEST(?) as value WHERE value ILIKE ?)", q.tags, ^"%elixir%")
+        )
+
       assert inspect(result) == inspect(expected)
     end
 

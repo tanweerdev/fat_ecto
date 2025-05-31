@@ -1,9 +1,9 @@
 defmodule FatEcto.Query.OperatorApplierTest do
   use FatEcto.ConnCase
-  alias FatEcto.Query.OperatorApplier
   alias FatEcto.Query.Dynamics.BtwInContains
   alias FatEcto.Query.Dynamics.GtLtEq
   alias FatEcto.Query.Dynamics.Like
+  alias FatEcto.Query.OperatorApplier
 
   describe "apply_operator/4" do
     test "applies $LIKE operator" do

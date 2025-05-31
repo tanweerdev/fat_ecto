@@ -53,8 +53,8 @@ defmodule FatEcto.Query.Buildable do
       end
   """
 
-  alias FatEcto.Query.Helper
   alias FatEcto.Query.Builder
+  alias FatEcto.Query.Helper
 
   @doc """
   Callback for handling custom filtering logic for overrideable fields with query support.
