@@ -23,7 +23,7 @@ Getting started is simple! Add `fat_ecto` to your list of dependencies in `mix.e
 def deps do
   [
     # Check https://hexdocs.pm/fat_ecto for the latest version
-    {:fat_ecto, "~> 1.0.0"}
+    {:fat_ecto, "~> 1.2"}
   ]
 end
 ```
