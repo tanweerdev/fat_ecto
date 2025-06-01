@@ -177,17 +177,15 @@ Sorting should be simple—and with `Sortable`, it is! Your frontend can send so
 defmodule Fat.SortQuery do
   import Ecto.Query
   use FatEcto.Sort.Sortable,
-    sortable: [id: "$ASC", name: ["$ASC", "$DESC"]],
+    sortable: [id: "$ASC", email: "*", name: ["$ASC", "$DESC"]],
     overrideable: ["custom_field"]
 
   @impl true
-  def override_sortable(query, "custom_field", "$ASC") do
-    from(q in query, order_by: [asc: fragment("?::jsonb->>'custom_field'", q)])
+  def override_sortable("custom_field", "$DESC") do
+    {:desc, dynamic([u], fragment("?->>'custom_field'", u.metadata))}
   end
 
-  def override_sortable(query, _field, _operator) do
-    query
-  end
+  def override_sortable(_field, _operator), do: nil
 end
 ```
 

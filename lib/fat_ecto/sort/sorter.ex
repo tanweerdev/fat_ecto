@@ -1,82 +1,43 @@
 defmodule FatEcto.Sort.Sorter do
   @moduledoc """
-  Builds query with `asc` or `desc` order.
-
-  This module provides functionality to dynamically add `order_by` clauses to Ecto queries
-  based on the provided parameters. It supports various order formats, including `$ASC`,
-  `$DESC`, and nulls handling (`$ASC_NULLS_FIRST`, `$DESC_NULLS_LAST`, etc.).
+  Builds order_by expressions in the format Ecto expects.
   """
-
   import Ecto.Query
-  alias FatEcto.SharedHelper
 
-  @spec build_order_by(any(), any(), any(), any()) :: any()
-  def build_order_by(queryable, order_by_params, _build_options, opts \\ [])
-
-  def build_order_by(queryable, nil, _build_options, _opts) do
-    queryable
-  end
+  @type order_expr ::
+          {:asc | :desc | :asc_nulls_first | :asc_nulls_last | :desc_nulls_first | :desc_nulls_last,
+           Ecto.Query.dynamic_expr()}
 
   @doc """
-  Orders the results based on the `order_by` clause in the params.
-
-  ### Parameters
-    - `queryable`: Ecto Queryable that represents your schema name, table name, or query.
-    - `order_by_params`: A map of fields and their order formats (e.g., `%{"field" => "$ASC"}`).
-    - `opts`: Options related to query bindings.
-    - `build_options`: Options related to the OTP app (unused in this function).
-
-  ### Examples
-      iex> query_opts = %{"$ORder" => %{"id" => "$ASC"}}
-      iex> FatEcto.Sort.Sorter.build_order_by(FatEcto.FatHospital, query_opts["$ORder"], [], [])
-      #Ecto.Query<from f0 in FatEcto.FatHospital, order_by: [asc: f0.id]>
+  Builds order expressions from parameters.
   """
-  def build_order_by(queryable, order_by_params, _build_options, opts) do
-    Enum.reduce(order_by_params, queryable, fn {field, format}, queryable ->
-      field_atom = SharedHelper.string_to_existing_atom(field)
-      apply_order(queryable, field_atom, format, opts[:binding])
+  @spec build_order_by(map()) :: [order_expr()]
+  def build_order_by(order_by_params)
+
+  def build_order_by(nil), do: []
+  def build_order_by(%{} = params) when map_size(params) == 0, do: []
+
+  def build_order_by(order_by_params) do
+    Enum.reduce(order_by_params, [], fn {field, operator}, acc ->
+      case apply_order(field, operator) do
+        nil -> acc
+        order_expr -> [order_expr | acc]
+      end
     end)
+    |> Enum.reverse()
   end
 
-  # Helper function to apply the order clause to the query
-  defp apply_order(queryable, field, format, binding) do
-    case binding do
-      :last ->
-        case format do
-          "$DESC" ->
-            from([q, ..., c] in queryable, order_by: [desc: field(c, ^field)])
+  defp apply_order(field, operator) when is_binary(field) do
+    field_atom = String.to_existing_atom(field)
 
-          "$ASC" ->
-            from([q, ..., c] in queryable, order_by: [asc: field(c, ^field)])
-
-          "$ASC_NULLS_FIRST" ->
-            from([q, ..., c] in queryable, order_by: [asc_nulls_first: field(c, ^field)])
-
-          "$ASC_NULLS_LAST" ->
-            from([q, ..., c] in queryable, order_by: [asc_nulls_last: field(c, ^field)])
-
-          "$DESC_NULLS_FIRST" ->
-            from([q, ..., c] in queryable, order_by: [desc_nulls_first: field(c, ^field)])
-
-          "$DESC_NULLS_LAST" ->
-            from([q, ..., c] in queryable, order_by: [desc_nulls_last: field(c, ^field)])
-
-          # Handle unexpected formats gracefully
-          _ ->
-            queryable
-        end
-
-      _ ->
-        case format do
-          "$DESC" -> from(queryable, order_by: [desc: ^field])
-          "$ASC" -> from(queryable, order_by: [asc: ^field])
-          "$ASC_NULLS_FIRST" -> from(queryable, order_by: [asc_nulls_first: ^field])
-          "$ASC_NULLS_LAST" -> from(queryable, order_by: [asc_nulls_last: ^field])
-          "$DESC_NULLS_FIRST" -> from(queryable, order_by: [desc_nulls_first: ^field])
-          "$DESC_NULLS_LAST" -> from(queryable, order_by: [desc_nulls_last: ^field])
-          # Handle unexpected formats gracefully
-          _ -> queryable
-        end
+    case operator do
+      "$DESC" -> {:desc, dynamic([q], field(q, ^field_atom))}
+      "$ASC" -> {:asc, dynamic([q], field(q, ^field_atom))}
+      "$ASC_NULLS_FIRST" -> {:asc_nulls_first, dynamic([q], field(q, ^field_atom))}
+      "$ASC_NULLS_LAST" -> {:asc_nulls_last, dynamic([q], field(q, ^field_atom))}
+      "$DESC_NULLS_FIRST" -> {:desc_nulls_first, dynamic([q], field(q, ^field_atom))}
+      "$DESC_NULLS_LAST" -> {:desc_nulls_last, dynamic([q], field(q, ^field_atom))}
+      _ -> nil
     end
   end
 end

@@ -4,8 +4,8 @@ defmodule FatEcto.Query.Dynamics.Builder do
   Used by FatDynamicsBuildable for dynamic-only use cases.
   """
 
-  import Ecto.Query
   alias FatEcto.Query.OperatorApplier
+  alias FatEcto.Query.Dynamics.Helper, as: DynamicsHelper
 
   @doc """
   Builds an Ecto dynamic query from a JSON-like structure.
@@ -47,10 +47,10 @@ defmodule FatEcto.Query.Dynamics.Builder do
     or_dynamic =
       Enum.reduce(conditions, nil, fn {field, value}, acc ->
         field_dynamic = build_field_dynamic(field, value, nil, override_callback, overrideable_fields)
-        combine_dynamics(acc, field_dynamic, :or)
+        DynamicsHelper.merge_dynamics(acc, field_dynamic, :or)
       end)
 
-    combine_dynamics(dynamic, or_dynamic, :and)
+    DynamicsHelper.merge_dynamics(dynamic, or_dynamic, :and)
   end
 
   defp build_or_dynamic(conditions, dynamic, override_callback, overrideable_fields) do
@@ -59,9 +59,9 @@ defmodule FatEcto.Query.Dynamics.Builder do
     |> ensure_list()
     |> Enum.reduce(nil, fn condition, acc ->
       condition_dynamic = build(condition, override_callback, overrideable_fields)
-      combine_dynamics(acc, condition_dynamic, :or)
+      DynamicsHelper.merge_dynamics(acc, condition_dynamic, :or)
     end)
-    |> combine_dynamics(dynamic, :and)
+    |> DynamicsHelper.merge_dynamics(dynamic, :and)
   end
 
   # Handles "$AND" conditions
@@ -70,9 +70,9 @@ defmodule FatEcto.Query.Dynamics.Builder do
     |> ensure_list()
     |> Enum.reduce(nil, fn condition, acc ->
       condition_dynamic = build(condition, override_callback, overrideable_fields)
-      combine_dynamics(acc, condition_dynamic, :and)
+      DynamicsHelper.merge_dynamics(acc, condition_dynamic, :and)
     end)
-    |> combine_dynamics(dynamic, :and)
+    |> DynamicsHelper.merge_dynamics(dynamic, :and)
   end
 
   # Handles individual field conditions
@@ -88,10 +88,10 @@ defmodule FatEcto.Query.Dynamics.Builder do
             OperatorApplier.apply_operator(operator, field, value)
           end
 
-        combine_dynamics(acc, dynamic, :and)
+        DynamicsHelper.merge_dynamics(acc, dynamic, :and)
       end)
 
-    combine_dynamics(dynamic, field_dynamic, :and)
+    DynamicsHelper.merge_dynamics(dynamic, field_dynamic, :and)
   end
 
   # Handles direct field comparisons (e.g., "field" => "value" or "field" => nil)
@@ -106,7 +106,7 @@ defmodule FatEcto.Query.Dynamics.Builder do
         OperatorApplier.apply_operator(operator, field, value)
       end
 
-    combine_dynamics(dynamic, field_dynamic, :and)
+    DynamicsHelper.merge_dynamics(dynamic, field_dynamic, :and)
   end
 
   # Common helpers
@@ -116,23 +116,6 @@ defmodule FatEcto.Query.Dynamics.Builder do
       fields when is_list(fields) -> field in fields
       fields when is_map(fields) -> Map.has_key?(fields, field)
       _ -> true
-    end
-  end
-
-  # Combines two dynamics with a specified operator (:and or :or)
-  defp combine_dynamics(dynamic1, dynamic2, operator) do
-    case {dynamic1, dynamic2} do
-      {nil, _} ->
-        dynamic2
-
-      {_, nil} ->
-        dynamic1
-
-      _ ->
-        case operator do
-          :and -> dynamic([q], ^dynamic1 and ^dynamic2)
-          :or -> dynamic([q], ^dynamic1 or ^dynamic2)
-        end
     end
   end
 

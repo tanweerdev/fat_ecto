@@ -4,13 +4,13 @@ defmodule FatEcto.RoomSortBuilder do
 
   import Ecto.Query
 
-  def override_sortable(query, "name", "$ASC") do
-    order_by(query, [r], asc: r.name)
+  def override_sortable("name", "$ASC") do
+    {:asc, dynamic([r], r.name)}
   end
 
-  def override_sortable(query, "phone", "$DESC") do
-    order_by(query, [r], desc: r.phone)
+  def override_sortable("phone", "$DESC") do
+    {:desc, dynamic([r], r.phone)}
   end
 
-  def override_sortable(query, _, _), do: query
+  def override_sortable(_, _), do: nil
 end

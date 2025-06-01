@@ -3,19 +3,32 @@ defmodule FatEcto.MultipleSortBuilderTest do
   alias FatEcto.DoctorSortBuilder
   alias FatEcto.HospitalSortBuilder
   alias FatEcto.RoomSortBuilder
+  import Ecto.Query
+
+  defp apply_sort(builder, opts) do
+    order_by = builder.build(opts)
+    from(q in FatEcto.FatDoctor, order_by: ^order_by)
+  end
 
   describe "Order by when allowed_fields: %{`email` => `$DESC`, `phone` => `$ASC`} passed" do
     test "returns the query with order by on email and phone" do
       opts = %{"email" => "$DESC", "phone" => "$ASC", "name" => "$DESC"}
-      expected = from(d in FatEcto.FatDoctor, order_by: [desc: d.email], order_by: [asc: d.phone])
-      query = DoctorSortBuilder.build(FatEcto.FatDoctor, opts)
+      query = apply_sort(DoctorSortBuilder, opts)
+
+      expected =
+        from(d in FatEcto.FatDoctor,
+          order_by: [desc: d.email, asc: d.phone]
+        )
+
       assert inspect(query) == inspect(expected)
     end
 
     test "returns the query with order by on email when phone => `$DESC` passed in overrideable_fields" do
       opts = %{"email" => "$DESC", "phone" => "$DESC"}
+      query = apply_sort(DoctorSortBuilder, opts)
+
       expected = from(d in FatEcto.FatDoctor, order_by: [desc: d.email])
-      query = DoctorSortBuilder.build(FatEcto.FatDoctor, opts)
+
       assert inspect(query) == inspect(expected)
     end
   end
@@ -27,10 +40,12 @@ defmodule FatEcto.MultipleSortBuilderTest do
         "phone" => "$ASC"
       }
 
-      expected = FatEcto.FatHospital
+      order_by = HospitalSortBuilder.build(opts)
+      assert order_by == []
 
-      query = HospitalSortBuilder.build(FatEcto.FatHospital, opts)
-      assert inspect(query) == inspect(expected)
+      query = from(h in FatEcto.FatHospital, order_by: ^order_by)
+      expected_query = from(f0 in FatEcto.FatHospital, order_by: [])
+      assert inspect(query) == inspect(expected_query)
     end
   end
 
@@ -41,10 +56,13 @@ defmodule FatEcto.MultipleSortBuilderTest do
         "phone" => "$DESC"
       }
 
-      expected =
-        from(h in FatEcto.FatRoom, order_by: [asc: h.name], order_by: [desc: h.phone])
+      query = apply_sort(RoomSortBuilder, opts)
 
-      query = RoomSortBuilder.build(FatEcto.FatRoom, opts)
+      expected =
+        from(d in FatEcto.FatDoctor,
+          order_by: [asc: d.name, desc: d.phone]
+        )
+
       assert inspect(query) == inspect(expected)
     end
   end

@@ -1,54 +1,43 @@
 defmodule FatEcto.Sort.Sortable do
-  # TODO: convert this sortable to use Dynamics and not Querable
   @moduledoc """
-  Provides functionality to sort Ecto queries based on user-defined rules.
+  Provides functionality to define sortable fields with override support.
 
-  This module allows sorting queries using predefined default fields (handled by `Sorter`)
-  and custom fields (handled by a fallback function).
+  ## Example Usage
 
-  ## Usage
-
-      defmodule Fat.SortQuery do
-        <!-- needed if you are writing queries in override_sortable -->
-        import Ecto.Query
+      defmodule MyApp.UserSort do
         use FatEcto.Sort.Sortable,
-          sortable: [id: "$ASC", name: ["$ASC", "$DESC"]],
+          sortable: [email: "*", name: ["$ASC", "$DESC"]],
           overrideable: ["custom_field"]
 
         @impl true
-        def override_sortable(query, field, operator) do
-          case {field, operator} do
-            {"custom_field", "$ASC"} ->
-              from(q in query, order_by: [asc: fragment("?::JSONB->>'custom_field'", q)])
-            _ ->
-              query
-          end
+        def override_sortable("custom_field", "$ASC") do
+          {:asc, dynamic([u], fragment("?->>'custom_field'", u.metadata))}
+        end
+
+        def override_sortable("custom_field", "$DESC") do
+          {:desc, dynamic([u], fragment("?->>'custom_field'", u.metadata))}
+        end
+
+        def override_sortable(_field, _operator) do
+          nil
         end
       end
 
-  ## Example
-
-      query = from(u in User)
-      sort_params = %{"id" => "$ASC", "name" => "$DESC", "custom_field" => "$ASC"}
-      Fat.SortQuery.build(query, sort_params)
-
-  This will sort the query by `id` in ascending order, `name` in descending order, and apply custom sorting for `custom_field`.
+      # Usage:
+      order_by = MyApp.UserSort.build(%{"email" => "$DESC", "custom_field" => "$ASC"})
+      query = from(u in User, order_by: ^order_by)
   """
 
-  alias FatEcto.SharedHelper
   alias FatEcto.Sort.Sorter
+  alias FatEcto.Sort.Helper
+  alias FatEcto.SharedHelper
 
   @doc """
   Callback for handling custom sorting logic.
 
-  This function is called for fields defined in `overrideable_fields`. The default behavior is to return the query,
-  but it can be overridden by the using module.
+  Should return `{direction, dynamic}` tuple or nil if not handling the field.
   """
-  @callback override_sortable(
-              query :: Ecto.Query.t(),
-              field :: String.t() | atom(),
-              operator :: String.t()
-            ) :: Ecto.Query.t()
+  @callback override_sortable(field :: String.t(), operator :: String.t()) :: Sorter.order_expr() | nil
 
   defmacro __using__(options \\ []) do
     quote do
@@ -56,7 +45,6 @@ defmodule FatEcto.Sort.Sortable do
       @options unquote(options)
       @sortable @options[:sortable] || []
       @overrideable_fields @options[:overrideable] || []
-      alias FatEcto.Sort.Helper
 
       # Raise a compile-time error if both sortable and overrideable options are empty.
       if @sortable == [] and @overrideable_fields == [] do
@@ -82,61 +70,42 @@ defmodule FatEcto.Sort.Sortable do
 
       @sortable_fields SharedHelper.filterable_opt_to_map(@sortable)
 
-      # Ensure `override_sortable/3` is implemented if `overrideable_fields` are provided.
-      # if @overrideable_fields != [] do
-      #   unless Module.defines?(__MODULE__, {:override_sortable, 3}) do
-      #     raise CompileError,
-      #       description: """
-      #       You must implement the `override_sortable/3` callback when `overrideable_fields` are provided.
-      #       Example:
-      #         def override_sortable(query, field, operator) do
-      #           # Your custom logic here
-      #           query
-      #         end
-      #       """
-      #   end
-      # end
-
       @doc """
-      Applies sorting to the query based on the provided parameters.
-
-      ### Parameters
-        - `queryable`: The Ecto query to which sorting will be applied.
-        - `sort_params`: A map of fields and their sorting operators (e.g., `%{"field" => "$ASC"}`).
-        - `options`: Additional options for query building (passed to `Sorter`).
-
-      ### Returns
-        - The query with sorting applied.
+      Builds order_by expressions for the given sort parameters.
+      Only processes fields defined in either sortable or overrideable lists.
       """
-      @spec build(Ecto.Query.t(), map(), keyword()) :: Ecto.Query.t()
-      def build(queryable, sort_params, options \\ []) do
-        # Step 1: Filter sortable_fields and prepare params for Sorter
-        order_by_params = Helper.filter_sortable_fields(sort_params, @sortable_fields)
+      @spec build(map()) :: [Sorter.order_expr()]
+      def build(sort_params) when is_map(sort_params) do
+        # Filter standard sortable fields first
+        standard_params = Helper.filter_sortable_fields(sort_params, @sortable_fields)
 
-        # Step 2: Apply sorting using Sorter
-        queryable = Sorter.build_order_by(queryable, order_by_params, options)
+        # Filter overrideable fields (only those explicitly listed)
+        override_params = Map.take(sort_params, @overrideable_fields)
 
-        # Step 3: Apply custom sorting for overrideable_fields
-        # Filter sort_params to only include fields in @overrideable_fields
-        # TODO: we need to fix this to allow for multiple operators inside $OR
-        override_params =
-          Enum.filter(sort_params, fn {field, _operator} -> field in @overrideable_fields end)
+        # Process standard fields
+        standard_orders = Sorter.build_order_by(standard_params)
 
-        # Apply custom sorting only if there are fields to override
-        Enum.reduce(override_params, queryable, fn {field, operator}, query ->
-          override_sortable(query, field, operator)
-        end)
+        # Process override fields with callback
+        override_orders =
+          Enum.flat_map(override_params, fn {field, operator} ->
+            case override_sortable(field, operator) do
+              nil -> []
+              order -> [order]
+            end
+          end)
+
+        standard_orders ++ override_orders
       end
 
+      def build(_), do: []
+
       @doc """
-      Default implementation of `override_sortable/3`.
-
-      This function can be overridden by the using module to implement custom sorting logic.
+      Default implementation returns nil (no custom ordering).
       """
-      @spec override_sortable(Ecto.Query.t(), String.t() | atom(), String.t()) :: Ecto.Query.t()
-      def override_sortable(query, _field, _operator), do: query
+      @spec override_sortable(String.t(), String.t()) :: Sorter.order_expr() | nil
+      def override_sortable(_field, _operator), do: nil
 
-      defoverridable override_sortable: 3
+      defoverridable override_sortable: 2
     end
   end
 end
