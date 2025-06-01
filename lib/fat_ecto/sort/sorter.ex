@@ -18,7 +18,8 @@ defmodule FatEcto.Sort.Sorter do
   def build_order_by(%{} = params) when map_size(params) == 0, do: []
 
   def build_order_by(order_by_params) do
-    Enum.reduce(order_by_params, [], fn {field, operator}, acc ->
+    order_by_params
+    |> Enum.reduce([], fn {field, operator}, acc ->
       case apply_order(field, operator) do
         nil -> acc
         order_expr -> [order_expr | acc]

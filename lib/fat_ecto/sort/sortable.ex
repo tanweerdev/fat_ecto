@@ -28,9 +28,9 @@ defmodule FatEcto.Sort.Sortable do
       query = from(u in User, order_by: ^order_by)
   """
 
-  alias FatEcto.Sort.Sorter
-  alias FatEcto.Sort.Helper
   alias FatEcto.SharedHelper
+  alias FatEcto.Sort.Helper
+  alias FatEcto.Sort.Sorter
 
   @doc """
   Callback for handling custom sorting logic.

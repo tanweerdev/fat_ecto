@@ -1,7 +1,7 @@
 defmodule FatEcto.HospitalSortBuilderTest do
   use FatEcto.ConnCase
-  alias FatEcto.HospitalSortBuilder
   import Ecto.Query
+  alias FatEcto.HospitalSortBuilder
 
   setup do
     hospital = insert(:hospital, rating: 5)

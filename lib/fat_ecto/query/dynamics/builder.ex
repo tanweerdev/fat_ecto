@@ -4,8 +4,8 @@ defmodule FatEcto.Query.Dynamics.Builder do
   Used by FatDynamicsBuildable for dynamic-only use cases.
   """
 
-  alias FatEcto.Query.OperatorApplier
   alias FatEcto.Query.Dynamics.Helper, as: DynamicsHelper
+  alias FatEcto.Query.OperatorApplier
 
   @doc """
   Builds an Ecto dynamic query from a JSON-like structure.

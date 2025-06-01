@@ -1,9 +1,9 @@
 defmodule FatEcto.MultipleSortBuilderTest do
   use FatEcto.ConnCase
+  import Ecto.Query
   alias FatEcto.DoctorSortBuilder
   alias FatEcto.HospitalSortBuilder
   alias FatEcto.RoomSortBuilder
-  import Ecto.Query
 
   defp apply_sort(builder, opts) do
     order_by = builder.build(opts)
