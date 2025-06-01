@@ -18,7 +18,7 @@ defmodule DocTest do
   doctest FatEcto.Sort.Sorter
   doctest FatEcto.Sample.Pagination
   doctest FatEcto.Sort.Helper
-  doctest Fat.DoctorOrderby
+  doctest FatEcto.DoctorSortBuilder
   doctest FatEcto.Query.Helper
-  doctest FatEcto.Dynamics.MyApp.DoctorFilter
+  doctest FatEcto.DoctorDynamicsBuilder
 end

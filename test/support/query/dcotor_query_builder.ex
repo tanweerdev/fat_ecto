@@ -1,4 +1,4 @@
-defmodule FatEcto.Query.MyApp.DoctorQuery do
+defmodule FatEcto.Query.DoctorQueryBuilder do
   use FatEcto.Query.Buildable,
     filterable: [
       email: [

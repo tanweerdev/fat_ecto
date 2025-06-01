@@ -1,4 +1,4 @@
-defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
+defmodule FatEcto.HospitalDynamicsBuilder do
   use FatEcto.Query.Dynamics.Buildable,
     overrideable: ["name", "phone"],
     ignoreable: [

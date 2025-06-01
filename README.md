@@ -17,7 +17,7 @@ FatEcto is an Elixir package designed to make your life easier when working with
 
 ## Installation
 
-Getting started is simple! Add `fat_ecto` to your list of dependencies in `mix.exs`:
+Add `fat_ecto` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -41,7 +41,7 @@ Tired of writing repetitive query filters? The `Whereable` module lets you dynam
 #### Usage
 
 ```elixir
-defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
+defmodule FatEcto.HospitalDynamicsBuilder do
   use FatEcto.Query.Dynamics.Buildable,
     filterable: [
       id: ["$EQUAL", "$NOT_EQUAL"]
@@ -68,14 +68,14 @@ end
 
 #### Example Usage
 
-Here are some practical examples of how to use `FatEcto.Dynamics.MyApp.HospitalFilter` to dynamically build queries:
+Here are some practical examples of how to use `FatEcto.HospitalDynamicsBuilder` to dynamically build queries:
 
 ##### Example 1: Basic Filtering by ID
 
 ```elixir
 # Filter hospitals with ID equal to 1
 params = %{"id" => %{"$EQUAL" => 1}}
-dynamics = FatEcto.Dynamics.MyApp.HospitalFilter.build(params)
+dynamics = FatEcto.HospitalDynamicsBuilder.build(params)
 
 # Use the dynamics in a query
 import Ecto.Query
@@ -90,7 +90,7 @@ query = where(FatEcto.FatHospital, ^dynamics)
 ```elixir
 # Filter hospitals with names containing "St. Mary"
 params = %{"name" => %{"$ILIKE" => "%St. Mary%"}}
-dynamics = FatEcto.Dynamics.MyApp.HospitalFilter.build(params)
+dynamics = FatEcto.HospitalDynamicsBuilder.build(params)
 
 # Use the dynamics in a query
 import Ecto.Query
@@ -108,7 +108,7 @@ params = %{
   "id" => %{"$NOT_EQUAL" => 2},
   "name" => %{"$ILIKE" => "%General%"}
 }
-dynamics = FatEcto.Dynamics.MyApp.HospitalFilter.build(params)
+dynamics = FatEcto.HospitalDynamicsBuilder.build(params)
 
 # Use the dynamics in a query
 import Ecto.Query
@@ -123,7 +123,7 @@ query = where(FatEcto.FatHospital, ^dynamics)
 ```elixir
 # Filter hospitals with a name, but ignore empty or invalid values
 params = %{"name" => %{"$ILIKE" => "%%"}}  # Empty value is ignored
-dynamics = FatEcto.Dynamics.MyApp.HospitalFilter.build(params)
+dynamics = FatEcto.HospitalDynamicsBuilder.build(params)
 
 # Use the dynamics in a query
 import Ecto.Query

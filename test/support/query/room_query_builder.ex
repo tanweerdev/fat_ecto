@@ -1,4 +1,4 @@
-defmodule FatEcto.Query.MyApp.RoomQuery do
+defmodule FatEcto.Query.RoomQueryBuilder do
   use FatEcto.Query.Buildable,
     filterable: [],
     overrideable: ["name", "phone", "purpose", "description"],

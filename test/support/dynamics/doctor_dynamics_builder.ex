@@ -1,4 +1,4 @@
-defmodule FatEcto.Dynamics.MyApp.DoctorFilter do
+defmodule FatEcto.DoctorDynamicsBuilder do
   use FatEcto.Query.Dynamics.Buildable,
     filterable: [
       email: [

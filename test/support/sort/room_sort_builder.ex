@@ -1,4 +1,4 @@
-defmodule Fat.RoomOrderby do
+defmodule FatEcto.RoomSortBuilder do
   use FatEcto.Sort.Sortable,
     overrideable: ["phone", "name"]
 

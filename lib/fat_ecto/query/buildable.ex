@@ -20,7 +20,7 @@ defmodule FatEcto.Query.Buildable do
       ]
 
   ## Example Usage
-      defmodule FatEcto.Query.MyApp.HospitalQuery do
+      defmodule FatEcto.Query.HospitalQueryBuilder do
         use FatEcto.Query.Buildable,
           filterable: [
             id: ["$EQUAL", "$NOT_EQUAL"]

@@ -1,14 +1,14 @@
-defmodule FatEcto.Query.MyApp.RoomQueryTest do
+defmodule FatEcto.Query.RoomQueryBuilderTest do
   use FatEcto.ConnCase
   import Ecto.Query
   alias FatEcto.FatRoom
 
-  alias FatEcto.Query.MyApp.RoomQuery
+  alias FatEcto.Query.RoomQueryBuilder
 
   describe "build/3" do
     test "filters by name with custom $LIKE operator" do
       base_query = from(r in FatRoom)
-      query = RoomQuery.build(base_query, %{"name" => %{"$LIKE" => "%ICU%"}})
+      query = RoomQueryBuilder.build(base_query, %{"name" => %{"$LIKE" => "%ICU%"}})
 
       expected_query = from(r in FatRoom, where: like(fragment("(?)::TEXT", r.name), ^"%ICU%"))
       assert inspect(query) == inspect(expected_query)
@@ -18,7 +18,7 @@ defmodule FatEcto.Query.MyApp.RoomQueryTest do
       base_query = from(r in FatRoom)
 
       # This will call our override_buildable function
-      query = RoomQuery.build(base_query, %{"name" => %{"$LIKE" => "%ICU%"}})
+      query = RoomQueryBuilder.build(base_query, %{"name" => %{"$LIKE" => "%ICU%"}})
 
       # Verify the query was modified by our override
       assert inspect(query) =~ "like(fragment(\"(?)::TEXT\", f0.name), ^\"%ICU%\")"
@@ -29,7 +29,7 @@ defmodule FatEcto.Query.MyApp.RoomQueryTest do
 
     test "filters by name with custom $ILIKE operator" do
       base_query = from(r in FatRoom)
-      query = RoomQuery.build(base_query, %{"name" => %{"$ILIKE" => "%ICU%"}})
+      query = RoomQueryBuilder.build(base_query, %{"name" => %{"$ILIKE" => "%ICU%"}})
 
       expected_query = from(r in FatRoom, where: ilike(fragment("(?)::TEXT", r.name), ^"%ICU%"))
       assert inspect(query) == inspect(expected_query)
@@ -37,14 +37,14 @@ defmodule FatEcto.Query.MyApp.RoomQueryTest do
 
     test "ignores name with ignoreable value" do
       base_query = from(r in FatRoom)
-      query = RoomQuery.build(base_query, %{"name" => "%%"})
+      query = RoomQueryBuilder.build(base_query, %{"name" => "%%"})
 
       assert query == base_query
     end
 
     test "filters by phone with custom $ILIKE operator" do
       base_query = from(r in FatRoom)
-      query = RoomQuery.build(base_query, %{"phone" => %{"$ILIKE" => "%123%"}})
+      query = RoomQueryBuilder.build(base_query, %{"phone" => %{"$ILIKE" => "%123%"}})
 
       expected_query = from(r in FatRoom, where: ilike(fragment("(?)::TEXT", r.phone), ^"%123%"))
       assert inspect(query) == inspect(expected_query)
@@ -52,14 +52,14 @@ defmodule FatEcto.Query.MyApp.RoomQueryTest do
 
     test "ignores phone with ignoreable value" do
       base_query = from(r in FatRoom)
-      query = RoomQuery.build(base_query, %{"phone" => "%%"})
+      query = RoomQueryBuilder.build(base_query, %{"phone" => "%%"})
 
       assert query == base_query
     end
 
     test "filters by purpose with $IN operator" do
       base_query = from(r in FatRoom)
-      query = RoomQuery.build(base_query, %{"purpose" => %{"$IN" => ["Surgery", "ICU"]}})
+      query = RoomQueryBuilder.build(base_query, %{"purpose" => %{"$IN" => ["Surgery", "ICU"]}})
 
       expected_query = from(r in FatRoom, where: r.purpose in ^["Surgery", "ICU"])
       assert inspect(query) == inspect(expected_query)
@@ -67,21 +67,21 @@ defmodule FatEcto.Query.MyApp.RoomQueryTest do
 
     test "ignores purpose with empty list value" do
       base_query = from(r in FatRoom)
-      query = RoomQuery.build(base_query, %{"purpose" => []})
+      query = RoomQueryBuilder.build(base_query, %{"purpose" => []})
 
       assert query == base_query
     end
 
     test "ignores purpose with empty $IN list" do
       base_query = from(r in FatRoom)
-      query = RoomQuery.build(base_query, %{"purpose" => %{"$IN" => []}})
+      query = RoomQueryBuilder.build(base_query, %{"purpose" => %{"$IN" => []}})
 
       assert query == base_query
     end
 
     test "filters by description with $EQUAL operator" do
       base_query = from(r in FatRoom)
-      query = RoomQuery.build(base_query, %{"description" => "Private Room"})
+      query = RoomQueryBuilder.build(base_query, %{"description" => "Private Room"})
 
       expected_query = from(r in FatRoom, where: r.description == ^"Private Room")
       assert inspect(query) == inspect(expected_query)
@@ -89,14 +89,14 @@ defmodule FatEcto.Query.MyApp.RoomQueryTest do
 
     test "ignores description with nil value" do
       base_query = from(r in FatRoom)
-      query = RoomQuery.build(base_query, %{"description" => nil})
+      query = RoomQueryBuilder.build(base_query, %{"description" => nil})
 
       assert query == base_query
     end
 
     test "ignores description with nil $EQUAL value" do
       base_query = from(r in FatRoom)
-      query = RoomQuery.build(base_query, %{"description" => %{"$EQUAL" => nil}})
+      query = RoomQueryBuilder.build(base_query, %{"description" => %{"$EQUAL" => nil}})
 
       assert query == base_query
     end

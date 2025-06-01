@@ -1,19 +1,21 @@
-defmodule Query.SortableTest do
+defmodule FatEcto.MultipleSortBuilderTest do
   use FatEcto.ConnCase
-  alias MyApp.HospitalOrderby
+  alias FatEcto.HospitalSortBuilder
+  alias FatEcto.DoctorSortBuilder
+  alias FatEcto.RoomSortBuilder
 
   describe "Order by when allowed_fields: %{`email` => `$DESC`, `phone` => `$ASC`} passed" do
     test "returns the query with order by on email and phone" do
       opts = %{"email" => "$DESC", "phone" => "$ASC", "name" => "$DESC"}
       expected = from(d in FatEcto.FatDoctor, order_by: [desc: d.email], order_by: [asc: d.phone])
-      query = DoctorOrderby.build(FatEcto.FatDoctor, opts)
+      query = DoctorSortBuilder.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
     end
 
     test "returns the query with order by on email when phone => `$DESC` passed in overrideable_fields" do
       opts = %{"email" => "$DESC", "phone" => "$DESC"}
       expected = from(d in FatEcto.FatDoctor, order_by: [desc: d.email])
-      query = DoctorOrderby.build(FatEcto.FatDoctor, opts)
+      query = DoctorSortBuilder.build(FatEcto.FatDoctor, opts)
       assert inspect(query) == inspect(expected)
     end
   end
@@ -27,7 +29,7 @@ defmodule Query.SortableTest do
 
       expected = FatEcto.FatHospital
 
-      query = HospitalOrderby.build(FatEcto.FatHospital, opts)
+      query = HospitalSortBuilder.build(FatEcto.FatHospital, opts)
       assert inspect(query) == inspect(expected)
     end
   end
@@ -42,7 +44,7 @@ defmodule Query.SortableTest do
       expected =
         from(h in FatEcto.FatRoom, order_by: [asc: h.name], order_by: [desc: h.phone])
 
-      query = RoomOrderby.build(FatEcto.FatRoom, opts)
+      query = RoomSortBuilder.build(FatEcto.FatRoom, opts)
       assert inspect(query) == inspect(expected)
     end
   end

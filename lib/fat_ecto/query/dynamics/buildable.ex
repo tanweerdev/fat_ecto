@@ -20,7 +20,7 @@ defmodule FatEcto.Query.Dynamics.Buildable do
       ]
 
   ## Example Usage
-      defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
+      defmodule FatEcto.HospitalDynamicsBuilder do
         use FatEcto.Query.Dynamics.Buildable,
           filterable: [
             id: ["$EQUAL", "$NOT_EQUAL"]

@@ -1,4 +1,4 @@
-defmodule MyApp.HospitalOrderby do
+defmodule FatEcto.HospitalSortBuilder do
   import Ecto.Query
 
   use FatEcto.Sort.Sortable,

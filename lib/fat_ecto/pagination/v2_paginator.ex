@@ -16,6 +16,7 @@ defmodule FatEcto.Pagination.V2Paginator do
         end
       end
   """
+  alias FatEcto.SharedHelper
 
   @doc """
   Required callback for counting records in a query.
@@ -111,7 +112,7 @@ defmodule FatEcto.Pagination.V2Paginator do
       end
 
       defp maybe_handle_composite_keys(query) do
-        case FatEcto.Pagination.Helper.get_primary_keys(query) do
+        case SharedHelper.get_primary_keys(query) do
           nil -> query
           [single_key] -> query
           keys -> apply_composite_key_distinct(query, keys)

@@ -1,6 +1,6 @@
-defmodule Query.OrderByTest do
+defmodule FatEcto.HospitalSortBuilderTest do
   use FatEcto.ConnCase
-  alias MyApp.HospitalOrderby
+  alias FatEcto.HospitalSortBuilder
 
   setup do
     hospital = insert(:hospital, rating: 5)
@@ -16,7 +16,7 @@ defmodule Query.OrderByTest do
     opts = %{"rating" => "$DESC"}
 
     expected = from(h in FatEcto.FatHospital, order_by: [desc: h.rating])
-    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalSortBuilder.build(FatEcto.FatHospital, opts)
     results = Repo.all(query)
 
     assert inspect(query) == inspect(expected)
@@ -31,7 +31,7 @@ defmodule Query.OrderByTest do
 
     expected = from(p in FatEcto.FatHospital, order_by: [desc: p.phone])
 
-    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalSortBuilder.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
   end
 
@@ -43,7 +43,7 @@ defmodule Query.OrderByTest do
 
     expected = from(p in FatEcto.FatHospital, order_by: [asc: p.rating])
 
-    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalSortBuilder.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     results = Repo.all(query)
     assert Enum.map(results, fn map -> map.rating end) == [4, 5, 6]
@@ -58,7 +58,7 @@ defmodule Query.OrderByTest do
 
     expected = from(f0 in FatEcto.FatHospital, order_by: [asc_nulls_last: f0.rating])
 
-    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalSortBuilder.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     results = Repo.all(query)
     assert Enum.map(results, fn map -> map.rating end) == [4, 5, 6, nil]
@@ -69,7 +69,7 @@ defmodule Query.OrderByTest do
 
     expected = FatEcto.FatHospital
 
-    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalSortBuilder.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
   end
 
@@ -82,7 +82,7 @@ defmodule Query.OrderByTest do
 
     expected = from(p in FatEcto.FatHospital, order_by: [asc_nulls_first: p.rating])
 
-    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalSortBuilder.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     results = Repo.all(query)
     assert Enum.map(results, fn map -> map.rating end) == [nil, 4, 5, 6]
@@ -97,7 +97,7 @@ defmodule Query.OrderByTest do
 
     expected = from(p in FatEcto.FatHospital, order_by: [desc_nulls_first: p.rating])
 
-    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalSortBuilder.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     results = Repo.all(query)
     assert Enum.map(results, fn map -> map.rating end) == [nil, 6, 5, 4]
@@ -112,7 +112,7 @@ defmodule Query.OrderByTest do
 
     expected = from(p in FatEcto.FatHospital, order_by: [desc_nulls_last: p.rating])
 
-    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalSortBuilder.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
     results = Repo.all(query)
     assert Enum.map(results, fn map -> map.rating end) == [6, 5, 4, nil]
@@ -125,7 +125,7 @@ defmodule Query.OrderByTest do
     opts = %{"date_of_birth" => "$ASC"}
 
     expected = from(p in FatEcto.FatHospital, order_by: [asc: p.date_of_birth])
-    query = HospitalOrderby.build(FatEcto.FatHospital, opts)
+    query = HospitalSortBuilder.build(FatEcto.FatHospital, opts)
     assert inspect(query) == inspect(expected)
   end
 end

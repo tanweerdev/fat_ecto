@@ -1,4 +1,4 @@
-defmodule FatEcto.Dynamics.MyApp.RoomFilter do
+defmodule FatEcto.RoomDynamicsBuilder do
   use FatEcto.Query.Dynamics.Buildable,
     filterable: [],
     overrideable: ["name", "phone", "purpose", "description"],

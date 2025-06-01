@@ -104,4 +104,20 @@ defmodule FatEcto.SharedHelper do
   end
 
   def keyword_list_to_map(input), do: input
+
+  def parse_integer!(int_str) do
+    cond do
+      is_integer(int_str) -> int_str
+      is_binary(int_str) -> do_parse_integer(int_str)
+      true -> nil
+    end
+  end
+
+  # Helper function to parse an integer from a string
+  defp do_parse_integer(int_str) do
+    case Integer.parse(int_str) do
+      {integer, _} -> integer
+      :error -> nil
+    end
+  end
 end

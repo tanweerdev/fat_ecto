@@ -3,12 +3,12 @@ defmodule FatDoctor.QueryTest do
   import Ecto.Query
   alias FatEcto.FatDoctor
 
-  alias FatEcto.Query.MyApp.DoctorQuery
+  alias FatEcto.Query.DoctorQueryBuilder
 
   describe "build/3" do
     test "filters by email with $EQUAL operator" do
       base_query = from(d in FatDoctor)
-      query = DoctorQuery.build(base_query, %{"email" => "test@example.com"})
+      query = DoctorQueryBuilder.build(base_query, %{"email" => "test@example.com"})
 
       expected_query = from(d in FatDoctor, where: d.email == ^"test@example.com")
       assert inspect(query) == inspect(expected_query)
@@ -16,7 +16,7 @@ defmodule FatDoctor.QueryTest do
 
     test "filters by email with $ILIKE operator" do
       base_query = from(d in FatDoctor)
-      query = DoctorQuery.build(base_query, %{"email" => %{"$ILIKE" => "%test%"}})
+      query = DoctorQueryBuilder.build(base_query, %{"email" => %{"$ILIKE" => "%test%"}})
 
       expected_query = from(d in FatDoctor, where: ilike(fragment("(?)::TEXT", d.email), ^"%test%"))
       assert inspect(query) == inspect(expected_query)
@@ -24,14 +24,14 @@ defmodule FatDoctor.QueryTest do
 
     test "ignores email with ignoreable value" do
       base_query = from(d in FatDoctor)
-      query = DoctorQuery.build(base_query, %{"email" => ""})
+      query = DoctorQueryBuilder.build(base_query, %{"email" => ""})
 
       assert query == base_query
     end
 
     test "filters by name with direct comparison" do
       base_query = from(d in FatDoctor)
-      query = DoctorQuery.build(base_query, %{"name" => "John"})
+      query = DoctorQueryBuilder.build(base_query, %{"name" => "John"})
 
       expected_query = from(d in FatDoctor, where: d.name == ^"John")
       assert inspect(query) == inspect(expected_query)
@@ -39,7 +39,7 @@ defmodule FatDoctor.QueryTest do
 
     test "filters by name with $LIKE operator" do
       base_query = from(d in FatDoctor)
-      query = DoctorQuery.build(base_query, %{"name" => %{"$LIKE" => "%John%"}})
+      query = DoctorQueryBuilder.build(base_query, %{"name" => %{"$LIKE" => "%John%"}})
 
       expected_query = from(d in FatDoctor, where: like(fragment("(?)::TEXT", d.name), ^"%John%"))
       assert inspect(query) == inspect(expected_query)
@@ -47,7 +47,7 @@ defmodule FatDoctor.QueryTest do
 
     test "filters by phone with custom $ILIKE operator" do
       base_query = from(d in FatDoctor)
-      query = DoctorQuery.build(base_query, %{"phone" => %{"$ILIKE" => "%123%"}})
+      query = DoctorQueryBuilder.build(base_query, %{"phone" => %{"$ILIKE" => "%123%"}})
 
       expected_query = from(d in FatDoctor, where: ilike(fragment("(?)::TEXT", d.phone), ^"%123%"))
       assert inspect(query) == inspect(expected_query)
@@ -58,7 +58,7 @@ defmodule FatDoctor.QueryTest do
       base_query = from(d in FatDoctor)
 
       query =
-        DoctorQuery.build(base_query, %{"phone" => %{"$ILIKE" => "%123%"}, "name" => %{"$EQUAL" => "John"}})
+        DoctorQueryBuilder.build(base_query, %{"phone" => %{"$ILIKE" => "%123%"}, "name" => %{"$EQUAL" => "John"}})
 
       expected_query =
         from(d in FatDoctor, where: d.name == ^"John" and ilike(fragment("(?)::TEXT", d.phone), ^"%123%"))
@@ -89,7 +89,7 @@ defmodule FatDoctor.QueryTest do
         ]
       }
 
-      query = DoctorQuery.build(base_query, params)
+      query = DoctorQueryBuilder.build(base_query, params)
 
       expected_query =
         from(d in FatDoctor,
@@ -125,7 +125,7 @@ defmodule FatDoctor.QueryTest do
         ]
       }
 
-      query = DoctorQuery.build(base_query, params)
+      query = DoctorQueryBuilder.build(base_query, params)
 
       expected_query =
         from(d in FatDoctor,
@@ -140,14 +140,14 @@ defmodule FatDoctor.QueryTest do
 
     test "ignores phone with ignoreable value" do
       base_query = from(d in FatDoctor)
-      query = DoctorQuery.build(base_query, %{"phone" => nil})
+      query = DoctorQueryBuilder.build(base_query, %{"phone" => nil})
 
       assert query == base_query
     end
 
     test "filters by rating with $GT operator" do
       base_query = from(d in FatDoctor)
-      query = DoctorQuery.build(base_query, %{"rating" => %{"$GT" => 4}})
+      query = DoctorQueryBuilder.build(base_query, %{"rating" => %{"$GT" => 4}})
 
       expected_query = from(d in FatDoctor, where: d.rating > ^4)
       assert inspect(query) == inspect(expected_query)
@@ -155,7 +155,7 @@ defmodule FatDoctor.QueryTest do
 
     test "filters by start_date with $GTE operator" do
       base_query = from(d in FatDoctor)
-      query = DoctorQuery.build(base_query, %{"start_date" => %{"$GTE" => "2023-01-01"}})
+      query = DoctorQueryBuilder.build(base_query, %{"start_date" => %{"$GTE" => "2023-01-01"}})
 
       expected_query = from(d in FatDoctor, where: d.start_date >= ^"2023-01-01")
       assert inspect(query) == inspect(expected_query)
@@ -163,7 +163,7 @@ defmodule FatDoctor.QueryTest do
 
     test "filters by location with $IN operator" do
       base_query = from(d in FatDoctor)
-      query = DoctorQuery.build(base_query, %{"location" => %{"$IN" => ["New York", "London"]}})
+      query = DoctorQueryBuilder.build(base_query, %{"location" => %{"$IN" => ["New York", "London"]}})
 
       expected_query = from(d in FatDoctor, where: d.location in ^["New York", "London"])
       assert inspect(query) == inspect(expected_query)

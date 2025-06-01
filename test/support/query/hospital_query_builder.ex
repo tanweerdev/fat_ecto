@@ -1,4 +1,4 @@
-defmodule FatEcto.Query.MyApp.HospitalQuery do
+defmodule FatEcto.Query.HospitalQueryBuilder do
   use FatEcto.Query.Buildable,
     overrideable: ["name", "phone"],
     ignoreable: [
