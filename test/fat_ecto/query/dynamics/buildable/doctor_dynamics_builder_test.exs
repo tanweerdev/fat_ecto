@@ -41,7 +41,9 @@ defmodule FatEcto.DoctorDynamicsBuilderTest do
     end
 
     test "filters by phone with custom $ILIKE operator and name with standard buildable" do
-      dynamics = DoctorDynamicsBuilder.build(%{"phone" => %{"$ILIKE" => "%123%"}, "name" => %{"$EQUAL" => "John"}})
+      dynamics =
+        DoctorDynamicsBuilder.build(%{"phone" => %{"$ILIKE" => "%123%"}, "name" => %{"$EQUAL" => "John"}})
+
       expected_dynamics = dynamic([q], q.name == ^"John" and ilike(fragment("(?)::TEXT", q.phone), ^"%123%"))
       assert inspect(dynamics) == inspect(expected_dynamics)
     end

@@ -58,7 +58,10 @@ defmodule FatDoctor.QueryTest do
       base_query = from(d in FatDoctor)
 
       query =
-        DoctorQueryBuilder.build(base_query, %{"phone" => %{"$ILIKE" => "%123%"}, "name" => %{"$EQUAL" => "John"}})
+        DoctorQueryBuilder.build(base_query, %{
+          "phone" => %{"$ILIKE" => "%123%"},
+          "name" => %{"$EQUAL" => "John"}
+        })
 
       expected_query =
         from(d in FatDoctor, where: d.name == ^"John" and ilike(fragment("(?)::TEXT", d.phone), ^"%123%"))
