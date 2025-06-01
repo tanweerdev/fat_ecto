@@ -12,27 +12,27 @@ defmodule FatEcto.RoomDynamicsBuilder do
   import Ecto.Query
   @impl FatEcto.Query.Dynamics.Buildable
 
-  def override_buildable(_dynamics, "phone", "$ILIKE", value) do
+  def override_buildable("phone", "$ILIKE", value) do
     dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
   end
 
-  def override_buildable(_dynamics, "name", "$LIKE", value) do
+  def override_buildable("name", "$LIKE", value) do
     dynamic([q], like(fragment("(?)::TEXT", q.name), ^value))
   end
 
-  def override_buildable(_dynamics, "name", "$ILIKE", value) do
+  def override_buildable("name", "$ILIKE", value) do
     dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
   end
 
-  def override_buildable(_dynamics, "description", "$EQUAL", value) do
+  def override_buildable("description", "$EQUAL", value) do
     dynamic([q], q.description == ^value)
   end
 
-  def override_buildable(_dynamics, "purpose", "$IN", values) when is_list(values) do
+  def override_buildable("purpose", "$IN", values) when is_list(values) do
     dynamic([q], q.purpose in ^values)
   end
 
-  def override_buildable(dynamics, _, _, _) do
-    dynamics
+  def override_buildable(_, _, _) do
+    nil
   end
 end

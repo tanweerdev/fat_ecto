@@ -29,15 +29,15 @@ defmodule FatEcto.DoctorDynamicsBuilder do
   # TODO: also support `field.EQUAL => value` instead of accepting just map eg `field => {"$EQUAL" => value}`
   # You can use either dot . or colon : to separate field and operator
 
-  def override_buildable(_dynamics, "phone", "$ILIKE", value) do
+  def override_buildable("phone", "$ILIKE", value) do
     dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
   end
 
-  def override_buildable(_dynamics, "phone", "$LIKE", value) do
+  def override_buildable("phone", "$LIKE", value) do
     dynamic([q], like(fragment("(?)::TEXT", q.phone), ^value))
   end
 
-  def override_buildable(dynamics, _, _, _) do
-    dynamics
+  def override_buildable(_, _, _) do
+    nil
   end
 end

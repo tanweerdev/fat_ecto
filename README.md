@@ -56,11 +56,11 @@ defmodule FatEcto.HospitalDynamicsBuilder do
 
   @impl true
   # You can implement override_buildable for your custom filters
-  def override_buildable(_dynamics, "name", "$ILIKE", value) do
+  def override_buildable("name", "$ILIKE", value) do
     dynamic([r], ilike(fragment("(?)::TEXT", r.name), ^value))
   end
 
-  def override_buildable(dynamics, _field, _operator, _value), do: dynamics
+  def override_buildable(_field, _operator, _value), do: nil
 end
 ```
 

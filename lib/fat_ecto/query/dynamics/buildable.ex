@@ -33,16 +33,16 @@ defmodule FatEcto.Query.Dynamics.Buildable do
 
         import Ecto.Query
 
-        def override_buildable(dynamics, "name", "$ILIKE", value) do
+        def override_buildable("name", "$ILIKE", value) do
           dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
         end
 
-        def override_buildable(dynamics, "phone", "$ILIKE", value) do
+        def override_buildable("phone", "$ILIKE", value) do
           dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
         end
 
-        def override_buildable(dynamics, _, _, _) do
-          dynamics
+        def override_buildable(_field, _operator, _value) do
+          nil
         end
 
         # Optional: Override after_buildable to perform custom processing on the final dynamics
@@ -58,11 +58,10 @@ defmodule FatEcto.Query.Dynamics.Buildable do
   @doc """
   Callback for handling custom filtering logic for overrideable fields.
 
-  This function acts as a fallback for overrideable fields. The default behavior is to return the dynamics,
+  This function acts as a fallback for overrideable fields. The default behavior is to return nil,
   but it can be overridden by the using module.
   """
   @callback override_buildable(
-              dynamics :: Ecto.Query.dynamic_expr(),
               field :: String.t() | atom(),
               operator :: String.t(),
               value :: any()
@@ -145,7 +144,7 @@ defmodule FatEcto.Query.Dynamics.Buildable do
         dynamics =
           Builder.build(
             filterable_params,
-            &override_buildable/4,
+            &override_buildable/3,
             @overrideable_fields
           )
 
@@ -158,11 +157,11 @@ defmodule FatEcto.Query.Dynamics.Buildable do
       end
 
       @doc """
-      Default implementation of `override_buildable/4`.
+      Default implementation of `override_buildable/3`.
 
       This function can be overridden by the using module to implement custom filtering logic.
       """
-      def override_buildable(dynamics, _field, _operator, _value), do: dynamics
+      def override_buildable(_field, _operator, _value), do: nil
 
       @doc """
       Default implementation of after_buildable/1.
@@ -171,7 +170,7 @@ defmodule FatEcto.Query.Dynamics.Buildable do
       """
       def after_buildable(dynamics), do: dynamics
 
-      defoverridable override_buildable: 4
+      defoverridable override_buildable: 3
       defoverridable after_buildable: 1
     end
   end
@@ -183,17 +182,17 @@ defmodule FatEcto.Query.Dynamics.Buildable do
   # def __after_compile__(%{module: module}, _bytecode) do
   #   options = module.using_options()
 
-  #   # Ensure `override_buildable/4` is implemented if `overrideable_fields` are provided.
+  #   # Ensure `override_buildable/3` is implemented if `overrideable_fields` are provided.
   #   IO.inspect("options: #{inspect(options)}")
   #   if options[:overrideable_fields] != [] do
-  #     unless Module.defines?(module, {:override_buildable, 4}) do
+  #     unless Module.defines?(module, {:override_buildable, 3}) do
   #       raise CompileError,
   #         description: """
-  #         You must implement the `override_buildable/4` callback when `overrideable_fields` are provided.
+  #         You must implement the `override_buildable/3` callback when `overrideable_fields` are provided.
   #         Example:
-  #           def override_buildable(dynamics, field, operator, value) do
+  #           def override_buildable(field, operator, value) do
   #             # Your custom logic here
-  #             dynamics
+  #             dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
   #           end
   #         """
   #     end

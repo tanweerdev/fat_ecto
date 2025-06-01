@@ -83,7 +83,7 @@ defmodule FatEcto.Query.Dynamics.Builder do
         # Call override if field is in filterable_fields or override_callback exists
         dynamic =
           if should_override?(field, overrideable_fields) && override_callback do
-            override_callback.(acc, field, operator, value)
+            override_callback.(field, operator, value)
           else
             OperatorApplier.apply_operator(operator, field, value)
           end
@@ -100,7 +100,7 @@ defmodule FatEcto.Query.Dynamics.Builder do
 
     field_dynamic =
       if should_override?(field, overrideable_fields) && override_callback do
-        override_callback.(dynamic, field, operator, value) ||
+        override_callback.(field, operator, value) ||
           OperatorApplier.apply_operator(operator, field, value)
       else
         OperatorApplier.apply_operator(operator, field, value)

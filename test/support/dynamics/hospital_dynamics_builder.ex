@@ -9,23 +9,23 @@ defmodule FatEcto.HospitalDynamicsBuilder do
   import Ecto.Query
 
   @impl true
-  def override_buildable(_dynamics, "name", "$ILIKE", value) do
+  def override_buildable("name", "$ILIKE", value) do
     dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
   end
 
-  def override_buildable(_dynamics, "name", "$LIKE", value) do
+  def override_buildable("name", "$LIKE", value) do
     dynamic([q], like(fragment("(?)::TEXT", q.name), ^value))
   end
 
-  def override_buildable(_dynamics, "phone", "$ILIKE", value) do
+  def override_buildable("phone", "$ILIKE", value) do
     dynamic([q], ilike(fragment("(?)::TEXT", q.phone), ^value))
   end
 
-  def override_buildable(_dynamics, "phone", "$LIKE", value) do
+  def override_buildable("phone", "$LIKE", value) do
     dynamic([q], like(fragment("(?)::TEXT", q.phone), ^value))
   end
 
-  def override_buildable(dynamics, _, _, _) do
-    dynamics
+  def override_buildable(_, _, _) do
+    nil
   end
 end
