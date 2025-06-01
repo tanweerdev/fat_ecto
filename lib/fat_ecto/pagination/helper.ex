@@ -4,8 +4,8 @@ defmodule FatEcto.Pagination.Helper do
   dynamic binding, and preloading associations.
   """
 
-  require Ecto.Query
   alias FatEcto.SharedHelper
+  require Ecto.Query
 
   @min_limit 0
   @min_skip 0

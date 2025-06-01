@@ -105,6 +105,12 @@ defmodule FatEcto.SharedHelper do
 
   def keyword_list_to_map(input), do: input
 
+  @doc """
+  Parses an integer from a string or returns the integer if already an integer.
+
+  Returns the parsed integer on success or `nil` on failure.
+  """
+  @spec parse_integer!(any()) :: integer() | nil
   def parse_integer!(int_str) do
     cond do
       is_integer(int_str) -> int_str

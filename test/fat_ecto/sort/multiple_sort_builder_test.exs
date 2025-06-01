@@ -1,7 +1,7 @@
 defmodule FatEcto.MultipleSortBuilderTest do
   use FatEcto.ConnCase
-  alias FatEcto.HospitalSortBuilder
   alias FatEcto.DoctorSortBuilder
+  alias FatEcto.HospitalSortBuilder
   alias FatEcto.RoomSortBuilder
 
   describe "Order by when allowed_fields: %{`email` => `$DESC`, `phone` => `$ASC`} passed" do
