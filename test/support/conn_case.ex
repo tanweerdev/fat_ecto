@@ -10,13 +10,6 @@ defmodule FatEcto.ConnCase do
       import FatEcto.Factory
 
       alias FatEcto.Repo
-      alias FatEcto.Dynamics.MyApp.DoctorFilter
-      alias Fat.DoctorOrderby
-      alias FatEcto.Dynamics.MyApp.HospitalFilter
-      alias FatEcto.FatHospitalOrderby
-      alias Fat.PatientOrderby
-      alias FatEcto.Dynamics.MyApp.RoomFilter
-      alias Fat.RoomOrderby
     end
   end
 

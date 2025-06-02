@@ -11,19 +11,19 @@
 
 ## Description
 
-FatEcto is an Elixir package designed to make your life easier when working with Ecto. It simplifies query building, filtering, sorting, pagination, and data sanitization—so you can focus on what truly matters: building amazing applications. With FatEcto, writing complex queries becomes effortless, flexible, and powerful! 💪
+FatEcto is an Elixir package designed to make your life easier when working with Ecto. It simplifies query building, filtering, sorting, and pagination—so you can focus on what truly matters: building amazing applications. With FatEcto, writing complex repeating queries becomes effortless, flexible, and powerful! 💪
 
 ---
 
 ## Installation
 
-Getting started is simple! Add `fat_ecto` to your list of dependencies in `mix.exs`:
+Add `fat_ecto` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
     # Check https://hexdocs.pm/fat_ecto for the latest version
-    {:fat_ecto, "~> 1.0.0"}
+    {:fat_ecto, "~> 1.2"}
   ]
 end
 ```
@@ -34,38 +34,33 @@ Then, run `mix deps.get` to install the package.
 
 ## Features & Modules
 
-### 🛠 FatEcto.Dynamics.FatBuildable – Dynamic Filtering Made Easy
+### 🛠 FatEcto.Query.Dynamics.Buildable – Dynamic Filtering Made Easy
 
 Tired of writing repetitive query filters? The `Whereable` module lets you dynamically filter records using flexible conditions passed from your web or mobile clients—with little to no effort! And the best part? You stay in control. 🚀
 
 #### Usage
 
 ```elixir
-defmodule FatEcto.Dynamics.MyApp.HospitalFilter do
-  use FatEcto.Dynamics.FatBuildable,
-    filterable_fields: %{
-      "id" => ["$EQUAL", "$NOT_EQUAL"]
-    },
-    overrideable_fields: ["name", "phone"],
-    ignoreable_fields_values: %{
-      "name" => ["%%", "", [], nil],
-      "phone" => ["%%", "", [], nil]
-    }
+defmodule FatEcto.HospitalDynamicsBuilder do
+  use FatEcto.Query.Dynamics.Buildable,
+    filterable: [
+      id: ["$EQUAL", "$NOT_EQUAL"]
+    ],
+    overrideable: ["name", "phone"],
+    ignoreable: [
+      name: ["%%", "", [], nil],
+      phone: ["%%", "", [], nil]
+    ]
 
   import Ecto.Query
 
   @impl true
-  # You can implement override_whereable for your custom filters
-  def override_whereable(_dynamics, "name", "$ILIKE", value) do
+  # You can implement override_buildable for your custom filters
+  def override_buildable("name", "$ILIKE", value) do
     dynamic([r], ilike(fragment("(?)::TEXT", r.name), ^value))
   end
 
-  def override_whereable(dynamics, _, _, _), do: dynamics
-
-  # You can do some custom processing if needed eg
-  def after_whereable(dynamics) do
-    if dynamics, do: dynamics, else: true
-  end
+  def override_buildable(_field, _operator, _value), do: nil
 end
 ```
 
@@ -73,14 +68,14 @@ end
 
 #### Example Usage
 
-Here are some practical examples of how to use `FatEcto.Dynamics.MyApp.HospitalFilter` to dynamically build queries:
+Here are some practical examples of how to use `FatEcto.HospitalDynamicsBuilder` to dynamically build queries:
 
 ##### Example 1: Basic Filtering by ID
 
 ```elixir
 # Filter hospitals with ID equal to 1
 params = %{"id" => %{"$EQUAL" => 1}}
-dynamics = FatEcto.Dynamics.MyApp.HospitalFilter.build(params)
+dynamics = FatEcto.HospitalDynamicsBuilder.build(params)
 
 # Use the dynamics in a query
 import Ecto.Query
@@ -95,7 +90,7 @@ query = where(FatEcto.FatHospital, ^dynamics)
 ```elixir
 # Filter hospitals with names containing "St. Mary"
 params = %{"name" => %{"$ILIKE" => "%St. Mary%"}}
-dynamics = FatEcto.Dynamics.MyApp.HospitalFilter.build(params)
+dynamics = FatEcto.HospitalDynamicsBuilder.build(params)
 
 # Use the dynamics in a query
 import Ecto.Query
@@ -113,7 +108,7 @@ params = %{
   "id" => %{"$NOT_EQUAL" => 2},
   "name" => %{"$ILIKE" => "%General%"}
 }
-dynamics = FatEcto.Dynamics.MyApp.HospitalFilter.build(params)
+dynamics = FatEcto.HospitalDynamicsBuilder.build(params)
 
 # Use the dynamics in a query
 import Ecto.Query
@@ -128,7 +123,7 @@ query = where(FatEcto.FatHospital, ^dynamics)
 ```elixir
 # Filter hospitals with a name, but ignore empty or invalid values
 params = %{"name" => %{"$ILIKE" => "%%"}}  # Empty value is ignored
-dynamics = FatEcto.Dynamics.MyApp.HospitalFilter.build(params)
+dynamics = FatEcto.HospitalDynamicsBuilder.build(params)
 
 # Use the dynamics in a query
 import Ecto.Query
@@ -172,7 +167,7 @@ dynamic(
 
 ---
 
-### 🔄 FatEcto.FatSortable – Effortless Sorting
+### 🔄 FatEcto.Sort.Sortable – Effortless Sorting
 
 Sorting should be simple—and with `Sortable`, it is! Your frontend can send sorting parameters, and FatEcto will seamlessly generate the right sorting queries, allowing you to build powerful, customizable sorting logic without breaking a sweat. 😎
 
@@ -181,25 +176,22 @@ Sorting should be simple—and with `Sortable`, it is! Your frontend can send so
 ```elixir
 defmodule Fat.SortQuery do
   import Ecto.Query
-  use FatEcto.FatSortable,
-    sortable_fields: %{"id" => "$ASC", "name" => ["$ASC", "$DESC"]},
-    overrideable_fields: ["custom_field"]
+  use FatEcto.Sort.Sortable,
+    sortable: [id: "$ASC", email: "*", name: ["$ASC", "$DESC"]],
+    overrideable: ["custom_field"]
 
   @impl true
-  def override_sortable(query, field, operator) do
-    case {field, operator} do
-      {"custom_field", "$ASC"} ->
-        from(q in query, order_by: [asc: fragment("?::jsonb->>'custom_field'", q)])
-      _ ->
-        query
-    end
+  def override_sortable("custom_field", "$DESC") do
+    {:desc, dynamic([u], fragment("?->>'custom_field'", u.metadata))}
   end
+
+  def override_sortable(_field, _operator), do: nil
 end
 ```
 
 ---
 
-### 📌 FatEcto.FatPaginator – Paginate Like a Pro
+### 📌 FatEcto.Pagination.Paginator – Paginate Like a Pro
 
 No more hassle with pagination! FatPaginator helps you paginate Ecto queries efficiently, keeping your APIs snappy and responsive.
 
@@ -207,38 +199,11 @@ No more hassle with pagination! FatPaginator helps you paginate Ecto queries eff
 
 ```elixir
 defmodule Fat.MyPaginator do
-  use FatEcto.FatPaginator, repo: Fat.Repo
-  # Add custom pagination functions here
+  use FatEcto.Pagination.V2Paginator,
+    default_limit: 10,
+    repo: FatEcto.Repo,
+    max_limit: 100
 end
-```
-
----
-
-### 🔍 FatEcto.FatDataSanitizer – Clean & Structured Data
-
-Messy data? Not anymore! `DataSanitizer` helps you sanitize records and transform them into structured, clean views effortlessly. Keep your data tidy and consistent. 🎯
-
-#### Usage of FatDataSanitizer
-
-```elixir
-defmodule Fat.MySanitizer do
-  use FatEcto.FatDataSanitizer
-  # Define your custom sanitization functions here
-end
-```
-
----
-
-### ⚡ FatEcto Utilities – Small Helpers, Big Impact
-
-FatEcto also comes with a set of handy utility functions to streamline your workflow:
-
-```elixir
-# Check if a map contains all required keys
-FatEcto.Utils.Map.has_all_keys?(%{a: 1, b: 2}, [:a, :b])
-
-# Ensure a map contains only allowed keys
-FatEcto.Utils.Map.contain_only_allowed_keys?(%{a: 1, c: 3}, [:a, :b])
 ```
 
 ---
