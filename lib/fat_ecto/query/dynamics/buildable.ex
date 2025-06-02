@@ -73,7 +73,7 @@ defmodule FatEcto.Query.Dynamics.Buildable do
   This function is called at the end of the `build/2` function. The default behavior is to return the dynamics,
   but it can be overridden by the using module.
   """
-  @callback after_buildable(dynamics :: Ecto.Query.dynamic_expr()) :: Ecto.Query.dynamic_expr()
+  @callback after_buildable(dynamics :: Ecto.Query.dynamic_expr() | nil) :: any()
 
   defmacro __using__(options \\ []) do
     quote do
