@@ -58,7 +58,8 @@ defmodule FatEcto.Pagination.V2Paginator do
       """
 
       @impl true
-      def paginate(query, params \\ %{}) do
+      @spec paginate(Ecto.Query.t()) :: {:ok, map()} | {:error, String.t()}
+      def paginate(query, params \\ []) do
         {limit, skip} = get_pagination_params(params)
 
         with {:ok, total} <- safe_count(query),
