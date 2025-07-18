@@ -27,7 +27,6 @@ defmodule FatEcto.Sort.Sortable do
       order_by = MyApp.UserSort.build(%{"email" => "$DESC", "custom_field" => "$ASC"})
       query = from(u in User, order_by: ^order_by)
   """
-
   alias FatEcto.SharedHelper
   alias FatEcto.Sort.Helper
   alias FatEcto.Sort.Sorter
@@ -89,8 +88,8 @@ defmodule FatEcto.Sort.Sortable do
         override_orders =
           Enum.flat_map(override_params, fn {field, operator} ->
             case override_sortable(field, operator) do
-              nil -> []
-              order -> [order]
+              order when not is_nil(order) -> [order]
+              _ -> []
             end
           end)
 
@@ -104,7 +103,6 @@ defmodule FatEcto.Sort.Sortable do
       """
       @spec override_sortable(String.t(), String.t()) :: Sorter.order_expr() | nil
       def override_sortable(_field, _operator), do: nil
-
       defoverridable override_sortable: 2
     end
   end

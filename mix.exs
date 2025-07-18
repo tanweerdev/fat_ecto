@@ -32,6 +32,9 @@ defmodule FatEcto.MixProject do
       ],
       coveralls: [
         minimum_coverage: 60
+      ],
+      dialyzer: [
+        plt_add_apps: [:ex_unit]
       ]
     ]
   end

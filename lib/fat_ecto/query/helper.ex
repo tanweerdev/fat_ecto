@@ -14,7 +14,7 @@ defmodule FatEcto.Query.Helper do
     - The filtered query parameters.
   """
   alias FatEcto.SharedHelper
-  @spec remove_ignoreable_fields(map(), keyword()) :: map()
+  @spec remove_ignoreable_fields(map(), keyword() | map()) :: map()
   def remove_ignoreable_fields(where_params, ignoreable_fields_values) do
     ignoreable_fields_values = SharedHelper.keyword_list_to_map(ignoreable_fields_values)
 
@@ -64,7 +64,7 @@ defmodule FatEcto.Query.Helper do
   ### Returns
     - The filtered query parameters.
   """
-  @spec filter_filterable_fields(map(), keyword(), list()) :: map()
+  @spec filter_filterable_fields(map(), keyword() | map(), [any()]) :: map()
   def filter_filterable_fields(where_params, filterable_fields, overrideable_fields) do
     filterable_fields = SharedHelper.filterable_opt_to_map(filterable_fields)
     do_filter_filterable_fields(where_params, filterable_fields, overrideable_fields, %{})
