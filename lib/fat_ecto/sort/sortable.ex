@@ -88,8 +88,8 @@ defmodule FatEcto.Sort.Sortable do
         override_orders =
           Enum.flat_map(override_params, fn {field, operator} ->
             case override_sortable(field, operator) do
-              nil -> []
-              order -> [order]
+              order when not is_nil(order) -> [order]
+              _ -> []
             end
           end)
 

@@ -29,6 +29,9 @@ jobs:
           --health-timeout=5s
           --health-retries=3
 
+    env:
+      MIX_ENV: test  # Set MIX_ENV globally for all steps
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -60,7 +63,6 @@ jobs:
 
       - name: Run tests
         env:
-          MIX_ENV: test
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mix coveralls.github
