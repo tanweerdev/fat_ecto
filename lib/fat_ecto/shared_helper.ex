@@ -81,7 +81,7 @@ defmodule FatEcto.SharedHelper do
   @spec filterable_opt_to_map(maybe_improper_list() | any()) :: maybe_improper_list() | map()
   def filterable_opt_to_map(list) when is_list(list) do
     if Keyword.keyword?(list) do
-      keyword_list_to_map(list)
+      keyword_list_to_map_with_uppercase_operators(list)
     else
       list
       |> Enum.map(fn k -> {Atom.to_string(k), "*"} end)
@@ -104,6 +104,31 @@ defmodule FatEcto.SharedHelper do
   end
 
   def keyword_list_to_map(input), do: input
+
+  # Converts a keyword list to a map with string keys and normalizes operator values to uppercase
+  @spec keyword_list_to_map_with_uppercase_operators(keyword() | map()) :: map()
+  def keyword_list_to_map_with_uppercase_operators(list) when is_list(list) do
+    if Keyword.keyword?(list) do
+      list
+      |> Enum.map(fn {k, v} -> {Atom.to_string(k), normalize_operators(v)} end)
+      |> Map.new()
+    else
+      list
+    end
+  end
+
+  def keyword_list_to_map_with_uppercase_operators(input), do: input
+
+  # Normalizes operator values to uppercase
+  defp normalize_operators(operators) when is_list(operators) do
+    Enum.map(operators, &String.upcase/1)
+  end
+
+  defp normalize_operators(operator) when is_binary(operator) do
+    String.upcase(operator)
+  end
+
+  defp normalize_operators(operator), do: operator
 
   @doc """
   Parses an integer from a string or returns the integer if already an integer.

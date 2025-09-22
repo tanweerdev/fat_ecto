@@ -14,9 +14,9 @@ defmodule FatDoctor.QueryTest do
       assert inspect(query) == inspect(expected_query)
     end
 
-    test "filters by email with $ILIKE operator" do
+    test "filters by email with $ilike operator (lowercase)" do
       base_query = from(d in FatDoctor)
-      query = DoctorQueryBuilder.build(base_query, %{"email" => %{"$ILIKE" => "%test%"}})
+      query = DoctorQueryBuilder.build(base_query, %{"email" => %{"$ilike" => "%test%"}})
 
       expected_query = from(d in FatDoctor, where: ilike(fragment("(?)::TEXT", d.email), ^"%test%"))
       assert inspect(query) == inspect(expected_query)
@@ -37,9 +37,9 @@ defmodule FatDoctor.QueryTest do
       assert inspect(query) == inspect(expected_query)
     end
 
-    test "filters by name with $LIKE operator" do
+    test "filters by name with $Like operator (mixed case)" do
       base_query = from(d in FatDoctor)
-      query = DoctorQueryBuilder.build(base_query, %{"name" => %{"$LIKE" => "%John%"}})
+      query = DoctorQueryBuilder.build(base_query, %{"name" => %{"$Like" => "%John%"}})
 
       expected_query = from(d in FatDoctor, where: like(fragment("(?)::TEXT", d.name), ^"%John%"))
       assert inspect(query) == inspect(expected_query)
@@ -148,17 +148,17 @@ defmodule FatDoctor.QueryTest do
       assert query == base_query
     end
 
-    test "filters by rating with $GT operator" do
+    test "filters by rating with $gt operator (lowercase)" do
       base_query = from(d in FatDoctor)
-      query = DoctorQueryBuilder.build(base_query, %{"rating" => %{"$GT" => 4}})
+      query = DoctorQueryBuilder.build(base_query, %{"rating" => %{"$gt" => 4}})
 
       expected_query = from(d in FatDoctor, where: d.rating > ^4)
       assert inspect(query) == inspect(expected_query)
     end
 
-    test "filters by start_date with $GTE operator" do
+    test "filters by start_date with $Gte operator (mixed case)" do
       base_query = from(d in FatDoctor)
-      query = DoctorQueryBuilder.build(base_query, %{"start_date" => %{"$GTE" => "2023-01-01"}})
+      query = DoctorQueryBuilder.build(base_query, %{"start_date" => %{"$Gte" => "2023-01-01"}})
 
       expected_query = from(d in FatDoctor, where: d.start_date >= ^"2023-01-01")
       assert inspect(query) == inspect(expected_query)

@@ -50,7 +50,7 @@ defmodule FatEcto.Query.Builder do
 
   defp build_field_query(field, conditions, query, callback, fields) when is_map(conditions) do
     Enum.reduce(conditions, query, fn {operator, value}, acc ->
-      if should_override?(field, fields, callback) do
+      if should_override?(field, fields) && callback do
         callback.(acc, field, operator, value) ||
           apply_operator(acc, operator, field, value)
       else
@@ -62,7 +62,7 @@ defmodule FatEcto.Query.Builder do
   defp build_field_query(field, value, query, callback, fields) do
     operator = if is_nil(value), do: "$NULL", else: "$EQUAL"
 
-    if should_override?(field, fields, callback) do
+    if should_override?(field, fields) && callback do
       callback.(query, field, operator, value) ||
         apply_operator(query, operator, field, value)
     else
@@ -108,14 +108,13 @@ defmodule FatEcto.Query.Builder do
   end
 
   # Shared helpers
-  defp should_override?(field, fields, callback) do
-    callback &&
-      case fields do
-        nil -> true
-        fields when is_list(fields) -> field in fields
-        fields when is_map(fields) -> Map.has_key?(fields, field)
-        _ -> true
-      end
+  defp should_override?(field, fields) do
+    case fields do
+      nil -> true
+      fields when is_list(fields) -> field in fields
+      fields when is_map(fields) -> Map.has_key?(fields, field)
+      _ -> true
+    end
   end
 
   defp ensure_list(input) when is_map(input), do: [input]

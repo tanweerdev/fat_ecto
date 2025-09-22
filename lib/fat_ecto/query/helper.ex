@@ -131,7 +131,8 @@ defmodule FatEcto.Query.Helper do
           filtered_value =
             Enum.reduce(value, %{}, fn {operator, val}, inner_acc ->
               if operator_allowed?(operator, allowed_operators) do
-                Map.put(inner_acc, operator, val)
+                normalized_operator = String.upcase(operator)
+                Map.put(inner_acc, normalized_operator, val)
               else
                 inner_acc
               end
@@ -170,11 +171,13 @@ defmodule FatEcto.Query.Helper do
 
   # Checks if an operator is allowed for a field.
   defp operator_allowed?(operator, allowed_operators) when is_list(allowed_operators) do
-    operator in allowed_operators
+    normalized_operator = String.upcase(operator)
+    normalized_operator in allowed_operators
   end
 
   defp operator_allowed?(operator, allowed_operator) when is_binary(allowed_operator) do
-    allowed_operator == "*" or operator == allowed_operator
+    normalized_operator = String.upcase(operator)
+    allowed_operator == "*" or normalized_operator == allowed_operator
   end
 
   defp operator_allowed?(_operator, _allowed_operators) do
