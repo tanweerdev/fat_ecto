@@ -82,129 +82,140 @@ defmodule FatEcto.Query.OperatorApplier do
     ]
 
   @spec apply_nil_operator(String.t(), atom()) :: nil | Ecto.Query.dynamic_expr()
-  def apply_nil_operator("$NULL", field) do
+  def apply_nil_operator(operator, field) do
+    operator = String.upcase(operator)
+    do_apply_nil_operator(operator, field)
+  end
+
+  defp do_apply_nil_operator("$NULL", field) do
     field = SharedHelper.string_to_existing_atom(field)
     GtLtEq.field_is_nil_dynamic(field)
   end
 
-  def apply_nil_operator("$NOT_NULL", field) do
+  defp do_apply_nil_operator("$NOT_NULL", field) do
     field = SharedHelper.string_to_existing_atom(field)
     GtLtEq.not_field_is_nil_dynamic(field)
   end
 
   # Helper function to apply the appropriate operator to the field and value.
   @spec apply_operator(String.t(), atom(), any()) :: nil | Ecto.Query.dynamic_expr()
-  def apply_operator("$LIKE", field, value) do
+  def apply_operator(operator, field, value) do
+    operator = String.upcase(operator)
+    do_apply_operator(operator, field, value)
+  end
+
+  @spec do_apply_operator(String.t(), atom(), any()) :: nil | Ecto.Query.dynamic_expr()
+  defp do_apply_operator("$LIKE", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     Like.like_dynamic(field, value)
   end
 
-  def apply_operator("$NULL", field, _value) do
+  defp do_apply_operator("$NULL", field, _value) do
     field = SharedHelper.string_to_existing_atom(field)
     GtLtEq.field_is_nil_dynamic(field)
   end
 
-  def apply_operator("$NOT_LIKE", field, value) do
+  defp do_apply_operator("$NOT_LIKE", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     Like.not_like_dynamic(field, value)
   end
 
-  def apply_operator("$ILIKE", field, value) do
+  defp do_apply_operator("$ILIKE", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     Like.ilike_dynamic(field, value)
   end
 
-  def apply_operator("$NOT_ILIKE", field, value) do
+  defp do_apply_operator("$NOT_ILIKE", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     Like.not_ilike_dynamic(field, value)
   end
 
-  def apply_operator("$LT", field, value) do
+  defp do_apply_operator("$LT", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     GtLtEq.lt_dynamic(field, value)
   end
 
-  def apply_operator("$LTE", field, value) do
+  defp do_apply_operator("$LTE", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     GtLtEq.lte_dynamic(field, value)
   end
 
-  def apply_operator("$GT", field, value) do
+  defp do_apply_operator("$GT", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     GtLtEq.gt_dynamic(field, value)
   end
 
-  def apply_operator("$GTE", field, value) do
+  defp do_apply_operator("$GTE", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     GtLtEq.gte_dynamic(field, value)
   end
 
-  def apply_operator("$BETWEEN", field, value) do
+  defp do_apply_operator("$BETWEEN", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     BtwInContains.between_dynamic(field, value)
   end
 
-  def apply_operator("$BETWEEN_EQUAL", field, value) do
+  defp do_apply_operator("$BETWEEN_EQUAL", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     BtwInContains.between_equal_dynamic(field, value)
   end
 
-  def apply_operator("$NOT_BETWEEN", field, value) do
+  defp do_apply_operator("$NOT_BETWEEN", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     BtwInContains.not_between_dynamic(field, value)
   end
 
-  def apply_operator("$NOT_BETWEEN_EQUAL", field, value) do
+  defp do_apply_operator("$NOT_BETWEEN_EQUAL", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     BtwInContains.not_between_equal_dynamic(field, value)
   end
 
-  def apply_operator("$IN", field, value) do
+  defp do_apply_operator("$IN", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     BtwInContains.in_dynamic(field, value)
   end
 
-  def apply_operator("$NOT_IN", field, value) do
+  defp do_apply_operator("$NOT_IN", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     BtwInContains.not_in_dynamic(field, value)
   end
 
-  def apply_operator("$EQUAL", field, value) do
+  defp do_apply_operator("$EQUAL", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     GtLtEq.eq_dynamic(field, value)
   end
 
-  def apply_operator("$CAST_TO_DATE_LT", field, value) do
+  defp do_apply_operator("$CAST_TO_DATE_LT", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     GtLtEq.cast_to_date_lt_dynamic(field, value)
   end
 
-  def apply_operator("$CAST_TO_DATE_LTE", field, value) do
+  defp do_apply_operator("$CAST_TO_DATE_LTE", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     GtLtEq.cast_to_date_lte_dynamic(field, value)
   end
 
-  def apply_operator("$CAST_TO_DATE_GT", field, value) do
+  defp do_apply_operator("$CAST_TO_DATE_GT", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     GtLtEq.cast_to_date_gt_dynamic(field, value)
   end
 
-  def apply_operator("$CAST_TO_DATE_GTE", field, value) do
+  defp do_apply_operator("$CAST_TO_DATE_GTE", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     GtLtEq.cast_to_date_gte_dynamic(field, value)
   end
 
-  def apply_operator("$CAST_TO_DATE_EQUAL", field, value) do
+  defp do_apply_operator("$CAST_TO_DATE_EQUAL", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     GtLtEq.cast_to_date_eq_dynamic(field, value)
   end
 
-  def apply_operator("$NOT_EQUAL", field, value) do
+  defp do_apply_operator("$NOT_EQUAL", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     GtLtEq.not_eq_dynamic(field, value)
   end
 
-  def apply_operator(_, _field, _value), do: nil
+  defp do_apply_operator(_, _field, _value), do: nil
 
   @spec allowed_not_operators() :: [String.t(), ...]
   def allowed_not_operators, do: ["$LIKE", "$ILIKE", "$ILIKE", "$LT", "$LTE", "$GT", "$GTE", "$EQUAL"]

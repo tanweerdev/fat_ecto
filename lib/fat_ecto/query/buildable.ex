@@ -132,6 +132,8 @@ defmodule FatEcto.Query.Buildable do
         where_params_ignoreables_removed =
           Helper.remove_ignoreable_fields(where_params, @ignoreable_fields_values)
 
+        # IO.inspect("where_params_ignoreables_removed::: #{inspect(where_params_ignoreables_removed)}")
+
         # IO.inspect("query::: #{inspect(query)}")
         # IO.inspect("where_params::: #{inspect(where_params)}")
         # Only keep filterable fields in params
@@ -153,7 +155,7 @@ defmodule FatEcto.Query.Buildable do
             @overrideable_fields
           )
 
-        # IO.inspect("query::: #{inspect(query)}")
+        # IO.inspect("query after build::: #{inspect(query)}")
 
         # Apply after_buildable callback
         after_buildable(query)
@@ -165,16 +167,7 @@ defmodule FatEcto.Query.Buildable do
 
       # Helper function to adapt the dynamics override callback to work with queries
       defp dynamics_override_callback(query, dynamics, field, operator, value) do
-        case override_buildable(query, field, operator, value) do
-          new_query when is_struct(new_query, Ecto.Query) ->
-            # If the override modified the query directly, we need to return nil for the dynamics
-            # since the condition was already applied to the query
-            nil
-
-          _ ->
-            # Fall back to default dynamics behavior
-            dynamics
-        end
+        override_buildable(query, field, operator, value)
       end
 
       @doc """

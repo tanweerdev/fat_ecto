@@ -51,8 +51,7 @@ defmodule FatEcto.Query.Builder do
   defp build_field_query(field, conditions, query, callback, fields) when is_map(conditions) do
     Enum.reduce(conditions, query, fn {operator, value}, acc ->
       if should_override?(field, fields) && callback do
-        callback.(acc, field, operator, value) ||
-          apply_operator(acc, operator, field, value)
+        callback.(acc, field, operator, value)
       else
         apply_operator(acc, operator, field, value)
       end
@@ -63,8 +62,7 @@ defmodule FatEcto.Query.Builder do
     operator = if is_nil(value), do: "$NULL", else: "$EQUAL"
 
     if should_override?(field, fields) && callback do
-      callback.(query, field, operator, value) ||
-        apply_operator(query, operator, field, value)
+      callback.(query, field, operator, value)
     else
       apply_operator(query, operator, field, value)
     end
