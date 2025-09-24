@@ -187,27 +187,33 @@ defmodule FatEcto.Query.OperatorApplier do
 
   defp do_apply_operator("$CAST_TO_DATE_LT", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
-    GtLtEq.cast_to_date_lt_dynamic(field, value)
+    val = SharedHelper.to_date!(value)
+    GtLtEq.cast_to_date_lt_dynamic(field, val)
   end
 
   defp do_apply_operator("$CAST_TO_DATE_LTE", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
-    GtLtEq.cast_to_date_lte_dynamic(field, value)
+    val = SharedHelper.to_date!(value)
+    GtLtEq.cast_to_date_lte_dynamic(field, val)
   end
 
   defp do_apply_operator("$CAST_TO_DATE_GT", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
-    GtLtEq.cast_to_date_gt_dynamic(field, value)
+    val = SharedHelper.to_date!(value)
+    GtLtEq.cast_to_date_gt_dynamic(field, val)
   end
 
   defp do_apply_operator("$CAST_TO_DATE_GTE", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
-    GtLtEq.cast_to_date_gte_dynamic(field, value)
+    val = SharedHelper.to_date!(value)
+    GtLtEq.cast_to_date_gte_dynamic(field, val)
   end
 
+  # TODO: maybe CAST_TO_DATE_NOT_EQUAL as well?
   defp do_apply_operator("$CAST_TO_DATE_EQUAL", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
-    GtLtEq.cast_to_date_eq_dynamic(field, value)
+    val = SharedHelper.to_date!(value)
+    GtLtEq.cast_to_date_eq_dynamic(field, val)
   end
 
   defp do_apply_operator("$NOT_EQUAL", field, value) do

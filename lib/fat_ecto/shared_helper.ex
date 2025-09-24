@@ -151,4 +151,86 @@ defmodule FatEcto.SharedHelper do
       :error -> nil
     end
   end
+
+  @doc """
+  Converts various date/datetime inputs to an Elixir Date struct.
+
+  Accepts:
+  - String date (e.g., "2023-12-25")
+  - String datetime (e.g., "2023-12-25T10:30:00Z", "2023-12-25 10:30:00")
+  - Elixir Date struct
+  - Elixir DateTime struct
+
+  Returns `{:ok, date}` on success or `{:error, reason}` on failure.
+
+  ## Examples
+      iex> FatEcto.SharedHelper.to_date("2023-12-25")
+      {:ok, ~D[2023-12-25]}
+
+      iex> FatEcto.SharedHelper.to_date("2023-12-25T10:30:00Z")
+      {:ok, ~D[2023-12-25]}
+
+      iex> FatEcto.SharedHelper.to_date(~D[2023-12-25])
+      {:ok, ~D[2023-12-25]}
+
+      iex> FatEcto.SharedHelper.to_date(~U[2023-12-25 10:30:00Z])
+      {:ok, ~D[2023-12-25]}
+  """
+  @spec to_date(String.t() | Date.t() | DateTime.t()) :: {:ok, Date.t()} | {:error, atom()}
+  def to_date(%Date{} = date), do: {:ok, date}
+
+  def to_date(%DateTime{} = datetime), do: {:ok, DateTime.to_date(datetime)}
+
+  def to_date(date_string) when is_binary(date_string) do
+    cond do
+      # Try parsing as ISO date first (YYYY-MM-DD)
+      String.match?(date_string, ~r/^\d{4}-\d{2}-\d{2}$/) ->
+        Date.from_iso8601(date_string)
+
+      # Try parsing as datetime with T separator (ISO 8601)
+      String.contains?(date_string, "T") ->
+        case DateTime.from_iso8601(date_string) do
+          {:ok, datetime, _offset} -> {:ok, DateTime.to_date(datetime)}
+          {:error, reason} -> {:error, reason}
+        end
+
+      # Try parsing as datetime with space separator (YYYY-MM-DD HH:MM:SS)
+      String.match?(date_string, ~r/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/) ->
+        case NaiveDateTime.from_iso8601(date_string) do
+          {:ok, naive_datetime} -> {:ok, NaiveDateTime.to_date(naive_datetime)}
+          {:error, reason} -> {:error, reason}
+        end
+
+      # Try parsing as date with various separators (YYYY/MM/DD, YYYY.MM.DD)
+      String.match?(date_string, ~r/^\d{4}[\/\.]\d{2}[\/\.]\d{2}$/) ->
+        normalized_date = String.replace(date_string, ~r/[\/\.]/, "-")
+        Date.from_iso8601(normalized_date)
+
+      # Default fallback - try to parse as ISO date
+      true ->
+        Date.from_iso8601(date_string)
+    end
+  end
+
+  def to_date(_), do: {:error, :invalid_input}
+
+  @doc """
+  Converts various date/datetime inputs to an Elixir Date struct.
+
+  Similar to `to_date/1` but raises an exception on failure.
+
+  ## Examples
+      iex> FatEcto.SharedHelper.to_date!("2023-12-25")
+      ~D[2023-12-25]
+
+      iex> FatEcto.SharedHelper.to_date!(~U[2023-12-25 10:30:00Z])
+      ~D[2023-12-25]
+  """
+  @spec to_date!(String.t() | Date.t() | DateTime.t()) :: Date.t()
+  def to_date!(input) do
+    case to_date(input) do
+      {:ok, date} -> date
+      {:error, reason} -> raise ArgumentError, "Invalid date input: #{inspect(input)}, reason: #{reason}"
+    end
+  end
 end
