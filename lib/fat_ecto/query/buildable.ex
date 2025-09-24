@@ -151,7 +151,7 @@ defmodule FatEcto.Query.Buildable do
           Builder.build(
             query,
             filterable_params,
-            &dynamics_override_callback(query, &1, &2, &3, &4),
+            &override_buildable(&1, &2, &3, &4),
             @overrideable_fields
           )
 
@@ -163,11 +163,6 @@ defmodule FatEcto.Query.Buildable do
 
       def build(query, _where_params, _build_options) do
         after_buildable(query)
-      end
-
-      # Helper function to adapt the dynamics override callback to work with queries
-      defp dynamics_override_callback(query, dynamics, field, operator, value) do
-        override_buildable(query, field, operator, value)
       end
 
       @doc """

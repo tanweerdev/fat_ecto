@@ -12,9 +12,14 @@ defmodule FatEcto.Query.Builder do
       when is_map(query_map) do
     Enum.reduce(query_map, from(q in queryable), fn {key, value}, query ->
       case key do
-        "$OR" -> build_or_query(value, query, override_callback, overrideable_fields)
-        "$AND" -> build_and_query(value, query, override_callback, overrideable_fields)
-        _ -> build_field_query(key, value, query, override_callback, overrideable_fields)
+        "$OR" ->
+          build_or_query(value, query, override_callback, overrideable_fields)
+
+        "$AND" ->
+          build_and_query(value, query, override_callback, overrideable_fields)
+
+        _ ->
+          build_field_query(key, value, query, override_callback, overrideable_fields)
       end
     end)
   end
@@ -49,10 +54,18 @@ defmodule FatEcto.Query.Builder do
   end
 
   defp build_field_query(field, conditions, query, callback, fields) when is_map(conditions) do
+    # IO.inspect("build_field_query conditions::: #{inspect(conditions)}")
+    # IO.inspect("build_field_query field::: #{inspect(field)}")
+    # IO.inspect("build_field_query query::: #{inspect(query)}")
+    # IO.inspect("build_field_query fields::: #{inspect(fields)}")
     Enum.reduce(conditions, query, fn {operator, value}, acc ->
+      # IO.inspect("operator::: #{inspect(operator)}")
+      # IO.inspect("value::: #{inspect(value)}")
       if should_override?(field, fields) && callback do
+        # IO.inspect("overriding for field:::")
         callback.(acc, field, operator, value)
       else
+        # IO.inspect("applying operator for field:::")
         apply_operator(acc, operator, field, value)
       end
     end)
