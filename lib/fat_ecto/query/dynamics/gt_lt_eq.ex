@@ -169,6 +169,28 @@ defmodule FatEcto.Query.Dynamics.GtLtEq do
   end
 
   @doc """
+  Builds a dynamic query where a field cast to `date` is not equal to a given value.
+
+  ### Parameters
+
+    - `key` - The field name as an atom.
+    - `value` - The value to compare against (must be a `Date`).
+
+  ### Examples
+
+      iex> result = #{__MODULE__}.cast_to_date_not_eq_dynamic(:end_date, ~D[2025-02-08])
+      iex> inspect(result)
+      "dynamic([q], fragment(\\\"?::date\\\", q.end_date) != ^~D[2025-02-08])"
+  """
+  @spec cast_to_date_not_eq_dynamic(atom(), Date.t()) :: Ecto.Query.dynamic_expr()
+  def cast_to_date_not_eq_dynamic(key, value) when is_atom(key) do
+    dynamic(
+      [q],
+      fragment("?::date", field(q, ^key)) != ^value
+    )
+  end
+
+  @doc """
   Builds a dynamic query where a field cast to `date` is greater than a given value.
 
   ### Parameters

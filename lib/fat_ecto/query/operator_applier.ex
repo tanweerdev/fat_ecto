@@ -13,6 +13,14 @@ defmodule FatEcto.Query.OperatorApplier do
   - `$NOT_LIKE`: Excludes rows that match a pattern in a string.
   - `$ILIKE`: Case-insensitive match of a pattern in a string.
   - `$NOT_ILIKE`: Case-insensitive exclusion of rows that match a pattern in a string.
+  - `$NULL`: Matches rows where the field is null.
+  - `$NOT_NULL`: Matches rows where the field is not null.
+  - `$CAST_TO_DATE_EQUAL`: Casts field to date and matches a specific date value.
+  - `$CAST_TO_DATE_NOT_EQUAL`: Casts field to date and excludes a specific date value.
+  - `$CAST_TO_DATE_GTE`: Casts field to date and matches dates greater than or equal to a value.
+  - `$CAST_TO_DATE_GT`: Casts field to date and matches dates greater than a value.
+  - `$CAST_TO_DATE_LT`: Casts field to date and matches dates less than a value.
+  - `$CAST_TO_DATE_LTE`: Casts field to date and matches dates less than or equal to a value.
   - `$LT`: Less than.
   - `$LTE`: Less than or equal to.
   - `$GT`: Greater than.
@@ -63,6 +71,7 @@ defmodule FatEcto.Query.OperatorApplier do
       "$NULL",
       "$NOT_NULL",
       "$CAST_TO_DATE_EQUAL",
+      "$CAST_TO_DATE_NOT_EQUAL",
       "$CAST_TO_DATE_GTE",
       "$CAST_TO_DATE_GT",
       "$CAST_TO_DATE_LT",
@@ -209,11 +218,16 @@ defmodule FatEcto.Query.OperatorApplier do
     GtLtEq.cast_to_date_gte_dynamic(field, val)
   end
 
-  # TODO: maybe CAST_TO_DATE_NOT_EQUAL as well?
   defp do_apply_operator("$CAST_TO_DATE_EQUAL", field, value) do
     field = SharedHelper.string_to_existing_atom(field)
     val = SharedHelper.to_date!(value)
     GtLtEq.cast_to_date_eq_dynamic(field, val)
+  end
+
+  defp do_apply_operator("$CAST_TO_DATE_NOT_EQUAL", field, value) do
+    field = SharedHelper.string_to_existing_atom(field)
+    val = SharedHelper.to_date!(value)
+    GtLtEq.cast_to_date_not_eq_dynamic(field, val)
   end
 
   defp do_apply_operator("$NOT_EQUAL", field, value) do
