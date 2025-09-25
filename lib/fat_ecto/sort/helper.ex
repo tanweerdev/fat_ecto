@@ -18,23 +18,26 @@ defmodule FatEcto.Sort.Helper do
     Enum.reduce(filtered_params, %{}, fn {field, operator}, acc ->
       if Map.has_key?(sortable_fields, field) do
         allowed_operators = sortable_fields[field]
-
-        case allowed_operators do
-          "*" ->
-            Map.put(acc, field, operator)
-
-          allowed when is_binary(allowed) ->
-            if allowed == operator, do: Map.put(acc, field, operator), else: acc
-
-          allowed when is_list(allowed) ->
-            if operator in allowed, do: Map.put(acc, field, operator), else: acc
-
-          _ ->
-            acc
-        end
+        validate_and_add_operator(acc, field, operator, allowed_operators)
       else
         acc
       end
     end)
+  end
+
+  defp validate_and_add_operator(acc, field, operator, allowed_operators) do
+    case allowed_operators do
+      "*" ->
+        Map.put(acc, field, operator)
+
+      allowed when is_binary(allowed) ->
+        if allowed == operator, do: Map.put(acc, field, operator), else: acc
+
+      allowed when is_list(allowed) ->
+        if operator in allowed, do: Map.put(acc, field, operator), else: acc
+
+      _ ->
+        acc
+    end
   end
 end

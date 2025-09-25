@@ -7,6 +7,45 @@ defmodule FatEcto.Query.Builder do
   import Ecto.Query
   alias FatEcto.Query.OperatorApplier
 
+  @doc """
+  Builds an Ecto query from a structured query map with dynamic conditions.
+
+  This function processes query maps that can contain field-specific conditions
+  as well as logical operators (`$AND`, `$OR`) to build complex queries.
+
+  ## Parameters
+
+  - `queryable` - The Ecto queryable (schema or query) to build upon
+  - `query_map` - A map containing query conditions and operators
+  - `override_callback` - Optional function to handle custom field processing
+  - `overrideable_fields` - List of field names that can use the override callback
+
+  ## Query Map Format
+
+  The query map can contain:
+  - Field names as keys with condition maps as values
+  - `$AND` key with a list of condition maps for AND logic
+  - `$OR` key with a list of condition maps for OR logic
+
+  ## Examples
+
+      # Simple field condition
+      query_map = %{"name" => %{"$LIKE" => "%John%"}}
+      Builder.build(User, query_map)
+
+      # Complex query with OR logic
+      query_map = %{
+        "$OR" => [
+          %{"name" => %{"$LIKE" => "%John%"}},
+          %{"email" => %{"$LIKE" => "%@gmail.com"}}
+        ]
+      }
+      Builder.build(User, query_map)
+
+  ## Returns
+
+  An `Ecto.Query.t()` with the conditions applied.
+  """
   @spec build(Ecto.Queryable.t(), map(), function() | nil, list() | nil) :: Ecto.Query.t()
   def build(queryable, query_map, override_callback \\ nil, overrideable_fields \\ nil)
       when is_map(query_map) do

@@ -35,6 +35,7 @@ defmodule FatEcto.Pagination.V2Paginator do
 
       import Ecto.Query
       alias Ecto.Query.Builder
+      alias FatEcto.Pagination.Helper
 
       @repo Keyword.fetch!(unquote(opts), :repo)
       @default_limit Keyword.get(unquote(opts), :default_limit, 20)
@@ -78,8 +79,8 @@ defmodule FatEcto.Pagination.V2Paginator do
       end
 
       defp get_pagination_params(params) do
-        {skip, params} = FatEcto.Pagination.Helper.get_skip_value(params)
-        {limit, _params} = FatEcto.Pagination.Helper.get_limit_value(params, unquote(opts))
+        {skip, params} = Helper.get_skip_value(params)
+        {limit, _params} = Helper.get_limit_value(params, unquote(opts))
         {limit, skip}
       end
 

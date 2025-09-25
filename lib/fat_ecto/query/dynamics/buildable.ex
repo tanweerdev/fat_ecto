@@ -83,9 +83,6 @@ defmodule FatEcto.Query.Dynamics.Buildable do
       @overrideable_fields @options[:overrideable] || []
       @ignoreable @options[:ignoreable] || []
       alias FatEcto.Query.Helper
-      # def using_options, do: @options
-      # # Defer the repo check to runtime
-      # @after_compile FatEcto.Query.Dynamics.Buildable
 
       # Ensure at least one of `filterable` or `overrideable` fields option is provided.
       if @filterable == [] and @overrideable_fields == [] do
@@ -156,12 +153,15 @@ defmodule FatEcto.Query.Dynamics.Buildable do
         after_buildable(nil)
       end
 
-      @doc """
-      Default implementation of `override_buildable/3`.
+      # Only define default override_buildable/3 if no overrideable fields are configured
+      if @overrideable_fields == [] do
+        @doc """
+        Default implementation of `override_buildable/3` when no overrideable fields are configured.
+        """
+        def override_buildable(_field, _operator, _value), do: nil
 
-      This function can be overridden by the using module to implement custom filtering logic.
-      """
-      def override_buildable(_field, _operator, _value), do: nil
+        defoverridable override_buildable: 3
+      end
 
       @doc """
       Default implementation of after_buildable/1.
@@ -170,32 +170,7 @@ defmodule FatEcto.Query.Dynamics.Buildable do
       """
       def after_buildable(dynamics), do: dynamics
 
-      defoverridable override_buildable: 3
       defoverridable after_buildable: 1
     end
   end
-
-  # TODO: This callback doesnt really work as we have default implementation already provided
-  # @doc """
-  # Callback function that runs after the module is compiled.
-  # """
-  # def __after_compile__(%{module: module}, _bytecode) do
-  #   options = module.using_options()
-
-  #   # Ensure `override_buildable/3` is implemented if `overrideable_fields` are provided.
-  #   IO.inspect("options: #{inspect(options)}")
-  #   if options[:overrideable_fields] != [] do
-  #     unless Module.defines?(module, {:override_buildable, 3}) do
-  #       raise CompileError,
-  #         description: """
-  #         You must implement the `override_buildable/3` callback when `overrideable_fields` are provided.
-  #         Example:
-  #           def override_buildable(field, operator, value) do
-  #             # Your custom logic here
-  #             dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^value))
-  #           end
-  #         """
-  #     end
-  #   end
-  # end
 end

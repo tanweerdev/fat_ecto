@@ -132,10 +132,6 @@ defmodule FatEcto.Query.Buildable do
         where_params_ignoreables_removed =
           Helper.remove_ignoreable_fields(where_params, @ignoreable_fields_values)
 
-        # IO.inspect("where_params_ignoreables_removed::: #{inspect(where_params_ignoreables_removed)}")
-
-        # IO.inspect("query::: #{inspect(query)}")
-        # IO.inspect("where_params::: #{inspect(where_params)}")
         # Only keep filterable fields in params
         filterable_params =
           Helper.filter_filterable_fields(
@@ -143,8 +139,6 @@ defmodule FatEcto.Query.Buildable do
             @filterable_fields,
             @overrideable_fields
           )
-
-        # IO.inspect("filterable_params::: #{inspect(filterable_params)}")
 
         # Build dynamics with the override_buildable function as the callback
         query =
@@ -155,8 +149,6 @@ defmodule FatEcto.Query.Buildable do
             @overrideable_fields
           )
 
-        # IO.inspect("query after build::: #{inspect(query)}")
-
         # Apply after_buildable callback
         after_buildable(query)
       end
@@ -165,12 +157,15 @@ defmodule FatEcto.Query.Buildable do
         after_buildable(query)
       end
 
-      @doc """
-      Default implementation of `override_buildable/4`.
+      # Only define default override_buildable/4 if no overrideable fields are configured
+      if @overrideable_fields == [] do
+        @doc """
+        Default implementation of `override_buildable/4` when no overrideable fields are configured.
+        """
+        def override_buildable(query, _field, _operator, _value), do: query
 
-      This function can be overridden by the using module to implement custom query filtering logic.
-      """
-      def override_buildable(query, _field, _operator, _value), do: query
+        defoverridable override_buildable: 4
+      end
 
       @doc """
       Default implementation of after_buildable/1.
@@ -179,7 +174,6 @@ defmodule FatEcto.Query.Buildable do
       """
       def after_buildable(query), do: query
 
-      defoverridable override_buildable: 4
       defoverridable after_buildable: 1
     end
   end

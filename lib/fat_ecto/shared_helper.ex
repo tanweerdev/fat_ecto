@@ -39,6 +39,7 @@ defmodule FatEcto.SharedHelper do
       iex> FatEcto.SharedHelper.string_to_atom("example")
       :example
   """
+  # 1 TODO: maybe remove this method as its dangerous
   @spec string_to_atom(String.t() | atom()) :: atom()
   def string_to_atom(already_atom) when is_atom(already_atom), do: already_atom
   def string_to_atom(str), do: String.to_atom(str)
@@ -78,6 +79,24 @@ defmodule FatEcto.SharedHelper do
     end
   end
 
+  @doc """
+  Converts a filterable option list to a map format if it's a keyword list.
+
+  This function checks if the input is a keyword list and converts it to a map.
+  If the input is not a list or not a keyword list, it returns the input unchanged.
+
+  ## Parameters
+
+  - `list` - Input that may be a keyword list, regular list, or other type
+
+  ## Examples
+
+      iex> FatEcto.SharedHelper.filterable_opt_to_map([name: ["$LIKE"], age: ["$GT"]])
+      %{"name" => ["$LIKE"], "age" => ["$GT"]}
+
+      iex> FatEcto.SharedHelper.filterable_opt_to_map(%{"name" => ["$LIKE"]})
+      %{"name" => ["$LIKE"]}
+  """
   @spec filterable_opt_to_map(maybe_improper_list() | any()) :: maybe_improper_list() | map()
   def filterable_opt_to_map(list) when is_list(list) do
     if Keyword.keyword?(list) do
@@ -91,7 +110,23 @@ defmodule FatEcto.SharedHelper do
 
   def filterable_opt_to_map(input), do: input
 
-  # Converts a keyword list to a map with string keys
+  @doc """
+  Converts a keyword list to a map with string keys.
+
+  If the input is already a map or not a keyword list, returns it unchanged.
+
+  ## Parameters
+
+  - `list` - A keyword list or map to convert
+
+  ## Examples
+
+      iex> FatEcto.SharedHelper.keyword_list_to_map([name: "John", age: 25])
+      %{"name" => "John", "age" => 25}
+
+      iex> FatEcto.SharedHelper.keyword_list_to_map(%{"name" => "John"})
+      %{"name" => "John"}
+  """
   @spec keyword_list_to_map(keyword() | map()) :: map()
   def keyword_list_to_map(list) when is_list(list) do
     if Keyword.keyword?(list) do
@@ -105,7 +140,21 @@ defmodule FatEcto.SharedHelper do
 
   def keyword_list_to_map(input), do: input
 
-  # Converts a keyword list to a map with string keys and normalizes operator values to uppercase
+  @doc """
+  Converts a keyword list to a map with string keys and normalizes operator values to uppercase.
+
+  This function is specifically designed for processing filterable options where
+  operator values need to be normalized to uppercase format.
+
+  ## Parameters
+
+  - `list` - A keyword list or map to convert
+
+  ## Examples
+
+      iex> FatEcto.SharedHelper.keyword_list_to_map_with_uppercase_operators([name: ["like"], age: ["gt"]])
+      %{"name" => ["LIKE"], "age" => ["GT"]}
+  """
   @spec keyword_list_to_map_with_uppercase_operators(keyword() | map()) :: map()
   def keyword_list_to_map_with_uppercase_operators(list) when is_list(list) do
     if Keyword.keyword?(list) do

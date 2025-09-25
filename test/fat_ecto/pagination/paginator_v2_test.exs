@@ -13,7 +13,7 @@ defmodule FatEcto.Pagination.V2PaginatorTest do
 
       assert result.meta.limit == 10
       assert result.meta.skip == 5
-      # TODO: insert some records to test pagination
+      # 2 TODO: insert some records to test pagination
       # Or whatever records you expect
       assert result.records == []
     end
