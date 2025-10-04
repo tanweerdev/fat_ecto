@@ -81,11 +81,13 @@ defmodule FatEcto.Query.Dynamics.Builder do
     field_dynamic =
       Enum.reduce(conditions, nil, fn {operator, value}, acc ->
         # Call override if field is in filterable_fields or override_callback exists
+        normalized_operator = String.upcase(operator)
+
         dynamic =
           if should_override?(field, overrideable_fields) && override_callback do
-            override_callback.(field, operator, value)
+            override_callback.(field, normalized_operator, value)
           else
-            OperatorApplier.apply_operator(operator, field, value)
+            OperatorApplier.apply_operator(normalized_operator, field, value)
           end
 
         DynamicsHelper.merge_dynamics(acc, dynamic, :and)

@@ -76,9 +76,67 @@ defmodule FatEcto.Query.OperatorApplierTest do
       assert result == GtLtEq.not_eq_dynamic(:age, 30)
     end
 
+    test "applies $BETWEEN_EQUAL operator" do
+      result = OperatorApplier.apply_operator("$BETWEEN_EQUAL", :age, [20, 30])
+      assert result == BtwInContains.between_equal_dynamic(:age, [20, 30])
+    end
+
+    test "applies $NOT_BETWEEN_EQUAL operator" do
+      result = OperatorApplier.apply_operator("$NOT_BETWEEN_EQUAL", :age, [20, 30])
+      assert result == BtwInContains.not_between_equal_dynamic(:age, [20, 30])
+    end
+
+    test "applies $CAST_TO_DATE_LT operator" do
+      date_value = ~D[2023-01-01]
+      result = OperatorApplier.apply_operator("$CAST_TO_DATE_LT", :end_date, date_value)
+      assert result == GtLtEq.cast_to_date_lt_dynamic(:end_date, date_value)
+    end
+
+    test "applies $CAST_TO_DATE_LTE operator" do
+      date_value = ~D[2023-01-01]
+      result = OperatorApplier.apply_operator("$CAST_TO_DATE_LTE", :end_date, date_value)
+      assert result == GtLtEq.cast_to_date_lte_dynamic(:end_date, date_value)
+    end
+
+    test "applies $CAST_TO_DATE_GT operator" do
+      date_value = ~D[2023-01-01]
+      result = OperatorApplier.apply_operator("$CAST_TO_DATE_GT", :end_date, date_value)
+      assert result == GtLtEq.cast_to_date_gt_dynamic(:end_date, date_value)
+    end
+
+    test "applies $CAST_TO_DATE_GTE operator" do
+      date_value = ~D[2023-01-01]
+      result = OperatorApplier.apply_operator("$CAST_TO_DATE_GTE", :end_date, date_value)
+      assert result == GtLtEq.cast_to_date_gte_dynamic(:end_date, date_value)
+    end
+
+    test "applies $CAST_TO_DATE_EQUAL operator" do
+      date_value = ~D[2023-01-01]
+      result = OperatorApplier.apply_operator("$CAST_TO_DATE_EQUAL", :end_date, date_value)
+      assert result == GtLtEq.cast_to_date_eq_dynamic(:end_date, date_value)
+    end
+
+    test "applies $CAST_TO_DATE_NOT_EQUAL operator" do
+      date_value = ~D[2023-01-01]
+      result = OperatorApplier.apply_operator("$CAST_TO_DATE_NOT_EQUAL", :end_date, date_value)
+      assert result == GtLtEq.cast_to_date_not_eq_dynamic(:end_date, date_value)
+    end
+
     test "returns nil for unsupported operator" do
       result = OperatorApplier.apply_operator("$unsupported", :age, 30)
       assert result == nil
+    end
+  end
+
+  describe "apply_nil_operator/2" do
+    test "applies $NULL operator" do
+      result = OperatorApplier.apply_nil_operator("$NULL", :location)
+      assert result == GtLtEq.field_is_nil_dynamic(:location)
+    end
+
+    test "applies $NOT_NULL operator" do
+      result = OperatorApplier.apply_nil_operator("$NOT_NULL", :location)
+      assert result == GtLtEq.not_field_is_nil_dynamic(:location)
     end
   end
 

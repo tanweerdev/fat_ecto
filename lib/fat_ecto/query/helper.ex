@@ -27,27 +27,10 @@ defmodule FatEcto.Query.Helper do
         ignoreable_values ->
           if is_map(value) do
             # Handle nested operators (e.g., %{"$ILIKE" => "%123%"})
-            filtered_value =
-              Enum.reduce(value, %{}, fn {operator, val}, inner_acc ->
-                if should_ignore_value?(val, ignoreable_values) do
-                  inner_acc
-                else
-                  Map.put(inner_acc, operator, val)
-                end
-              end)
-
-            if map_size(filtered_value) > 0 do
-              Map.put(acc, field, filtered_value)
-            else
-              acc
-            end
+            process_nested_ignoreable_values(acc, field, value, ignoreable_values)
           else
             # Handle direct comparisons (e.g., "field" => "value")
-            if should_ignore_value?(value, ignoreable_values) do
-              acc
-            else
-              Map.put(acc, field, value)
-            end
+            process_direct_ignoreable_value(acc, field, value, ignoreable_values)
           end
       end
     end)
@@ -128,27 +111,10 @@ defmodule FatEcto.Query.Helper do
 
         if is_map(value) do
           # Handle nested operators (e.g., %{"$EQUAL" => "value"})
-          filtered_value =
-            Enum.reduce(value, %{}, fn {operator, val}, inner_acc ->
-              if operator_allowed?(operator, allowed_operators) do
-                Map.put(inner_acc, operator, val)
-              else
-                inner_acc
-              end
-            end)
-
-          if map_size(filtered_value) > 0 do
-            {field, filtered_value}
-          else
-            nil
-          end
+          filter_nested_operators(field, value, allowed_operators)
         else
           # Handle direct comparisons (e.g., "field" => "value")
-          if operator_allowed?("$EQUAL", allowed_operators) do
-            {field, %{"$EQUAL" => value}}
-          else
-            nil
-          end
+          filter_direct_value(field, value, allowed_operators)
         end
 
       # Field is neither filterable nor overrideable
@@ -168,13 +134,66 @@ defmodule FatEcto.Query.Helper do
     value == ignoreable_value
   end
 
+  defp process_nested_ignoreable_values(acc, field, value, ignoreable_values) do
+    filtered_value =
+      Enum.reduce(value, %{}, fn {operator, val}, inner_acc ->
+        if should_ignore_value?(val, ignoreable_values) do
+          inner_acc
+        else
+          Map.put(inner_acc, operator, val)
+        end
+      end)
+
+    if map_size(filtered_value) > 0 do
+      Map.put(acc, field, filtered_value)
+    else
+      acc
+    end
+  end
+
+  defp process_direct_ignoreable_value(acc, field, value, ignoreable_values) do
+    if should_ignore_value?(value, ignoreable_values) do
+      acc
+    else
+      Map.put(acc, field, value)
+    end
+  end
+
+  defp filter_nested_operators(field, value, allowed_operators) do
+    filtered_value =
+      Enum.reduce(value, %{}, fn {operator, val}, acc ->
+        if operator_allowed?(operator, allowed_operators) do
+          normalized_operator = String.upcase(operator)
+          Map.put(acc, normalized_operator, val)
+        else
+          acc
+        end
+      end)
+
+    if map_size(filtered_value) > 0 do
+      {field, filtered_value}
+    else
+      nil
+    end
+  end
+
+  defp filter_direct_value(field, value, allowed_operators) do
+    if operator_allowed?("$EQUAL", allowed_operators) do
+      {field, %{"$EQUAL" => value}}
+    else
+      nil
+    end
+  end
+
   # Checks if an operator is allowed for a field.
   defp operator_allowed?(operator, allowed_operators) when is_list(allowed_operators) do
-    operator in allowed_operators
+    normalized_operator = String.upcase(operator)
+    normalized_operator in allowed_operators
   end
 
   defp operator_allowed?(operator, allowed_operator) when is_binary(allowed_operator) do
-    allowed_operator == "*" or operator == allowed_operator
+    normalized_operator = String.upcase(operator)
+    allowed_operator == "*" or normalized_operator == allowed_operator
   end
 
   defp operator_allowed?(_operator, _allowed_operators) do

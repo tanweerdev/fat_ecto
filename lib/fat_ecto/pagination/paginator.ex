@@ -25,6 +25,7 @@ defmodule FatEcto.Pagination.Paginator do
       @behaviour FatEcto.Pagination.Paginator
 
       import Ecto.Query
+      alias FatEcto.Pagination.Helper
 
       @options unquote(options)
       @default_limit Keyword.get(@options, :default_limit, 10)
@@ -65,8 +66,8 @@ defmodule FatEcto.Pagination.Paginator do
           #Ecto.Query<from f0 in FatEcto.FatHospital, distinct: true>
       """
       def paginate(query, params) do
-        {skip, params} = FatEcto.Pagination.Helper.get_skip_value(params)
-        {limit, _params} = FatEcto.Pagination.Helper.get_limit_value(params, @options)
+        {skip, params} = Helper.get_skip_value(params)
+        {limit, _params} = Helper.get_limit_value(params, @options)
 
         %{
           data_query: data_query(query, skip, limit),

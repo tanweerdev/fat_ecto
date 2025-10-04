@@ -2,16 +2,16 @@ defmodule FatEcto.Query.DoctorQueryBuilder do
   use FatEcto.Query.Buildable,
     filterable: [
       email: [
-        "$EQUAL",
-        "$LIKE",
-        "$NOT_EQUAL",
-        "$NOT_LIKE",
-        "$ILIKE",
-        "$IN",
-        "$NOT_ILIKE",
-        "$NOT_IN",
-        "$NOT_NULL",
-        "$NULL"
+        "$equal",
+        "$LiKE",
+        "$NOT_eQUAL",
+        "$Not_LIKE",
+        "$ilike",
+        "$in",
+        "$Not_ILIKE",
+        "$NOT_in",
+        "$NOT_null",
+        "$Null"
       ],
       name: "*",
       rating: "*",

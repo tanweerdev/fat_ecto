@@ -7,14 +7,58 @@ defmodule FatEcto.Query.Builder do
   import Ecto.Query
   alias FatEcto.Query.OperatorApplier
 
+  @doc """
+  Builds an Ecto query from a structured query map with dynamic conditions.
+
+  This function processes query maps that can contain field-specific conditions
+  as well as logical operators (`$AND`, `$OR`) to build complex queries.
+
+  ## Parameters
+
+  - `queryable` - The Ecto queryable (schema or query) to build upon
+  - `query_map` - A map containing query conditions and operators
+  - `override_callback` - Optional function to handle custom field processing
+  - `overrideable_fields` - List of field names that can use the override callback
+
+  ## Query Map Format
+
+  The query map can contain:
+  - Field names as keys with condition maps as values
+  - `$AND` key with a list of condition maps for AND logic
+  - `$OR` key with a list of condition maps for OR logic
+
+  ## Examples
+
+      # Simple field condition
+      query_map = %{"name" => %{"$LIKE" => "%John%"}}
+      Builder.build(User, query_map)
+
+      # Complex query with OR logic
+      query_map = %{
+        "$OR" => [
+          %{"name" => %{"$LIKE" => "%John%"}},
+          %{"email" => %{"$LIKE" => "%@gmail.com"}}
+        ]
+      }
+      Builder.build(User, query_map)
+
+  ## Returns
+
+  An `Ecto.Query.t()` with the conditions applied.
+  """
   @spec build(Ecto.Queryable.t(), map(), function() | nil, list() | nil) :: Ecto.Query.t()
   def build(queryable, query_map, override_callback \\ nil, overrideable_fields \\ nil)
       when is_map(query_map) do
     Enum.reduce(query_map, from(q in queryable), fn {key, value}, query ->
       case key do
-        "$OR" -> build_or_query(value, query, override_callback, overrideable_fields)
-        "$AND" -> build_and_query(value, query, override_callback, overrideable_fields)
-        _ -> build_field_query(key, value, query, override_callback, overrideable_fields)
+        "$OR" ->
+          build_or_query(value, query, override_callback, overrideable_fields)
+
+        "$AND" ->
+          build_and_query(value, query, override_callback, overrideable_fields)
+
+        _ ->
+          build_field_query(key, value, query, override_callback, overrideable_fields)
       end
     end)
   end
@@ -49,11 +93,18 @@ defmodule FatEcto.Query.Builder do
   end
 
   defp build_field_query(field, conditions, query, callback, fields) when is_map(conditions) do
+    # IO.inspect("build_field_query conditions::: #{inspect(conditions)}")
+    # IO.inspect("build_field_query field::: #{inspect(field)}")
+    # IO.inspect("build_field_query query::: #{inspect(query)}")
+    # IO.inspect("build_field_query fields::: #{inspect(fields)}")
     Enum.reduce(conditions, query, fn {operator, value}, acc ->
-      if should_override?(field, fields, callback) do
-        callback.(acc, field, operator, value) ||
-          apply_operator(acc, operator, field, value)
+      # IO.inspect("operator::: #{inspect(operator)}")
+      # IO.inspect("value::: #{inspect(value)}")
+      if should_override?(field, fields) && callback do
+        # IO.inspect("overriding for field:::")
+        callback.(acc, field, operator, value)
       else
+        # IO.inspect("applying operator for field:::")
         apply_operator(acc, operator, field, value)
       end
     end)
@@ -62,9 +113,8 @@ defmodule FatEcto.Query.Builder do
   defp build_field_query(field, value, query, callback, fields) do
     operator = if is_nil(value), do: "$NULL", else: "$EQUAL"
 
-    if should_override?(field, fields, callback) do
-      callback.(query, field, operator, value) ||
-        apply_operator(query, operator, field, value)
+    if should_override?(field, fields) && callback do
+      callback.(query, field, operator, value)
     else
       apply_operator(query, operator, field, value)
     end
@@ -108,14 +158,13 @@ defmodule FatEcto.Query.Builder do
   end
 
   # Shared helpers
-  defp should_override?(field, fields, callback) do
-    callback &&
-      case fields do
-        nil -> true
-        fields when is_list(fields) -> field in fields
-        fields when is_map(fields) -> Map.has_key?(fields, field)
-        _ -> true
-      end
+  defp should_override?(field, fields) do
+    case fields do
+      nil -> true
+      fields when is_list(fields) -> field in fields
+      fields when is_map(fields) -> Map.has_key?(fields, field)
+      _ -> true
+    end
   end
 
   defp ensure_list(input) when is_map(input), do: [input]

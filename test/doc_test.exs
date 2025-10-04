@@ -1,9 +1,11 @@
 defmodule DocTest do
   use ExUnit.Case, async: true
 
+  alias Ecto.Adapters.SQL.Sandbox
+
   setup do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(FatEcto.Repo)
-    Ecto.Adapters.SQL.Sandbox.mode(FatEcto.Repo, {:shared, self()})
+    :ok = Sandbox.checkout(FatEcto.Repo)
+    Sandbox.mode(FatEcto.Repo, {:shared, self()})
     FatEcto.Repo.delete_all(FatEcto.FatPatient)
     :ok
   end
