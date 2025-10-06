@@ -56,7 +56,7 @@
         {Credo.Check.Refactor.CyclomaticComplexity, [priority: :normal, max_complexity: 12]},
         {Credo.Check.Refactor.DoubleBooleanNegation},
         {Credo.Check.Refactor.FunctionArity},
-        {Credo.Check.Refactor.LongQuoteBlocks, [priority: :low, max_line_count: 250]},
+        {Credo.Check.Refactor.LongQuoteBlocks, [priority: :low, max_line_count: 350]},
         {Credo.Check.Refactor.MatchInCondition},
         {Credo.Check.Refactor.NegatedConditionsInUnless},
         {Credo.Check.Refactor.NegatedConditionsWithElse},

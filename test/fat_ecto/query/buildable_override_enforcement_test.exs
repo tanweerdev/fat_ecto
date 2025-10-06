@@ -1,20 +1,23 @@
 defmodule FatEcto.Query.BuildableOverrideEnforcementTest do
   use ExUnit.Case, async: true
+  import ExUnit.CaptureIO
 
   test "modules with overrideable fields must implement override_buildable/4" do
     # This should raise a compilation error because override_buildable/4 is not defined
     # when overrideable fields are present (no default implementation provided)
     assert_raise CompileError, ~r/cannot compile module.*errors have been logged/, fn ->
-      defmodule TestQueryModuleRequiresImplementation do
-        use FatEcto.Query.Buildable,
-          filterable: [
-            id: ["$EQUAL", "$NOT_EQUAL"]
-          ],
-          overrideable: ["name", "phone"]
+      capture_io(:stderr, fn ->
+        defmodule TestQueryModuleRequiresImplementation do
+          use FatEcto.Query.Buildable,
+            filterable: [
+              id: ["$EQUAL", "$NOT_EQUAL"]
+            ],
+            overrideable: ["name", "phone"]
 
-        # Intentionally NOT implementing override_buildable/4
-        # This should fail because no default implementation is provided
-      end
+          # Intentionally NOT implementing override_buildable/4
+          # This should fail because no default implementation is provided
+        end
+      end)
     end
   end
 

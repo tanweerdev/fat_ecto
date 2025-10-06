@@ -321,7 +321,7 @@ defmodule FatEcto.Sort.SortableTest do
     end
 
     test "validates sortable format" do
-      assert_raise ArgumentError, ~r/Please send/, fn ->
+      assert_raise ArgumentError, ~r/Format for/, fn ->
         defmodule InvalidSortable do
           use FatEcto.Sort.Sortable,
             sortable: "invalid"
@@ -330,7 +330,7 @@ defmodule FatEcto.Sort.SortableTest do
     end
 
     test "validates overrideable format" do
-      assert_raise ArgumentError, ~r/Please send/, fn ->
+      assert_raise ArgumentError, ~r/Format for/, fn ->
         defmodule InvalidOverrideable do
           use FatEcto.Sort.Sortable,
             sortable: [id: "$ASC"],

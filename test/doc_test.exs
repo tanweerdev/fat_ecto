@@ -18,7 +18,6 @@ defmodule DocTest do
   doctest FatEcto.Query.OperatorApplier
   # doctest FatEcto.SharedHelper
   doctest FatEcto.Sort.Sorter
-  doctest FatEcto.Sample.Pagination
   doctest FatEcto.Sort.Helper
   doctest FatEcto.DoctorSortBuilder
   doctest FatEcto.Query.Helper

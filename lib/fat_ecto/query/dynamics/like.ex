@@ -12,6 +12,8 @@ defmodule FatEcto.Query.Dynamics.Like do
       "dynamic([q], ilike(fragment(\\\"(?)::TEXT\\\", q.name), ^\\\"%john%\\\"))"
   """
 
+  # Import is used by all functions, but not by doctests - suppress warning
+  @compile {:no_warn_unused_import, Ecto.Query}
   import Ecto.Query
 
   @doc """

@@ -34,9 +34,23 @@ Then, run `mix deps.get` to install the package.
 
 ## Features & Modules
 
+### ✅ FatEcto.Params.Validator – Validate Before You Query
+
+NEW! Validate your query parameters before building queries. Catch errors early and provide clear feedback to API consumers.
+
+```elixir
+params = %{"limit" => 10, "skip" => 0}
+case FatEcto.Params.Validator.validate_pagination(params, max_limit: 100) do
+  {:ok, validated} -> # proceed with query
+  {:error, reason} -> # handle validation error
+end
+```
+
 ### 🛠 FatEcto.Query.Dynamics.Buildable – Dynamic Filtering Made Easy
 
-Tired of writing repetitive query filters? The `Whereable` module lets you dynamically filter records using flexible conditions passed from your web or mobile clients—with little to no effort! And the best part? You stay in control. 🚀
+Tired of writing repetitive query filters? The `Buildable` module lets you dynamically filter records using flexible conditions passed from your web or mobile clients—with little to no effort! And the best part? You stay in control. 🚀
+
+> 📚 **For comprehensive documentation with 20+ examples including complex nested queries, custom overrides, and real-world use cases, see the [FatEcto.Query.Dynamics.Buildable module documentation](https://hexdocs.pm/fat_ecto/FatEcto.Query.Dynamics.Buildable.html).**
 
 #### Usage
 
@@ -191,18 +205,200 @@ end
 
 ---
 
-### 📌 FatEcto.Pagination.Paginator – Paginate Like a Pro
+### 📌 Pagination – Choose Your Strategy
 
-No more hassle with pagination! FatPaginator helps you paginate Ecto queries efficiently, keeping your APIs snappy and responsive.
+FatEcto provides **two professional-grade pagination strategies**, each optimized for different use cases.
 
-#### Usage of FatPaginator
+#### 🔢 FatEcto.Pagination.OffsetPaginator
+
+**Best for:** Traditional pagination with page numbers (e.g., "Page 3 of 10")
 
 ```elixir
-defmodule Fat.MyPaginator do
-  use FatEcto.Pagination.V2Paginator,
-    default_limit: 10,
-    repo: FatEcto.Repo,
+defmodule MyApp.Paginator do
+  use FatEcto.Pagination.OffsetPaginator,
+    repo: MyApp.Repo,
+    default_limit: 20,
     max_limit: 100
+end
+
+# Offset/Limit style
+query = from(u in User, where: u.active == true)
+{:ok, result} = MyApp.Paginator.paginate(query, offset: 20, limit: 10)
+
+# Page/PageSize style (more user-friendly)
+{:ok, result} = MyApp.Paginator.paginate(query, page: 3, page_size: 10)
+
+# Rich metadata
+result.metadata
+# => %{
+#   total_count: 156,
+#   total_pages: 16,
+#   current_page: 3,
+#   has_next_page: true,
+#   has_previous_page: true,
+#   is_first_page: false,
+#   is_last_page: false,
+#   ...
+# }
+```
+
+**Features:**
+- ✅ Dual API (offset/limit and page/page_size)
+- ✅ Total count and page numbers
+- ✅ Jump to any page
+- ✅ Built-in validation
+- ✅ Efficient count queries
+
+#### 🔗 FatEcto.Pagination.CursorPaginator
+
+**Best for:** Large datasets, real-time feeds, infinite scroll
+
+**Relay-compliant** cursor-based pagination following GraphQL Cursor Connections Specification.
+
+```elixir
+defmodule MyApp.CursorPaginator do
+  use FatEcto.Pagination.CursorPaginator,
+    repo: MyApp.Repo,
+    default_limit: 20,
+    max_limit: 100
+end
+
+# Forward pagination (next page)
+query = from(u in User, order_by: [asc: u.inserted_at, asc: u.id])
+{:ok, result} = MyApp.CursorPaginator.paginate(query,
+  cursor_fields: [:inserted_at, :id],
+  first: 10
+)
+
+# Next page using cursor
+{:ok, next_page} = MyApp.CursorPaginator.paginate(query,
+  cursor_fields: [:inserted_at, :id],
+  first: 10,
+  after: result.page_info.end_cursor
+)
+
+# Relay-compliant structure
+result
+# => %{
+#   edges: [
+#     %{cursor: "g3QAAAACZAAKaW5zZXJ0ZWRfYXR...", node: %User{}},
+#     ...
+#   ],
+#   page_info: %{
+#     has_next_page: true,
+#     has_previous_page: false,
+#     start_cursor: "...",
+#     end_cursor: "..."
+#   }
+# }
+```
+
+**Features:**
+- ✅ Stable results (unaffected by concurrent changes)
+- ✅ Efficient for large datasets (no OFFSET penalty)
+- ✅ Bidirectional (forward & backward)
+- ✅ Relay/GraphQL compatible
+- ✅ Opaque, secure cursors (Base64-encoded)
+
+#### 📊 Which Pagination to Use?
+
+| Criterion | OffsetPaginator | CursorPaginator |
+|-----------|-----------------|-----------------|
+| **Page numbers** | ✅ Yes | ❌ No |
+| **Jump to page** | ✅ Yes | ❌ No |
+| **Total count** | ✅ Yes | ⚠️ Optional (expensive) |
+| **Large datasets** | ⚠️ Slow with high offsets | ✅ Fast |
+| **Real-time feeds** | ❌ Inconsistent | ✅ Stable |
+| **GraphQL/Relay** | ❌ Not compatible | ✅ Native support |
+| **Simple UI** | ✅ Perfect | ⚠️ Infinite scroll only |
+| **Dataset changes** | ⚠️ May show duplicates | ✅ Consistent |
+
+---
+
+## 🎯 Best Practices
+
+### Parameter Validation
+
+Always validate user-provided parameters before building queries to prevent errors and provide clear feedback:
+
+```elixir
+# Define your validation rules
+filterable_fields = %{
+  "name" => ["$ILIKE"],
+  "age" => ["$GT", "$GTE", "$LT", "$LTE"],
+  "email" => ["$EQUAL"]
+}
+
+sortable_fields = %{
+  "name" => ["$ASC", "$DESC"],
+  "created_at" => "*"  # Allow all sort directions
+}
+
+# Validate all parameters at once
+params = %{
+  "filter" => %{"name" => %{"$ILIKE" => "%John%"}, "age" => %{"$GT" => 18}},
+  "sort" => %{"created_at" => "$DESC"},
+  "limit" => 20,
+  "skip" => 0
+}
+
+case FatEcto.Params.Validator.validate(params,
+  filterable_fields: filterable_fields,
+  sortable_fields: sortable_fields,
+  max_limit: 100
+) do
+  {:ok, validated_params} ->
+    # Build and execute your query
+    dynamics = MyApp.UserFilter.build(params["filter"])
+    order_by = MyApp.UserSort.build(params["sort"])
+
+    query = from(u in User, where: ^dynamics, order_by: ^order_by)
+    MyApp.Paginator.paginate(query, limit: params["limit"], skip: params["skip"])
+
+  {:error, errors} ->
+    # Return validation errors to the user
+    {:error, errors}
+end
+```
+
+### Combining All Features
+
+Here's a complete example combining filtering, sorting, and pagination:
+
+```elixir
+defmodule MyApp.UserQueryBuilder do
+  import Ecto.Query
+
+  def search_users(params) do
+    # 1. Validate parameters
+    with {:ok, _} <- validate_params(params),
+         # 2. Build dynamics for filtering
+         dynamics <- MyApp.UserFilter.build(params["filter"]),
+         # 3. Build order_by for sorting
+         order_by <- MyApp.UserSort.build(params["sort"]),
+         # 4. Build base query
+         query <- apply_filters_and_sorting(dynamics, order_by),
+         # 5. Paginate
+         {:ok, result} <- MyApp.Paginator.paginate(query,
+           limit: params["limit"],
+           skip: params["skip"]) do
+      {:ok, result}
+    end
+  end
+
+  defp validate_params(params) do
+    FatEcto.Params.Validator.validate(params,
+      filterable_fields: %{"name" => ["$ILIKE"], "age" => ["$GT", "$LT"]},
+      sortable_fields: %{"name" => ["$ASC", "$DESC"]},
+      max_limit: 100
+    )
+  end
+
+  defp apply_filters_and_sorting(dynamics, order_by) do
+    from(u in User)
+    |> where(^dynamics)
+    |> order_by(^order_by)
+  end
 end
 ```
 

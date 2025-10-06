@@ -2,7 +2,7 @@ defmodule FatEcto.FatUser do
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "users" do
+  schema "fat_users" do
     field(:name, :string)
     field(:email, :string)
     field(:age, :integer)
