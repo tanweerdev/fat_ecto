@@ -18,6 +18,17 @@ defmodule FatEcto.Query.Dynamics.Buildable do
         "name" => ["%%", "", [], nil],
         "phone" => ["%%", "", [], nil]
       ]
+  - `default_dynamic`: When set to `:return_true`, returns `dynamic([q], true)` instead of `nil`
+      when no dynamics are built. Example: `default_dynamic: :return_true`
+
+  ## Global Configuration
+  You can configure the default behavior for all Buildable modules in your config:
+
+      # config/config.exs
+      config :fat_ecto, :default_dynamic, :return_true
+
+  This will make all Buildable modules return `dynamic([q], true)` when no filters are applied,
+  unless explicitly overridden at the module level with `default_dynamic: nil`.
 
   ## Example Usage
       defmodule FatEcto.HospitalDynamicsBuilder do
@@ -65,7 +76,7 @@ defmodule FatEcto.Query.Dynamics.Buildable do
               field :: String.t() | atom(),
               operator :: String.t(),
               value :: any()
-            ) :: Ecto.Query.dynamic_expr()
+            ) :: Ecto.Query.dynamic_expr() | nil
 
   @doc """
   Callback for performing custom processing on the final dynamics.
@@ -82,7 +93,15 @@ defmodule FatEcto.Query.Dynamics.Buildable do
       @filterable @options[:filterable] || []
       @overrideable_fields @options[:overrideable] || []
       @ignoreable @options[:ignoreable] || []
+
+      # Get default_dynamic option: module option takes precedence over global config
+      @default_dynamic_option (case Keyword.get(@options, :default_dynamic) do
+                                 nil -> Application.compile_env(:fat_ecto, :default_dynamic, nil)
+                                 value -> value
+                               end)
+
       alias FatEcto.Query.Helper
+      import Ecto.Query
 
       # Ensure at least one of `filterable` or `overrideable` fields option is provided.
       if @filterable == [] and @overrideable_fields == [] do
@@ -119,7 +138,7 @@ defmodule FatEcto.Query.Dynamics.Buildable do
         - `build_options`: Additional options for dynamics building (passed to `Builder`).
 
       ### Returns
-        - The dynamics with filtering applied.
+        - The dynamics with filtering applied (or the result from `after_buildable/1` callback).
       """
       @spec build(map() | nil, keyword()) :: Ecto.Query.dynamic_expr() | nil
       def build(where_params \\ nil, build_options \\ [])
@@ -145,12 +164,30 @@ defmodule FatEcto.Query.Dynamics.Buildable do
             @overrideable_fields
           )
 
+        # Apply default_dynamic if nil and configured
+        dynamics = apply_default_dynamic(dynamics)
+
         # Apply after_buildable callback
         after_buildable(dynamics)
       end
 
       def build(_where_params, _build_options) do
-        after_buildable(nil)
+        # Apply default_dynamic if configured
+        dynamics = apply_default_dynamic(nil)
+        after_buildable(dynamics)
+      end
+
+      # Helper to apply default_dynamic when dynamics is nil
+      # Only generate the special case if the option is actually :return_true
+      if @default_dynamic_option == :return_true do
+        defp apply_default_dynamic(nil) do
+          dynamic([q], true)
+        end
+
+        defp apply_default_dynamic(dynamics), do: dynamics
+      else
+        # Default behavior - just pass through
+        defp apply_default_dynamic(dynamics), do: dynamics
       end
 
       # Only define default override_buildable/3 if no overrideable fields are configured
