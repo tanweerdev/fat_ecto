@@ -165,6 +165,19 @@ dynamic(
 # You can now apply the result on where just like above examples
 ```
 
+##### Example 6: Global Configuration for Default Dynamics
+
+Configure FatEcto to return `dynamic([q], true)` instead of `nil` when no filters are applied:
+
+```elixir
+# config/config.exs
+config :fat_ecto, :default_dynamic, :return_true
+
+# Now all Buildable modules return dynamic([q], true) when filters are empty
+dynamics = FatEcto.HospitalBuilder.build(%{})
+# Returns: dynamic([q], true) instead of nil
+```
+
 ---
 
 ### 🔄 FatEcto.Sort.Sortable – Effortless Sorting
