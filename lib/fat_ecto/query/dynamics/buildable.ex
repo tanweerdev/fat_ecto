@@ -76,7 +76,7 @@ defmodule FatEcto.Query.Dynamics.Buildable do
               field :: String.t() | atom(),
               operator :: String.t(),
               value :: any()
-            ) :: Ecto.Query.dynamic_expr()
+            ) :: Ecto.Query.dynamic_expr() | nil
 
   @doc """
   Callback for performing custom processing on the final dynamics.
@@ -138,7 +138,7 @@ defmodule FatEcto.Query.Dynamics.Buildable do
         - `build_options`: Additional options for dynamics building (passed to `Builder`).
 
       ### Returns
-        - The dynamics with filtering applied.
+        - The dynamics with filtering applied (or the result from `after_buildable/1` callback).
       """
       @spec build(map() | nil, keyword()) :: Ecto.Query.dynamic_expr() | nil
       def build(where_params \\ nil, build_options \\ [])
@@ -178,11 +178,17 @@ defmodule FatEcto.Query.Dynamics.Buildable do
       end
 
       # Helper to apply default_dynamic when dynamics is nil
-      defp apply_default_dynamic(nil) when @default_dynamic_option == :return_true do
-        dynamic([q], true)
-      end
+      # Only generate the special case if the option is actually :return_true
+      if @default_dynamic_option == :return_true do
+        defp apply_default_dynamic(nil) do
+          dynamic([q], true)
+        end
 
-      defp apply_default_dynamic(dynamics), do: dynamics
+        defp apply_default_dynamic(dynamics), do: dynamics
+      else
+        # Default behavior - just pass through
+        defp apply_default_dynamic(dynamics), do: dynamics
+      end
 
       # Only define default override_buildable/3 if no overrideable fields are configured
       if @overrideable_fields == [] do
