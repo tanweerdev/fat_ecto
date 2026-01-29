@@ -5,6 +5,22 @@ defmodule FatEcto.Query.Dynamics.Like do
   This module is designed to simplify the creation of dynamic queries for Ecto schemas, particularly
   when dealing with pattern matching on text fields or arrays.
 
+  ## Named Bindings (Join Filters)
+
+  All functions support an optional `binding` parameter for filtering on joined tables.
+  When `nil` (default), uses the standard `[q]` binding.
+  When an atom is provided, uses a named binding `[{binding, j}]`.
+
+  ### Examples
+
+      # Direct filter (no binding)
+      ilike_dynamic(:name, "%john%")
+      # => dynamic([q], ilike(fragment("(?)::TEXT", q.name), ^"%john%"))
+
+      # Join filter (with binding)
+      ilike_dynamic(:name, "%john%", :users)
+      # => dynamic([users: j], ilike(fragment("(?)::TEXT", j.name), ^"%john%"))
+
   ## Example Usage
 
       iex> result = #{__MODULE__}.ilike_dynamic(:name, "%john%")
@@ -21,6 +37,7 @@ defmodule FatEcto.Query.Dynamics.Like do
 
     - `key` - The field name as an atom.
     - `value` - The substring to match (e.g., `"%john%"`).
+    - `binding` - Optional named binding atom for join filters (default: nil).
 
   ### Examples
 
@@ -28,15 +45,15 @@ defmodule FatEcto.Query.Dynamics.Like do
       iex> inspect(result)
       "dynamic([q], ilike(fragment(\\\"(?)::TEXT\\\", q.name), ^\\\"%john%\\\"))"
   """
-  @spec ilike_dynamic(atom(), String.t()) :: Ecto.Query.dynamic_expr()
-  def ilike_dynamic(key, value) when is_atom(key) and is_binary(value) do
-    dynamic(
-      [q],
-      ilike(
-        fragment("(?)::TEXT", field(q, ^key)),
-        ^value
-      )
-    )
+  @spec ilike_dynamic(atom(), String.t(), atom() | nil) :: Ecto.Query.dynamic_expr()
+  def ilike_dynamic(key, value, binding \\ nil)
+
+  def ilike_dynamic(key, value, nil) when is_atom(key) and is_binary(value) do
+    dynamic([q], ilike(fragment("(?)::TEXT", field(q, ^key)), ^value))
+  end
+
+  def ilike_dynamic(key, value, binding) when is_atom(key) and is_binary(value) and is_atom(binding) do
+    dynamic([{^binding, j}], ilike(fragment("(?)::TEXT", field(j, ^key)), ^value))
   end
 
   @doc """
@@ -46,6 +63,7 @@ defmodule FatEcto.Query.Dynamics.Like do
 
     - `key` - The field name as an atom.
     - `value` - The substring to match (e.g., `"%elixir%"`).
+    - `binding` - Optional named binding atom for join filters (default: nil).
 
   ### Examples
 
@@ -53,13 +71,26 @@ defmodule FatEcto.Query.Dynamics.Like do
       iex> inspect(result)
       "dynamic([q], fragment(\\\"EXISTS (SELECT 1 FROM UNNEST(?) as value WHERE value ILIKE ?)\\\", q.tags, ^\\\"%elixir%\\\"))"
   """
-  @spec array_ilike_dynamic(atom(), String.t()) :: Ecto.Query.dynamic_expr()
-  def array_ilike_dynamic(key, value) when is_atom(key) and is_binary(value) do
+  @spec array_ilike_dynamic(atom(), String.t(), atom() | nil) :: Ecto.Query.dynamic_expr()
+  def array_ilike_dynamic(key, value, binding \\ nil)
+
+  def array_ilike_dynamic(key, value, nil) when is_atom(key) and is_binary(value) do
     dynamic(
       [q],
       fragment(
         "EXISTS (SELECT 1 FROM UNNEST(?) as value WHERE value ILIKE ?)",
         field(q, ^key),
+        ^value
+      )
+    )
+  end
+
+  def array_ilike_dynamic(key, value, binding) when is_atom(key) and is_binary(value) and is_atom(binding) do
+    dynamic(
+      [{^binding, j}],
+      fragment(
+        "EXISTS (SELECT 1 FROM UNNEST(?) as value WHERE value ILIKE ?)",
+        field(j, ^key),
         ^value
       )
     )
@@ -72,6 +103,7 @@ defmodule FatEcto.Query.Dynamics.Like do
 
     - `key` - The field name as an atom.
     - `value` - The substring to match (e.g., `"%John%"`).
+    - `binding` - Optional named binding atom for join filters (default: nil).
 
   ### Examples
 
@@ -79,15 +111,15 @@ defmodule FatEcto.Query.Dynamics.Like do
       iex> inspect(result)
       "dynamic([q], like(fragment(\\\"(?)::TEXT\\\", q.name), ^\\\"%John%\\\"))"
   """
-  @spec like_dynamic(atom(), String.t()) :: Ecto.Query.dynamic_expr()
-  def like_dynamic(key, value) when is_atom(key) and is_binary(value) do
-    dynamic(
-      [q],
-      like(
-        fragment("(?)::TEXT", field(q, ^key)),
-        ^value
-      )
-    )
+  @spec like_dynamic(atom(), String.t(), atom() | nil) :: Ecto.Query.dynamic_expr()
+  def like_dynamic(key, value, binding \\ nil)
+
+  def like_dynamic(key, value, nil) when is_atom(key) and is_binary(value) do
+    dynamic([q], like(fragment("(?)::TEXT", field(q, ^key)), ^value))
+  end
+
+  def like_dynamic(key, value, binding) when is_atom(key) and is_binary(value) and is_atom(binding) do
+    dynamic([{^binding, j}], like(fragment("(?)::TEXT", field(j, ^key)), ^value))
   end
 
   @doc """
@@ -97,6 +129,7 @@ defmodule FatEcto.Query.Dynamics.Like do
 
     - `key` - The field name as an atom.
     - `value` - The substring to exclude (e.g., `"%john%"`).
+    - `binding` - Optional named binding atom for join filters (default: nil).
 
   ### Examples
 
@@ -104,15 +137,15 @@ defmodule FatEcto.Query.Dynamics.Like do
       iex> inspect(result)
       "dynamic([q], not ilike(fragment(\\\"(?)::TEXT\\\", q.name), ^\\\"%john%\\\"))"
   """
-  @spec not_ilike_dynamic(atom(), String.t()) :: Ecto.Query.dynamic_expr()
-  def not_ilike_dynamic(key, value) when is_atom(key) and is_binary(value) do
-    dynamic(
-      [q],
-      not ilike(
-        fragment("(?)::TEXT", field(q, ^key)),
-        ^value
-      )
-    )
+  @spec not_ilike_dynamic(atom(), String.t(), atom() | nil) :: Ecto.Query.dynamic_expr()
+  def not_ilike_dynamic(key, value, binding \\ nil)
+
+  def not_ilike_dynamic(key, value, nil) when is_atom(key) and is_binary(value) do
+    dynamic([q], not ilike(fragment("(?)::TEXT", field(q, ^key)), ^value))
+  end
+
+  def not_ilike_dynamic(key, value, binding) when is_atom(key) and is_binary(value) and is_atom(binding) do
+    dynamic([{^binding, j}], not ilike(fragment("(?)::TEXT", field(j, ^key)), ^value))
   end
 
   @doc """
@@ -122,6 +155,7 @@ defmodule FatEcto.Query.Dynamics.Like do
 
     - `key` - The field name as an atom.
     - `value` - The substring to exclude (e.g., `"%John%"`).
+    - `binding` - Optional named binding atom for join filters (default: nil).
 
   ### Examples
 
@@ -129,14 +163,14 @@ defmodule FatEcto.Query.Dynamics.Like do
       iex> inspect(result)
       "dynamic([q], not like(fragment(\\\"(?)::TEXT\\\", q.name), ^\\\"%John%\\\"))"
   """
-  @spec not_like_dynamic(atom(), String.t()) :: Ecto.Query.dynamic_expr()
-  def not_like_dynamic(key, value) when is_atom(key) and is_binary(value) do
-    dynamic(
-      [q],
-      not like(
-        fragment("(?)::TEXT", field(q, ^key)),
-        ^value
-      )
-    )
+  @spec not_like_dynamic(atom(), String.t(), atom() | nil) :: Ecto.Query.dynamic_expr()
+  def not_like_dynamic(key, value, binding \\ nil)
+
+  def not_like_dynamic(key, value, nil) when is_atom(key) and is_binary(value) do
+    dynamic([q], not like(fragment("(?)::TEXT", field(q, ^key)), ^value))
+  end
+
+  def not_like_dynamic(key, value, binding) when is_atom(key) and is_binary(value) and is_atom(binding) do
+    dynamic([{^binding, j}], not like(fragment("(?)::TEXT", field(j, ^key)), ^value))
   end
 end

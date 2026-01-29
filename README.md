@@ -178,6 +178,38 @@ dynamics = FatEcto.HospitalBuilder.build(%{})
 # Returns: dynamic([q], true) instead of nil
 ```
 
+##### Example 7: Filtering on Joined Associations
+
+Use nested `filterable` to filter on joined tables. The nested key (e.g., `doctors:`) becomes the expected `as:` binding name in your query.
+
+```elixir
+defmodule FatEcto.HospitalDynamicsBuilder do
+  use FatEcto.Query.Dynamics.Buildable,
+    filterable: [
+      name: ["$ILIKE"],                    # Direct filter on hospitals table
+      doctors: [                            # Join filter: fields use :doctors binding
+        specialty: ["$EQUAL"],
+        rating: ["$GTE"]
+      ]
+    ]
+
+  def override_buildable(_field, _operator, _value), do: nil
+end
+
+import Ecto.Query
+
+# Filter params use field names directly - "specialty" maps to :doctors binding
+# because it's defined under `doctors:` in filterable config
+params = %{"name" => %{"$ILIKE" => "%General%"}, "specialty" => %{"$EQUAL" => "Cardiology"}}
+dynamics = FatEcto.HospitalDynamicsBuilder.build(params)
+
+# Query must include the join with matching `as:` binding
+FatEcto.FatHospital
+|> join(:inner, [h], d in assoc(h, :doctors), as: :doctors)
+|> where(^dynamics)
+|> Repo.all()
+```
+
 ---
 
 ### 🔄 FatEcto.Sort.Sortable – Effortless Sorting

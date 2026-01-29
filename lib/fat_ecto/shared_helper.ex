@@ -282,4 +282,156 @@ defmodule FatEcto.SharedHelper do
       {:error, reason} -> raise ArgumentError, "Invalid date input: #{inspect(input)}, reason: #{reason}"
     end
   end
+
+  # ============================================
+  # Join Filter Helpers
+  # ============================================
+
+  @doc """
+  Checks if a filterable entry is a join filter (nested keyword list).
+
+  A join filter is detected when the value is a keyword list (nested fields)
+  rather than a list of operator strings.
+
+  ## Examples
+
+      iex> FatEcto.SharedHelper.join_filter?({:title, ["$ILIKE"]})
+      false
+
+      iex> FatEcto.SharedHelper.join_filter?({:classifications, [subject_id: ["$EQUAL"]]})
+      true
+
+      iex> FatEcto.SharedHelper.join_filter?({:name, "*"})
+      false
+  """
+  @spec join_filter?({atom(), any()}) :: boolean()
+  def join_filter?({_field, value}) when is_list(value) do
+    # Check if it's a keyword list AND the first element's value is also a list
+    # This distinguishes [subject_id: ["$EQUAL"]] from ["$EQUAL", "$IN"]
+    Keyword.keyword?(value) and length(value) > 0 and
+      match?([{_, nested_val} | _] when is_list(nested_val), value)
+  end
+
+  def join_filter?(_), do: false
+
+  @doc """
+  Flattens a filterable config into a map of field => operators.
+
+  Direct filters: {field, [operators]} -> {"field" => [uppercase_ops]}
+  Join filters: {assoc, [nested]} -> each nested field gets "*" wildcard
+
+  This is the main function to convert filterable option to a field map.
+
+  ## Examples
+
+      iex> FatEcto.SharedHelper.flatten_filterable_to_map([title: ["$ilike"], classifications: [subject_id: ["$EQUAL"]]])
+      %{"title" => ["$ILIKE"], "subject_id" => "*"}
+
+      iex> FatEcto.SharedHelper.flatten_filterable_to_map([name: ["$equal"], age: ["$gt"]])
+      %{"name" => ["$EQUAL"], "age" => ["$GT"]}
+  """
+  @spec flatten_filterable_to_map(keyword() | list()) :: map()
+  def flatten_filterable_to_map(filterable) when is_list(filterable) do
+    if Keyword.keyword?(filterable) do
+      filterable
+      |> Enum.flat_map(&flatten_filterable_entry/1)
+      |> Map.new()
+    else
+      # Plain list of atoms (overrideable style)
+      Map.new(filterable, fn k -> {Atom.to_string(k), "*"} end)
+    end
+  end
+
+  def flatten_filterable_to_map(_), do: %{}
+
+  defp flatten_filterable_entry(entry) do
+    if join_filter?(entry) do
+      # Join filter: extract nested fields with "*" wildcard
+      {_assoc, fields} = entry
+      Enum.map(fields, fn {nested_field, _ops} -> {to_string(nested_field), "*"} end)
+    else
+      # Direct filter: normalize operators to uppercase
+      {field, operators} = entry
+      [{to_string(field), safe_normalize_operators(operators)}]
+    end
+  end
+
+  # Safely normalizes operators - only processes lists of strings
+  defp safe_normalize_operators(operators) when is_list(operators) do
+    if Enum.all?(operators, &is_binary/1) do
+      Enum.map(operators, &String.upcase/1)
+    else
+      # Not a list of strings, return as-is
+      operators
+    end
+  end
+
+  defp safe_normalize_operators(operator) when is_binary(operator), do: String.upcase(operator)
+  defp safe_normalize_operators(other), do: other
+
+  @doc """
+  Separates filterable into direct filters and join filters.
+
+  Direct filters have a list of operator strings as values.
+  Join filters have a nested keyword list as values.
+
+  ## Examples
+
+      iex> FatEcto.SharedHelper.separate_filterables([title: ["$ILIKE"], classifications: [subject_id: ["$EQUAL"]]])
+      {[title: ["$ILIKE"]], [classifications: [subject_id: ["$EQUAL"]]]}
+
+      iex> FatEcto.SharedHelper.separate_filterables([name: ["$EQUAL"], age: ["$GT"]])
+      {[name: ["$EQUAL"], age: ["$GT"]], []}
+  """
+  @spec separate_filterables(keyword() | any()) :: {keyword(), keyword()}
+  def separate_filterables(filterable) when is_list(filterable) do
+    Enum.split_with(filterable, fn entry -> not join_filter?(entry) end)
+  end
+
+  def separate_filterables(filterable), do: {filterable, []}
+
+  @doc """
+  Extracts field names from join filters as strings for overrideable list.
+
+  ## Examples
+
+      iex> FatEcto.SharedHelper.extract_join_filter_fields([classifications: [subject_id: ["$EQUAL"], grade_id: ["$EQUAL"]]])
+      ["subject_id", "grade_id"]
+
+      iex> FatEcto.SharedHelper.extract_join_filter_fields([])
+      []
+  """
+  @spec extract_join_filter_fields(keyword()) :: [String.t()]
+  def extract_join_filter_fields(join_filters) when is_list(join_filters) do
+    Enum.flat_map(join_filters, fn {_assoc, fields} ->
+      Enum.map(fields, fn {field, _operators} -> to_string(field) end)
+    end)
+  end
+
+  def extract_join_filter_fields(_), do: []
+
+  @doc """
+  Builds a map of field_name => binding for join filters.
+
+  This map is used by Builder to determine which fields should use
+  JoinOperatorApplier instead of the standard OperatorApplier.
+
+  ## Examples
+
+      iex> FatEcto.SharedHelper.build_join_filters_map([classifications: [subject_id: ["$EQUAL"], grade_id: ["$EQUAL"]]])
+      %{"subject_id" => :classifications, "grade_id" => :classifications}
+
+      iex> FatEcto.SharedHelper.build_join_filters_map([])
+      %{}
+  """
+  @spec build_join_filters_map(keyword()) :: map()
+  def build_join_filters_map(join_filters) when is_list(join_filters) do
+    join_filters
+    |> Enum.flat_map(fn {assoc, fields} ->
+      Enum.map(fields, fn {field, _operators} -> {to_string(field), assoc} end)
+    end)
+    |> Map.new()
+  end
+
+  def build_join_filters_map(_), do: %{}
 end

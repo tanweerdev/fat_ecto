@@ -43,6 +43,19 @@ defmodule FatEcto.Query.OperatorApplier do
   - `$GTE`: Negates the `$GTE` condition.
   - `$EQUAL`: Negates the `$EQUAL` condition.
 
+  ## Join Filters (Named Bindings)
+
+  All operators support an optional `binding` parameter for filtering on joined tables.
+  When a binding is provided, the dynamic uses a named binding instead of the default `[q]`.
+
+      # Direct filter (no binding)
+      OperatorApplier.apply_operator("$EQUAL", :name, "John")
+      # => dynamic([q], q.name == ^"John")
+
+      # Join filter (with binding)
+      OperatorApplier.apply_operator("$EQUAL", :subject_id, "uuid", :classifications)
+      # => dynamic([classifications: j], j.subject_id == ^"uuid")
+
   ## Usage
 
   This module is typically used internally by `FatEcto.FatQuery.FatWhere` and `FatEcto.FatQuery.WhereOr` to construct
@@ -51,11 +64,15 @@ defmodule FatEcto.Query.OperatorApplier do
   ### Example
 
       # Applying a `$LIKE` operator
-      OperatorApplier.apply_operator("$LIKE", :name, "%John%", [])
+      OperatorApplier.apply_operator("$LIKE", :name, "%John%")
 
       # Applying a negated `$EQUAL` operator
-      OperatorApplier.apply_not_condition("$EQUAL", :age, 30, [])
+      OperatorApplier.apply_not_condition("$EQUAL", :age, 30)
+
+      # Applying a `$EQUAL` operator on a joined table
+      OperatorApplier.apply_operator("$EQUAL", :subject_id, "uuid", :classifications)
   """
+
   alias FatEcto.Query.Dynamics.BtwInContains
   alias FatEcto.Query.Dynamics.GtLtEq
   alias FatEcto.Query.Dynamics.Like
@@ -107,135 +124,123 @@ defmodule FatEcto.Query.OperatorApplier do
   end
 
   # Helper function to apply the appropriate operator to the field and value.
-  @spec apply_operator(String.t(), atom(), any()) :: nil | Ecto.Query.dynamic_expr()
-  def apply_operator(operator, field, value) do
+  # Optional binding parameter for join filters (named bindings).
+  @spec apply_operator(String.t(), atom() | String.t(), any(), atom() | nil) ::
+          nil | Ecto.Query.dynamic_expr()
+  def apply_operator(operator, field, value, binding \\ nil) do
     operator = String.upcase(operator)
-    do_apply_operator(operator, field, value)
+    field = SharedHelper.string_to_existing_atom(field)
+    do_apply_operator(operator, field, value, binding)
   end
 
-  @spec do_apply_operator(String.t(), atom(), any()) :: nil | Ecto.Query.dynamic_expr()
-  defp do_apply_operator("$LIKE", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
-    Like.like_dynamic(field, value)
+  # Delegates to dynamics modules with binding parameter
+  # The modules handle both direct filters (binding=nil) and join filters (binding=atom)
+
+  @spec do_apply_operator(String.t(), atom(), any(), atom() | nil) ::
+          nil | Ecto.Query.dynamic_expr()
+  defp do_apply_operator("$LIKE", field, value, binding) do
+    Like.like_dynamic(field, value, binding)
   end
 
-  defp do_apply_operator("$NULL", field, _value) do
-    field = SharedHelper.string_to_existing_atom(field)
-    GtLtEq.field_is_nil_dynamic(field)
+  defp do_apply_operator("$NULL", field, _value, binding) do
+    GtLtEq.field_is_nil_dynamic(field, binding)
   end
 
-  defp do_apply_operator("$NOT_LIKE", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
-    Like.not_like_dynamic(field, value)
+  defp do_apply_operator("$NOT_NULL", field, _value, binding) do
+    GtLtEq.not_field_is_nil_dynamic(field, binding)
   end
 
-  defp do_apply_operator("$ILIKE", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
-    Like.ilike_dynamic(field, value)
+  defp do_apply_operator("$NOT_LIKE", field, value, binding) do
+    Like.not_like_dynamic(field, value, binding)
   end
 
-  defp do_apply_operator("$NOT_ILIKE", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
-    Like.not_ilike_dynamic(field, value)
+  defp do_apply_operator("$ILIKE", field, value, binding) do
+    Like.ilike_dynamic(field, value, binding)
   end
 
-  defp do_apply_operator("$LT", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
-    GtLtEq.lt_dynamic(field, value)
+  defp do_apply_operator("$NOT_ILIKE", field, value, binding) do
+    Like.not_ilike_dynamic(field, value, binding)
   end
 
-  defp do_apply_operator("$LTE", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
-    GtLtEq.lte_dynamic(field, value)
+  defp do_apply_operator("$LT", field, value, binding) do
+    GtLtEq.lt_dynamic(field, value, binding)
   end
 
-  defp do_apply_operator("$GT", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
-    GtLtEq.gt_dynamic(field, value)
+  defp do_apply_operator("$LTE", field, value, binding) do
+    GtLtEq.lte_dynamic(field, value, binding)
   end
 
-  defp do_apply_operator("$GTE", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
-    GtLtEq.gte_dynamic(field, value)
+  defp do_apply_operator("$GT", field, value, binding) do
+    GtLtEq.gt_dynamic(field, value, binding)
   end
 
-  defp do_apply_operator("$BETWEEN", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
-    BtwInContains.between_dynamic(field, value)
+  defp do_apply_operator("$GTE", field, value, binding) do
+    GtLtEq.gte_dynamic(field, value, binding)
   end
 
-  defp do_apply_operator("$BETWEEN_EQUAL", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
-    BtwInContains.between_equal_dynamic(field, value)
+  defp do_apply_operator("$BETWEEN", field, value, binding) do
+    BtwInContains.between_dynamic(field, value, binding)
   end
 
-  defp do_apply_operator("$NOT_BETWEEN", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
-    BtwInContains.not_between_dynamic(field, value)
+  defp do_apply_operator("$BETWEEN_EQUAL", field, value, binding) do
+    BtwInContains.between_equal_dynamic(field, value, binding)
   end
 
-  defp do_apply_operator("$NOT_BETWEEN_EQUAL", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
-    BtwInContains.not_between_equal_dynamic(field, value)
+  defp do_apply_operator("$NOT_BETWEEN", field, value, binding) do
+    BtwInContains.not_between_dynamic(field, value, binding)
   end
 
-  defp do_apply_operator("$IN", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
-    BtwInContains.in_dynamic(field, value)
+  defp do_apply_operator("$NOT_BETWEEN_EQUAL", field, value, binding) do
+    BtwInContains.not_between_equal_dynamic(field, value, binding)
   end
 
-  defp do_apply_operator("$NOT_IN", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
-    BtwInContains.not_in_dynamic(field, value)
+  defp do_apply_operator("$IN", field, value, binding) do
+    BtwInContains.in_dynamic(field, value, binding)
   end
 
-  defp do_apply_operator("$EQUAL", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
-    GtLtEq.eq_dynamic(field, value)
+  defp do_apply_operator("$NOT_IN", field, value, binding) do
+    BtwInContains.not_in_dynamic(field, value, binding)
   end
 
-  defp do_apply_operator("$CAST_TO_DATE_LT", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
+  defp do_apply_operator("$EQUAL", field, value, binding) do
+    GtLtEq.eq_dynamic(field, value, binding)
+  end
+
+  defp do_apply_operator("$NOT_EQUAL", field, value, binding) do
+    GtLtEq.not_eq_dynamic(field, value, binding)
+  end
+
+  defp do_apply_operator("$CAST_TO_DATE_LT", field, value, binding) do
     val = SharedHelper.to_date!(value)
-    GtLtEq.cast_to_date_lt_dynamic(field, val)
+    GtLtEq.cast_to_date_lt_dynamic(field, val, binding)
   end
 
-  defp do_apply_operator("$CAST_TO_DATE_LTE", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
+  defp do_apply_operator("$CAST_TO_DATE_LTE", field, value, binding) do
     val = SharedHelper.to_date!(value)
-    GtLtEq.cast_to_date_lte_dynamic(field, val)
+    GtLtEq.cast_to_date_lte_dynamic(field, val, binding)
   end
 
-  defp do_apply_operator("$CAST_TO_DATE_GT", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
+  defp do_apply_operator("$CAST_TO_DATE_GT", field, value, binding) do
     val = SharedHelper.to_date!(value)
-    GtLtEq.cast_to_date_gt_dynamic(field, val)
+    GtLtEq.cast_to_date_gt_dynamic(field, val, binding)
   end
 
-  defp do_apply_operator("$CAST_TO_DATE_GTE", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
+  defp do_apply_operator("$CAST_TO_DATE_GTE", field, value, binding) do
     val = SharedHelper.to_date!(value)
-    GtLtEq.cast_to_date_gte_dynamic(field, val)
+    GtLtEq.cast_to_date_gte_dynamic(field, val, binding)
   end
 
-  defp do_apply_operator("$CAST_TO_DATE_EQUAL", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
+  defp do_apply_operator("$CAST_TO_DATE_EQUAL", field, value, binding) do
     val = SharedHelper.to_date!(value)
-    GtLtEq.cast_to_date_eq_dynamic(field, val)
+    GtLtEq.cast_to_date_eq_dynamic(field, val, binding)
   end
 
-  defp do_apply_operator("$CAST_TO_DATE_NOT_EQUAL", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
+  defp do_apply_operator("$CAST_TO_DATE_NOT_EQUAL", field, value, binding) do
     val = SharedHelper.to_date!(value)
-    GtLtEq.cast_to_date_not_eq_dynamic(field, val)
+    GtLtEq.cast_to_date_not_eq_dynamic(field, val, binding)
   end
 
-  defp do_apply_operator("$NOT_EQUAL", field, value) do
-    field = SharedHelper.string_to_existing_atom(field)
-    GtLtEq.not_eq_dynamic(field, value)
-  end
-
-  defp do_apply_operator(_, _field, _value), do: nil
+  defp do_apply_operator(_, _field, _value, _binding), do: nil
 
   @spec allowed_not_operators() :: [String.t(), ...]
   def allowed_not_operators, do: ["$LIKE", "$ILIKE", "$ILIKE", "$LT", "$LTE", "$GT", "$GTE", "$EQUAL"]
