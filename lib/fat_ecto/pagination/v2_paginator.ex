@@ -38,8 +38,8 @@ defmodule FatEcto.Pagination.V2Paginator do
       alias FatEcto.Pagination.Helper
 
       @repo Keyword.fetch!(unquote(opts), :repo)
-      @default_limit Keyword.get(unquote(opts), :default_limit, 20)
-      @max_limit Keyword.get(unquote(opts), :max_limit, 100)
+      @max_limit Keyword.fetch!(unquote(opts), :max_limit)
+      @default_limit Keyword.get(unquote(opts), :default_limit, @max_limit)
 
       @doc """
       Paginates the query and returns records with metadata.
