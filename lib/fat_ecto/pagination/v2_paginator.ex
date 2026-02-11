@@ -46,7 +46,8 @@ defmodule FatEcto.Pagination.V2Paginator do
 
       ## Parameters
       - `query`: Ecto query to paginate
-      - `params`: Map or keyword list with :limit and :skip/:page parameters
+      - `params`: Keyword list or string-keyed map with `limit` and `skip` keys.
+                   String values are parsed to integers automatically.
 
       ## Returns
       `{:ok, %{records: [map], meta: map}}` or `{:error, reason}`
@@ -56,6 +57,11 @@ defmodule FatEcto.Pagination.V2Paginator do
       - :limit - records per page
       - :skip - records skipped
       - :pages - total pages
+
+      ## Examples
+
+          {:ok, result} = MyPaginator.paginate(query, limit: 10, skip: 0)
+          {:ok, result} = MyPaginator.paginate(query, %{"limit" => "10", "skip" => "0"})
       """
 
       @impl true
@@ -78,7 +84,17 @@ defmodule FatEcto.Pagination.V2Paginator do
         end
       end
 
-      defp get_pagination_params(params) do
+      defp get_pagination_params(params) when is_map(params) do
+        keyword_params =
+          Enum.reject(
+            [skip: params["skip"], limit: params["limit"]],
+            fn {_k, v} -> is_nil(v) end
+          )
+
+        get_pagination_params(keyword_params)
+      end
+
+      defp get_pagination_params(params) when is_list(params) do
         {skip, params} = Helper.get_skip_value(params)
         {limit, _params} = Helper.get_limit_value(params, unquote(opts))
         {limit, skip}
