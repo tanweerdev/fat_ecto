@@ -80,10 +80,37 @@ defmodule FatEcto.SharedHelper do
   end
 
   @doc """
+  Checks if a value is an alias tuple: `{schema_field_atom, operators}`.
+
+  Alias tuples allow using a different API name than the actual schema field.
+
+  ## Examples
+
+      iex> FatEcto.SharedHelper.alias_entry?({:name, ["$ILIKE"]})
+      true
+
+      iex> FatEcto.SharedHelper.alias_entry?({:name, "*"})
+      true
+
+      iex> FatEcto.SharedHelper.alias_entry?(["$ILIKE"])
+      false
+
+      iex> FatEcto.SharedHelper.alias_entry?("*")
+      false
+  """
+  @spec alias_entry?(any()) :: boolean()
+  def alias_entry?({schema_field, ops})
+      when is_atom(schema_field) and (is_list(ops) or is_binary(ops)),
+      do: true
+
+  def alias_entry?(_), do: false
+
+  @doc """
   Converts a filterable option list to a map format if it's a keyword list.
 
   This function checks if the input is a keyword list and converts it to a map.
   If the input is not a list or not a keyword list, it returns the input unchanged.
+  Alias tuples are unwrapped to extract the operators.
 
   ## Parameters
 
@@ -96,11 +123,19 @@ defmodule FatEcto.SharedHelper do
 
       iex> FatEcto.SharedHelper.filterable_opt_to_map(%{"name" => ["$LIKE"]})
       %{"name" => ["$LIKE"]}
+
+      iex> FatEcto.SharedHelper.filterable_opt_to_map([author_name: {:name, "*"}])
+      %{"author_name" => "*"}
   """
   @spec filterable_opt_to_map(maybe_improper_list() | any()) :: maybe_improper_list() | map()
   def filterable_opt_to_map(list) when is_list(list) do
     if Keyword.keyword?(list) do
-      keyword_list_to_map_with_uppercase_operators(list)
+      list
+      |> Enum.map(fn {k, v} ->
+        ops = unwrap_alias_operators(v)
+        {Atom.to_string(k), normalize_operators(ops)}
+      end)
+      |> Map.new()
     else
       list
       |> Enum.map(fn k -> {Atom.to_string(k), "*"} end)
@@ -306,13 +341,24 @@ defmodule FatEcto.SharedHelper do
   """
   @spec join_filter?({atom(), any()}) :: boolean()
   def join_filter?({_field, value}) when is_list(value) do
-    # Check if it's a keyword list AND the first element's value is also a list
+    # Check if it's a keyword list AND the first element's value looks like
+    # a nested filter field (operator list, wildcard, or alias tuple).
     # This distinguishes [subject_id: ["$EQUAL"]] from ["$EQUAL", "$IN"]
     Keyword.keyword?(value) and length(value) > 0 and
-      match?([{_, nested_val} | _] when is_list(nested_val), value)
+      nested_filter_value?(elem(hd(value), 1))
   end
 
   def join_filter?(_), do: false
+
+  # Recognizes valid values inside a join filter entry
+  defp nested_filter_value?(val) when is_list(val), do: true
+  defp nested_filter_value?("*"), do: true
+
+  defp nested_filter_value?({schema_field, ops})
+       when is_atom(schema_field) and (is_list(ops) or is_binary(ops)),
+       do: true
+
+  defp nested_filter_value?(_), do: false
 
   @doc """
   Flattens a filterable config into a map of field => operators.
@@ -344,17 +390,58 @@ defmodule FatEcto.SharedHelper do
 
   def flatten_filterable_to_map(_), do: %{}
 
-  defp flatten_filterable_entry(entry) do
-    if join_filter?(entry) do
-      # Join filter: extract nested fields with "*" wildcard
-      {_assoc, fields} = entry
-      Enum.map(fields, fn {nested_field, _ops} -> {to_string(nested_field), "*"} end)
+  @doc """
+  Like `flatten_filterable_to_map/1` but preserves operators for join fields.
+
+  ## Examples
+
+      iex> FatEcto.SharedHelper.flatten_sortable_to_map([id: "*", fat_rooms: [floor: "*", is_active: ["$ASC", "$DESC"]]])
+      %{"id" => "*", "floor" => "*", "is_active" => ["$ASC", "$DESC"]}
+  """
+  @spec flatten_sortable_to_map(keyword() | list()) :: map()
+  def flatten_sortable_to_map(sortable) when is_list(sortable) do
+    if Keyword.keyword?(sortable) do
+      sortable
+      |> Enum.flat_map(&flatten_entry(&1, :preserve_joins))
+      |> Map.new()
     else
-      # Direct filter: normalize operators to uppercase
-      {field, operators} = entry
-      [{to_string(field), safe_normalize_operators(operators)}]
+      Map.new(sortable, fn k -> {Atom.to_string(k), "*"} end)
     end
   end
+
+  def flatten_sortable_to_map(_), do: %{}
+
+  defp flatten_filterable_entry(entry) do
+    flatten_entry(entry, :wildcard_joins)
+  end
+
+  defp flatten_entry(entry, join_mode) do
+    if join_filter?(entry) do
+      {_assoc, fields} = entry
+
+      Enum.map(fields, fn {api_name, value} ->
+        case join_mode do
+          :wildcard_joins ->
+            {to_string(api_name), "*"}
+
+          :preserve_joins ->
+            ops = unwrap_alias_operators(value)
+            {to_string(api_name), safe_normalize_operators(ops)}
+        end
+      end)
+    else
+      {api_name, value} = entry
+      ops = unwrap_alias_operators(value)
+      [{to_string(api_name), safe_normalize_operators(ops)}]
+    end
+  end
+
+  # Unwraps an alias tuple to get the operators, or returns value as-is
+  defp unwrap_alias_operators({schema_field, operators})
+       when is_atom(schema_field) and (is_list(operators) or is_binary(operators)),
+       do: operators
+
+  defp unwrap_alias_operators(operators), do: operators
 
   # Safely normalizes operators - only processes lists of strings
   defp safe_normalize_operators(operators) when is_list(operators) do
@@ -434,4 +521,81 @@ defmodule FatEcto.SharedHelper do
   end
 
   def build_join_filters_map(_), do: %{}
+
+  # ============================================
+  # Field Alias Helpers
+  # ============================================
+
+  @doc """
+  Builds a map of API name => schema field atom from a filterable config.
+
+  Only includes entries that use the alias tuple syntax `{:schema_field, operators}`.
+  Non-aliased fields are not included (they use the API name as-is).
+
+  ## Examples
+
+      iex> FatEcto.SharedHelper.build_field_aliases([
+      ...>   title: ["$ILIKE"],
+      ...>   author_name: {:name, ["$ILIKE"]},
+      ...>   classifications: [
+      ...>     grade_id: ["$EQUAL"],
+      ...>     subject_name: {:name, ["$EQUAL"]}
+      ...>   ]
+      ...> ])
+      %{"author_name" => :name, "subject_name" => :name}
+
+      iex> FatEcto.SharedHelper.build_field_aliases([title: ["$ILIKE"], rating: ["$GT"]])
+      %{}
+  """
+  @spec build_field_aliases(keyword()) :: map()
+  def build_field_aliases(filterable) when is_list(filterable) do
+    filterable
+    |> Enum.flat_map(fn entry ->
+      if join_filter?(entry) do
+        {_assoc, fields} = entry
+        extract_aliases_from_fields(fields)
+      else
+        {api_name, value} = entry
+        extract_alias(api_name, value)
+      end
+    end)
+    |> Map.new()
+  end
+
+  def build_field_aliases(_), do: %{}
+
+  @doc """
+  Builds a map of API name => schema field atom from a sortable config.
+
+  Only includes entries that use the alias tuple syntax `{:schema_field, directions}`.
+
+  ## Examples
+
+      iex> FatEcto.SharedHelper.build_sort_aliases([
+      ...>   inserted_at: "*",
+      ...>   author_name: {:name, "*"}
+      ...> ])
+      %{"author_name" => :name}
+
+      iex> FatEcto.SharedHelper.build_sort_aliases([inserted_at: "*", views_count: "*"])
+      %{}
+  """
+  @spec build_sort_aliases(keyword()) :: map()
+  def build_sort_aliases(sortable) when is_list(sortable) do
+    sortable
+    |> Enum.flat_map(fn {api_name, value} -> extract_alias(api_name, value) end)
+    |> Map.new()
+  end
+
+  def build_sort_aliases(_), do: %{}
+
+  defp extract_aliases_from_fields(fields) do
+    Enum.flat_map(fields, fn {api_name, value} -> extract_alias(api_name, value) end)
+  end
+
+  defp extract_alias(api_name, {schema_field, _ops})
+       when is_atom(schema_field),
+       do: [{to_string(api_name), schema_field}]
+
+  defp extract_alias(_api_name, _value), do: []
 end

@@ -142,6 +142,9 @@ defmodule FatEcto.Query.Dynamics.Buildable do
     # Direct filters get their operators, join filter fields get "*" wildcard
     filterable_fields = FatEcto.SharedHelper.flatten_filterable_to_map(filterable)
 
+    # Build field aliases map (api_name => schema_field) for aliased fields
+    field_aliases = FatEcto.SharedHelper.build_field_aliases(filterable)
+
     # Pre-compute ignoreable fields map
     ignoreable_fields_values = FatEcto.SharedHelper.keyword_list_to_map(options[:ignoreable] || [])
 
@@ -157,8 +160,9 @@ defmodule FatEcto.Query.Dynamics.Buildable do
       @join_filter_fields unquote(Macro.escape(join_filter_fields))
       @overrideable_fields @base_overrideable_fields
 
-      # Pre-computed filterable and ignoreable maps
+      # Pre-computed filterable, ignoreable, and alias maps
       @filterable_fields unquote(Macro.escape(filterable_fields))
+      @field_aliases unquote(Macro.escape(field_aliases))
       @ignoreable_fields_values unquote(Macro.escape(ignoreable_fields_values))
 
       # Get default_dynamic option: module option takes precedence over global config
@@ -211,12 +215,14 @@ defmodule FatEcto.Query.Dynamics.Buildable do
         # Build dynamics with:
         # - override_buildable as callback for overrideable fields
         # - join_filters_map for join filter fields (handled by JoinOperatorApplier)
+        # - field_aliases for resolving API names to schema fields
         dynamics =
           Builder.build(
             filterable_params,
             &override_buildable/3,
             @overrideable_fields,
-            @join_filters_map
+            @join_filters_map,
+            @field_aliases
           )
 
         # Apply default_dynamic if nil and configured

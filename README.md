@@ -210,6 +210,40 @@ FatEcto.FatHospital
 |> Repo.all()
 ```
 
+##### Example 8: Field Aliases (Renaming API Fields)
+
+When joined tables share the same field name (e.g., both `hospitals` and `doctors` have `name`), you can use aliases to expose them under different API names. Use the `{:schema_field, operators}` tuple syntax:
+
+```elixir
+defmodule MyApp.HospitalFilter do
+  use FatEcto.Query.Dynamics.Buildable,
+    filterable: [
+      name: ["$ILIKE", "$EQUAL"],              # hospital's own name
+      doctors: [
+        doctor_name: {:name, ["$ILIKE"]},      # "doctor_name" in API -> :name in DB
+        rating: ["$GTE", "$LTE"]
+      ]
+    ],
+    default_dynamic: :return_true
+
+  def override_buildable(_field, _operator, _value), do: nil
+end
+
+# Now the API can filter both names without conflict
+params = %{
+  "name" => %{"$EQUAL" => "City Hospital"},
+  "doctor_name" => %{"$ILIKE" => "%Smith%"}
+}
+dynamics = MyApp.HospitalFilter.build(params)
+
+Hospital
+|> join(:left, [h], d in assoc(h, :doctors), as: :doctors)
+|> where(^dynamics)
+|> Repo.all()
+
+# Generates: WHERE h.name = 'City Hospital' AND d.name ILIKE '%Smith%'
+```
+
 ---
 
 ### 🔄 FatEcto.Sort.Sortable – Effortless Sorting
@@ -232,6 +266,49 @@ defmodule Fat.SortQuery do
 
   def override_sortable(_field, _operator), do: nil
 end
+```
+
+##### Sort Aliases
+
+Just like Buildable, you can alias sort field names using the `{:schema_field, directions}` tuple:
+
+```elixir
+defmodule MyApp.HospitalSort do
+  use FatEcto.Sort.Sortable,
+    sortable: [
+      id: "*",
+      hospital_name: {:name, ["$ASC", "$DESC"]}   # "hospital_name" in API -> :name in DB
+    ]
+end
+
+order = MyApp.HospitalSort.build(%{"hospital_name" => "$ASC"})
+# Generates: ORDER BY h.name ASC
+```
+
+##### Sorting on Joined Tables
+
+Use nested keyword lists to sort on fields from joined associations — same syntax as Buildable join filters:
+
+```elixir
+defmodule MyApp.HospitalSort do
+  use FatEcto.Sort.Sortable,
+    sortable: [
+      name: "*",
+      doctors: [
+        doctor_name: {:name, "*"},           # alias on joined table
+        rating: ["$ASC", "$DESC"]            # non-aliased join field
+      ]
+    ]
+end
+
+order = MyApp.HospitalSort.build(%{"doctor_name" => "$DESC", "rating" => "$ASC"})
+
+Hospital
+|> join(:left, [h], d in assoc(h, :doctors), as: :doctors)
+|> order_by(^order)
+|> Repo.all()
+
+# Generates: ORDER BY d.name DESC, d.rating ASC
 ```
 
 ---
