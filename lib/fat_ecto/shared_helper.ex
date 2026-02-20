@@ -344,7 +344,7 @@ defmodule FatEcto.SharedHelper do
     # Check if it's a keyword list AND the first element's value looks like
     # a nested filter field (operator list, wildcard, or alias tuple).
     # This distinguishes [subject_id: ["$EQUAL"]] from ["$EQUAL", "$IN"]
-    Keyword.keyword?(value) and length(value) > 0 and
+    Keyword.keyword?(value) and value != [] and
       nested_filter_value?(elem(hd(value), 1))
   end
 
