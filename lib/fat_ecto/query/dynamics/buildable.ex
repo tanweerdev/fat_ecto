@@ -6,10 +6,16 @@ defmodule FatEcto.Query.Dynamics.Buildable do
   and overrideable fields (handled by a fallback function).
 
   ## Options
-  - `filterable`: A map of fields and their allowed operators. Example:
+  - `filterable`: A keyword list of fields and their allowed operators. Supports nested structures
+      for filtering on joined/associated tables. Example:
       [
         id: ["$EQUAL", "$NOT_EQUAL"],
-        name: ["$ILIKE"]
+        name: ["$ILIKE"],
+        # Nested = join filter (association name must match `as:` binding)
+        classifications: [
+          subject_id: ["$EQUAL"],
+          grade_id: ["$EQUAL", "$IN"]
+        ]
       ]
   - `overrideable`: A list of fields that can be overridden. Example:
       ["name", "phone"]
@@ -20,6 +26,38 @@ defmodule FatEcto.Query.Dynamics.Buildable do
       ]
   - `default_dynamic`: When set to `:return_true`, returns `dynamic([q], true)` instead of `nil`
       when no dynamics are built. Example: `default_dynamic: :return_true`
+
+  ## Join Filters (Nested Filterable)
+
+  When a filterable entry has a keyword list as its value (instead of a list of operator strings),
+  it's treated as a join filter. The key becomes the expected named binding (via `as:` option in join).
+
+      use FatEcto.Query.Dynamics.Buildable,
+        filterable: [
+          title: ["$ILIKE"],                    # Direct filter on main table
+          classifications: [                     # Join filter on :classifications binding
+            subject_id: ["$EQUAL"],
+            grade_id: ["$EQUAL", "$IN"]
+          ]
+        ]
+
+  The caller must provide the join with matching `as:` binding:
+
+      Video
+      |> join(:inner, [v], c in assoc(v, :classifications), as: :classifications)
+      |> where(^dynamics)
+
+  Join filters support all standard operators: `$EQUAL`, `$NOT_EQUAL`, `$IN`, `$NOT_IN`,
+  `$LIKE`, `$ILIKE`, `$GT`, `$GTE`, `$LT`, `$LTE`, `$NULL`, `$NOT_NULL`.
+
+  Join filters also work seamlessly with `$OR` and `$AND` operators:
+
+      %{
+        "$OR" => [
+          %{"subject_id" => %{"$EQUAL" => "math-uuid"}},
+          %{"grade_id" => %{"$EQUAL" => "grade-10-uuid"}}
+        ]
+      }
 
   ## Global Configuration
   You can configure the default behavior for all Buildable modules in your config:
@@ -87,12 +125,45 @@ defmodule FatEcto.Query.Dynamics.Buildable do
   @callback after_buildable(dynamics :: Ecto.Query.dynamic_expr() | nil) :: any()
 
   defmacro __using__(options \\ []) do
+    # Get the filterable option
+    filterable = options[:filterable] || []
+
+    # Separate join filters for building join_filters_map
+    {_direct_filterable, join_filters} =
+      FatEcto.SharedHelper.separate_filterables(filterable)
+
+    # Build the join_filters_map (field_name => binding) for Builder
+    join_filters_map = FatEcto.SharedHelper.build_join_filters_map(join_filters)
+
+    # Extract join filter field names (for tracking)
+    join_filter_fields = FatEcto.SharedHelper.extract_join_filter_fields(join_filters)
+
+    # Flatten all filterables into a single map (handles both direct and join)
+    # Direct filters get their operators, join filter fields get "*" wildcard
+    filterable_fields = FatEcto.SharedHelper.flatten_filterable_to_map(filterable)
+
+    # Build field aliases map (api_name => schema_field) for aliased fields
+    field_aliases = FatEcto.SharedHelper.build_field_aliases(filterable)
+
+    # Pre-compute ignoreable fields map
+    ignoreable_fields_values = FatEcto.SharedHelper.keyword_list_to_map(options[:ignoreable] || [])
+
     quote do
       @behaviour FatEcto.Query.Dynamics.Buildable
-      @options unquote(options)
-      @filterable @options[:filterable] || []
-      @overrideable_fields @options[:overrideable] || []
-      @ignoreable @options[:ignoreable] || []
+      @options unquote(Macro.escape(options))
+      @join_filters unquote(Macro.escape(join_filters))
+      @join_filters_map unquote(Macro.escape(join_filters_map))
+      @base_overrideable_fields @options[:overrideable] || []
+
+      # Join filter fields are stored separately (not added to overrideable)
+      # Builder handles them directly via join_filters_map
+      @join_filter_fields unquote(Macro.escape(join_filter_fields))
+      @overrideable_fields @base_overrideable_fields
+
+      # Pre-computed filterable, ignoreable, and alias maps
+      @filterable_fields unquote(Macro.escape(filterable_fields))
+      @field_aliases unquote(Macro.escape(field_aliases))
+      @ignoreable_fields_values unquote(Macro.escape(ignoreable_fields_values))
 
       # Get default_dynamic option: module option takes precedence over global config
       @default_dynamic_option (case Keyword.get(@options, :default_dynamic) do
@@ -104,7 +175,7 @@ defmodule FatEcto.Query.Dynamics.Buildable do
       import Ecto.Query
 
       # Ensure at least one of `filterable` or `overrideable` fields option is provided.
-      if @filterable == [] and @overrideable_fields == [] do
+      if @filterable_fields == %{} and @base_overrideable_fields == [] do
         raise CompileError,
           description: """
           You must provide at least one of `filterable` or `overrideable` option.
@@ -114,21 +185,6 @@ defmodule FatEcto.Query.Dynamics.Buildable do
               overrideable: [:name, :phone]
           """
       end
-
-      unless (is_list(@filterable) || is_nil(@filterable)) and
-               (is_list(@overrideable_fields) || is_nil(@overrideable_fields)) do
-        raise CompileError,
-          description: """
-          Format for `filterable` or `overrideable` fields should be in expected format.
-          Example:
-            use FatEcto.Query.Dynamics.Buildable,
-              filterable: [id: ["$EQUAL", "$NOT_EQUAL"]],
-              overrideable: [:name, :phone]
-          """
-      end
-
-      @filterable_fields FatEcto.SharedHelper.filterable_opt_to_map(@filterable)
-      @ignoreable_fields_values FatEcto.SharedHelper.keyword_list_to_map(@ignoreable)
 
       @doc """
       Builds dynamics after filtering fields based on the provided parameters.
@@ -156,12 +212,17 @@ defmodule FatEcto.Query.Dynamics.Buildable do
             @overrideable_fields
           )
 
-        # Build dynamics with the override_buildable function as the callback
+        # Build dynamics with:
+        # - override_buildable as callback for overrideable fields
+        # - join_filters_map for join filter fields (handled by JoinOperatorApplier)
+        # - field_aliases for resolving API names to schema fields
         dynamics =
           Builder.build(
             filterable_params,
             &override_buildable/3,
-            @overrideable_fields
+            @overrideable_fields,
+            @join_filters_map,
+            @field_aliases
           )
 
         # Apply default_dynamic if nil and configured

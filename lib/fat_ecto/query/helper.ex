@@ -178,8 +178,11 @@ defmodule FatEcto.Query.Helper do
   end
 
   defp filter_direct_value(field, value, allowed_operators) do
-    if operator_allowed?("$EQUAL", allowed_operators) do
-      {field, %{"$EQUAL" => value}}
+    # When value is nil, use $NULL operator instead of $EQUAL
+    operator = if is_nil(value), do: "$NULL", else: "$EQUAL"
+
+    if operator_allowed?(operator, allowed_operators) do
+      {field, %{operator => value}}
     else
       nil
     end

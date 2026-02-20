@@ -27,7 +27,6 @@ defmodule FatEcto.Sort.Sortable do
       order_by = MyApp.UserSort.build(%{"email" => "$DESC", "custom_field" => "$ASC"})
       query = from(u in User, order_by: ^order_by)
   """
-  alias FatEcto.SharedHelper
   alias FatEcto.Sort.Helper
   alias FatEcto.Sort.Sorter
 
@@ -39,6 +38,13 @@ defmodule FatEcto.Sort.Sortable do
   @callback override_sortable(field :: String.t(), operator :: String.t()) :: Sorter.order_expr() | nil
 
   defmacro __using__(options \\ []) do
+    sortable = options[:sortable] || []
+
+    {_direct_sortable, join_sorts} = FatEcto.SharedHelper.separate_filterables(sortable)
+    sort_join_filters_map = FatEcto.SharedHelper.build_join_filters_map(join_sorts)
+    sortable_fields = FatEcto.SharedHelper.flatten_sortable_to_map(sortable)
+    sort_aliases = FatEcto.SharedHelper.build_field_aliases(sortable)
+
     quote do
       @behaviour FatEcto.Sort.Sortable
       @options unquote(options)
@@ -67,7 +73,9 @@ defmodule FatEcto.Sort.Sortable do
         """
       end
 
-      @sortable_fields SharedHelper.filterable_opt_to_map(@sortable)
+      @sortable_fields unquote(Macro.escape(sortable_fields))
+      @sort_aliases unquote(Macro.escape(sort_aliases))
+      @sort_join_filters_map unquote(Macro.escape(sort_join_filters_map))
 
       @doc """
       Builds order_by expressions for the given sort parameters.
@@ -81,8 +89,8 @@ defmodule FatEcto.Sort.Sortable do
         # Filter overrideable fields (only those explicitly listed)
         override_params = Map.take(sort_params, @overrideable_fields)
 
-        # Process standard fields
-        standard_orders = Sorter.build_order_by(standard_params)
+        # Process standard fields (with alias resolution and join binding support)
+        standard_orders = Sorter.build_order_by(standard_params, @sort_aliases, @sort_join_filters_map)
 
         # Process override fields with callback
         override_orders =

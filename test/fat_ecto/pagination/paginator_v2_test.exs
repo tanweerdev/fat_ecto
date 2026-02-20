@@ -4,7 +4,7 @@ defmodule FatEcto.Pagination.V2PaginatorTest do
   alias FatEcto.FatHospital
   alias FatEcto.Sample.V2Pagination
 
-  describe "paginate/2" do
+  describe "paginate/2 with keyword params" do
     test "paginates a query with limit and skip" do
       query = from(t in FatHospital)
       params = [limit: 10, skip: 5]
@@ -13,8 +13,6 @@ defmodule FatEcto.Pagination.V2PaginatorTest do
 
       assert result.meta.limit == 10
       assert result.meta.skip == 5
-      # 2 TODO: insert some records to test pagination
-      # Or whatever records you expect
       assert result.records == []
     end
 
@@ -24,7 +22,6 @@ defmodule FatEcto.Pagination.V2PaginatorTest do
 
       {:ok, result} = V2Pagination.paginate(query, params)
 
-      # Assuming default limit is 10
       assert result.meta.limit == 10
       assert result.meta.skip == 5
     end
@@ -39,7 +36,48 @@ defmodule FatEcto.Pagination.V2PaginatorTest do
       assert result.meta.skip == 0
     end
 
-    test "paginates a query with group_by and count" do
+    test "paginates a query with no limit or skip" do
+      query = from(t in FatHospital)
+      params = []
+
+      {:ok, result} = V2Pagination.paginate(query, params)
+
+      assert result.meta.limit == 10
+      assert result.meta.skip == 0
+    end
+  end
+
+  describe "paginate/2 with string-keyed map params" do
+    test "accepts integer values" do
+      query = from(t in FatHospital)
+
+      {:ok, result} = V2Pagination.paginate(query, %{"limit" => 5, "skip" => 10})
+
+      assert result.meta.limit == 5
+      assert result.meta.skip == 10
+    end
+
+    test "accepts string values" do
+      query = from(t in FatHospital)
+
+      {:ok, result} = V2Pagination.paginate(query, %{"limit" => "5", "skip" => "10"})
+
+      assert result.meta.limit == 5
+      assert result.meta.skip == 10
+    end
+
+    test "uses defaults for empty map" do
+      query = from(t in FatHospital)
+
+      {:ok, result} = V2Pagination.paginate(query, %{})
+
+      assert result.meta.limit == 10
+      assert result.meta.skip == 0
+    end
+  end
+
+  describe "paginate/2 with complex queries" do
+    test "handles group_by" do
       query = from(t in FatHospital, group_by: t.id)
       params = [limit: 10, skip: 5]
 
@@ -47,7 +85,7 @@ defmodule FatEcto.Pagination.V2PaginatorTest do
                V2Pagination.paginate(query, params)
     end
 
-    test "paginates a query with distinct and count" do
+    test "handles distinct" do
       query = from(t in FatHospital, distinct: t.name)
       params = [limit: 10, skip: 5]
 
@@ -57,7 +95,7 @@ defmodule FatEcto.Pagination.V2PaginatorTest do
       assert result.meta.skip == 5
     end
 
-    test "paginates a query with preload and count" do
+    test "handles preload" do
       query = from(t in FatHospital, preload: [:some_assoc])
       params = [limit: 10, skip: 5]
 
@@ -67,7 +105,7 @@ defmodule FatEcto.Pagination.V2PaginatorTest do
       assert result.meta.skip == 5
     end
 
-    test "paginates a query with order_by and count" do
+    test "handles order_by" do
       query = from(t in FatHospital, order_by: [desc: t.phone])
       params = [limit: 10, skip: 5]
 
@@ -77,7 +115,7 @@ defmodule FatEcto.Pagination.V2PaginatorTest do
       assert result.meta.skip == 5
     end
 
-    test "paginates a query with multiple primary keys and count" do
+    test "handles multiple primary keys" do
       query = from(t in FatEcto.FatDoctorPatient)
       params = [limit: 10, skip: 5]
 
@@ -85,17 +123,6 @@ defmodule FatEcto.Pagination.V2PaginatorTest do
 
       assert result.meta.limit == 10
       assert result.meta.skip == 5
-    end
-
-    test "paginates a query with no limit or skip" do
-      query = from(t in FatHospital)
-      params = []
-
-      {:ok, result} = V2Pagination.paginate(query, params)
-
-      # Assuming default limit is 10
-      assert result.meta.limit == 10
-      assert result.meta.skip == 0
     end
   end
 end

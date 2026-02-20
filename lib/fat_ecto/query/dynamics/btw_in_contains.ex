@@ -6,6 +6,12 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
   This module is designed to simplify the creation of dynamic queries for Ecto schemas, particularly
   when dealing with complex filtering conditions.
 
+  ## Named Bindings (Join Filters)
+
+  All functions support an optional `binding` parameter for filtering on joined tables.
+  When `nil` (default), uses the standard `[q]` binding.
+  When an atom is provided, uses a named binding `[{binding, j}]`.
+
   ## Example Usage
 
       iex> result = #{__MODULE__}.between_dynamic(:experience_years, [2, 5])
@@ -22,6 +28,7 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
 
     - `key`       - The field name as an atom.
     - `values`    - A list of two values representing the range.
+    - `binding`   - Optional named binding atom for join filters (default: nil).
 
   ### Examples
 
@@ -29,13 +36,15 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
       iex> inspect(result)
       "dynamic([q], q.experience_years > ^2 and q.experience_years < ^5)"
   """
-  @spec between_dynamic(atom(), [any()]) :: Ecto.Query.dynamic_expr()
-  def between_dynamic(key, [min, max] = values) when is_atom(key) and is_list(values) do
-    dynamic(
-      [q],
-      field(q, ^key) > ^min and
-        field(q, ^key) < ^max
-    )
+  @spec between_dynamic(atom(), [any()], atom() | nil) :: Ecto.Query.dynamic_expr()
+  def between_dynamic(key, values, binding \\ nil)
+
+  def between_dynamic(key, [min, max], nil) when is_atom(key) do
+    dynamic([q], field(q, ^key) > ^min and field(q, ^key) < ^max)
+  end
+
+  def between_dynamic(key, [min, max], binding) when is_atom(key) and is_atom(binding) do
+    dynamic([{^binding, j}], field(j, ^key) > ^min and field(j, ^key) < ^max)
   end
 
   @doc """
@@ -45,6 +54,7 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
 
     - `key`       - The field name as an atom.
     - `values`    - A list of two values representing the range.
+    - `binding`   - Optional named binding atom for join filters (default: nil).
 
   ### Examples
 
@@ -52,13 +62,15 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
       iex> inspect(result)
       "dynamic([q], q.experience_years >= ^2 and q.experience_years <= ^5)"
   """
-  @spec between_equal_dynamic(atom(), [any()]) :: Ecto.Query.dynamic_expr()
-  def between_equal_dynamic(key, [min, max] = values) when is_atom(key) and is_list(values) do
-    dynamic(
-      [q],
-      field(q, ^key) >= ^min and
-        field(q, ^key) <= ^max
-    )
+  @spec between_equal_dynamic(atom(), [any()], atom() | nil) :: Ecto.Query.dynamic_expr()
+  def between_equal_dynamic(key, values, binding \\ nil)
+
+  def between_equal_dynamic(key, [min, max], nil) when is_atom(key) do
+    dynamic([q], field(q, ^key) >= ^min and field(q, ^key) <= ^max)
+  end
+
+  def between_equal_dynamic(key, [min, max], binding) when is_atom(key) and is_atom(binding) do
+    dynamic([{^binding, j}], field(j, ^key) >= ^min and field(j, ^key) <= ^max)
   end
 
   @doc """
@@ -68,6 +80,7 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
 
     - `key`       - The field name as an atom.
     - `values`    - A list of values to match against.
+    - `binding`   - Optional named binding atom for join filters (default: nil).
 
   ### Examples
 
@@ -75,12 +88,15 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
       iex> inspect(result)
       "dynamic([q], q.experience_years in ^[2, 5])"
   """
-  @spec in_dynamic(atom(), [any()]) :: Ecto.Query.dynamic_expr()
-  def in_dynamic(key, values) when is_atom(key) and is_list(values) do
-    dynamic(
-      [q],
-      field(q, ^key) in ^values
-    )
+  @spec in_dynamic(atom(), [any()], atom() | nil) :: Ecto.Query.dynamic_expr()
+  def in_dynamic(key, values, binding \\ nil)
+
+  def in_dynamic(key, values, nil) when is_atom(key) and is_list(values) do
+    dynamic([q], field(q, ^key) in ^values)
+  end
+
+  def in_dynamic(key, values, binding) when is_atom(key) and is_list(values) and is_atom(binding) do
+    dynamic([{^binding, j}], field(j, ^key) in ^values)
   end
 
   @doc """
@@ -90,6 +106,7 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
 
     - `key`       - The JSONB field name as an atom.
     - `value`     - The value to check for containment.
+    - `binding`   - Optional named binding atom for join filters (default: nil).
 
   ### Examples
 
@@ -97,12 +114,15 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
       iex> inspect(result)
       "dynamic([q], fragment(\\\"? @> ?\\\", q.metadata, ^%{\\\"role\\\" => \\\"admin\\\"}))"
   """
-  @spec contains_dynamic(atom(), map() | list()) :: Ecto.Query.dynamic_expr()
-  def contains_dynamic(key, value) when is_atom(key) do
-    dynamic(
-      [q],
-      fragment("? @> ?", field(q, ^key), ^value)
-    )
+  @spec contains_dynamic(atom(), map() | list(), atom() | nil) :: Ecto.Query.dynamic_expr()
+  def contains_dynamic(key, value, binding \\ nil)
+
+  def contains_dynamic(key, value, nil) when is_atom(key) do
+    dynamic([q], fragment("? @> ?", field(q, ^key), ^value))
+  end
+
+  def contains_dynamic(key, value, binding) when is_atom(key) and is_atom(binding) do
+    dynamic([{^binding, j}], fragment("? @> ?", field(j, ^key), ^value))
   end
 
   @doc """
@@ -112,6 +132,7 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
 
     - `key`       - The JSONB field name as an atom.
     - `values`    - The values to check for overlap.
+    - `binding`   - Optional named binding atom for join filters (default: nil).
 
   ### Examples
 
@@ -119,12 +140,15 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
       iex> inspect(result)
       "dynamic([q], fragment(\\\"? && ?\\\", q.tags, ^[\\\"elixir\\\", \\\"erlang\\\"]))"
   """
-  @spec contains_any_dynamic(atom(), [any()]) :: Ecto.Query.dynamic_expr()
-  def contains_any_dynamic(key, values) when is_atom(key) and is_list(values) do
-    dynamic(
-      [q],
-      fragment("? && ?", field(q, ^key), ^values)
-    )
+  @spec contains_any_dynamic(atom(), [any()], atom() | nil) :: Ecto.Query.dynamic_expr()
+  def contains_any_dynamic(key, values, binding \\ nil)
+
+  def contains_any_dynamic(key, values, nil) when is_atom(key) and is_list(values) do
+    dynamic([q], fragment("? && ?", field(q, ^key), ^values))
+  end
+
+  def contains_any_dynamic(key, values, binding) when is_atom(key) and is_list(values) and is_atom(binding) do
+    dynamic([{^binding, j}], fragment("? && ?", field(j, ^key), ^values))
   end
 
   @doc """
@@ -134,6 +158,7 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
 
     - `key`       - The field name as an atom.
     - `values`    - A list of two values representing the range.
+    - `binding`   - Optional named binding atom for join filters (default: nil).
 
   ### Examples
 
@@ -141,13 +166,15 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
       iex> inspect(result)
       "dynamic([q], q.experience_years < ^2 or q.experience_years > ^5)"
   """
-  @spec not_between_dynamic(atom(), [any()]) :: Ecto.Query.dynamic_expr()
-  def not_between_dynamic(key, [min, max] = values) when is_atom(key) and is_list(values) do
-    dynamic(
-      [q],
-      field(q, ^key) < ^min or
-        field(q, ^key) > ^max
-    )
+  @spec not_between_dynamic(atom(), [any()], atom() | nil) :: Ecto.Query.dynamic_expr()
+  def not_between_dynamic(key, values, binding \\ nil)
+
+  def not_between_dynamic(key, [min, max], nil) when is_atom(key) do
+    dynamic([q], field(q, ^key) < ^min or field(q, ^key) > ^max)
+  end
+
+  def not_between_dynamic(key, [min, max], binding) when is_atom(key) and is_atom(binding) do
+    dynamic([{^binding, j}], field(j, ^key) < ^min or field(j, ^key) > ^max)
   end
 
   @doc """
@@ -157,6 +184,7 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
 
     - `key`       - The field name as an atom.
     - `values`    - A list of two values representing the range.
+    - `binding`   - Optional named binding atom for join filters (default: nil).
 
   ### Examples
 
@@ -164,13 +192,15 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
       iex> inspect(result)
       "dynamic([q], q.experience_years <= ^2 or q.experience_years >= ^5)"
   """
-  @spec not_between_equal_dynamic(atom(), [any()]) :: Ecto.Query.dynamic_expr()
-  def not_between_equal_dynamic(key, [min, max] = values) when is_atom(key) and is_list(values) do
-    dynamic(
-      [q],
-      field(q, ^key) <= ^min or
-        field(q, ^key) >= ^max
-    )
+  @spec not_between_equal_dynamic(atom(), [any()], atom() | nil) :: Ecto.Query.dynamic_expr()
+  def not_between_equal_dynamic(key, values, binding \\ nil)
+
+  def not_between_equal_dynamic(key, [min, max], nil) when is_atom(key) do
+    dynamic([q], field(q, ^key) <= ^min or field(q, ^key) >= ^max)
+  end
+
+  def not_between_equal_dynamic(key, [min, max], binding) when is_atom(key) and is_atom(binding) do
+    dynamic([{^binding, j}], field(j, ^key) <= ^min or field(j, ^key) >= ^max)
   end
 
   @doc """
@@ -180,6 +210,7 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
 
     - `key`       - The field name as an atom.
     - `values`    - A list of values to exclude.
+    - `binding`   - Optional named binding atom for join filters (default: nil).
 
   ### Examples
 
@@ -187,12 +218,15 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
       iex> inspect(result)
       "dynamic([q], q.experience_years not in ^[2, 5])"
   """
-  @spec not_in_dynamic(atom(), [any()]) :: Ecto.Query.dynamic_expr()
-  def not_in_dynamic(key, values) when is_atom(key) and is_list(values) do
-    dynamic(
-      [q],
-      field(q, ^key) not in ^values
-    )
+  @spec not_in_dynamic(atom(), [any()], atom() | nil) :: Ecto.Query.dynamic_expr()
+  def not_in_dynamic(key, values, binding \\ nil)
+
+  def not_in_dynamic(key, values, nil) when is_atom(key) and is_list(values) do
+    dynamic([q], field(q, ^key) not in ^values)
+  end
+
+  def not_in_dynamic(key, values, binding) when is_atom(key) and is_list(values) and is_atom(binding) do
+    dynamic([{^binding, j}], field(j, ^key) not in ^values)
   end
 
   @doc """
@@ -202,6 +236,7 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
 
     - `key`       - The JSONB field name as an atom.
     - `value`     - The value to check for absence.
+    - `binding`   - Optional named binding atom for join filters (default: nil).
 
   ### Examples
 
@@ -209,12 +244,15 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
       iex> inspect(result)
       "dynamic([q], not fragment(\\\"? @> ?\\\", q.metadata, ^%{\\\"role\\\" => \\\"admin\\\"}))"
   """
-  @spec not_contains_dynamic(atom(), map() | list()) :: Ecto.Query.dynamic_expr()
-  def not_contains_dynamic(key, value) when is_atom(key) do
-    dynamic(
-      [q],
-      not fragment("? @> ?", field(q, ^key), ^value)
-    )
+  @spec not_contains_dynamic(atom(), map() | list(), atom() | nil) :: Ecto.Query.dynamic_expr()
+  def not_contains_dynamic(key, value, binding \\ nil)
+
+  def not_contains_dynamic(key, value, nil) when is_atom(key) do
+    dynamic([q], not fragment("? @> ?", field(q, ^key), ^value))
+  end
+
+  def not_contains_dynamic(key, value, binding) when is_atom(key) and is_atom(binding) do
+    dynamic([{^binding, j}], not fragment("? @> ?", field(j, ^key), ^value))
   end
 
   @doc """
@@ -224,6 +262,7 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
 
     - `key`       - The JSONB field name as an atom.
     - `values`    - The values to check for absence.
+    - `binding`   - Optional named binding atom for join filters (default: nil).
 
   ### Examples
 
@@ -231,11 +270,15 @@ defmodule FatEcto.Query.Dynamics.BtwInContains do
       iex> inspect(result)
       "dynamic([q], not fragment(\\\"? && ?\\\", q.tags, ^[\\\"elixir\\\", \\\"erlang\\\"]))"
   """
-  @spec not_contains_any_dynamic(atom(), [any()]) :: Ecto.Query.dynamic_expr()
-  def not_contains_any_dynamic(key, values) when is_atom(key) and is_list(values) do
-    dynamic(
-      [q],
-      not fragment("? && ?", field(q, ^key), ^values)
-    )
+  @spec not_contains_any_dynamic(atom(), [any()], atom() | nil) :: Ecto.Query.dynamic_expr()
+  def not_contains_any_dynamic(key, values, binding \\ nil)
+
+  def not_contains_any_dynamic(key, values, nil) when is_atom(key) and is_list(values) do
+    dynamic([q], not fragment("? && ?", field(q, ^key), ^values))
+  end
+
+  def not_contains_any_dynamic(key, values, binding)
+      when is_atom(key) and is_list(values) and is_atom(binding) do
+    dynamic([{^binding, j}], not fragment("? && ?", field(j, ^key), ^values))
   end
 end
