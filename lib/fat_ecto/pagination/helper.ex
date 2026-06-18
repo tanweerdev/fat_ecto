@@ -5,7 +5,6 @@ defmodule FatEcto.Pagination.Helper do
   """
 
   alias FatEcto.SharedHelper
-  require Ecto.Query
 
   @min_limit 0
   @min_skip 0

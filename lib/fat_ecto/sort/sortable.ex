@@ -39,6 +39,29 @@ defmodule FatEcto.Sort.Sortable do
 
   defmacro __using__(options \\ []) do
     sortable = options[:sortable] || []
+    overrideable = options[:overrideable] || []
+
+    # Only emit the override-callback processing when overrideable fields are
+    # configured. With `overrideable: []`, `override_sortable/2` is just the
+    # default clause (returns nil), so Elixir 1.18+'s type checker proves the
+    # `order when not is_nil(order)` guard is unreachable and warns
+    # "this clause will never match". Skipping the block when there is nothing
+    # to override removes the dead code (and the warning) entirely.
+    override_orders_ast =
+      if overrideable == [] do
+        quote do: []
+      else
+        quote do
+          sort_params
+          |> Map.take(@overrideable_fields)
+          |> Enum.flat_map(fn {field, operator} ->
+            case override_sortable(field, operator) do
+              order when not is_nil(order) -> [order]
+              _ -> []
+            end
+          end)
+        end
+      end
 
     {_direct_sortable, join_sorts} = FatEcto.SharedHelper.separate_filterables(sortable)
     sort_join_filters_map = FatEcto.SharedHelper.build_join_filters_map(join_sorts)
@@ -83,23 +106,12 @@ defmodule FatEcto.Sort.Sortable do
       """
       @spec build(map()) :: [Sorter.order_expr()]
       def build(sort_params) when is_map(sort_params) do
-        # Filter standard sortable fields first
-        standard_params = Helper.filter_sortable_fields(sort_params, @sortable_fields)
-
-        # Filter overrideable fields (only those explicitly listed)
-        override_params = Map.take(sort_params, @overrideable_fields)
-
         # Process standard fields (with alias resolution and join binding support)
+        standard_params = Helper.filter_sortable_fields(sort_params, @sortable_fields)
         standard_orders = Sorter.build_order_by(standard_params, @sort_aliases, @sort_join_filters_map)
 
-        # Process override fields with callback
-        override_orders =
-          Enum.flat_map(override_params, fn {field, operator} ->
-            case override_sortable(field, operator) do
-              order when not is_nil(order) -> [order]
-              _ -> []
-            end
-          end)
+        # Process override fields with callback (only when overrideable fields exist)
+        override_orders = unquote(override_orders_ast)
 
         standard_orders ++ override_orders
       end
