@@ -4,7 +4,7 @@ defmodule FatEcto.MixProject do
   def project do
     [
       app: :fat_ecto,
-      version: "1.4.0",
+      version: "1.4.1",
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
       build_embedded: Mix.env() == :prod,
@@ -23,18 +23,24 @@ defmodule FatEcto.MixProject do
       ],
       source_url: "https://github.com/tanweerdev/fat_ecto",
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [
-        coveralls: :test,
-        "coveralls.detail": :test,
-        "coveralls.post": :test,
-        "coveralls.html": :test,
-        "coveralls.github": :test
-      ],
       coveralls: [
         minimum_coverage: 60
       ],
       dialyzer: [
         plt_add_apps: [:ex_unit]
+      ]
+    ]
+  end
+
+  # CLI task environments (Elixir 1.19+: moved out of `project/0`).
+  def cli do
+    [
+      preferred_envs: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test,
+        "coveralls.github": :test
       ]
     ]
   end
@@ -53,11 +59,10 @@ defmodule FatEcto.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ecto, "~> 3.2 or ~> 3.5 or ~> 3.8 or ~> 3.10 or ~> 3.12"},
-      {:ecto_sql, "~> 3.2 or ~> 3.5 or ~> 3.8 or ~> 3.10 or ~> 3.12"},
-      {:postgrex, "~> 0.15 or ~> 0.16 or ~> 0.17 or ~> 0.19 or ~> 0.20"},
-      {:earmark, "~> 1.4", only: [:dev, :test], optional: true},
-      {:ex_doc, "~> 0.19 or ~> 0.28 or ~> 0.30 or ~> 0.31 or ~> 0.32 or ~> 0.36 or ~> 0.37",
+      {:ecto, "~> 3.2 or ~> 3.5 or ~> 3.8 or ~> 3.10 or ~> 3.12 or ~> 3.14"},
+      {:ecto_sql, "~> 3.2 or ~> 3.5 or ~> 3.8 or ~> 3.10 or ~> 3.12 or ~> 3.14"},
+      {:postgrex, "~> 0.15 or ~> 0.16 or ~> 0.17 or ~> 0.19 or ~> 0.20 or ~> 0.21 or ~> 0.22 "},
+      {:ex_doc, "~> 0.19 or ~> 0.28 or ~> 0.30 or ~> 0.31 or ~> 0.32 or ~> 0.36 or ~> 0.37 or ~> 0.38 or ~> 0.39 or ~> 0.40",
        only: [:dev, :test], runtime: false, optional: true},
       {:ex_machina, "~> 2.3 or ~> 2.7 or ~> 2.8", only: [:dev, :test], optional: true},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false, optional: true},
